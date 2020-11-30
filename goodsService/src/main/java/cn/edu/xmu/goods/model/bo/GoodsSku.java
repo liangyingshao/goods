@@ -5,6 +5,7 @@ import cn.edu.xmu.goods.model.vo.GoodsSkuRetVo;
 import cn.edu.xmu.ooad.model.VoObject;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Data
@@ -32,9 +33,9 @@ public class GoodsSku implements VoObject {
 
     private Byte disabled;
 
-    private Date gmtCreated;
+    private LocalDateTime gmtCreated;
 
-    private Date gmtModified;
+    private LocalDateTime gmtModified;
 
     public GoodsSku(GoodsSkuPo po) {
         id=po.getId();
