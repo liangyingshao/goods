@@ -2,6 +2,7 @@ package cn.edu.xmu.goods.dao;
 
 import cn.edu.xmu.goods.mapper.GoodsSkuPoMapper;
 import cn.edu.xmu.goods.mapper.GoodsSpuPoMapper;
+import cn.edu.xmu.goods.model.bo.GoodsSku;
 import cn.edu.xmu.goods.model.po.*;
 import cn.edu.xmu.goods.model.vo.GoodsSkuRetVo;
 import cn.edu.xmu.ooad.util.ResponseCode;
@@ -74,28 +75,34 @@ public class GoodsDao {
         GoodsSkuPoExample.Criteria skuCriteria=skuExample.createCriteria();
         if(skuSn!=null&&!skuSn.isBlank())skuCriteria.andSkuSnEqualTo(skuSn);
         if(spuId!=null)skuCriteria.andGoodsSpuIdEqualTo(spuId);
-        List<GoodsSkuPo> skuPos=new ArrayList<GoodsSkuPo>();
+        List<GoodsSkuPo> skuPos=new ArrayList<>();
         PageHelper.startPage(page,pageSize);
         logger.debug("page="+page+" pageSize="+pageSize);
         if((spuSn!=null&&!spuSn.isBlank())||shopId!=null)
         {
-            //logger.debug("use spu\n");
             GoodsSpuPoExample spuExample=new GoodsSpuPoExample();
             GoodsSpuPoExample.Criteria spuCriteria= spuExample.createCriteria();
             if(!spuSn.isBlank())spuCriteria.andGoodsSnEqualTo(spuSn);
             if(shopId!=null)spuCriteria.andShopIdEqualTo(shopId);
             List<GoodsSpuPo> spuPos=spuMapper.selectByExample(spuExample);
-            //logger.debug(String.valueOf(spuPos));
             for (int i=0;i<spuPos.size();++i)
             {
                 skuCriteria.andGoodsSpuIdEqualTo(spuPos.get(i).getId());
                 if(i==0)skuPos=skuMapper.selectByExample(skuExample);
                 else skuPos.addAll(skuMapper.selectByExample(skuExample));
-                //logger.debug(String.valueOf(skuPos));
             }
         }
         else skuPos=skuMapper.selectByExample(skuExample);
         return new PageInfo<>(skuPos);
     }
 
+    /**
+     * 获得sku的详细信息
+     * @param id
+     * @return GoodsSkuPo
+     */
+    public GoodsSkuPo getSku(Long id)
+    {
+        return skuMapper.selectByPrimaryKey(id);
+    }
 }

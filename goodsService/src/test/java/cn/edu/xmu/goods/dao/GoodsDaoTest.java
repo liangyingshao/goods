@@ -28,4 +28,10 @@ class GoodsDaoTest {
         assertEquals(skuPos.getList().size(),1);
     }
 
+    @Test
+    void getSku() {
+        GoodsSkuPo skuPo=goodsDao.getSku((long) 273);
+        assertEquals(skuPo.getName(),"+");
+        assertEquals(skuPo.getGoodsSpuId(),(long)273);
+    }
 }

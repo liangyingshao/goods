@@ -53,4 +53,16 @@ public class GoodsService {
 
         return new ReturnObject<>(returnObject);
     }
+
+    /**
+     * 获得sku的详细信息
+     * @param id
+     * @return ReturnObject<VoObject>
+     */
+    @Transactional
+    public ReturnObject<VoObject> getSku(Long id)
+    {
+        GoodsSku sku=new GoodsSku(goodsDao.getSku(id));
+        return new ReturnObject<>(sku);
+    }
 }

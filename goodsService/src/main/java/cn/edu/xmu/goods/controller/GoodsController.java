@@ -76,9 +76,7 @@ public class GoodsController {
      * @return Object
      */
     @ApiOperation(value = "查询SKU")
-    @ApiResponses({
-            @ApiResponse(code = 0, message = "成功")
-    })
+    @ApiResponse(code = 0, message = "成功")
     @GetMapping("/skus")
     @ResponseBody
     public Object getSkuList(
@@ -94,6 +92,21 @@ public class GoodsController {
         return Common.decorateReturnObject(returnObject);
     }
 
-
+    /**
+     * 获得sku的详细信息
+     * @param id
+     * @return Object
+     */
+    @ApiOperation(value="获得sku的详细信息")
+    @ApiImplicitParam(paramType = "path",dataType = "Long",name="id",value = "sku id",required = true)
+    @ApiResponse(code=0,message = "成功")
+    @GetMapping("/skus/{id}")
+    @ResponseBody
+    public Object getSku(@PathVariable Long id)
+    {
+        logger.debug("getSku:id="+id);
+        ReturnObject returnObject=goodsService.getSku(id);
+        return Common.decorateReturnObject(returnObject);
+    }
 }
 
