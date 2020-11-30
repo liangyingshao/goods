@@ -2,6 +2,7 @@ package cn.edu.xmu.goods.controller;
 
 import cn.edu.xmu.goods.GoodsServiceApplication;
 import cn.edu.xmu.ooad.util.JwtHelper;
+import cn.edu.xmu.ooad.util.ResponseCode;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +17,7 @@ import org.springframework.util.MultiValueMap;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -95,7 +95,35 @@ class GoodsControllerTest {
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
         //System.out.println(responseString);
-        String expectResonse="{\"errno\":0,\"data\":{\"id\":273,\"goodsSpuId\":273,\"name\":\"+\",\"skuSn\":null,\"imageUrl\":\"http://47.52.88.176/file/images/201612/file_586206d4c7d2f.jpg\",\"inventory\":1,\"originalPrice\":980000,\"configuration\":null,\"weight\":10,\"detail\":null,\"disabled\":4,\"gmtCreated\":\"2020-11-24T17:19:55\",\"gmtModified\":\"2020-11-24T17:19:55\"},\"errmsg\":\"成功\"}";
-        JSONAssert.assertEquals(expectResonse,responseString,true);
+        String expectedResponse="{\"errno\":0,\"data\":{\"id\":273,\"goodsSpuId\":273,\"name\":\"+\",\"skuSn\":null,\"imageUrl\":\"http://47.52.88.176/file/images/201612/file_586206d4c7d2f.jpg\",\"inventory\":1,\"originalPrice\":980000,\"configuration\":null,\"weight\":10,\"detail\":null,\"disabled\":4,\"gmtCreated\":\"2020-11-24T17:19:55\",\"gmtModified\":\"2020-11-24T17:19:55\"},\"errmsg\":\"成功\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+    }
+
+    @Test
+    void deleteSku() throws Exception{
+        String token = creatTestToken(1L, 0L, 100);
+        String responseString=this.mvc.perform(delete("/goods/shops/0/skus/273").header("authorization",token))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        //System.out.println(responseString);
+        String expectedResponse="{\"errno\":0,\"errmsg\":\"成功\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+
+        responseString=this.mvc.perform(delete("/goods/shops/1/skus/273").header("authorization",token))
+                .andExpect(status().is4xxClientError())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        //System.out.println(responseString);
+        expectedResponse="{\"errno\":504,\"errmsg\":\"操作的资源id不存在\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+
+        responseString=this.mvc.perform(delete("/goods/shops/0/skus/1").header("authorization",token))
+                .andExpect(status().is4xxClientError())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        //System.out.println(responseString);
+        expectedResponse="{\"errno\":504,\"errmsg\":\"操作的资源id不存在\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
     }
 }

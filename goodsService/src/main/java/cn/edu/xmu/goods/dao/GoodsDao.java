@@ -105,4 +105,50 @@ public class GoodsDao {
     {
         return skuMapper.selectByPrimaryKey(id);
     }
+
+    /**
+     * sku上传图片
+     * @param sku
+     * @return ReturnObject
+     */
+    public ReturnObject uploadSkuImg(GoodsSku sku)
+    {
+        ReturnObject returnObject;
+        GoodsSkuPo newSkuPo = new GoodsSkuPo();
+        newSkuPo.setId(sku.getId());
+        newSkuPo.setImageUrl(sku.getImageUrl());
+        int ret = skuMapper.updateByPrimaryKeySelective(newSkuPo);
+        if (ret == 0) {
+            logger.debug("uploadSkuImg: update fail. sku id: " + sku.getId());
+            returnObject = new ReturnObject(ResponseCode.FIELD_NOTVALID);
+        } else {
+            logger.debug("uploadSkuImg: update sku success : " + sku);
+            returnObject = new ReturnObject();
+        }
+        return returnObject;
+    }
+
+    /**
+     * 管理员或店家逻辑删除SKU
+     * @param shopId
+     * @param id
+     * @return ReturnObject
+     */
+    public ReturnObject logicalDelete(Long shopId, Long id)
+    {
+        GoodsSkuPo skuPo=skuMapper.selectByPrimaryKey(id);
+        if(skuPo==null)return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        GoodsSpuPo spuPo=spuMapper.selectByPrimaryKey(skuPo.getGoodsSpuId());
+        if(spuPo.getShopId()==shopId)
+        {
+            int ret=skuMapper.updateByPrimaryKey(skuPo);
+            if(ret==0)
+            {
+                logger.debug("logicalDelete:update fail.sku id="+id);
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            }
+            else return new ReturnObject();
+        }
+        else return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+    }
 }

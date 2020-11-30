@@ -1,7 +1,10 @@
 package cn.edu.xmu.goods.dao;
 
 import cn.edu.xmu.goods.GoodsServiceApplication;
+import cn.edu.xmu.goods.model.bo.GoodsSku;
 import cn.edu.xmu.goods.model.po.GoodsSkuPo;
+import cn.edu.xmu.ooad.util.ResponseCode;
+import cn.edu.xmu.ooad.util.ReturnObject;
 import com.github.pagehelper.PageInfo;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +21,7 @@ class GoodsDaoTest {
 
     @Test
     void getSkuList() {
-        PageInfo<GoodsSkuPo>skuPos=goodsDao.getSkuList(null,null, (long) 273,"drh-d0001",1,5);
+        PageInfo<GoodsSkuPo>skuPos=goodsDao.getSkuList((long)0,null, (long) 273,"drh-d0001",1,5);
         assertEquals(skuPos.getList().size(),1);
         skuPos=goodsDao.getSkuList(null,null, null,null,1,5);
         assertEquals(skuPos.getList().size(),5);
@@ -33,5 +36,15 @@ class GoodsDaoTest {
         GoodsSkuPo skuPo=goodsDao.getSku((long) 273);
         assertEquals(skuPo.getName(),"+");
         assertEquals(skuPo.getGoodsSpuId(),(long)273);
+    }
+
+    @Test
+    void logicalDelete() {
+        ReturnObject returnObject=goodsDao.logicalDelete((long)0,(long)273);
+        assertEquals(returnObject.getCode(),ResponseCode.OK);
+        returnObject=goodsDao.logicalDelete((long)1,(long)273);
+        assertEquals(returnObject.getCode(),ResponseCode.RESOURCE_ID_NOTEXIST);
+        returnObject=goodsDao.logicalDelete((long)0,(long)1);
+        assertEquals(returnObject.getCode(),ResponseCode.RESOURCE_ID_NOTEXIST);
     }
 }

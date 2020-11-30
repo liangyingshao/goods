@@ -41,6 +41,8 @@ public class GoodsController {
     @Autowired
     GoodsService goodsService;
 
+    @Autowired
+    private HttpServletResponse httpServletResponse;
 
     /**
      * auth002: 用户重置密码
@@ -76,7 +78,9 @@ public class GoodsController {
      * @return Object
      */
     @ApiOperation(value = "查询SKU")
-    @ApiResponse(code = 0, message = "成功")
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功")
+    })
     @GetMapping("/skus")
     @ResponseBody
     public Object getSkuList(
@@ -106,6 +110,58 @@ public class GoodsController {
     {
         logger.debug("getSku:id="+id);
         ReturnObject returnObject=goodsService.getSku(id);
+        return Common.decorateReturnObject(returnObject);
+    }
+
+    /**
+     * sku上传图片
+     * @param shopId
+     * @param id
+     * @param file
+     * @return Object
+     */
+    @ApiOperation(value="sku上传图片")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header",dataType = "String",name = "authorization",value = "用户token",required = true),
+            @ApiImplicitParam(paramType = "path",dataType = "Long",name = "shopId",value = "店铺id",required = true),
+            @ApiImplicitParam(paramType = "path",dataType = "Long",name = "id",value = "sku id",required = true),
+            @ApiImplicitParam(paramType = "formData", dataType = "file", name = "img", value ="文件", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 506, message = "该目录文件夹没有写入的权限"),
+            @ApiResponse(code = 508, message = "图片格式不正确"),
+            @ApiResponse(code = 509, message = "图片大小超限")
+    })
+    @Audit
+    @PostMapping("/shops/{shopId}/skus/{id}/uploadImg")
+    public Object uploadSkuImg(@PathVariable Long shopId,@PathVariable Long id, @RequestParam("img") MultipartFile file){
+        logger.debug("uploadSkuImg: id = "+ id+" shopId="+shopId +" img=" + file.getOriginalFilename());
+        ReturnObject returnObject = goodsService.uploadSkuImg(shopId,id,file);
+        return Common.getNullRetObj(returnObject, httpServletResponse);
+    }
+
+    /**
+     * 管理员或店家逻辑删除SKU
+     * @param shopId
+     * @param id
+     * @return Object
+     */
+    @ApiOperation(value = "管理员或店家逻辑删除SKU")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header",dataType = "String",name="authorization",required = true),
+            @ApiImplicitParam(paramType = "path",dataType = "Long",name = "shopId",value = "shop id",required = true),
+            @ApiImplicitParam(paramType = "path",dataType = "Long",name = "id",value = "sku id",required = true),
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功")
+    })
+    @Audit
+    @DeleteMapping("/shops/{shopId}/skus/{id}")
+    public Object deleteSku(@PathVariable Long shopId,@PathVariable Long id)
+    {
+        logger.debug("deleteSku: id = "+ id+" shopId="+shopId);
+        ReturnObject returnObject=goodsService.deleteSku(shopId,id);
         return Common.decorateReturnObject(returnObject);
     }
 }
