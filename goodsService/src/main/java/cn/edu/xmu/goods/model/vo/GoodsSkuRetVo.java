@@ -3,6 +3,7 @@ package cn.edu.xmu.goods.model.vo;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Data
@@ -30,8 +31,8 @@ public class GoodsSkuRetVo {
 
     private Byte disabled;
 
-    //private Date gmtCreated;
+    private LocalDateTime gmtCreated;
 
-    //private Date gmtModified;
+    private LocalDateTime gmtModified;
 
 }

@@ -13,7 +13,7 @@ public class GoodsSku implements VoObject {
 
     private Long id;
 
-    private Long goodsSpuId;
+    //private Long goodsSpuId;
 
     private String skuSn;
 
@@ -21,15 +21,15 @@ public class GoodsSku implements VoObject {
 
     private Long originalPrice;
 
-    private String configuration;
+    //private String configuration;
 
-    private Long weight;
+    //private Long weight;
 
     private String imageUrl;
 
     private Integer inventory;
 
-    private String detail;
+    //private String detail;
 
     private Byte disabled;
 
@@ -39,15 +39,15 @@ public class GoodsSku implements VoObject {
 
     public GoodsSku(GoodsSkuPo po) {
         id=po.getId();
-        goodsSpuId=po.getGoodsSpuId();
+        //goodsSpuId=po.getGoodsSpuId();
         skuSn=po.getSkuSn();
         name=po.getName();
         originalPrice=po.getOriginalPrice();
-        configuration=po.getConfiguration();
-        weight=po.getWeight();
+        //configuration=po.getConfiguration();
+        //weight=po.getWeight();
         imageUrl=po.getImageUrl();
         inventory=po.getInventory();
-        detail=po.getDetail();
+        //detail=po.getDetail();
         disabled=po.getDisabled();
         gmtCreated=po.getGmtCreated();
         gmtModified=po.getGmtModified();
@@ -69,8 +69,8 @@ public class GoodsSku implements VoObject {
         skuRetVo.setInventory(inventory);
         //skuRetVo.setDetail(detail);
         skuRetVo.setDisabled(disabled);
-        //skuRetVo.setGmtCreated(gmtCreated);
-        //skuRetVo.setGmtModified(gmtModified);
+        skuRetVo.setGmtCreated(gmtCreated);
+        skuRetVo.setGmtModified(gmtModified);
         return skuRetVo;
     }
 
