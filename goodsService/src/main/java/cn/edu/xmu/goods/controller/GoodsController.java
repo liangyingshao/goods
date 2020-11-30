@@ -65,6 +65,34 @@ public class GoodsController {
         return Common.decorateReturnObject(returnObject);
     }
 
+    /**
+     *查询SKU
+     * @param shopId
+     * @param skuSn
+     * @param spuId
+     * @param spuSn
+     * @param page
+     * @param pageSize
+     * @return Object
+     */
+    @ApiOperation(value = "查询SKU")
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功")
+    })
+    @GetMapping("/skus")
+    @ResponseBody
+    public Object getSkuList(
+            @RequestParam(required = false)Long shopId,
+            @RequestParam(required = false)String skuSn,
+            @RequestParam(required = false)Long spuId,
+            @RequestParam(required = false)String spuSn,
+            @RequestParam(required = false, defaultValue = "1") Integer page,
+            @RequestParam(required = false, defaultValue = "10") Integer pageSize)
+    {
+        logger.debug("getSkuList:page="+page+" pageSize="+pageSize);
+        ReturnObject returnObject=goodsService.getSkuList(shopId,skuSn,spuId,spuSn,page,pageSize);
+        return Common.decorateReturnObject(returnObject);
+    }
 
 
 }

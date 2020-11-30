@@ -9,6 +9,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -40,5 +44,16 @@ class GoodsControllerTest {
 
         String expectedResponse = "{\"errno\": 0, \"errmsg\": \"成功\"}";
         JSONAssert.assertEquals(expectedResponse, responseString, true);
+    }
+
+    @Test
+    void getSkuList() throws Exception{
+        String responseString=this.mvc.perform(get("/goods/skus")
+                .queryParam("spuId", "273").queryParam("spuSn","drh-d0001").queryParam("page", "1").queryParam("pageSize", "5")
+        )
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        System.out.println(responseString);
     }
 }
