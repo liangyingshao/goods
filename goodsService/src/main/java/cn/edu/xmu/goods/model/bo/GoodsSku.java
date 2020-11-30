@@ -51,7 +51,7 @@ public class GoodsSku implements VoObject {
         inventory=po.getInventory();
         detail=po.getDetail();
         disabled=po.getDisabled();
-        gmtCreated=po.getGmtCreated();
+        gmtCreated=po.getGmtCreate();
         gmtModified=po.getGmtModified();
     }
 
