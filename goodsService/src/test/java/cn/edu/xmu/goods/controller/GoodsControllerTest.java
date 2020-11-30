@@ -126,4 +126,31 @@ class GoodsControllerTest {
         expectedResponse="{\"errno\":504,\"errmsg\":\"操作的资源id不存在\"}";
         JSONAssert.assertEquals(expectedResponse,responseString,true);
     }
+
+    @Test
+    void modifySKU() throws Exception{
+        String requireJson="{\n    \"name\": \"name\",\n    \"originalPrice\": \"100\",\n    \"configuration\": \"configuration\",\n    \"weight\": \"100\",\n    \"inventory\": \"9999\",\n    \"detail\": \"detail\"\n}";
+        String token = creatTestToken(1L, 0L, 100);
+        String responseString=this.mvc.perform(put("/goods/shops/0/skus/273")
+                .header("authorization",token)
+                .contentType("application/json;charset=UTF-8")
+                .content(requireJson))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        //System.out.println(responseString);
+        String expectedResponse="{\"errno\":0,\"errmsg\":\"成功\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+
+        responseString=this.mvc.perform(put("/goods/shops/1/skus/273")
+                .header("authorization",token)
+                .contentType("application/json;charset=UTF-8")
+                .content(requireJson))
+                .andExpect(status().is4xxClientError())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        //System.out.println(responseString);
+        expectedResponse="{\"errno\":504,\"errmsg\":\"操作的资源id不存在\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+    }
 }

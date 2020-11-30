@@ -5,6 +5,7 @@ import cn.edu.xmu.goods.model.bo.GoodsSku;
 import cn.edu.xmu.goods.model.po.GoodsSkuPo;
 import cn.edu.xmu.goods.model.po.ShopPo;
 import cn.edu.xmu.goods.model.vo.GoodsSkuRetVo;
+import cn.edu.xmu.goods.model.vo.GoodsSkuVo;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ImgHelper;
 import cn.edu.xmu.ooad.util.ResponseCode;
@@ -139,4 +140,15 @@ public class GoodsService {
         return goodsDao.logicalDelete(shopId,id);
     }
 
+    /**
+     * 管理员或店家修改SKU信息
+     * @param shopId
+     * @param bo
+     * @return ReturnObject
+     */
+    @Transactional
+    public ReturnObject modifySku(Long shopId, GoodsSku bo)
+    {
+        return goodsDao.modifySku(shopId,bo);
+    }
 }

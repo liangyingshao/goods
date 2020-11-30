@@ -3,6 +3,7 @@ package cn.edu.xmu.goods.dao;
 import cn.edu.xmu.goods.GoodsServiceApplication;
 import cn.edu.xmu.goods.model.bo.GoodsSku;
 import cn.edu.xmu.goods.model.po.GoodsSkuPo;
+import cn.edu.xmu.goods.model.vo.GoodsSkuVo;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import com.github.pagehelper.PageInfo;
@@ -46,5 +47,23 @@ class GoodsDaoTest {
         assertEquals(returnObject.getCode(),ResponseCode.RESOURCE_ID_NOTEXIST);
         returnObject=goodsDao.logicalDelete((long)0,(long)1);
         assertEquals(returnObject.getCode(),ResponseCode.RESOURCE_ID_NOTEXIST);
+    }
+
+    @Test
+    void modifySku() {
+        GoodsSku sku=new GoodsSku();
+        sku.setId((long)273);
+        sku.setName("name");
+        sku.setInventory(9999);
+        sku.setOriginalPrice((long) 100);
+        sku.setConfiguration("configuration");
+        sku.setWeight((long) 100);
+        sku.setDetail("detail");
+        ReturnObject returnObject=goodsDao.modifySku((long)0,sku);
+        assertEquals(returnObject.getCode(),ResponseCode.OK);
+
+        returnObject=goodsDao.modifySku((long)1,sku);
+        assertEquals(returnObject.getCode(),ResponseCode.RESOURCE_ID_NOTEXIST);
+
     }
 }

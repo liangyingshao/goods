@@ -39,6 +39,10 @@ public class GoodsSku implements VoObject {
 
     private LocalDateTime gmtModified;
 
+    public GoodsSku() {
+
+    }
+
     public GoodsSku(GoodsSkuPo po) {
         id=po.getId();
         goodsSpuId=po.getGoodsSpuId();
@@ -79,5 +83,17 @@ public class GoodsSku implements VoObject {
     @Override
     public Object createSimpleVo() {
         return null;
+    }
+
+    public GoodsSkuPo getGoodsSkuPo() {
+        GoodsSkuPo skuPo=new GoodsSkuPo();
+        skuPo.setId(id);
+        skuPo.setName(name);
+        skuPo.setInventory(inventory);
+        skuPo.setOriginalPrice(originalPrice);
+        skuPo.setConfiguration(configuration);
+        skuPo.setWeight(weight);
+        skuPo.setDetail(detail);
+        return skuPo;
     }
 }

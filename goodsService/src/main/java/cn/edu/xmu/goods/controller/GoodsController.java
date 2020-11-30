@@ -1,5 +1,7 @@
 package cn.edu.xmu.goods.controller;
 
+import cn.edu.xmu.goods.model.bo.GoodsSku;
+import cn.edu.xmu.goods.model.vo.GoodsSkuVo;
 import cn.edu.xmu.goods.service.GoodsService;
 import cn.edu.xmu.ooad.annotation.Audit;
 import cn.edu.xmu.ooad.annotation.Depart;
@@ -163,6 +165,42 @@ public class GoodsController {
         logger.debug("deleteSku: id = "+ id+" shopId="+shopId);
         ReturnObject returnObject=goodsService.deleteSku(shopId,id);
         return Common.decorateReturnObject(returnObject);
+    }
+
+    /**
+     * 管理员或店家修改SKU信息
+     * @param shopId
+     * @param id
+     * @param vo
+     * @return Object
+     */
+    @ApiOperation(value = "管理员或店家修改SKU信息")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header",dataType = "String",name="authorization",required = true),
+            @ApiImplicitParam(paramType = "path",dataType = "Long",name = "shopId",value = "shop id",required = true),
+            @ApiImplicitParam(paramType = "path",dataType = "Long",name = "id",value = "sku id",required = true),
+            @ApiImplicitParam(paramType = "body",dataType = "GoodsSkuVo",name = "vo",value = "可修改的SKU信息",required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功")
+    })
+    @Audit
+    @PutMapping("/shops/{shopId}/skus/{id}")
+    public Object modifySKU(@PathVariable Long shopId,@PathVariable Long id,@Validated @RequestBody GoodsSkuVo vo,BindingResult bindingResult)
+    {
+        logger.debug("modifySKU: id = "+ id+" shopId="+shopId+" vo="+vo);
+        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (null != returnObject) {
+            return returnObject;
+        }
+        GoodsSku sku=vo.createGoodsSku();
+        sku.setId(id);
+        ReturnObject retObject=goodsService.modifySku(shopId,sku);
+        if (retObject.getData() != null) {
+            return Common.getRetObject(retObject);
+        } else {
+            return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
+        }
     }
 }
 

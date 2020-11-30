@@ -5,6 +5,7 @@ import cn.edu.xmu.goods.mapper.GoodsSpuPoMapper;
 import cn.edu.xmu.goods.model.bo.GoodsSku;
 import cn.edu.xmu.goods.model.po.*;
 import cn.edu.xmu.goods.model.vo.GoodsSkuRetVo;
+import cn.edu.xmu.goods.model.vo.GoodsSkuVo;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import com.github.pagehelper.PageHelper;
@@ -12,10 +13,12 @@ import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Repository
 public class GoodsDao {
@@ -150,5 +153,50 @@ public class GoodsDao {
             else return new ReturnObject();
         }
         else return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+    }
+
+    public ReturnObject modifySku(Long shopId, GoodsSku sku)
+    {
+        GoodsSkuPo selecctSkuPo=skuMapper.selectByPrimaryKey(sku.getId());
+        GoodsSpuPoExample spuPoExample=new GoodsSpuPoExample();
+        GoodsSpuPoExample.Criteria criteria1=spuPoExample.createCriteria();
+        criteria1.andShopIdEqualTo(shopId);
+        criteria1.andIdEqualTo(selecctSkuPo.getGoodsSpuId());
+        List<GoodsSpuPo> spuPos=spuMapper.selectByExample(spuPoExample);
+        if(spuPos.size()==0)return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST,String.format("skuId不存在："+sku.getId()));
+        GoodsSkuPo skuPo=sku.getGoodsSkuPo();
+        try{
+            int ret = skuMapper.updateByPrimaryKeySelective(skuPo);
+            if (ret == 0)
+            {
+                //修改失败
+                logger.debug("modifySku: update sku fail : " + skuPo.toString());
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("skuId不存在：" + skuPo.getId()));
+            }
+            else {
+                //修改成功
+                logger.debug("modifySku: update sku = " + skuPo.toString());
+                return new ReturnObject<>();
+            }
+        }
+        catch (DataAccessException e)
+        {
+            if (Objects.requireNonNull(e.getMessage()).contains("auth_role.auth_role_name_uindex"))
+            {
+                //若有重复的角色名则修改失败
+                logger.debug("modifySku: have same sku name = " + skuPo.getName());
+                return new ReturnObject<>(ResponseCode.ROLE_REGISTERED, String.format("角色名重复：" + skuPo.getName()));
+            }
+            else {
+                // 其他数据库错误
+                logger.debug("other sql exception : " + e.getMessage());
+                return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+            }
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
     }
 }
