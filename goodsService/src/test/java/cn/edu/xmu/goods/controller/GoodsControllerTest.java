@@ -15,6 +15,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -153,6 +154,75 @@ class GoodsControllerTest {
                 .andReturn().getResponse().getContentAsString();
         //System.out.println(responseString);
         expectedResponse="{\"errno\":504,\"errmsg\":\"操作的资源id不存在\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+    }
+
+    @Test
+    void add_floating_price() throws Exception
+    {
+        LocalDateTime beginTime= LocalDateTime.of(2020,12,12,10,0,0);
+        LocalDateTime endTime=LocalDateTime.of(2020,12,30,10,0,0);
+        System.out.println(beginTime);
+        String requireJson="{\n    \"activityPrice\": \"100\",\n    \"beginTime\": \""+beginTime.toString()+"\",\n    \"endTime\": \""+endTime.toString()+"\",\n    \"quantity\": \"100\"\n}";
+        String token = creatTestToken(1L, 0L, 100);
+        String responseString=this.mvc.perform(post("/goods/shops/0/skus/273/floatPrices")
+                .header("authorization",token)
+                .contentType("application/json;charset=UTF-8")
+                .content(requireJson))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        //System.out.println(responseString);
+        String expectedResponse="{\"errno\":0,\"errmsg\":\"成功\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+
+        responseString=this.mvc.perform(post("/goods/shops/1/skus/273/floatPrices")
+                .header("authorization",token)
+                .contentType("application/json;charset=UTF-8")
+                .content(requireJson))
+                .andExpect(status().is4xxClientError())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        //System.out.println(responseString);
+        expectedResponse="{\"errno\":504,\"errmsg\":\"操作的资源id不存在\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+
+        LocalDateTime beginTime1=LocalDateTime.of(2019,12,12,10,0,0);
+        requireJson="{\n    \"activityPrice\": \"100\",\n    \"beginTime\": \""+beginTime1.toString()+"\",\n    \"endTime\": \""+endTime.toString()+"\",\n    \"quantity\": \"100\"\n}";
+        responseString=this.mvc.perform(post("/goods/shops/0/skus/273/floatPrices")
+                .header("authorization",token)
+                .contentType("application/json;charset=UTF-8")
+                .content(requireJson))
+                .andExpect(status().is4xxClientError())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        //System.out.println(responseString);
+        expectedResponse="{\"errno\":503,\"errmsg\":\"must be a future date;\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+
+        LocalDateTime endTime1=LocalDateTime.of(2020,12,11,20,0,0);
+        requireJson="{\n    \"activityPrice\": \"100\",\n    \"beginTime\": \""+beginTime.toString()+"\",\n    \"endTime\": \""+endTime1.toString()+"\",\n    \"quantity\": \"100\"\n}";
+        responseString=this.mvc.perform(post("/goods/shops/0/skus/273/floatPrices")
+                .header("authorization",token)
+                .contentType("application/json;charset=UTF-8")
+                .content(requireJson))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        //System.out.println(responseString);
+        expectedResponse="{\"errno\":610,\"errmsg\":\"开始时间大于结束时间\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+
+        requireJson="{\n    \"activityPrice\": \"100\",\n    \"beginTime\": \""+beginTime.toString()+"\",\n    \"endTime\": \""+endTime.toString()+"\",\n    \"quantity\": \"-100\"\n}";
+        responseString=this.mvc.perform(post("/goods/shops/0/skus/273/floatPrices")
+                .header("authorization",token)
+                .contentType("application/json;charset=UTF-8")
+                .content(requireJson))
+                .andExpect(status().is4xxClientError())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        //System.out.println(responseString);
+        expectedResponse="{\"errno\":503,\"errmsg\":\"must be greater than or equal to 0;\"}";
         JSONAssert.assertEquals(expectedResponse,responseString,true);
     }
 

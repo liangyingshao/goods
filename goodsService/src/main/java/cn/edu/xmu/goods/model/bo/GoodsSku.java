@@ -7,9 +7,45 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Data
 public class GoodsSku implements VoObject {
+
+    public enum State {
+        ABLED(0, "可用"),
+        DISABLED(1, "废弃");
+
+        private static final Map<Integer, GoodsSku.State> stateMap;
+
+        static { //由类加载机制，静态块初始加载对应的枚举属性到map中，而不用每次取属性时，遍历一次所有枚举值
+            stateMap = new HashMap();
+            for (GoodsSku.State enum1 : values()) {
+                stateMap.put(enum1.code, enum1);
+            }
+        }
+
+        private int code;
+        private String description;
+
+        State(int code, String description) {
+            this.code = code;
+            this.description = description;
+        }
+
+        public static GoodsSku.State getTypeByCode(Integer code) {
+            return stateMap.get(code);
+        }
+
+        public Integer getCode() {
+            return code;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+    }
 
     private Long id;
 
@@ -33,7 +69,7 @@ public class GoodsSku implements VoObject {
 
     private String detail;
 
-    private Byte disabled;
+    private State disabled;
 
     private LocalDateTime gmtCreated;
 
@@ -54,7 +90,7 @@ public class GoodsSku implements VoObject {
         imageUrl=po.getImageUrl();
         inventory=po.getInventory();
         detail=po.getDetail();
-        disabled=po.getDisabled();
+        disabled=State.getTypeByCode(po.getDisabled().intValue());
         gmtCreated=po.getGmtCreate();
         gmtModified=po.getGmtModified();
     }
@@ -74,7 +110,7 @@ public class GoodsSku implements VoObject {
         skuRetVo.setImageUrl(imageUrl);
         skuRetVo.setInventory(inventory);
         //skuRetVo.setDetail(detail);
-        skuRetVo.setDisabled(disabled);
+        skuRetVo.setDisabled(disabled.getCode().byteValue());
         skuRetVo.setGmtCreated(gmtCreated);
         skuRetVo.setGmtModified(gmtModified);
         return skuRetVo;

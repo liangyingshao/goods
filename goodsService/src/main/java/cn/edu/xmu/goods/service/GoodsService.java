@@ -1,6 +1,7 @@
 package cn.edu.xmu.goods.service;
 
 import cn.edu.xmu.goods.dao.GoodsDao;
+import cn.edu.xmu.goods.model.bo.FloatPrice;
 import cn.edu.xmu.goods.model.bo.GoodsSku;
 import cn.edu.xmu.goods.model.po.GoodsSkuPo;
 import cn.edu.xmu.goods.model.po.ShopPo;
@@ -147,5 +148,17 @@ public class GoodsService {
     public ReturnObject modifySku(Long shopId, GoodsSku bo)
     {
         return goodsDao.modifySku(shopId,bo);
+    }
+
+    /**
+     * 管理员新增商品价格浮动
+     * @param shopId
+     * @param floatPrice
+     * @return ReturnObject
+     */
+    @Transactional
+    public ReturnObject addFloatPrice(Long shopId, FloatPrice floatPrice)
+    {
+        return goodsDao.addFloatPrice(shopId,floatPrice);
     }
 }

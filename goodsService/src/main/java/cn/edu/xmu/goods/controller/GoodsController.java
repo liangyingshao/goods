@@ -1,7 +1,7 @@
 package cn.edu.xmu.goods.controller;
 
+import cn.edu.xmu.goods.model.bo.FloatPrice;
 import cn.edu.xmu.goods.model.bo.GoodsSku;
-import cn.edu.xmu.goods.model.bo.GoodsSpu;
 import cn.edu.xmu.goods.model.vo.GoodsSkuVo;
 import cn.edu.xmu.goods.model.vo.GoodsSpuCreateVo;
 import cn.edu.xmu.goods.model.vo.StateVo;
@@ -313,6 +313,44 @@ public class GoodsController {
             return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }
 
+    }
+
+    /**
+     * 管理员新增商品价格浮动
+     * @param shopId
+     * @param id
+     * @param vo
+     * @param bindingResult
+     * @return Object
+     */
+    @ApiOperation(value="管理员新增商品价格浮动")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header",dataType = "String",name="authorization",required = true),
+            @ApiImplicitParam(paramType = "path",dataType = "Long",name = "shopId",value = "shop id",required = true),
+            @ApiImplicitParam(paramType = "path",dataType = "Long",name = "id",value = "sku id",required = true),
+            @ApiImplicitParam(paramType = "body",dataType = "FloatPriceVo",name = "vo",value = "可修改的信息",required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功")
+    })
+    @Audit
+    @PostMapping("/shops/{shopId}/skus/{id}/floatPrices")
+    public Object add_floating_price(@PathVariable Long shopId, @PathVariable Long id, @Validated @RequestBody FloatPriceVo vo, BindingResult bindingResult)
+    {
+        if(vo.getBeginTime().isAfter(vo.getEndTime()))return Common.getRetObject(new ReturnObject<>(ResponseCode.Log_Bigger));
+        logger.debug("add_floating_price: id = "+ id+" shopId="+shopId+" vo="+vo);
+        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (null != returnObject) {
+            return returnObject;
+        }
+        FloatPrice floatPrice=vo.createFloatPrice();
+        floatPrice.setGoodsSkuId(id);
+        ReturnObject retObject=goodsService.addFloatPrice(shopId,floatPrice);
+        if (retObject.getData() != null) {
+            return Common.getRetObject(retObject);
+        } else {
+            return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
+        }
     }
 }
 
