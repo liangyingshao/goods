@@ -1,7 +1,9 @@
 package cn.edu.xmu.goods.dao;
 
+import cn.edu.xmu.goods.mapper.FloatPricePoMapper;
 import cn.edu.xmu.goods.mapper.GoodsSkuPoMapper;
 import cn.edu.xmu.goods.mapper.GoodsSpuPoMapper;
+import cn.edu.xmu.goods.model.bo.FloatPrice;
 import cn.edu.xmu.goods.model.bo.GoodsSku;
 import cn.edu.xmu.goods.model.po.*;
 import cn.edu.xmu.goods.model.vo.GoodsSkuRetVo;
@@ -28,6 +30,8 @@ public class GoodsDao {
     private GoodsSkuPoMapper skuMapper;
     @Autowired
     private GoodsSpuPoMapper spuMapper;
+    @Autowired
+    private FloatPricePoMapper floatMapper;
 
     public void initialize() throws Exception {
         //初始化sku
@@ -55,6 +59,17 @@ public class GoodsDao {
             newPo.setGoodsSn(po.getGoodsSn());
             newPo.setShopId(po.getShopId());
             spuMapper.updateByPrimaryKeySelective(newPo);
+        }
+        //初始化floatPrice
+        FloatPricePoExample example2=new FloatPricePoExample();
+        FloatPricePoExample.Criteria criteria2=example2.createCriteria();
+        List<FloatPricePo> floatPricePos=floatMapper.selectByExample(example2);
+        for(FloatPricePo po:floatPricePos)
+        {
+            FloatPricePo newPo=new FloatPricePo();
+            newPo.setId(po.getId());
+            newPo.setGoodsSkuId(po.getGoodsSkuId());
+            floatMapper.updateByPrimaryKeySelective(newPo);
         }
     }
     public ReturnObject<ShopPo> modifyShop(Long id, String name)
@@ -144,6 +159,7 @@ public class GoodsDao {
         GoodsSpuPo spuPo=spuMapper.selectByPrimaryKey(skuPo.getGoodsSpuId());
         if(spuPo.getShopId()==shopId)
         {
+            skuPo.setDisabled(GoodsSku.State.DISABLED.getCode().byteValue());
             int ret=skuMapper.updateByPrimaryKey(skuPo);
             if(ret==0)
             {
@@ -155,6 +171,12 @@ public class GoodsDao {
         else return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
     }
 
+    /**
+     * 管理员或店家修改SKU信息
+     * @param shopId
+     * @param sku
+     * @return ReturnObject
+     */
     public ReturnObject modifySku(Long shopId, GoodsSku sku)
     {
         GoodsSkuPo selecctSkuPo=skuMapper.selectByPrimaryKey(sku.getId());
@@ -181,7 +203,7 @@ public class GoodsDao {
         }
         catch (DataAccessException e)
         {
-            if (Objects.requireNonNull(e.getMessage()).contains("auth_role.auth_role_name_uindex"))
+            if (Objects.requireNonNull(e.getMessage()).contains("goods_sku.goods_sku_name_uindex"))
             {
                 //若有重复的角色名则修改失败
                 logger.debug("modifySku: have same sku name = " + skuPo.getName());
@@ -192,6 +214,49 @@ public class GoodsDao {
                 logger.debug("other sql exception : " + e.getMessage());
                 return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
             }
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
+    }
+
+    /**
+     * 管理员新增商品价格浮动
+     * @param shopId
+     * @param floatPrice
+     * @return ReturnObject
+     */
+    public ReturnObject addFloatPrice(Long shopId, FloatPrice floatPrice)
+    {
+        GoodsSkuPo selecctSkuPo=skuMapper.selectByPrimaryKey(floatPrice.getGoodsSkuId());
+        GoodsSpuPoExample spuPoExample=new GoodsSpuPoExample();
+        GoodsSpuPoExample.Criteria criteria1=spuPoExample.createCriteria();
+        criteria1.andShopIdEqualTo(shopId);
+        criteria1.andIdEqualTo(selecctSkuPo.getGoodsSpuId());
+        List<GoodsSpuPo> spuPos=spuMapper.selectByExample(spuPoExample);
+        if(spuPos.size()==0)return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST,String.format("skuId不存在："+floatPrice.getGoodsSkuId()));
+        FloatPricePo floatPricePo=floatPrice.getFloatPricePo();
+        try{
+            int ret = floatMapper.insertSelective(floatPricePo);
+            if (ret == 0)
+            {
+                //修改失败
+                logger.debug("addFloatPrice: insert floatPrice fail : " + floatPricePo.toString());
+                return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("floatPrice字段不合法：" + floatPricePo.toString()));
+            }
+            else {
+                //修改成功
+                logger.debug("addFloatPrice: insert floatPrice = " + floatPricePo.toString());
+                return new ReturnObject<>();
+            }
+        }
+        catch (DataAccessException e)
+        {
+            // 其他数据库错误
+            logger.debug("other sql exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
         }
         catch (Exception e) {
             // 其他Exception错误

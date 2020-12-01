@@ -1,12 +1,14 @@
 package cn.edu.xmu.goods.controller;
 
-import cn.edu.xmu.goods.model.bo.Comment;
+import cn.edu.xmu.goods.model.bo.FloatPrice;
 import cn.edu.xmu.goods.model.bo.GoodsSku;
 import cn.edu.xmu.goods.model.vo.CommentAuditVo;
 import cn.edu.xmu.goods.model.vo.CommentStateRetVo;
 import cn.edu.xmu.goods.model.vo.GoodsSkuVo;
-import cn.edu.xmu.goods.service.CommentService;
+import cn.edu.xmu.goods.model.vo.GoodsSpuCreateVo;
+import cn.edu.xmu.goods.model.vo.StateVo;
 import cn.edu.xmu.goods.service.GoodsService;
+import cn.edu.xmu.goods.service.SpuService;
 import cn.edu.xmu.ooad.annotation.Audit;
 import cn.edu.xmu.ooad.annotation.Depart;
 import cn.edu.xmu.ooad.annotation.LoginUser;
@@ -20,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -51,10 +52,10 @@ public class GoodsController {
     GoodsService goodsService;
 
     @Autowired
-    private HttpServletResponse httpServletResponse;
+    SpuService spuService;
 
     @Autowired
-    CommentService commentService;
+    private HttpServletResponse httpServletResponse;
 
     /**
      * auth002: 用户重置密码
@@ -214,91 +215,149 @@ public class GoodsController {
     }
 
     /**
-     * 业务: comment002买家新增sku的评论
-     * @param id 订单明细的id
-     * @param content
-     * @param type
-     * @param userId
-     * @return java.lang.Object
-     * @author: 24320182203259 邵良颖
-     * Created at: 2020-12-01 15:55
-     * version: 1.0
+     * spu001: 获得商品SPU的所有状态
+     * @return Object
+     * @author 24320182203254 秦楚彦
+     * Created at 2020/11/29 21:02
      */
-    @ApiOperation(value = "买家新增sku的评论")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
-            @ApiImplicitParam(name="id", required = true, dataType="String", paramType="path"),
-            @ApiImplicitParam(name="content", required = true, dataType="String", paramType="body"),
-            @ApiImplicitParam(name="type", required = true, dataType="integer", paramType="body")
-    })
+    @ApiOperation(value="获得商品SPU的所有状态",produces="application/json")
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
-            @ApiResponse(code = 903, message = "用户没有购买此商品")
+            @ApiResponse(code = 504, message = "操作id不存在")
     })
+
     @Audit
     @PostMapping("/orderitems/{id}/comments")
+    @GetMapping("spus/states")
     @ResponseBody
-    public Object addSkuComment(@PathVariable Long id, String content, Long type, @LoginUser @ApiIgnore @RequestParam(required = false, defaultValue = "0") Long userId){
-        logger.debug("comment: id = "+ id+" userid: id = "+ userId + " type: " + type + " content: " + content);
-        ReturnObject<VoObject> returnObject = commentService.addSkuComment(id, content, type, userId);
+    public Object getgoodspustate() {
 
-        return Common.decorateReturnObject(returnObject);
-    }
+        GoodsSpu.SpuState[] spustates=GoodsSpu.SpuState.class.getEnumConstants();
+        List<StateVo> stateVos=new ArrayList<StateVo>();
+        for(int i=0;i<spustates.length;i++){
+            stateVos.add(new StateVo(spustates[i]));
 
-    /**
-     * 业务: comment001:获得评论的所有状态
-     * @param
-     * @return java.lang.Object
-     * @author: 24320182203259 邵良颖
-     * Created at: 2020-12-01 15:55
-     * version: 1.0
-     */
-    @ApiOperation(value = "comment001:获得评论的所有状态",  produces="application/json")
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value ="用户token", required = true)
-    })
-    @ApiResponses({
-    })
-    @Audit
-    @GetMapping("/comments/states")
-    public Object getcommentState() {
-        Comment.State[] states=Comment.State.class.getEnumConstants();
-        List<CommentStateRetVo> stateVos=new ArrayList<CommentStateRetVo>();
-        for(int i=0;i<states.length;i++){
-            stateVos.add(new CommentStateRetVo(states[i]));
         }
+
         return ResponseUtil.ok(new ReturnObject<List>(stateVos).getData());
     }
 
+
     /**
-     * 业务: comment003：查询已通过审核的评论
-     * @param id sku的id
-     * @param page 页数
-     * @param pageSize 页大小
-     * @return java.lang.Object
-     * @author: 24320182203259 邵良颖
-     * Created at: 2020-12-01 15:54
-     * version: 1.0
+     * spu003 业务: 查看一条商品SPU的详细信息（无需登录）
+     * @param id
+     * @return  ReturnObject
+     * @author 24320182203254 秦楚彦
+     * Created at 2020/11/30 08：41
      */
-    @ApiOperation(value = "查询已通过审核的评论", produces = "application/json")
+    @ApiOperation(value="查看一条商品SPU的详细信息（无需登录）",produces="application/json")
     @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
-            @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "SKU Id", required = true),
-            @ApiImplicitParam(paramType = "query", dataType = "int", name = "page", value = "页码", required = false),
-            @ApiImplicitParam(paramType = "query", dataType = "int", name = "pageSize", value = "每页数目", required = false)
+            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "id", value = "商品SPUid", required = true)
+
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功")
+    })
+    @GetMapping("spus/{id}")
+    @ResponseBody
+    public Object showSpu(@PathVariable Long id) {
+        Object returnObject=null;
+        ReturnObject<Object> spu = spuService.showSpu(id);
+        logger.debug("findSpuById: spu="+spu.getData()+" code="+spu.getCode());
+        if (!spu.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST)) {
+            return spu;
+        } else {
+            returnObject = Common.getNullRetObj(new ReturnObject<>(spu.getCode(), spu.getErrmsg()), httpServletResponse);
+        }
+
+        return returnObject;
+    }
+
+    /**
+     * spu004 业务: 店家新建商品SPU
+     * @param id 商铺ID
+     * @param vo 新增SPU视图
+     * @param userId 当前用户ID
+     * @return  ReturnObject
+     * @author 24320182203254 秦楚彦
+     * Created at 2020/11/30 22：19
+     */
+    @ApiOperation(value="店家新建商品SPU",produces="application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "id", value = "商铺id", required = true),
+            @ApiImplicitParam(paramType = "body", dataType = "", name = "body", value = "SPU详细信息", required = true)
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
+
+    })
+    @Audit // 需要认证
+    @PostMapping("shops/{id}/spus")
+    @ResponseBody
+    public Object addSpu(@Validated @RequestBody GoodsSpuCreateVo vo,
+                         @PathVariable Long id,
+                         BindingResult bindingResult,
+                         @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
+                         @Depart @ApiIgnore @RequestParam(required = false) Long departId
+
+    ) {
+        logger.debug("insert SPU by shopId:" + id);
+        //校验前端数据
+        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (null != returnObject) {
+            logger.debug("validate fail");
+            return returnObject;
+        }
+        GoodsSpu spu=vo.createSpu();
+        spu.setShopId(id);
+        spu.setGmtCreated(LocalDateTime.now());
+        ReturnObject retObject = spuService.addSpu(spu);
+        if (retObject.getData() != null) {
+            httpServletResponse.setStatus(HttpStatus.CREATED.value());
+            return retObject;
+        } else {
+            return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
+        }
+
+    }
+
+    /**
+     * 管理员新增商品价格浮动
+     * @param shopId
+     * @param id
+     * @param vo
+     * @param bindingResult
+     * @return Object
+     */
+    @ApiOperation(value="管理员新增商品价格浮动")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header",dataType = "String",name="authorization",required = true),
+            @ApiImplicitParam(paramType = "path",dataType = "Long",name = "shopId",value = "shop id",required = true),
+            @ApiImplicitParam(paramType = "path",dataType = "Long",name = "id",value = "sku id",required = true),
+            @ApiImplicitParam(paramType = "body",dataType = "FloatPriceVo",name = "vo",value = "可修改的信息",required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功")
     })
     @Audit
-    @GetMapping("/skus/{id}/comments")
-    public Object selectAllPassComment(
-                                 @PathVariable("id") Long id,
-                                 @RequestParam(required = false, defaultValue = "1") Integer page,
-                                 @RequestParam(required = false, defaultValue = "10") Integer pageSize) {
-        logger.debug("selectAllPassComment: page = "+ page +"  pageSize ="+pageSize);
-        ReturnObject<PageInfo<VoObject>> returnObject =  commentService.selectAllPassComment(id, page, pageSize);
-        return Common.getPageRetObject(returnObject);
+    @PostMapping("/shops/{shopId}/skus/{id}/floatPrices")
+    public Object add_floating_price(@PathVariable Long shopId, @PathVariable Long id, @Validated @RequestBody FloatPriceVo vo, BindingResult bindingResult)
+    {
+        if(vo.getBeginTime().isAfter(vo.getEndTime()))return Common.getRetObject(new ReturnObject<>(ResponseCode.Log_Bigger));
+        logger.debug("add_floating_price: id = "+ id+" shopId="+shopId+" vo="+vo);
+        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (null != returnObject) {
+            return returnObject;
+        }
+        FloatPrice floatPrice=vo.createFloatPrice();
+        floatPrice.setGoodsSkuId(id);
+        ReturnObject retObject=goodsService.addFloatPrice(shopId,floatPrice);
+        if (retObject.getData() != null) {
+            return Common.getRetObject(retObject);
+        } else {
+            return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
+        }
     }
 
 //    @ApiOperation(value = "管理员审核评论")
