@@ -1,8 +1,12 @@
 package cn.edu.xmu.goods.controller;
 
 import cn.edu.xmu.goods.model.bo.GoodsSku;
+import cn.edu.xmu.goods.model.bo.GoodsSpu;
 import cn.edu.xmu.goods.model.vo.GoodsSkuVo;
+import cn.edu.xmu.goods.model.vo.GoodsSpuCreateVo;
+import cn.edu.xmu.goods.model.vo.StateVo;
 import cn.edu.xmu.goods.service.GoodsService;
+import cn.edu.xmu.goods.service.SpuService;
 import cn.edu.xmu.ooad.annotation.Audit;
 import cn.edu.xmu.ooad.annotation.Depart;
 import cn.edu.xmu.ooad.annotation.LoginUser;
@@ -42,6 +46,9 @@ public class GoodsController {
 
     @Autowired
     GoodsService goodsService;
+
+    @Autowired
+    SpuService spuService;
 
     @Autowired
     private HttpServletResponse httpServletResponse;
@@ -201,6 +208,111 @@ public class GoodsController {
         } else {
             return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }
+    }
+
+    /**
+     * spu001: 获得商品SPU的所有状态
+     * @return Object
+     * @author 24320182203254 秦楚彦
+     * Created at 2020/11/29 21:02
+     */
+    @ApiOperation(value="获得商品SPU的所有状态",produces="application/json")
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 504, message = "操作id不存在")
+    })
+    @GetMapping("spus/states")
+    @ResponseBody
+    public Object getgoodspustate() {
+
+        GoodsSpu.SpuState[] spustates=GoodsSpu.SpuState.class.getEnumConstants();
+        List<StateVo> stateVos=new ArrayList<StateVo>();
+        for(int i=0;i<spustates.length;i++){
+            stateVos.add(new StateVo(spustates[i]));
+
+        }
+
+        return ResponseUtil.ok(new ReturnObject<List>(stateVos).getData());
+    }
+
+
+    /**
+     * spu003 业务: 查看一条商品SPU的详细信息（无需登录）
+     * @param id
+     * @return  ReturnObject
+     * @author 24320182203254 秦楚彦
+     * Created at 2020/11/30 08：41
+     */
+    @ApiOperation(value="查看一条商品SPU的详细信息（无需登录）",produces="application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "id", value = "商品SPUid", required = true)
+
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功")
+    })
+    @GetMapping("spus/{id}")
+    @ResponseBody
+    public Object showSpu(@PathVariable Long id) {
+        Object returnObject=null;
+        ReturnObject<Object> spu = spuService.showSpu(id);
+        logger.debug("findSpuById: spu="+spu.getData()+" code="+spu.getCode());
+        if (!spu.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST)) {
+            return spu;
+        } else {
+            returnObject = Common.getNullRetObj(new ReturnObject<>(spu.getCode(), spu.getErrmsg()), httpServletResponse);
+        }
+
+        return returnObject;
+    }
+
+    /**
+     * spu004 业务: 店家新建商品SPU
+     * @param id 商铺ID
+     * @param vo 新增SPU视图
+     * @param userId 当前用户ID
+     * @return  ReturnObject
+     * @author 24320182203254 秦楚彦
+     * Created at 2020/11/30 22：19
+     */
+    @ApiOperation(value="店家新建商品SPU",produces="application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "id", value = "商铺id", required = true),
+            @ApiImplicitParam(paramType = "body", dataType = "", name = "body", value = "SPU详细信息", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+
+    })
+    @Audit // 需要认证
+    @PostMapping("shops/{id}/spus")
+    @ResponseBody
+    public Object addSpu(@Validated @RequestBody GoodsSpuCreateVo vo,
+                         @PathVariable Long id,
+                         BindingResult bindingResult,
+                         @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
+                         @Depart @ApiIgnore @RequestParam(required = false) Long departId
+
+    ) {
+        logger.debug("insert SPU by shopId:" + id);
+        //校验前端数据
+        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (null != returnObject) {
+            logger.debug("validate fail");
+            return returnObject;
+        }
+        GoodsSpu spu=vo.createSpu();
+        spu.setShopId(id);
+        spu.setGmtCreated(LocalDateTime.now());
+        ReturnObject retObject = spuService.addSpu(spu);
+        if (retObject.getData() != null) {
+            httpServletResponse.setStatus(HttpStatus.CREATED.value());
+            return retObject;
+        } else {
+            return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
+        }
+
     }
 }
 
