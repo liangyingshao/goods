@@ -66,4 +66,14 @@ class GoodsDaoTest {
         assertEquals(returnObject.getCode(),ResponseCode.RESOURCE_ID_NOTEXIST);
 
     }
+
+    @Test
+    void uploadSkuImg()
+    {
+        GoodsSku sku=new GoodsSku();
+        sku.setId((long)273);
+        sku.setImageUrl("http://47.52.88.176/file/images/201610/file_57fae8f7240c6.jpg");
+        ReturnObject returnObject=goodsDao.uploadSkuImg(sku);
+        assertEquals(returnObject.getCode(),ResponseCode.OK);
+    }
 }
