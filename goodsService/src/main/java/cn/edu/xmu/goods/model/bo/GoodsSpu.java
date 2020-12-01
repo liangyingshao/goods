@@ -40,7 +40,8 @@ public class GoodsSpu {
      */
     public enum SpuState{
         ONSHELF(0,"上架"),
-        OFFSHELF(1,"下架");
+        OFFSHELF(1,"下架"),
+        UNKNOWN(4,"不晓得是啥");
 
         private static final Map<Integer, SpuState> stateMap;
 

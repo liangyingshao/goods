@@ -150,10 +150,18 @@ public class GoodsController {
     })
     @Audit
     @PostMapping("/shops/{shopId}/skus/{id}/uploadImg")
-    public Object uploadSkuImg(@PathVariable Long shopId,@PathVariable Long id, @RequestParam("img") MultipartFile file){
+    public Object uploadSkuImg(@PathVariable Long shopId,@PathVariable Long id,
+                               @RequestParam("img") MultipartFile file,BindingResult bindingResult,
+                               @Depart @ApiIgnore @RequestParam(required = false) Long departId){
         logger.debug("uploadSkuImg: id = "+ id+" shopId="+shopId +" img=" + file.getOriginalFilename());
-        ReturnObject returnObject = goodsService.uploadSkuImg(shopId,id,file);
-        return Common.getNullRetObj(returnObject, httpServletResponse);
+        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (null != returnObject) {
+            return returnObject;
+        }
+        if(departId!=shopId)
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        ReturnObject retObject = goodsService.uploadSkuImg(shopId,id,file);
+        return Common.getNullRetObj(retObject, httpServletResponse);
     }
 
     /**
@@ -173,11 +181,14 @@ public class GoodsController {
     })
     @Audit
     @DeleteMapping("/shops/{shopId}/skus/{id}")
-    public Object deleteSku(@PathVariable Long shopId,@PathVariable Long id)
+    public Object deleteSku(@PathVariable Long shopId, @PathVariable Long id,
+                            @Depart @ApiIgnore @RequestParam(required = false) Long departId)
     {
         logger.debug("deleteSku: id = "+ id+" shopId="+shopId);
-        ReturnObject returnObject=goodsService.deleteSku(shopId,id);
-        return Common.decorateReturnObject(returnObject);
+        if(departId!=0&&departId!=shopId)
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        ReturnObject retObject=goodsService.deleteSku(shopId,id);
+        return Common.decorateReturnObject(retObject);
     }
 
     /**
@@ -199,13 +210,17 @@ public class GoodsController {
     })
     @Audit
     @PutMapping("/shops/{shopId}/skus/{id}")
-    public Object modifySKU(@PathVariable Long shopId,@PathVariable Long id,@Validated @RequestBody GoodsSkuVo vo,BindingResult bindingResult)
+    public Object modifySKU(@PathVariable Long shopId,@PathVariable Long id,
+                            @Validated @RequestBody GoodsSkuVo vo,BindingResult bindingResult,
+                            @Depart @ApiIgnore @RequestParam(required = false) Long departId)
     {
         logger.debug("modifySKU: id = "+ id+" shopId="+shopId+" vo="+vo);
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != returnObject) {
             return returnObject;
         }
+        if(departId!=0&&departId!=shopId)
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
         GoodsSku sku=vo.createGoodsSku();
         sku.setId(id);
         ReturnObject retObject=goodsService.modifySku(shopId,sku);
@@ -343,7 +358,10 @@ public class GoodsController {
     })
     @Audit
     @PostMapping("/shops/{shopId}/skus/{id}/floatPrices")
-    public Object add_floating_price(@PathVariable Long shopId, @PathVariable Long id, @Validated @RequestBody FloatPriceVo vo, BindingResult bindingResult)
+    public Object add_floating_price(@PathVariable Long shopId, @PathVariable Long id,
+                                     @Validated @RequestBody FloatPriceVo vo, BindingResult bindingResult,
+                                     @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
+                                     @Depart @ApiIgnore @RequestParam(required = false) Long departId)
     {
         if(vo.getBeginTime().isAfter(vo.getEndTime()))return Common.getRetObject(new ReturnObject<>(ResponseCode.Log_Bigger));
         logger.debug("add_floating_price: id = "+ id+" shopId="+shopId+" vo="+vo);
@@ -351,11 +369,14 @@ public class GoodsController {
         if (null != returnObject) {
             return returnObject;
         }
+        if(departId!=shopId)return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
         FloatPrice floatPrice=vo.createFloatPrice();
         floatPrice.setGoodsSkuId(id);
-        ReturnObject retObject=goodsService.addFloatPrice(shopId,floatPrice);
+        floatPrice.setValid(FloatPrice.Validation.VALID);
+        floatPrice.setCreatedBy(userId);
+        ReturnObject<FloatPriceRetVo> retObject=goodsService.addFloatPrice(shopId,floatPrice,userId);
         if (retObject.getData() != null) {
-            return Common.getRetObject(retObject);
+            return Common.decorateReturnObject(retObject);
         } else {
             return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }

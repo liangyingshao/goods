@@ -1,13 +1,11 @@
 package cn.edu.xmu.goods.dao;
 
-import cn.edu.xmu.goods.mapper.FloatPricePoMapper;
-import cn.edu.xmu.goods.mapper.GoodsSkuPoMapper;
-import cn.edu.xmu.goods.mapper.GoodsSpuPoMapper;
+import cn.edu.xmu.goods.mapper.*;
 import cn.edu.xmu.goods.model.bo.FloatPrice;
 import cn.edu.xmu.goods.model.bo.GoodsSku;
+import cn.edu.xmu.goods.model.bo.GoodsSpu;
 import cn.edu.xmu.goods.model.po.*;
-import cn.edu.xmu.goods.model.vo.GoodsSkuRetVo;
-import cn.edu.xmu.goods.model.vo.GoodsSkuVo;
+import cn.edu.xmu.goods.model.vo.*;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import com.github.pagehelper.PageHelper;
@@ -18,9 +16,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Repository
 public class GoodsDao {
@@ -32,6 +32,10 @@ public class GoodsDao {
     private GoodsSpuPoMapper spuMapper;
     @Autowired
     private FloatPricePoMapper floatMapper;
+    @Autowired
+    private BrandPoMapper brandMapper;
+    @Autowired
+    private GoodsCategoryPoMapper categoryMapper;
 
     public void initialize() throws Exception {
         //初始化sku
@@ -71,6 +75,27 @@ public class GoodsDao {
             newPo.setGoodsSkuId(po.getGoodsSkuId());
             floatMapper.updateByPrimaryKeySelective(newPo);
         }
+        //初始化brand
+        BrandPoExample example3=new BrandPoExample();
+        BrandPoExample.Criteria criteria3=example3.createCriteria();
+        List<BrandPo>brandPos=brandMapper.selectByExample(example3);
+        for(BrandPo po:brandPos)
+        {
+            BrandPo newPo=new BrandPo();
+            newPo.setId(po.getId());
+            brandMapper.updateByPrimaryKeySelective(newPo);
+        }
+        //初始化category
+        GoodsCategoryPoExample example4=new GoodsCategoryPoExample();
+        GoodsCategoryPoExample.Criteria criteria4=example4.createCriteria();
+        List<GoodsCategoryPo>categoryPos=categoryMapper.selectByExample(example4);
+        for(GoodsCategoryPo po:categoryPos)
+        {
+            GoodsCategoryPo newPo=new GoodsCategoryPo();
+            newPo.setId(po.getId());
+            newPo.setPid(po.getPid());
+            categoryMapper.updateByPrimaryKeySelective(newPo);
+        }
     }
     public ReturnObject<ShopPo> modifyShop(Long id, String name)
     {
@@ -87,7 +112,7 @@ public class GoodsDao {
      * @param pageSize
      * @return PageInfo<GoodsSkuPo>
      */
-    public PageInfo<GoodsSkuPo> getSkuList(Long shopId,String skuSn,Long spuId,String spuSn,Integer page,Integer pageSize)
+    public PageInfo<GoodsSkuRetVo> getSkuList(Long shopId, String skuSn, Long spuId, String spuSn, Integer page, Integer pageSize)
     {
         GoodsSkuPoExample skuExample=new GoodsSkuPoExample();
         GoodsSkuPoExample.Criteria skuCriteria=skuExample.createCriteria();
@@ -111,7 +136,20 @@ public class GoodsDao {
             }
         }
         else skuPos=skuMapper.selectByExample(skuExample);
-        return new PageInfo<>(skuPos);
+        List<GoodsSku>skus=skuPos.stream().map(GoodsSku::new).collect(Collectors.toList());
+        for(GoodsSku sku:skus)
+        {
+            FloatPricePoExample floatExample=new FloatPricePoExample();
+            FloatPricePoExample.Criteria floatCriteria=floatExample.createCriteria();
+            floatCriteria.andGoodsSkuIdEqualTo(sku.getId());
+            floatCriteria.andBeginTimeLessThanOrEqualTo(LocalDateTime.now());
+            floatCriteria.andEndTimeGreaterThanOrEqualTo(LocalDateTime.now());
+            List<FloatPricePo> floatPos=floatMapper.selectByExample(floatExample);
+            if(floatPos.size()==0)sku.setPrice(sku.getOriginalPrice());
+            else if(floatPos.size()==1)sku.setPrice(floatPos.get(0).getActivityPrice());
+        }
+        List<GoodsSkuRetVo> ret = skus.stream().map(GoodsSkuRetVo::new).collect(Collectors.toList());
+        return new PageInfo<>(ret);
     }
 
     /**
@@ -119,7 +157,20 @@ public class GoodsDao {
      * @param id
      * @return GoodsSkuPo
      */
-    public GoodsSkuPo getSku(Long id)
+    public GoodsSkuDetailRetVo getSku(Long id)
+    {
+        GoodsSkuPo skuPo=skuMapper.selectByPrimaryKey(id);
+        GoodsSkuDetailRetVo retVo=new GoodsSkuDetailRetVo();
+        if(skuPo!=null&&GoodsSku.State.getTypeByCode(skuPo.getDisabled().intValue()) != GoodsSku.State.DISABLED)retVo.set(new GoodsSku(skuPo));
+        else return null;
+        GoodsSpuPo spuPo= spuMapper.selectByPrimaryKey(skuPo.getGoodsSpuId());
+        GoodsSpu spu=new GoodsSpu(spuPo);
+        GoodsSpuVo spuVo= new GoodsSpuVo(spu);
+        retVo.setSpu(spuVo);
+        return retVo;
+    }
+
+    public GoodsSkuPo internalGetSku(Long id)
     {
         return skuMapper.selectByPrimaryKey(id);
     }
@@ -132,6 +183,8 @@ public class GoodsDao {
     public ReturnObject uploadSkuImg(GoodsSku sku)
     {
         ReturnObject returnObject;
+        GoodsSkuPo skuPo=skuMapper.selectByPrimaryKey(sku.getId());
+        if(skuPo==null|| GoodsSku.State.getTypeByCode(skuPo.getDisabled().intValue())== GoodsSku.State.DISABLED)return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         GoodsSkuPo newSkuPo = new GoodsSkuPo();
         newSkuPo.setId(sku.getId());
         newSkuPo.setImageUrl(sku.getImageUrl());
@@ -155,7 +208,7 @@ public class GoodsDao {
     public ReturnObject logicalDelete(Long shopId, Long id)
     {
         GoodsSkuPo skuPo=skuMapper.selectByPrimaryKey(id);
-        if(skuPo==null)return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        if(skuPo==null|| GoodsSku.State.getTypeByCode(skuPo.getDisabled().intValue())== GoodsSku.State.DISABLED)return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         GoodsSpuPo spuPo=spuMapper.selectByPrimaryKey(skuPo.getGoodsSpuId());
         if(spuPo.getShopId()==shopId)
         {
@@ -168,7 +221,7 @@ public class GoodsDao {
             }
             else return new ReturnObject();
         }
-        else return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        else return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
     }
 
     /**
@@ -179,13 +232,28 @@ public class GoodsDao {
      */
     public ReturnObject modifySku(Long shopId, GoodsSku sku)
     {
-        GoodsSkuPo selecctSkuPo=skuMapper.selectByPrimaryKey(sku.getId());
+        //SKU存在
+        GoodsSkuPo selectSkuPo=skuMapper.selectByPrimaryKey(sku.getId());
+        if(selectSkuPo==null|| GoodsSku.State.getTypeByCode(selectSkuPo.getDisabled().intValue())== GoodsSku.State.DISABLED)
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+
+        //shopId和spuId匹配
         GoodsSpuPoExample spuPoExample=new GoodsSpuPoExample();
         GoodsSpuPoExample.Criteria criteria1=spuPoExample.createCriteria();
         criteria1.andShopIdEqualTo(shopId);
-        criteria1.andIdEqualTo(selecctSkuPo.getGoodsSpuId());
+        criteria1.andIdEqualTo(selectSkuPo.getGoodsSpuId());
         List<GoodsSpuPo> spuPos=spuMapper.selectByExample(spuPoExample);
-        if(spuPos.size()==0)return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST,String.format("skuId不存在："+sku.getId()));
+        if(spuPos.size()==0)return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
+
+        //同SPU下SKU不重名
+        GoodsSkuPoExample skuExample=new GoodsSkuPoExample();
+        GoodsSkuPoExample.Criteria criteria=skuExample.createCriteria();
+        criteria.andGoodsSpuIdEqualTo(selectSkuPo.getGoodsSpuId());
+        List<GoodsSkuPo>skuPos=skuMapper.selectByExample(skuExample);
+        for(GoodsSkuPo po:skuPos)
+            if(po.getName().equals(sku.getName()))return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("SKU名重复：" + selectSkuPo.getName()));
+
+        //尝试修改
         GoodsSkuPo skuPo=sku.getGoodsSkuPo();
         try{
             int ret = skuMapper.updateByPrimaryKeySelective(skuPo);
@@ -205,9 +273,8 @@ public class GoodsDao {
         {
             if (Objects.requireNonNull(e.getMessage()).contains("goods_sku.goods_sku_name_uindex"))
             {
-                //若有重复的角色名则修改失败
                 logger.debug("modifySku: have same sku name = " + skuPo.getName());
-                return new ReturnObject<>(ResponseCode.ROLE_REGISTERED, String.format("角色名重复：" + skuPo.getName()));
+                return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("SKU名重复：" + skuPo.getName()));
             }
             else {
                 // 其他数据库错误
@@ -226,17 +293,36 @@ public class GoodsDao {
      * 管理员新增商品价格浮动
      * @param shopId
      * @param floatPrice
+     * @param userId
      * @return ReturnObject
      */
-    public ReturnObject addFloatPrice(Long shopId, FloatPrice floatPrice)
+    public ReturnObject<FloatPriceRetVo> addFloatPrice(Long shopId, FloatPrice floatPrice, Long userId)
     {
+        //库存充足
         GoodsSkuPo selecctSkuPo=skuMapper.selectByPrimaryKey(floatPrice.getGoodsSkuId());
+        if(selecctSkuPo.getInventory()*9/10<floatPrice.getQuantity())
+            return new ReturnObject(ResponseCode.SKU_NOTENOUGH,String.format("库存不足："+floatPrice.getGoodsSkuId()));
+
+        //shopId能和skuId匹配
         GoodsSpuPoExample spuPoExample=new GoodsSpuPoExample();
         GoodsSpuPoExample.Criteria criteria1=spuPoExample.createCriteria();
         criteria1.andShopIdEqualTo(shopId);
         criteria1.andIdEqualTo(selecctSkuPo.getGoodsSpuId());
         List<GoodsSpuPo> spuPos=spuMapper.selectByExample(spuPoExample);
-        if(spuPos.size()==0)return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST,String.format("skuId不存在："+floatPrice.getGoodsSkuId()));
+        if(spuPos.size()==0)
+            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST,String.format("skuId不存在："+floatPrice.getGoodsSkuId()));
+
+        //时间不冲突
+        FloatPricePoExample nowExample=new FloatPricePoExample();
+        FloatPricePoExample.Criteria nowCriteria=nowExample.createCriteria();
+        nowCriteria.andGoodsSkuIdEqualTo(floatPrice.getGoodsSkuId());
+        nowCriteria.andBeginTimeLessThanOrEqualTo(floatPrice.getEndTime());
+        nowCriteria.andEndTimeGreaterThanOrEqualTo(floatPrice.getBeginTime());
+        List<FloatPricePo> nowFloatPos=floatMapper.selectByExample(nowExample);
+        if(nowFloatPos.size()>0)
+            return new ReturnObject<>(ResponseCode.SKUPRICE_CONFLICT, String.format("floatPrice时间冲突：已有"+nowFloatPos.toString() +"待加"+ floatPrice.toString()));
+
+        //尝试插入
         FloatPricePo floatPricePo=floatPrice.getFloatPricePo();
         try{
             int ret = floatMapper.insertSelective(floatPricePo);
@@ -249,7 +335,38 @@ public class GoodsDao {
             else {
                 //修改成功
                 logger.debug("addFloatPrice: insert floatPrice = " + floatPricePo.toString());
-                return new ReturnObject<>();
+                //检验
+                FloatPricePoExample floatExample=new FloatPricePoExample();
+                FloatPricePoExample.Criteria criteria=floatExample.createCriteria();
+                criteria.andGoodsSkuIdEqualTo(floatPrice.getGoodsSkuId());
+                criteria.andBeginTimeEqualTo(floatPrice.getBeginTime());
+                criteria.andEndTimeEqualTo(floatPrice.getEndTime());
+                criteria.andActivityPriceEqualTo(floatPrice.getActivityPrice());
+                criteria.andQuantityEqualTo(floatPrice.getQuantity());
+                List<FloatPricePo> checkFloatPo=floatMapper.selectByExample(floatExample);
+                if(checkFloatPo.size()==0)
+                    return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("floatPrice字段不合法：" + floatPricePo.toString()));
+                else {//构造FloatPriceRetVo
+                    FloatPriceRetVo retVo=new FloatPriceRetVo();
+                    retVo.set(new FloatPrice(checkFloatPo.get(0)));
+                    /**
+                     * 获取用户名
+                     * 输入：checkFloatPo.get(0).getCreatedBy()
+                     * 输出：UserPo
+                     */
+                    CreatedBy createdBy=new CreatedBy();
+                    createdBy.set(userId,"createUser");
+                    retVo.setCreatedBy(createdBy);
+                    /**
+                     * 获取用户名
+                     * 输入：userId
+                     * 输出：UserPo
+                     */
+                    ModifiedBy modifiedBy=new ModifiedBy();
+                    modifiedBy.set(userId,"testUser");
+                    retVo.setModifiedBy(modifiedBy);
+                    return new ReturnObject<>(retVo);
+                }
             }
         }
         catch (DataAccessException e)

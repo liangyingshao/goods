@@ -1,6 +1,8 @@
 package cn.edu.xmu.goods.model.bo;
 
+import cn.edu.xmu.goods.model.po.BrandPo;
 import cn.edu.xmu.goods.model.po.GoodsSkuPo;
+import cn.edu.xmu.goods.model.po.GoodsSpuPo;
 import cn.edu.xmu.goods.model.vo.GoodsSkuRetVo;
 import cn.edu.xmu.ooad.model.VoObject;
 import lombok.Data;
@@ -15,7 +17,8 @@ public class GoodsSku implements VoObject {
 
     public enum State {
         ABLED(0, "可用"),
-        DISABLED(1, "废弃");
+        DISABLED(1, "废弃"),
+        UNKNOWN(4,"不晓得是啥");
 
         private static final Map<Integer, GoodsSku.State> stateMap;
 
@@ -61,7 +64,7 @@ public class GoodsSku implements VoObject {
 
     private Long originalPrice;
 
-    //private Long price;
+    private Long price;
 
     private String configuration;
 
@@ -99,26 +102,12 @@ public class GoodsSku implements VoObject {
 
     @Override
     public Object createVo() {
-        GoodsSkuRetVo skuRetVo=new GoodsSkuRetVo();
-        skuRetVo.setId(id);
-        //skuRetVo.setGoodsSpuId(goodsSpuId);
-        skuRetVo.setSkuSn(skuSn);
-        skuRetVo.setName(name);
-        skuRetVo.setOriginalPrice(originalPrice);
-        //skuRetVo.setConfiguration(configuration);
-        //skuRetVo.setWeight(weight);
-        skuRetVo.setImageUrl(imageUrl);
-        skuRetVo.setInventory(inventory);
-        //skuRetVo.setDetail(detail);
-        skuRetVo.setDisabled(disabled.getCode().byteValue());
-        skuRetVo.setGmtCreated(gmtCreated);
-        skuRetVo.setGmtModified(gmtModified);
-        return skuRetVo;
+        return new GoodsSkuRetVo(this);
     }
 
     @Override
     public Object createSimpleVo() {
-        return null;
+        return new GoodsSkuRetVo(this);
     }
 
     public GoodsSkuPo getGoodsSkuPo() {

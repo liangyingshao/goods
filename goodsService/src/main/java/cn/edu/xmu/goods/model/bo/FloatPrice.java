@@ -105,6 +105,8 @@ public class FloatPrice implements VoObject {
         floatPricePo.setBeginTime(beginTime);
         floatPricePo.setEndTime(endTime);
         floatPricePo.setQuantity(quantity);
+        floatPricePo.setValid(valid.getCode().byteValue());
+        floatPricePo.setCreatedBy(createdBy);
         return floatPricePo;
     }
 }
