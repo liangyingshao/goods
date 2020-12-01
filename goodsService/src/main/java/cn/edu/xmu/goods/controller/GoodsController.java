@@ -2,11 +2,9 @@ package cn.edu.xmu.goods.controller;
 
 import cn.edu.xmu.goods.model.bo.FloatPrice;
 import cn.edu.xmu.goods.model.bo.GoodsSku;
-import cn.edu.xmu.goods.model.vo.CommentAuditVo;
-import cn.edu.xmu.goods.model.vo.CommentStateRetVo;
-import cn.edu.xmu.goods.model.vo.GoodsSkuVo;
-import cn.edu.xmu.goods.model.vo.GoodsSpuCreateVo;
-import cn.edu.xmu.goods.model.vo.StateVo;
+import cn.edu.xmu.goods.model.bo.GoodsSpu;
+import cn.edu.xmu.goods.model.vo.*;
+import cn.edu.xmu.goods.service.CommentService;
 import cn.edu.xmu.goods.service.GoodsService;
 import cn.edu.xmu.goods.service.SpuService;
 import cn.edu.xmu.ooad.annotation.Audit;
@@ -50,6 +48,9 @@ public class GoodsController {
 
     @Autowired
     GoodsService goodsService;
+
+    @Autowired
+    CommentService commentService;
 
     @Autowired
     SpuService spuService;
