@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = GoodsServiceApplication.class)   //标识本类是一个SpringBootTest
 @AutoConfigureMockMvc
 //@Transactional
-public class commentControllerTest {
+public class CommentControllerTest {
     @Autowired
     private MockMvc mvc;
 
@@ -84,7 +84,7 @@ public class commentControllerTest {
         String token = creatTestToken(1L, 0L, 100);
         String json = "{\"conclusion\":\"true\"}";
         String responseString = this.mvc.perform(
-                put("/goods/comments/1/confirm?conclusion=true")
+                put("/goods/comments/2/confirm?conclusion=true")
                         .header("authorization", token)
                         .contentType("application/json;charset=UTF-8")
                         .content(json))
@@ -94,5 +94,25 @@ public class commentControllerTest {
 
         String expectedResponse = "{\"code\":\"OK\",\"errmsg\":\"成功\",\"data\":null}";
         JSONAssert.assertEquals(expectedResponse, responseString, true);
+    }
+
+    @Test
+    public void showComment() {
+        String responseString = null;
+        String token = creatTestToken(1L, 1L, 100);
+        try {
+            responseString = this.mvc.perform(get("/goods/comments?page=1&pageSize=2").header("authorization", token))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andReturn().getResponse().getContentAsString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        String expectedResponse = "{\"errno\":0,\"data\":{\"total\":2,\"pages\":1,\"pageSize\":2,\"page\":1,\"list\":[{\"id\":2,\"customerId\":1,\"goodsSkuId\":1,\"orderitemId\":1,\"type\":0,\"content\":null,\"state\":0,\"gmtCreate\":\"2020-12-01T21:20:48\",\"gmtModified\":null},{\"id\":3,\"customerId\":1,\"goodsSkuId\":1,\"orderitemId\":1,\"type\":0,\"content\":null,\"state\":0,\"gmtCreate\":\"2020-12-01T21:26:54\",\"gmtModified\":null}]},\"errmsg\":\"成功\"}";
+        try {
+            JSONAssert.assertEquals(expectedResponse, responseString, false);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 }

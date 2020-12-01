@@ -116,6 +116,7 @@ public class CommentDao {
                     newState = 1;
                 }
                 commentPo.setState(newState);
+                commentPo.setGmtModified(LocalDateTime.now());
                 commentPoMapper.updateByPrimaryKey(commentPo);
                 return new ReturnObject<>(ResponseCode.OK);
             }

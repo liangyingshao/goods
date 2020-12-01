@@ -41,6 +41,31 @@ public class CommentController {
     CommentService commentService;
 
     /**
+     * 业务: comment001:获得评论的所有状态
+     * @param
+     * @return java.lang.Object
+     * @author: 24320182203259 邵良颖
+     * Created at: 2020-12-01 15:55
+     * version: 1.0
+     */
+    @ApiOperation(value = "comment001:获得评论的所有状态",  produces="application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value ="用户token", required = true)
+    })
+    @ApiResponses({
+    })
+    @Audit
+    @GetMapping("/comments/states")
+    public Object getcommentState() {
+        Comment.State[] states=Comment.State.class.getEnumConstants();
+        List<CommentStateRetVo> stateVos=new ArrayList<CommentStateRetVo>();
+        for(int i=0;i<states.length;i++){
+            stateVos.add(new CommentStateRetVo(states[i]));
+        }
+        return ResponseUtil.ok(new ReturnObject<List>(stateVos).getData());
+    }
+
+    /**
      * 业务: comment002买家新增sku的评论
      * @param id 订单明细的id
      * @param content
@@ -73,31 +98,6 @@ public class CommentController {
     }
 
     /**
-     * 业务: comment001:获得评论的所有状态
-     * @param
-     * @return java.lang.Object
-     * @author: 24320182203259 邵良颖
-     * Created at: 2020-12-01 15:55
-     * version: 1.0
-     */
-    @ApiOperation(value = "comment001:获得评论的所有状态",  produces="application/json")
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value ="用户token", required = true)
-    })
-    @ApiResponses({
-    })
-    @Audit
-    @GetMapping("/comments/states")
-    public Object getcommentState() {
-        Comment.State[] states=Comment.State.class.getEnumConstants();
-        List<CommentStateRetVo> stateVos=new ArrayList<CommentStateRetVo>();
-        for(int i=0;i<states.length;i++){
-            stateVos.add(new CommentStateRetVo(states[i]));
-        }
-        return ResponseUtil.ok(new ReturnObject<List>(stateVos).getData());
-    }
-
-    /**
      * 业务: comment003：查询已通过审核的评论
      * @param id sku的id
      * @param page 页数
@@ -123,7 +123,6 @@ public class CommentController {
             @PathVariable("id") Long id,
             @RequestParam(required = false, defaultValue = "1") Integer page,
             @RequestParam(required = false, defaultValue = "10") Integer pageSize) {
-        logger.debug("selectAllPassComment: page = "+ page +"  pageSize ="+pageSize);
         ReturnObject<PageInfo<VoObject>> returnObject =  commentService.selectAllPassComment(id, page, pageSize);
         return Common.getPageRetObject(returnObject);
     }
@@ -164,5 +163,34 @@ public class CommentController {
             return new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW);
         }
         return returnObject;
+    }
+
+    /**
+     * 业务: comment005买家查看自己的评价记录
+     * @param id
+     * @param page
+     * @param pageSize
+     * @return java.lang.Object
+     * @author: 24320182203259 邵良颖
+     * Created at: 2020-12-01 21:37
+     * version: 1.0
+     */
+    @ApiOperation(value = "买家查看自己的评价记录", produces = "application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(paramType = "query", dataType = "int", name = "page", value = "页码", required = false),
+            @ApiImplicitParam(paramType = "query", dataType = "int", name = "pageSize", value = "每页数目", required = false)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @Audit
+    @GetMapping("/comments")
+    public Object showComment(
+            @LoginUser Long id,
+            @RequestParam(required = false, defaultValue = "1") Integer page,
+            @RequestParam(required = false, defaultValue = "10") Integer pageSize) {
+        ReturnObject<PageInfo<VoObject>> returnObject =  commentService.showComment(id, page, pageSize);
+        return Common.getPageRetObject(returnObject);
     }
 }

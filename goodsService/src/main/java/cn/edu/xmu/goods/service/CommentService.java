@@ -55,7 +55,13 @@ public class CommentService {
     }
 
     public ReturnObject<PageInfo<VoObject>> showComment(Long user_Id, Integer pageNum, Integer pageSize) {
-        ReturnObject<PageInfo<VoObject>> returnObject = commentDao.selectAllPassComment(user_Id, pageNum, pageSize);
+        //还得根据用户id找到用户信息封装进data里面，应该是其他模块的内部接口，但是在user模块里没找到对应的API，/users/{id}是外部接口
+//        "customer": {
+//            "id": 0,
+//            "userName": "string",
+//            "realName": "string"
+//        }
+        ReturnObject<PageInfo<VoObject>> returnObject = commentDao.showComment(user_Id, pageNum, pageSize);
         return returnObject;
     }
 }
