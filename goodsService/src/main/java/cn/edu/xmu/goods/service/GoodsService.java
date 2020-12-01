@@ -29,12 +29,9 @@ public class GoodsService {
     private Logger logger = LoggerFactory.getLogger(GoodsService.class);
     @Autowired
     GoodsDao goodsDao;
-    //@Value("${privilegeservice.dav.sername}")
-    private String davUsername;
-    //@Value("${privilegeservice.dav.password}")
-    private String davPassword;
-    //@Value("${privilegeservice.dav.baseUrl}")
-    private String baseUrl;
+    private String davUsername="oomall";
+    private String davPassword="admin";
+    private String baseUrl="http://192.168.148.131:8888/webdav/";
 
     @Transactional
     public ReturnObject modifyShop(Long id, String name) {
