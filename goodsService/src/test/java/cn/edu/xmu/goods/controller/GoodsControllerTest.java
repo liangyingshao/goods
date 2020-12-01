@@ -153,4 +153,29 @@ class GoodsControllerTest {
         expectedResponse="{\"errno\":504,\"errmsg\":\"操作的资源id不存在\"}";
         JSONAssert.assertEquals(expectedResponse,responseString,true);
     }
+
+    @Test
+    public void addSkuComment1() throws Exception{
+        String token = creatTestToken(1L, 0L, 100);
+        String responseString = this.mvc.perform(post("/goods/orderitems/1/comments").header("authorization",token).contentType("application/json;charset=UTF-8").queryParam("type", "0").queryParam("content", "购物体验良好"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+
+        String expectedResponse = "{\"errno\": 0, \"errmsg\": \"成功\"}";
+        JSONAssert.assertEquals(expectedResponse, responseString, true);
+        //一要检测返回值是否符合预期
+        //二要检查数据库的值是否符合预期
+    }
+
+    @Test
+    public void getcommentState1() throws Exception{
+        String token = creatTestToken(1L, 0L, 100);
+        String responseString = this.mvc.perform(get("/goods/comments/states").header("authorization",token).contentType("application/json;charset=UTF-8"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        String expectedResponse="{\"errno\":0,\"data\":[{\"name\":\"待审核\",\"code\":0},{\"name\":\"审核通过\",\"code\":1},{\"name\":\"审核不通过\",\"code\":2}],\"errmsg\":\"成功\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+    }
 }

@@ -1,7 +1,10 @@
 package cn.edu.xmu.goods.controller;
 
+import cn.edu.xmu.goods.model.bo.Comment;
 import cn.edu.xmu.goods.model.bo.GoodsSku;
+import cn.edu.xmu.goods.model.vo.CommentStateRetVo;
 import cn.edu.xmu.goods.model.vo.GoodsSkuVo;
+import cn.edu.xmu.goods.service.CommentService;
 import cn.edu.xmu.goods.service.GoodsService;
 import cn.edu.xmu.ooad.annotation.Audit;
 import cn.edu.xmu.ooad.annotation.Depart;
@@ -14,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -45,6 +49,9 @@ public class GoodsController {
 
     @Autowired
     private HttpServletResponse httpServletResponse;
+
+    @Autowired
+    CommentService commentService;
 
     /**
      * auth002: 用户重置密码
@@ -201,6 +208,44 @@ public class GoodsController {
         } else {
             return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }
+    }
+
+    @ApiOperation(value = "买家新增sku的评论")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+            @ApiImplicitParam(name="id", required = true, dataType="String", paramType="path"),//订单明细的id
+            @ApiImplicitParam(name="content", required = true, dataType="String", paramType="body"),
+            @ApiImplicitParam(name="type", required = true, dataType="integer", paramType="body")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 903, message = "用户没有购买此商品")
+    })
+    //@Audit
+    @PostMapping("/orderitems/{id}/comments")
+    @ResponseBody
+    public Object addSkuComment(@PathVariable Long id, String content, Long type, @LoginUser @ApiIgnore @RequestParam(required = false, defaultValue = "0") Long userId){
+        logger.debug("comment: id = "+ id+" userid: id = "+ userId + " type: " + type + " content: " + content);
+        ReturnObject<VoObject> returnObject = commentService.addSkuComment(id, content, type, userId);
+
+        return Common.decorateReturnObject(returnObject);
+    }
+
+    @ApiOperation(value = "comment001:获得评论的所有状态",  produces="application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value ="用户token", required = true)
+    })
+    @ApiResponses({
+    })
+    @Audit
+    @GetMapping("/comments/states")
+    public Object getcommentState() {
+        Comment.State[] states=Comment.State.class.getEnumConstants();
+        List<CommentStateRetVo> stateVos=new ArrayList<CommentStateRetVo>();
+        for(int i=0;i<states.length;i++){
+            stateVos.add(new CommentStateRetVo(states[i]));
+        }
+        return ResponseUtil.ok(new ReturnObject<List>(stateVos).getData());
     }
 }
 
