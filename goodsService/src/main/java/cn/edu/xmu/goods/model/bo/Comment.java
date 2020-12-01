@@ -1,11 +1,49 @@
 package cn.edu.xmu.goods.model.bo;
 
+import cn.edu.xmu.goods.model.po.CommentPo;
+import cn.edu.xmu.goods.model.vo.CommentRetVo;
+import cn.edu.xmu.goods.model.vo.CommentSimpleRetVo;
+import cn.edu.xmu.goods.model.vo.CommentStateRetVo;
+import cn.edu.xmu.ooad.model.VoObject;
+import lombok.Data;
+
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Comment {
+@Data
+public class Comment implements VoObject {
+
+    /**
+     * 业务: 构造函数
+     * @param po
+     * @return
+     * @author: 24320182203259 邵良颖
+     * Created at: 2020-12-01 15:03
+     * version: 1.0
+     */
+    public Comment(CommentPo po) {
+        this.id = po.getId();
+        this.customerId = po.getCustomerId();
+        this.goodsSkuId = po.getGoodsSkuId();
+        this.orderitemId = po.getOrderitemId();
+        this.type = po.getType();
+        this.state = po.getState();
+        this.gmtCreate = po.getGmtCreate();
+        this.gmtModified = po.getGmtModified();
+    }
+
+    @Override
+    public Object createVo() {
+        return new CommentRetVo(this);
+    }
+
+    @Override
+    public CommentSimpleRetVo createSimpleVo() {
+        return new CommentSimpleRetVo(this);
+    }
 
     /**
      * 评论状态
@@ -23,14 +61,6 @@ public class Comment {
             for (Comment.State enum1 : values()) {
                 stateMap.put(enum1.code, enum1);
             }
-        }
-
-        public static Map <Comment.State,String> getAllState() {
-            Map <Comment.State,String> map=new HashMap<>();
-            for (Comment.State enum1 : values()) {
-                map.put(enum1.getTypeByCode(enum1.code), enum1.description);
-            }
-            return map;
         }
 
         private int code;
@@ -106,79 +136,7 @@ public class Comment {
 
     private Byte state;
 
-    private LocalDateTime gmtCreated;
+    private LocalDateTime gmtCreate;
 
     private LocalDateTime gmtModified;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getCustomerId() {
-        return customerId;
-    }
-
-    public void setCustomerId(Long customerId) {
-        this.customerId = customerId;
-    }
-
-    public Long getGoodsSkuId() {
-        return goodsSkuId;
-    }
-
-    public void setGoodsSkuId(Long goodsSkuId) {
-        this.goodsSkuId = goodsSkuId;
-    }
-
-    public Long getOrderitemId() {
-        return orderitemId;
-    }
-
-    public void setOrderitemId(Long orderitemId) {
-        this.orderitemId = orderitemId;
-    }
-
-    public Byte getType() {
-        return type;
-    }
-
-    public void setType(Byte type) {
-        this.type = type;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content == null ? null : content.trim();
-    }
-
-    public Byte getState() {
-        return state;
-    }
-
-    public void setState(Byte state) {
-        this.state = state;
-    }
-
-    public LocalDateTime getGmtCreated() {
-        return gmtCreated;
-    }
-
-    public void setGmtCreated(LocalDateTime gmtCreated) {
-        this.gmtCreated = gmtCreated;
-    }
-
-    public LocalDateTime getGmtModified() {
-        return gmtModified;
-    }
-
-    public void setGmtModified(LocalDateTime gmtModified) {
-        this.gmtModified = gmtModified;
-    }
 }

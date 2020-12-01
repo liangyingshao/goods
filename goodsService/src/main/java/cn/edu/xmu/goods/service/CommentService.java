@@ -4,6 +4,7 @@ import cn.edu.xmu.goods.dao.CommentDao;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
+import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,9 +38,9 @@ public class CommentService {
 
         return commentDao.addSkuComment(id,content,type,userId,SKU_Id);
     }
-//
-//    public Map getcommentState() {
-//        Map commentState = commentDao.getcommentState();
-//        return commentState;
-//    }
+
+    public ReturnObject<PageInfo<VoObject>> selectAllPassComment(Long SKU_Id, Integer pageNum, Integer pageSize) {
+        ReturnObject<PageInfo<VoObject>> returnObject = commentDao.selectAllPassComment(SKU_Id, pageNum, pageSize);
+        return returnObject;
+    }
 }

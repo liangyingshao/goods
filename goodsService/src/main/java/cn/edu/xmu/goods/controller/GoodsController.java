@@ -210,10 +210,21 @@ public class GoodsController {
         }
     }
 
+    /**
+     * 业务: comment002买家新增sku的评论
+     * @param id 订单明细的id
+     * @param content
+     * @param type
+     * @param userId
+     * @return java.lang.Object
+     * @author: 24320182203259 邵良颖
+     * Created at: 2020-12-01 15:55
+     * version: 1.0
+     */
     @ApiOperation(value = "买家新增sku的评论")
     @ApiImplicitParams({
             @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
-            @ApiImplicitParam(name="id", required = true, dataType="String", paramType="path"),//订单明细的id
+            @ApiImplicitParam(name="id", required = true, dataType="String", paramType="path"),
             @ApiImplicitParam(name="content", required = true, dataType="String", paramType="body"),
             @ApiImplicitParam(name="type", required = true, dataType="integer", paramType="body")
     })
@@ -231,6 +242,14 @@ public class GoodsController {
         return Common.decorateReturnObject(returnObject);
     }
 
+    /**
+     * 业务: comment001:获得评论的所有状态
+     * @param
+     * @return java.lang.Object
+     * @author: 24320182203259 邵良颖
+     * Created at: 2020-12-01 15:55
+     * version: 1.0
+     */
     @ApiOperation(value = "comment001:获得评论的所有状态",  produces="application/json")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value ="用户token", required = true)
@@ -246,6 +265,37 @@ public class GoodsController {
             stateVos.add(new CommentStateRetVo(states[i]));
         }
         return ResponseUtil.ok(new ReturnObject<List>(stateVos).getData());
+    }
+
+    /**
+     * 业务: comment003：查询已通过审核的评论
+     * @param id sku的id
+     * @param page 页数
+     * @param pageSize 页大小
+     * @return java.lang.Object
+     * @author: 24320182203259 邵良颖
+     * Created at: 2020-12-01 15:54
+     * version: 1.0
+     */
+    @ApiOperation(value = "查询已通过审核的评论", produces = "application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "SKU Id", required = true),
+            @ApiImplicitParam(paramType = "query", dataType = "int", name = "page", value = "页码", required = false),
+            @ApiImplicitParam(paramType = "query", dataType = "int", name = "pageSize", value = "每页数目", required = false)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @Audit
+    @GetMapping("/skus/{id}/comments")
+    public Object selectAllPassComment(
+                                 @PathVariable("id") Long id,
+                                 @RequestParam(required = false, defaultValue = "1") Integer page,
+                                 @RequestParam(required = false, defaultValue = "10") Integer pageSize) {
+        logger.debug("selectAllPassComment: page = "+ page +"  pageSize ="+pageSize);
+        ReturnObject<PageInfo<VoObject>> returnObject =  commentService.selectAllPassComment(id, page, pageSize);
+        return Common.getPageRetObject(returnObject);
     }
 }
 

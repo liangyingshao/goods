@@ -3,6 +3,7 @@ package cn.edu.xmu.goods.controller;
 import cn.edu.xmu.goods.GoodsServiceApplication;
 import cn.edu.xmu.ooad.util.JwtHelper;
 import cn.edu.xmu.ooad.util.ResponseCode;
+import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -179,4 +180,25 @@ class GoodsControllerTest {
         String expectedResponse="{\"errno\":0,\"data\":[{\"name\":\"待审核\",\"code\":0},{\"name\":\"审核通过\",\"code\":1},{\"name\":\"审核不通过\",\"code\":2}],\"errmsg\":\"成功\"}";
         JSONAssert.assertEquals(expectedResponse,responseString,true);
     }
+
+    @Test
+    public void selectAllPassComment1() {
+        String responseString = null;
+        String token = creatTestToken(1L, 0L, 100);
+        try {
+            responseString = this.mvc.perform(get("/goods/skus/1/comments?page=1&pageSize=2").header("authorization", token))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andReturn().getResponse().getContentAsString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        String expectedResponse = "{\"errno\":0,\"data\":{\"total\":0,\"pages\":0,\"pageSize\":0,\"page\":1,\"list\":[]},\"errmsg\":\"成功\"}";
+        try {
+            JSONAssert.assertEquals(expectedResponse, responseString, false);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
