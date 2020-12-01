@@ -1,5 +1,6 @@
 package cn.edu.xmu.goods.controller;
 
+import cn.edu.xmu.goods.model.bo.Comment;
 import cn.edu.xmu.goods.model.bo.FloatPrice;
 import cn.edu.xmu.goods.model.bo.GoodsSku;
 import cn.edu.xmu.goods.model.bo.GoodsSpu;
@@ -228,7 +229,6 @@ public class GoodsController {
     })
 
     @Audit
-    @PostMapping("/orderitems/{id}/comments")
     @GetMapping("spus/states")
     @ResponseBody
     public Object getgoodspustate() {
@@ -361,32 +361,6 @@ public class GoodsController {
         }
     }
 
-//    @ApiOperation(value = "管理员审核评论")
-//    @ApiImplicitParams({
-//            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
-//            @ApiImplicitParam(name="id", required = true, dataType="Integer", paramType="path"),
-//            @ApiImplicitParam(name="conclusion", required = true, dataType="Boolean", paramType="body")
-//
-//    })
-//    @ApiResponses({
-//            @ApiResponse(code = 0, message = "成功"),
-//            @ApiResponse(code = 504, message = "操作的资源id不存在"),
-//            @ApiResponse(code = 705, message = "无权限访问")
-//    })
-    @Audit // 需要认证
-    @PutMapping("/comments/{id}/confirm")
-    public Object auditComment(@PathVariable("id") Long id, @RequestBody CommentAuditVo conclusion,
-                               @Depart Long shopid) {
-        ReturnObject returnObject=null;
-        if(shopid==0)
-        {
-            returnObject=commentService.auditComment(id, conclusion.getConclusion());
-        }
-        else
-        {
-            return new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW);
-        }
-        return returnObject;
-    }
+
 }
 

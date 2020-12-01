@@ -124,4 +124,33 @@ public class CommentDao {
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
         }
     }
+
+    public ReturnObject<PageInfo<VoObject>> showComment(Long user_Id, Integer pageNum, Integer pageSize) {
+        CommentPoExample example = new CommentPoExample();
+        CommentPoExample.Criteria criteria = example.createCriteria();
+        //增加顾客Id=user_Id的查询
+        criteria.andCustomerIdEqualTo(user_Id);
+        //分页查询
+        PageHelper.startPage(pageNum, pageSize);
+        List<CommentPo> commentPos = null;
+        try {
+            commentPos = commentPoMapper.selectByExample(example);
+            List<VoObject> ret = new ArrayList<>(commentPos.size());
+            for (CommentPo po : commentPos) {
+                Comment comment = new Comment(po);
+                ret.add(comment);
+            }
+            PageInfo<VoObject> commentPage = PageInfo.of(ret);
+            return new ReturnObject<>(commentPage);
+        }
+        catch (DataAccessException e){
+            logger.error("selectAllPassComment: DataAccessException:" + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
+    }
 }

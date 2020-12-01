@@ -35,7 +35,12 @@ public class CommentService {
             SKU_Id=1;
             //判断顾客id和userId是否一致，否则返回903
         }
-
+        //还得根据用户id找到用户信息，应该是其他模块的内部接口，但是在user模块里没找到对应的API，/users/{id}是外部接口
+//        "customer": {
+//            "id": 0,
+//            "userName": "string",
+//            "realName": "string"
+//        }
         return commentDao.addSkuComment(id,content,type,userId,SKU_Id);
     }
 
@@ -47,5 +52,10 @@ public class CommentService {
     @Transactional
     public ReturnObject<Object> auditComment(Long comment_id, boolean conclusion) {
         return commentDao.auditComment(comment_id, conclusion);
+    }
+
+    public ReturnObject<PageInfo<VoObject>> showComment(Long user_Id, Integer pageNum, Integer pageSize) {
+        ReturnObject<PageInfo<VoObject>> returnObject = commentDao.selectAllPassComment(user_Id, pageNum, pageSize);
+        return returnObject;
     }
 }
