@@ -43,4 +43,9 @@ public class CommentService {
         ReturnObject<PageInfo<VoObject>> returnObject = commentDao.selectAllPassComment(SKU_Id, pageNum, pageSize);
         return returnObject;
     }
+
+    @Transactional
+    public ReturnObject<Object> auditComment(Long comment_id, boolean conclusion) {
+        return commentDao.auditComment(comment_id, conclusion);
+    }
 }

@@ -201,4 +201,21 @@ class GoodsControllerTest {
         }
     }
 
+    @Test
+    public void auditComment() throws Exception {
+        String token = creatTestToken(1L, 0L, 100);
+        String json = "{\"conclusion\":\"true\"}";
+        String responseString = this.mvc.perform(
+                put("/goods/comments/1/confirm?conclusion=true")
+                        .header("authorization", token)
+                        .contentType("application/json;charset=UTF-8")
+                        .content(json))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+
+        String expectedResponse = "{\"code\":\"OK\",\"errmsg\":\"成功\",\"data\":null}";
+        JSONAssert.assertEquals(expectedResponse, responseString, true);
+    }
+
 }

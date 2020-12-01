@@ -12,6 +12,7 @@ import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.sun.mail.iap.Response;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,6 +94,33 @@ public class CommentDao {
         catch (Exception e) {
             // 其他Exception错误
             logger.error("other exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
+    }
+
+    public ReturnObject<Object> auditComment(Long comment_id, boolean conclusion) {
+        try {
+            CommentPo commentPo = commentPoMapper.selectByPrimaryKey(comment_id);
+            if (commentPo == null) {//如果没有这条评论
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            }
+            else {
+                Byte newState;
+                if(commentPo.getState() != 0){
+                    return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);//该评论已经审核过了，错误码需要调整
+                }
+                if(conclusion) {//通过审核
+                    newState = 2;
+                }
+                else {//不通过审核
+                    newState = 1;
+                }
+                commentPo.setState(newState);
+                commentPoMapper.updateByPrimaryKey(commentPo);
+                return new ReturnObject<>(ResponseCode.OK);
+            }
+        }
+        catch(Exception e) {
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
         }
     }

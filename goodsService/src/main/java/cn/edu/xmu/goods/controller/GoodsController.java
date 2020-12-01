@@ -2,6 +2,7 @@ package cn.edu.xmu.goods.controller;
 
 import cn.edu.xmu.goods.model.bo.Comment;
 import cn.edu.xmu.goods.model.bo.GoodsSku;
+import cn.edu.xmu.goods.model.vo.CommentAuditVo;
 import cn.edu.xmu.goods.model.vo.CommentStateRetVo;
 import cn.edu.xmu.goods.model.vo.GoodsSkuVo;
 import cn.edu.xmu.goods.service.CommentService;
@@ -12,7 +13,9 @@ import cn.edu.xmu.ooad.annotation.LoginUser;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.*;
 import com.github.pagehelper.PageInfo;
+import com.sun.mail.iap.Response;
 import io.swagger.annotations.*;
+import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -232,7 +235,7 @@ public class GoodsController {
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 903, message = "用户没有购买此商品")
     })
-    //@Audit
+    @Audit
     @PostMapping("/orderitems/{id}/comments")
     @ResponseBody
     public Object addSkuComment(@PathVariable Long id, String content, Long type, @LoginUser @ApiIgnore @RequestParam(required = false, defaultValue = "0") Long userId){
@@ -296,6 +299,34 @@ public class GoodsController {
         logger.debug("selectAllPassComment: page = "+ page +"  pageSize ="+pageSize);
         ReturnObject<PageInfo<VoObject>> returnObject =  commentService.selectAllPassComment(id, page, pageSize);
         return Common.getPageRetObject(returnObject);
+    }
+
+//    @ApiOperation(value = "管理员审核评论")
+//    @ApiImplicitParams({
+//            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+//            @ApiImplicitParam(name="id", required = true, dataType="Integer", paramType="path"),
+//            @ApiImplicitParam(name="conclusion", required = true, dataType="Boolean", paramType="body")
+//
+//    })
+//    @ApiResponses({
+//            @ApiResponse(code = 0, message = "成功"),
+//            @ApiResponse(code = 504, message = "操作的资源id不存在"),
+//            @ApiResponse(code = 705, message = "无权限访问")
+//    })
+    @Audit // 需要认证
+    @PutMapping("/comments/{id}/confirm")
+    public Object auditComment(@PathVariable("id") Long id, @RequestBody CommentAuditVo conclusion,
+                               @Depart Long shopid) {
+        ReturnObject returnObject=null;
+        if(shopid==0)
+        {
+            returnObject=commentService.auditComment(id, conclusion.getConclusion());
+        }
+        else
+        {
+            return new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW);
+        }
+        return returnObject;
     }
 }
 
