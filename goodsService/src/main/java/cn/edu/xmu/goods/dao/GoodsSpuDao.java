@@ -146,6 +146,7 @@ public class GoodsSpuDao {
      * Created at 2020/12/01 22：07
      */
     public ReturnObject<Object> modifyGoodsSpu(GoodsSpu spu) {
+
         GoodsSpuPo spuPo = spu.createSpuPo();
         ReturnObject<Object> returnObject = null;
         GoodsSpuPoExample spuPoExample = new GoodsSpuPoExample();
@@ -191,12 +192,13 @@ public class GoodsSpuDao {
             GoodsCategoryPo categoryPo=goodsCategoryMapper.selectByPrimaryKey(spu.getCategoryId());
             //该分类不存在
             if(categoryPo==null)
-                returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+                return returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             //该分类为一级分类，不可加入
-            if(categoryPo.getPid()==0)
-                returnObject=new ReturnObject<>(ResponseCode.CATEALTER_INVALID);
+            if(categoryPo.getPid().equals((long)0))
+                return returnObject=new ReturnObject<>(ResponseCode.CATEALTER_INVALID);
             //该分类为二级分类，将SPU加入
-            modifyGoodsSpu(spu);
+            spu.setDisabled(GoodsSpu.SpuState.UNKNOWN);//提前设置，避免空指针错误
+            returnObject=modifyGoodsSpu(spu);
         }
         catch (DataAccessException e) {
             // 其他数据库错误
@@ -225,13 +227,14 @@ public class GoodsSpuDao {
             GoodsCategoryPo categoryPo=goodsCategoryMapper.selectByPrimaryKey(spu.getCategoryId());
             //该分类不存在
             if(categoryPo==null)
-                returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-            //请求移出分类与SPU实际所属分类不一致
-            if(!categoryPo.getPid().equals(spu.getCategoryId()))
-                returnObject=new ReturnObject<>(ResponseCode.CATEALTER_INVALID);
+                return returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            //请求移出分类与SPU实际所属分类不一致 或请求移出分类为一级分类
+            if(!categoryPo.getId().equals(spu.getCategoryId())||categoryPo.getPid().equals((long)0))
+                return returnObject=new ReturnObject<>(ResponseCode.CATEALTER_INVALID);
             //将SPU移出
-            spu.setCategoryId(null);
-            modifyGoodsSpu(spu);
+            spu.setDisabled(GoodsSpu.SpuState.UNKNOWN);//提前设置，避免空指针错误
+            spu.setCategoryId((long)0);//提前设置，避免空指针错误
+            returnObject=modifyGoodsSpu(spu);
         }
         catch (DataAccessException e) {
             // 其他数据库错误

@@ -75,7 +75,7 @@ public class GoodsSpu {
 
     private String spec;
 
-    private GoodsSku.State disabled;
+    private SpuState disabled;
 
     private LocalDateTime gmtCreated;
 
@@ -104,13 +104,14 @@ public class GoodsSpu {
         if(null!=po.getState()){
             this.state=SpuState.getTypeByCode(po.getState().intValue());
         }
-        this.disabled=GoodsSku.State.getTypeByCode(po.getDisabled().intValue());
+        this.disabled=SpuState.getTypeByCode(po.getDisabled().intValue());
     }
 
     /**
      * 构造函数 用bo对象创建po对象
      * @return GoodsSpu
      * Created at 2020/12/01 00：46
+     * Modified at 2020/12/02 20:13
      */
     public GoodsSpuPo createSpuPo(){
         GoodsSpuPo spuPo=new GoodsSpuPo();

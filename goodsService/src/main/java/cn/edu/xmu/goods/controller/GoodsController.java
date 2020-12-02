@@ -603,10 +603,10 @@ public class GoodsController {
 
         ReturnObject retObject = spuService.addSpuCategory(spu);
         //校验是否为该商铺管理员
-        if(shopId!=departId)
-            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW), httpServletResponse);
+//        if(shopId!=departId)
+//            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW), httpServletResponse);
         if(retObject.getData()!=null){
-            return Common.getRetObject(retObject);
+            return Common.decorateReturnObject(retObject);
         }else{
             return  Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }
@@ -623,7 +623,7 @@ public class GoodsController {
      * @author 24320182203254 秦楚彦
      * Created at 2020/11/02 10：29
      */
-    @ApiOperation(value="将SPU加入分类",produces="application/json")
+    @ApiOperation(value="将SPU移出分类",produces="application/json")
     @ApiImplicitParams({
             @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
             @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "shopId", value = "商铺id", required = true),
@@ -650,8 +650,8 @@ public class GoodsController {
 
         ReturnObject retObject = spuService.removeSpuCategory(spu);
         //校验是否为该商铺管理员
-        if(shopId!=departId)
-            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW), httpServletResponse);
+//        if(shopId!=departId)
+//            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW), httpServletResponse);
         if(retObject.getData()!=null){
             return Common.getRetObject(retObject);
         }else{
