@@ -198,7 +198,7 @@ public class GoodsSpuDao {
             if(categoryPo.getPid().equals((long)0))
                 return returnObject=new ReturnObject<>(ResponseCode.CATEALTER_INVALID);
             //该分类为二级分类，将SPU加入
-            spu.setDisabled(GoodsSpu.SpuState.ONSHELF);//提前设置，避免空指针错误
+            spu.setDisabled(false);//提前设置，避免空指针错误
             returnObject=modifyGoodsSpu(spu);
         }
         catch (DataAccessException e) {
@@ -233,7 +233,7 @@ public class GoodsSpuDao {
             if(!categoryPo.getId().equals(spu.getCategoryId())||categoryPo.getPid().equals((long)0))
                 return returnObject=new ReturnObject<>(ResponseCode.CATEALTER_INVALID);
             //将SPU移出该分类
-            spu.setDisabled(GoodsSpu.SpuState.ONSHELF);//提前设置，避免空指针错误
+            spu.setDisabled(false);//提前设置，避免空指针错误
             spu.setCategoryId((long)0);//提前设置，避免空指针错误
             returnObject=modifyGoodsSpu(spu);
         }
@@ -266,7 +266,7 @@ public class GoodsSpuDao {
             if(brandPo==null)
                 return returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             //该品牌存在，将SPU加入
-            spu.setDisabled(GoodsSpu.SpuState.ONSHELF);//提前设置，避免空指针错误
+            spu.setDisabled(false);//提前设置，避免空指针错误
             returnObject=modifyGoodsSpu(spu);
         }
         catch (DataAccessException e) {
@@ -302,7 +302,7 @@ public class GoodsSpuDao {
             if(!brandPo.getId().equals(spuPo.getBrandId())||spuPo.getBrandId().equals(0))
                 return returnObject=new ReturnObject<>(ResponseCode.BRANDALTER_INVALID);
             //将SPU移出该品牌
-            spu.setDisabled(GoodsSpu.SpuState.ONSHELF);//提前设置，避免空指针错误？？状态存疑
+            spu.setDisabled((false))//提前设置，避免空指针错误
             spu.setBrandId((long)0);//提前设置，避免空指针错误
             returnObject=modifyGoodsSpu(spu);
         }

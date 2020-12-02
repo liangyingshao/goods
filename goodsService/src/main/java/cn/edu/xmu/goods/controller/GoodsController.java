@@ -751,5 +751,16 @@ public class GoodsController {
         }
 
     }
+
+    /**
+     * spu007 业务: 店家逻辑删除商品SPU
+     * @param spuId 商品SPUID
+     * @param shopId 店铺ID
+     * @param id 商品分类ID
+     * @param userId 当前用户ID
+     * @return  Object
+     * @author 24320182203254 秦楚彦
+     * Created at 2020/11/02 23：57
+     */
 }
 
