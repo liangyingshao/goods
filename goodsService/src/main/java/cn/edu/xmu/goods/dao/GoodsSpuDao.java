@@ -302,7 +302,7 @@ public class GoodsSpuDao {
             if(!brandPo.getId().equals(spuPo.getBrandId())||spuPo.getBrandId().equals(0))
                 return returnObject=new ReturnObject<>(ResponseCode.BRANDALTER_INVALID);
             //将SPU移出该品牌
-            spu.setDisabled((false))//提前设置，避免空指针错误
+            spu.setDisabled((false));//提前设置，避免空指针错误
             spu.setBrandId((long)0);//提前设置，避免空指针错误
             returnObject=modifyGoodsSpu(spu);
         }
