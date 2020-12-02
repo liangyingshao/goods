@@ -2,7 +2,6 @@ package cn.edu.xmu.goods.service;
 
 import cn.edu.xmu.goods.dao.GoodsSpuDao;
 import cn.edu.xmu.goods.model.bo.GoodsSpu;
-import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -54,9 +53,8 @@ public class SpuService {
      */
     @Transactional
     public ReturnObject putGoodsOnSale(GoodsSpu spu) {
-        ReturnObject<Object> returnObject;
         spu.setState(GoodsSpu.SpuState.ONSHELF);
-    returnObject=spuDao.changeState(spu);
+    ReturnObject<Object> returnObject=spuDao.changeState(spu);
     return returnObject;
     }
 
@@ -69,46 +67,10 @@ public class SpuService {
      */
     @Transactional
     public ReturnObject putOffGoodsOnSale(GoodsSpu spu) {
-        ReturnObject<Object> returnObject;
         spu.setState(GoodsSpu.SpuState.OFFSHELF);
-        returnObject=spuDao.changeState(spu);
+        ReturnObject<Object> returnObject=spuDao.changeState(spu);
         return returnObject;
     }
 
-    /**
-     * 修改商品SPU
-     * @param spu
-     * @return  ReturnObject
-     * @author 24320182203254 秦楚彦
-     * Created at 2020/12/01 22：06
-     */
-    @Transactional
-    public ReturnObject modifyGoodsSpu(GoodsSpu spu) {
-        ReturnObject<Object> returnObject = spuDao.modifyGoodsSpu(spu);
-        return returnObject;
-    }
 
-    /**
-     * 将商品SPU添加至二级分类
-     * @param spu
-     * @return  ReturnObject
-     * @author 24320182203254 秦楚彦
-     * Created at 2020/12/01 22：56
-     */
-    public ReturnObject addSpuCategory(GoodsSpu spu) {
-        ReturnObject<Object> returnObject = spuDao.addSpuCategory(spu);
-        return returnObject;
-    }
-
-    /**
-     * 将商品SPU移出分类
-     * @param spu
-     * @return  ReturnObject
-     * @author 24320182203254 秦楚彦
-     * Created at 2020/12/02 10：38
-     */
-    public ReturnObject removeSpuCategory(GoodsSpu spu) {
-        ReturnObject<Object> returnObject = spuDao.removeSpuCategory(spu);
-        return returnObject;
-    }
 }
