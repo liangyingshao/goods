@@ -16,8 +16,8 @@ import java.util.Map;
 public class GoodsSku implements VoObject {
 
     public enum State {
-        ABLED(4, "可用"),
-        DISABLED(5, "废弃");
+        ABLE(4, "可用"),
+        DISABLED(6, "废弃");
 
         private static final Map<Integer, GoodsSku.State> stateMap;
 
