@@ -4,6 +4,7 @@ import cn.edu.xmu.goods.mapper.BrandPoMapper;
 import cn.edu.xmu.goods.mapper.GoodsCategoryPoMapper;
 import cn.edu.xmu.goods.mapper.GoodsSpuPoMapper;
 import cn.edu.xmu.goods.model.bo.GoodsSpu;
+import cn.edu.xmu.goods.model.po.BrandPo;
 import cn.edu.xmu.goods.model.po.GoodsCategoryPo;
 import cn.edu.xmu.goods.model.po.GoodsSpuPo;
 import cn.edu.xmu.goods.model.po.GoodsSpuPoExample;
@@ -146,6 +147,7 @@ public class GoodsSpuDao {
      * Created at 2020/12/01 22：07
      */
     public ReturnObject<Object> modifyGoodsSpu(GoodsSpu spu) {
+
         GoodsSpuPo spuPo = spu.createSpuPo();
         ReturnObject<Object> returnObject = null;
         GoodsSpuPoExample spuPoExample = new GoodsSpuPoExample();
@@ -191,12 +193,13 @@ public class GoodsSpuDao {
             GoodsCategoryPo categoryPo=goodsCategoryMapper.selectByPrimaryKey(spu.getCategoryId());
             //该分类不存在
             if(categoryPo==null)
-                returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+                return returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             //该分类为一级分类，不可加入
-            if(categoryPo.getPid()==0)
-                returnObject=new ReturnObject<>(ResponseCode.CATEALTER_INVALID);
+            if(categoryPo.getPid().equals((long)0))
+                return returnObject=new ReturnObject<>(ResponseCode.CATEALTER_INVALID);
             //该分类为二级分类，将SPU加入
-            modifyGoodsSpu(spu);
+            spu.setDisabled(GoodsSpu.SpuState.ONSHELF);//提前设置，避免空指针错误
+            returnObject=modifyGoodsSpu(spu);
         }
         catch (DataAccessException e) {
             // 其他数据库错误
@@ -225,13 +228,83 @@ public class GoodsSpuDao {
             GoodsCategoryPo categoryPo=goodsCategoryMapper.selectByPrimaryKey(spu.getCategoryId());
             //该分类不存在
             if(categoryPo==null)
-                returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-            //请求移出分类与SPU实际所属分类不一致
-            if(!categoryPo.getPid().equals(spu.getCategoryId()))
-                returnObject=new ReturnObject<>(ResponseCode.CATEALTER_INVALID);
-            //将SPU移出
-            spu.setCategoryId(null);
-            modifyGoodsSpu(spu);
+                return returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            //请求移出分类与SPU实际所属分类不一致 或请求移出分类为一级分类
+            if(!categoryPo.getId().equals(spu.getCategoryId())||categoryPo.getPid().equals((long)0))
+                return returnObject=new ReturnObject<>(ResponseCode.CATEALTER_INVALID);
+            //将SPU移出该分类
+            spu.setDisabled(GoodsSpu.SpuState.ONSHELF);//提前设置，避免空指针错误
+            spu.setCategoryId((long)0);//提前设置，避免空指针错误
+            returnObject=modifyGoodsSpu(spu);
+        }
+        catch (DataAccessException e) {
+            // 其他数据库错误
+            logger.debug("other sql exception : " + e.getMessage());
+            returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
+        return returnObject;
+    }
+
+    /**
+     * 修改SPU的BrandId
+     * @param spu SPUbo
+     * @return  ReturnObject<Object> 修改结果
+     * @author 24320182203254 秦楚彦
+     * Created at 2020/12/02 22：30
+     */
+    public ReturnObject<Object> addSpuBrand(GoodsSpu spu) {
+        ReturnObject<Object> returnObject = null;
+        //获得该品牌信息
+        try {
+            BrandPo brandPo = brandMapper.selectByPrimaryKey(spu.getBrandId());
+            //该品牌不存在
+            if(brandPo==null)
+                return returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            //该品牌存在，将SPU加入
+            spu.setDisabled(GoodsSpu.SpuState.ONSHELF);//提前设置，避免空指针错误
+            returnObject=modifyGoodsSpu(spu);
+        }
+        catch (DataAccessException e) {
+            // 其他数据库错误
+            logger.debug("other sql exception : " + e.getMessage());
+            returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
+        return returnObject;
+    }
+
+    /**
+     * 移除SPU的BrandId
+     * @param spu SPUbo
+     * @return  ReturnObject<Object> 修改结果
+     * @author 24320182203254 秦楚彦
+     * Created at 2020/12/02 22：32
+     */
+    public ReturnObject<Object> removeSpuBrand(GoodsSpu spu) {
+        ReturnObject<Object> returnObject = null;
+        //获得该品牌信息
+        try {
+            GoodsSpuPo spuPo=goodsSpuMapper.selectByPrimaryKey(spu.getId());
+            BrandPo brandPo = brandMapper.selectByPrimaryKey(spu.getBrandId());
+            //该品牌不存在
+            if(brandPo==null)
+                return returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            //请求移出品牌与SPU实际所属品牌不一致 或SPU本无品牌
+            if(!brandPo.getId().equals(spuPo.getBrandId())||spuPo.getBrandId().equals(0))
+                return returnObject=new ReturnObject<>(ResponseCode.BRANDALTER_INVALID);
+            //将SPU移出该品牌
+            spu.setDisabled(GoodsSpu.SpuState.ONSHELF);//提前设置，避免空指针错误？？状态存疑
+            spu.setBrandId((long)0);//提前设置，避免空指针错误
+            returnObject=modifyGoodsSpu(spu);
         }
         catch (DataAccessException e) {
             // 其他数据库错误

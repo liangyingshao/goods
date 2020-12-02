@@ -39,9 +39,10 @@ public class GoodsSpu {
      * 商品SPU状态
      */
     public enum SpuState{
-        ONSHELF(0,"上架"),
-        OFFSHELF(1,"下架"),
-        UNKNOWN(4,"不晓得是啥");
+        OFFSHELF(0,"未上架"),
+        ONSHELF(4,"上架"),
+        DELETED(6,"已删除")
+        ;
 
         private static final Map<Integer, SpuState> stateMap;
 
@@ -75,7 +76,7 @@ public class GoodsSpu {
 
     private String spec;
 
-    private SpuState disabled;
+    private SpuState disabled;//还有点问题哦
 
     private LocalDateTime gmtCreated;
 

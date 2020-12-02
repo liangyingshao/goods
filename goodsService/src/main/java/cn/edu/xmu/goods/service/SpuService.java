@@ -111,4 +111,28 @@ public class SpuService {
         ReturnObject<Object> returnObject = spuDao.removeSpuCategory(spu);
         return returnObject;
     }
+
+    /**
+     * 将商品SPU添加至品牌
+     * @param spu
+     * @return  ReturnObject
+     * @author 24320182203254 秦楚彦
+     * Created at 2020/12/02 22：29
+     */
+    public ReturnObject addSpuBrand(GoodsSpu spu) {
+        ReturnObject<Object> returnObject = spuDao.addSpuBrand(spu);
+        return returnObject;
+    }
+
+    /**
+     * 将商品SPU添加至品牌
+     * @param spu
+     * @return  ReturnObject
+     * @author 24320182203254 秦楚彦
+     * Created at 2020/12/02 22：31
+     */
+    public ReturnObject removeSpuBrand(GoodsSpu spu) {
+        ReturnObject<Object> returnObject = spuDao.removeSpuBrand(spu);
+        return returnObject;
+    }
 }

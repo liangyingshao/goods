@@ -524,7 +524,7 @@ public class GoodsController {
      * @param userId 当前用户ID
      * @return  Object
      * @author 24320182203254 秦楚彦
-     * Created at 2020/11/01 15：36
+     * Created at 2020/12/01 15：36
      */
     @ApiOperation(value="店家商品下架",produces="application/json")
     @ApiImplicitParams({
@@ -561,14 +561,14 @@ public class GoodsController {
     }
 
     /**
-     * spu010 业务: 将SPU加入二级分类
+     * spu010 业务: 将SPU加入二级分类/若已有分类则修改
      * @param spuId 商品SPUID
      * @param shopId 店铺ID
      * @param id 商品分类ID
      * @param userId 当前用户ID
      * @return  Object
      * @author 24320182203254 秦楚彦
-     * Created at 2020/11/01 22：49
+     * Created at 2020/12/01 22：49
      */
     @ApiOperation(value="将SPU加入分类",produces="application/json")
     @ApiImplicitParams({
@@ -597,10 +597,10 @@ public class GoodsController {
 
         ReturnObject retObject = spuService.addSpuCategory(spu);
         //校验是否为该商铺管理员
-        if(shopId!=departId)
-            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW), httpServletResponse);
+//        if(shopId!=departId)
+//            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW), httpServletResponse);
         if(retObject.getData()!=null){
-            return Common.getRetObject(retObject);
+            return Common.decorateReturnObject(retObject);
         }else{
             return  Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }
@@ -615,9 +615,9 @@ public class GoodsController {
      * @param userId 当前用户ID
      * @return  Object
      * @author 24320182203254 秦楚彦
-     * Created at 2020/11/02 10：29
+     * Created at 2020/12/02 10：29
      */
-    @ApiOperation(value="将SPU加入分类",produces="application/json")
+    @ApiOperation(value="将SPU移出分类",produces="application/json")
     @ApiImplicitParams({
             @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
             @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "shopId", value = "商铺id", required = true),
@@ -634,7 +634,7 @@ public class GoodsController {
     public Object removeSpuCategory(@PathVariable Long shopId,@PathVariable Long spuId,@PathVariable Long id,
                                     @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
                                     @Depart @ApiIgnore @RequestParam(required = false) Long departId) {
-        logger.debug("remove SPU to a category by shopId:" + shopId+ " spuId:" + spuId + " cateId" + id);
+        logger.debug("remove SPU from a category by shopId:" + shopId+ " spuId:" + spuId + " cateId" + id);
 
         GoodsSpu spu=new GoodsSpu();
         spu.setShopId(shopId);
@@ -644,8 +644,100 @@ public class GoodsController {
 
         ReturnObject retObject = spuService.removeSpuCategory(spu);
         //校验是否为该商铺管理员
-        if(shopId!=departId)
-            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW), httpServletResponse);
+//        if(shopId!=departId)
+//            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW), httpServletResponse);
+        if(retObject.getData()!=null){
+            return Common.getRetObject(retObject);
+        }else{
+            return  Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
+        }
+
+    }
+    /**
+     * spu012 业务: 将SPU加入品牌/若已有品牌则修改
+     * @param spuId 商品SPUID
+     * @param shopId 店铺ID
+     * @param id 商品分类ID
+     * @param userId 当前用户ID
+     * @return  Object
+     * @author 24320182203254 秦楚彦
+     * Created at 2020/12/02 22：27
+     */
+    @ApiOperation(value="将SPU加入品牌",produces="application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "shopId", value = "商铺id", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "spuId", value = "SpuId", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "id", value = "brandId", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+
+    })
+    @Audit // 需要认证
+    @PutMapping("shops/{shopId}/spus/{spuId}/brands/{id}")
+    //@ResponseBody
+    public Object addSpuBrand(@PathVariable Long shopId,@PathVariable Long spuId,@PathVariable Long id,
+                                 @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
+                                 @Depart @ApiIgnore @RequestParam(required = false) Long departId) {
+        logger.debug("add SPU to a brand by shopId:" + shopId+ " spuId:" + spuId + " brandId" + id);
+
+        GoodsSpu spu=new GoodsSpu();
+        spu.setShopId(shopId);
+        spu.setId(spuId);
+        spu.setBrandId(id);
+        spu.setGmtModified(LocalDateTime.now());
+
+        ReturnObject retObject = spuService.addSpuBrand(spu);
+        //校验是否为该商铺管理员
+//        if(shopId!=departId)
+//            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW), httpServletResponse);
+        if(retObject.getData()!=null){
+            return Common.decorateReturnObject(retObject);
+        }else{
+            return  Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
+        }
+
+    }
+
+    /**
+     * spu013 业务: 将SPU移出品牌（变为无分类商品）
+     * @param spuId 商品SPUID
+     * @param shopId 店铺ID
+     * @param id 商品分类ID
+     * @param userId 当前用户ID
+     * @return  Object
+     * @author 24320182203254 秦楚彦
+     * Created at 2020/11/02 22：27
+     */
+    @ApiOperation(value="将SPU移出分类",produces="application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "shopId", value = "商铺id", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "spuId", value = "SpuId", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "id", value = "brandId", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+
+    })
+    @Audit // 需要认证
+    @DeleteMapping("shops/{shopId}/spus/{spuId}/brands/{id}")
+    //@ResponseBody
+    public Object removeSpuBrand(@PathVariable Long shopId,@PathVariable Long spuId,@PathVariable Long id,
+                                    @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
+                                    @Depart @ApiIgnore @RequestParam(required = false) Long departId) {
+        logger.debug("remove SPU from a brand by shopId:" + shopId+ " spuId:" + spuId + " brandId" + id);
+
+        GoodsSpu spu=new GoodsSpu();
+        spu.setShopId(shopId);
+        spu.setId(spuId);
+        spu.setBrandId(id);
+        spu.setGmtModified(LocalDateTime.now());
+
+        ReturnObject retObject = spuService.removeSpuBrand(spu);
+        //校验是否为该商铺管理员
+
         if(retObject.getData()!=null){
             return Common.getRetObject(retObject);
         }else{

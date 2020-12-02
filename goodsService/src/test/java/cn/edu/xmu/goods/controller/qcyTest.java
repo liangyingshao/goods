@@ -135,25 +135,23 @@ public class qcyTest {
     }
 
     /**
-     * description: 将SPU加入二级分类
+     * description: 将SPU加入二级分类 (成功)
      * date: 2020/12/02 01：09
      * author: 秦楚彦 24320182203254
      * version: 1.0
      */
     @Test
-    public void addSpuCategoryTest() throws JSONException {
+    public void addSpuCategoryTest1() throws JSONException {
         String token = creatTestToken(1L,1L,100);
         String responseString=null;
-        String requireJson=null;
         try{
-            responseString=this.mvc.perform(put("/goods/shops/1/spus/681/categories/125")
+            responseString=this.mvc.perform(put("/goods/shops/1/spus/681/categories/128")
                     .header("authorization",token)
                     .contentType("application/json;charset=UTF-8")
-                    .content(requireJson))
+            )
                     .andExpect(status().isOk())
                     .andExpect(content().contentType("application/json;charset=UTF-8"))
                     .andExpect(jsonPath("$.errno").value(ResponseCode.OK.getCode()))
-                    .andExpect(jsonPath("$.data").exists())
                     .andReturn().getResponse().getContentAsString();
         }catch (Exception e){
             e.printStackTrace();
@@ -161,25 +159,186 @@ public class qcyTest {
     }
 
     /**
-     * description: 移除SPU分类
+     * description: 将SPU加入二级分类 (试图加入一级分类)
+     * date: 2020/12/02 20：40
+     * author: 秦楚彦 24320182203254
+     * version: 1.0
+     */
+    @Test
+    public void addSpuCategoryTest2() throws JSONException {
+        String token = creatTestToken(1L,1L,100);
+        String responseString=null;
+        try{
+            responseString=this.mvc.perform(put("/goods/shops/1/spus/681/categories/125")
+                    .header("authorization",token)
+                    .contentType("application/json;charset=UTF-8")
+                    )
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andExpect(jsonPath("$.errno").value(ResponseCode.CATEALTER_INVALID.getCode()))
+                    .andReturn().getResponse().getContentAsString();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * description: 移除SPU分类 (成功)
      * date: 2020/12/02 11：00
      * author: 秦楚彦 24320182203254
      * version: 1.0
      */
     @Test
-    public void removeSpuCategoryTest() throws JSONException {
+    public void removeSpuCategoryTest1() throws JSONException {
         String token = creatTestToken(1L,1L,100);
         String responseString=null;
-        String requireJson=null;
         try{
-            responseString=this.mvc.perform(delete("/goods/shops/1/spus/681/categories/125")
+            responseString=this.mvc.perform(delete("/goods/shops/1/spus/681/categories/128")
+                    .header("authorization",token)
+                    .contentType("application/json;charset=UTF-8"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andExpect(jsonPath("$.errno").value(ResponseCode.OK))
+                    .andReturn().getResponse().getContentAsString();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * description: 移除SPU分类 (移出分类与SPU原分类不一致)
+     * date: 2020/12/02 20：46
+     * author: 秦楚彦 24320182203254
+     * version: 1.0
+     */
+    @Test
+    public void removeSpuCategoryTest2() throws JSONException {
+        String token = creatTestToken(1L,1L,100);
+        String responseString=null;
+        try{
+            responseString=this.mvc.perform(delete("/goods/shops/1/spus/681/categories/131")
+                    .header("authorization",token)
+                    .contentType("application/json;charset=UTF-8"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andExpect(jsonPath("$.errno").value(ResponseCode.CATEALTER_INVALID.getCode()))
+                    .andReturn().getResponse().getContentAsString();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * description: 将SPU加入品牌 (成功)
+     * date: 2020/12/02 22：52
+     * author: 秦楚彦 24320182203254
+     * version: 1.0
+     */
+    @Test
+    public void addSpuBrandTest1() throws JSONException {
+        String token = creatTestToken(1L,1L,100);
+        String responseString=null;
+        try{
+            responseString=this.mvc.perform(put("/goods/shops/1/spus/681/brands/110")
                     .header("authorization",token)
                     .contentType("application/json;charset=UTF-8")
-                    .content(requireJson))
+            )
                     .andExpect(status().isOk())
                     .andExpect(content().contentType("application/json;charset=UTF-8"))
                     .andExpect(jsonPath("$.errno").value(ResponseCode.OK.getCode()))
-                    .andExpect(jsonPath("$.data").exists())
+                    .andReturn().getResponse().getContentAsString();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * description: 将SPU加入品牌 (试图加入不存在的品牌)
+     * date: 2020/12/02 22：52
+     * author: 秦楚彦 24320182203254
+     * version: 1.0
+     */
+    @Test
+    public void addSpuBrandTest2() throws JSONException {
+        String token = creatTestToken(1L,1L,100);
+        String responseString=null;
+        try{
+            responseString=this.mvc.perform(put("/goods/shops/1/spus/681/brands/120")
+                    .header("authorization",token)
+                    .contentType("application/json;charset=UTF-8")
+            )
+                    .andExpect(status().isNotFound())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andExpect(jsonPath("$.errno").value(ResponseCode.RESOURCE_ID_NOTEXIST.getCode()))
+                    .andReturn().getResponse().getContentAsString();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * description: 移除SPU品牌 (成功)
+     * date: 2020/12/02 22：52
+     * author: 秦楚彦 24320182203254
+     * version: 1.0
+     */
+    @Test
+    public void removeSpuBrandTest1() throws JSONException {
+        String token = creatTestToken(1L,1L,100);
+        String responseString=null;
+        try{
+            responseString=this.mvc.perform(delete("/goods/shops/1/spus/681/brands/110")
+                    .header("authorization",token)
+                    .contentType("application/json;charset=UTF-8"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andExpect(jsonPath("$.errno").value(ResponseCode.OK.getCode()))
+                    .andReturn().getResponse().getContentAsString();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * description: 移除SPU品牌 (移出品牌与SPU原品牌不一致)
+     * date: 2020/12/02 22：52
+     * author: 秦楚彦 24320182203254
+     * version: 1.0
+     */
+    @Test
+    public void removeSpuBrandTest2() throws JSONException {
+        String token = creatTestToken(1L,1L,100);
+        String responseString=null;
+        try{
+            responseString=this.mvc.perform(delete("/goods/shops/1/spus/681/brands/109")
+                    .header("authorization",token)
+                    .contentType("application/json;charset=UTF-8"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andExpect(jsonPath("$.errno").value(ResponseCode.BRANDALTER_INVALID.getCode()))
+                    .andReturn().getResponse().getContentAsString();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * description: 移除SPU品牌 (该商品本无品牌)
+     * date: 2020/12/02 22：52
+     * author: 秦楚彦 24320182203254
+     * version: 1.0
+     */
+    @Test
+    public void removeSpuBrandTest3() throws JSONException {
+        String token = creatTestToken(1L,1L,100);
+        String responseString=null;
+        try{
+            responseString=this.mvc.perform(delete("/goods/shops/1/spus/681/brands/110")
+                    .header("authorization",token)
+                    .contentType("application/json;charset=UTF-8"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andExpect(jsonPath("$.errno").value(ResponseCode.BRANDALTER_INVALID.getCode()))
                     .andReturn().getResponse().getContentAsString();
         }catch (Exception e){
             e.printStackTrace();

@@ -93,6 +93,8 @@ public enum ResponseCode {
 
     STATE_NOCHANGE(920,"状态未改变"),
     CATEALTER_INVALID(921,"对SPU类别操作无效"),
+    BRANDALTER_INVALID(922,"对SPU品牌操作无效"),
+
     COMMENT_AUDITED(940,"评论已审核");
     private int code;
     private String message;

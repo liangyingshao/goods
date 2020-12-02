@@ -135,4 +135,35 @@ public class CommentControllerTest {
             e.printStackTrace();
         }
     }
+
+    @Test
+    public void add_floating_price() throws Exception{
+        String token = creatTestToken(1L, 1L, 100);
+        String json = "{\"activityPrice\":\"120\", \"beginTime\":\"2020-12-28 17:42:20\",\"endTime\":\"2021-1-28 17:42:20\",\"quantity\": \"1000\"}";
+        String responseString = this.mvc.perform(post("/goods/shops/1/skus/1/floatPrices").header("authorization",token)
+                    .contentType("application/json;charset=UTF-8")
+                    .content(json))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+
+        String expectedResponse = "{\"errno\": 0, \"errmsg\": \"成功\"}";
+        JSONAssert.assertEquals(expectedResponse, responseString, true);
+        //一要检测返回值是否符合预期
+        //二要检查数据库的值是否符合预期
+    }
+
+    @Test
+    public void invalidFloatPrice() throws Exception{
+        String token = creatTestToken(1L, 0L, 100);
+        String responseString = this.mvc.perform(delete("/goods/shops/0/floatPrices/1").header("authorization",token))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+
+        String expectedResponse = "{\"errno\": 0, \"errmsg\": \"成功\"}";
+        JSONAssert.assertEquals(expectedResponse, responseString, true);
+        //一要检测返回值是否符合预期
+        //二要检查数据库的值是否符合预期
+    }
 }
