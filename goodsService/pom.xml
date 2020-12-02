@@ -155,7 +155,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <includes>
-                        <include>**/GoodsDaoTest.java</include>
+                        <include>**/GoodsControllerTest.java</include>
                     </includes>
                 </configuration>
             </plugin>
