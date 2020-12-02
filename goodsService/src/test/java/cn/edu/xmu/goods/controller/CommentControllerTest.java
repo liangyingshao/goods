@@ -97,11 +97,31 @@ public class CommentControllerTest {
     }
 
     @Test
-    public void showComment() {
+    public void showComment() throws Exception {
         String responseString = null;
         String token = creatTestToken(1L, 1L, 100);
         try {
             responseString = this.mvc.perform(get("/goods/comments?page=1&pageSize=2").header("authorization", token))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andReturn().getResponse().getContentAsString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        String expectedResponse = "{\"errno\":0,\"data\":{\"total\":2,\"pages\":1,\"pageSize\":2,\"page\":1,\"list\":[{\"id\":2,\"customerId\":1,\"goodsSkuId\":1,\"orderitemId\":1,\"type\":0,\"content\":null,\"state\":0,\"gmtCreate\":\"2020-12-01T21:20:48\",\"gmtModified\":null},{\"id\":3,\"customerId\":1,\"goodsSkuId\":1,\"orderitemId\":1,\"type\":0,\"content\":null,\"state\":0,\"gmtCreate\":\"2020-12-01T21:26:54\",\"gmtModified\":null}]},\"errmsg\":\"成功\"}";
+        try {
+            JSONAssert.assertEquals(expectedResponse, responseString, false);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void showUnAuditComments() throws Exception {
+        String responseString = null;
+        String token = creatTestToken(1L, 0L, 100);
+        try {
+            responseString = this.mvc.perform(get("/goods/shops/0/comments/all?state=1&page=1&pageSize=2").header("authorization", token))
                     .andExpect(status().isOk())
                     .andExpect(content().contentType("application/json;charset=UTF-8"))
                     .andReturn().getResponse().getContentAsString();

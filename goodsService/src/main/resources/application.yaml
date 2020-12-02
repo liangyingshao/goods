@@ -25,7 +25,7 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
-    initialization-mode: always
+#    initialization-mode: always
     schema: classpath:schema.sql
     data: classpath:testdata.sql
     druid:
