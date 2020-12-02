@@ -121,7 +121,7 @@ public class ActivityDao {
     public ReturnObject<CouponSpuRetVo> createCouponSpu(Long shopId, CouponSpu couponSpu) {
         //SPU存在
         GoodsSpuPo spuPo=spuMapper.selectByPrimaryKey(couponSpu.getSpuId());
-        if(spuPo==null|| GoodsSku.State.getTypeByCode(spuPo.getDisabled().intValue()).equals(GoodsSku.State.DISABLED))
+        if(spuPo==null|| GoodsSpu.SpuState.getTypeByCode(spuPo.getDisabled().intValue()).equals(GoodsSpu.SpuState.DELETED))
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
 
         //SPU和shopId匹配

@@ -401,7 +401,7 @@ public class GoodsDao {
     {
         //SPU存在
         GoodsSpuPo spuPo=spuMapper.selectByPrimaryKey(sku.getGoodsSpuId());
-        if(spuPo==null||spuPo.getDisabled().equals(GoodsSku.State.DISABLED))
+        if(spuPo==null||spuPo.getDisabled().equals(GoodsSpu.SpuState.DELETED))
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
 
         //shopId和SPU匹配
