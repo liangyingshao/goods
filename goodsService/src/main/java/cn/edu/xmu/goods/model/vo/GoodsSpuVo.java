@@ -67,7 +67,7 @@ public class GoodsSpuVo {
         this.imageUrl=bo.getImageUrl();
         this.state=bo.getState().getCode().byteValue();
         this.spec=bo.getSpec();
-        this.disabled=bo.getDisabled();
+        this.disabled=bo.getDisabled().getCode().byteValue();
     }
 
 }

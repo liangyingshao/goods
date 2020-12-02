@@ -78,6 +78,8 @@ public class GoodsSku implements VoObject {
 
     private LocalDateTime gmtModified;
 
+    private String spuSpec;
+
     public GoodsSku() {
 
     }
@@ -98,8 +100,6 @@ public class GoodsSku implements VoObject {
         gmtModified=po.getGmtModified();
     }
 
-
-
     @Override
     public Object createVo() {
         return new GoodsSkuRetVo(this);
@@ -119,6 +119,22 @@ public class GoodsSku implements VoObject {
         skuPo.setConfiguration(configuration);
         skuPo.setWeight(weight);
         skuPo.setDetail(detail);
+        return skuPo;
+    }
+
+    public GoodsSkuPo getNewGoodsSkuPo()
+    {
+        GoodsSkuPo skuPo=new GoodsSkuPo();
+        skuPo.setGoodsSpuId(goodsSpuId);
+        skuPo.setSkuSn(skuSn);
+        skuPo.setName(name);
+        skuPo.setOriginalPrice(originalPrice);
+        skuPo.setConfiguration(configuration);
+        skuPo.setWeight(weight);
+        skuPo.setImageUrl(imageUrl);
+        skuPo.setInventory(inventory);
+        skuPo.setDetail(detail);
+        skuPo.setDisabled(disabled.getCode().byteValue());
         return skuPo;
     }
 }

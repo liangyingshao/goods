@@ -75,7 +75,7 @@ public class GoodsSpu {
 
     private String spec;
 
-    private Byte disabled;
+    private GoodsSku.State disabled;
 
     private LocalDateTime gmtCreated;
 
@@ -104,6 +104,7 @@ public class GoodsSpu {
         if(null!=po.getState()){
             this.state=SpuState.getTypeByCode(po.getState().intValue());
         }
+        this.disabled=GoodsSku.State.getTypeByCode(po.getDisabled().intValue());
     }
 
     /**
@@ -119,7 +120,7 @@ public class GoodsSpu {
         spuPo.setShopId(this.shopId);
         spuPo.setFreightId(this.freightId);
         spuPo.setDetail(this.detail);
-        spuPo.setDisabled(this.disabled);
+        spuPo.setDisabled(this.disabled.getCode().byteValue());
         spuPo.setGmtCreate(this.gmtCreated);
         spuPo.setGmtModified(this.gmtModified);
         spuPo.setGoodsSn(this.goodsSn);

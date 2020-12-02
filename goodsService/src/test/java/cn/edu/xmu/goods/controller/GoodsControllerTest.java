@@ -206,7 +206,6 @@ class GoodsControllerTest {
     {
         LocalDateTime beginTime= LocalDateTime.of(2020,12,12,10,0,0);
         LocalDateTime endTime=LocalDateTime.of(2020,12,30,10,0,0);
-        System.out.println(beginTime);
         String requireJson="{\n    \"activityPrice\": \"100\",\n    \"beginTime\": \""+beginTime.toString()+"\",\n    \"endTime\": \""+endTime.toString()+"\",\n    \"quantity\": \"100\"\n}";
         String token = creatTestToken(1L, 0L, 100);
         String responseString=this.mvc.perform(post("/goods/shops/0/skus/278/floatPrices")
@@ -280,6 +279,58 @@ class GoodsControllerTest {
                 .andReturn().getResponse().getContentAsString();
         //System.out.println(responseString);
         expectedResponse="{\"errno\":503,\"errmsg\":\"must be greater than or equal to 0;\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+    }
+
+    @Test
+    void createSKU() throws Exception
+    {
+        String requireJson="{\n" +
+                "  \"spuSpec\": \"{id: 0,name: spuSpecName,specItems: [{id: 0,name: specItemsName}]}\",\n" +
+                "  \"sn\": \"newSkuSn\",\n" +
+                "  \"name\": \"name\",\n" +
+                "  \"originalPrice\": 100,\n" +
+                "  \"configuration\": \"configuration\",\n" +
+                "  \"weight\": 100,\n" +
+                "  \"imageUrl\": \"http://47.52.88.176/file/images/201612/file_586227f3cd5c9.jpg\",\n" +
+                "  \"inventory\": 100,\n" +
+                "  \"detail\": \"detail\"\n" +
+                "}";
+        String token = creatTestToken(1L, 0L, 100);
+        String responseString=this.mvc.perform(post("/goods/shops/0/spus/273")
+                .header("authorization",token)
+                .contentType("application/json;charset=UTF-8")
+                .content(requireJson))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        System.out.println(responseString);
+        //每次id都会自增，所以没有JSONAssert只是输出人工检验
+        String expectedResponse
+                //="{\"errno\":0,\"data\":{\"id\":696,\"name\":\"name\",\"skuSn\":\"newSkuSn\",\"imageUrl\":\"http://47.52.88.176/file/images/201612/file_586227f3cd5c9.jpg\",\"inventory\":100,\"originalPrice\":100,\"price\":100,\"disabled\":0},\"errmsg\":\"成功\"}"
+                ;
+        //JSONAssert.assertEquals(expectedResponse,responseString,true);
+
+        responseString=this.mvc.perform(post("/goods/shops/0/spus/273")
+                .header("authorization",token)
+                .contentType("application/json;charset=UTF-8")
+                .content(requireJson))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        //System.out.println(responseString);
+        expectedResponse="{\"errno\":901,\"errmsg\":\"SKU规格重复：name\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+
+        responseString=this.mvc.perform(post("/goods/shops/1/spus/273")
+                .header("authorization",token)
+                .contentType("application/json;charset=UTF-8")
+                .content(requireJson))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        //System.out.println(responseString);
+        expectedResponse="{\"code\":\"RESOURCE_ID_OUTSCOPE\",\"errmsg\":\"操作的资源id不是自己的对象\",\"data\":null}";
         JSONAssert.assertEquals(expectedResponse,responseString,true);
     }
 }

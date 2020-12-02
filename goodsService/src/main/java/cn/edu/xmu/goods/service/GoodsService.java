@@ -159,4 +159,17 @@ public class GoodsService {
 
         return returnObject;
     }
+
+    /**
+     * 管理员添加新的SKU到SPU里
+     * @param shopId
+     * @param sku
+     * @return ReturnObject<GoodsSkuRetVo>
+     */
+    @Transactional
+    public ReturnObject<GoodsSkuRetVo> createSKU(Long shopId, GoodsSku sku)
+    {
+        ReturnObject<GoodsSkuRetVo>returnObject=goodsDao.createSKU(shopId,sku);
+        return returnObject;
+    }
 }

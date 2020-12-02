@@ -152,6 +152,7 @@ public class GoodsController {
     @PostMapping("/shops/{shopId}/skus/{id}/uploadImg")
     public Object uploadSkuImg(@PathVariable Long shopId,@PathVariable Long id,
                                @RequestParam("img") MultipartFile file,BindingResult bindingResult,
+                               @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
                                @Depart @ApiIgnore @RequestParam(required = false) Long departId){
         logger.debug("uploadSkuImg: id = "+ id+" shopId="+shopId +" img=" + file.getOriginalFilename());
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
@@ -182,6 +183,7 @@ public class GoodsController {
     @Audit
     @DeleteMapping("/shops/{shopId}/skus/{id}")
     public Object deleteSku(@PathVariable Long shopId, @PathVariable Long id,
+                            @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
                             @Depart @ApiIgnore @RequestParam(required = false) Long departId)
     {
         logger.debug("deleteSku: id = "+ id+" shopId="+shopId);
@@ -212,6 +214,7 @@ public class GoodsController {
     @PutMapping("/shops/{shopId}/skus/{id}")
     public Object modifySKU(@PathVariable Long shopId,@PathVariable Long id,
                             @Validated @RequestBody GoodsSkuVo vo,BindingResult bindingResult,
+                            @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
                             @Depart @ApiIgnore @RequestParam(required = false) Long departId)
     {
         logger.debug("modifySKU: id = "+ id+" shopId="+shopId+" vo="+vo);
@@ -382,6 +385,48 @@ public class GoodsController {
         }
     }
 
-
+    /**
+     * 管理员添加新的SKU到SPU里
+     * @param shopId
+     * @param id
+     * @param vo
+     * @param bindingResult
+     * @param userId
+     * @param departId
+     * @return Object
+     */
+    @ApiOperation(value = "管理员添加新的SKU到SPU里")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header",dataType = "String",name="authorization",required = true),
+            @ApiImplicitParam(paramType = "path",dataType = "Long",name = "shopId",value = "shop id",required = true),
+            @ApiImplicitParam(paramType = "path",dataType = "Long",name = "id",value = "sku id",required = true),
+            @ApiImplicitParam(paramType = "body",dataType = "GoodsSkuBySpuVo",name = "vo",value = "可修改的信息",required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功")
+    })
+    @Audit
+    @PostMapping("/shops/{shopId}/spus/{id}")
+    public Object createSKU(@PathVariable Long shopId, @PathVariable Long id,
+                            @Validated @RequestBody GoodsSkuBySpuVo vo, BindingResult bindingResult,
+                            @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
+                            @Depart @ApiIgnore @RequestParam(required = false) Long departId)
+    {
+        logger.debug("createSKU: id = "+ id+" shopId="+shopId+" vo="+vo);
+        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (null != returnObject) {
+            return returnObject;
+        }
+        if(departId!=shopId)return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        GoodsSku sku=vo.createGoodsSku();
+        sku.setGoodsSpuId(id);
+        sku.setDisabled(GoodsSku.State.ABLED);
+        ReturnObject<GoodsSkuRetVo> retObject=goodsService.createSKU(shopId,sku);
+        if (retObject.getData() != null) {
+            return Common.decorateReturnObject(retObject);
+        } else {
+            return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
+        }
+    }
 }
 

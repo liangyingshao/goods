@@ -122,10 +122,33 @@ class GoodsDaoTest {
         assertEquals(returnObject.getCode(),ResponseCode.SKUPRICE_CONFLICT);
 
         returnObject=goodsDao.addFloatPrice((long)1,floatPrice, (long)0);
-        assertEquals(returnObject.getCode(),ResponseCode.RESOURCE_ID_NOTEXIST);
+        assertEquals(returnObject.getCode(),ResponseCode.RESOURCE_ID_OUTSCOPE);
 
         floatPrice.setGoodsSkuId((long)273);
         returnObject=goodsDao.addFloatPrice((long)0,floatPrice, (long)0);
         assertEquals(returnObject.getCode(),ResponseCode.SKU_NOTENOUGH);
+    }
+
+    @Test
+    void createSKU() {
+        GoodsSku sku=new GoodsSku();
+        sku.setGoodsSpuId((long)273);
+        sku.setSkuSn("skuSn");
+        sku.setName("newSku");
+        sku.setOriginalPrice((long)100);
+        sku.setConfiguration("configuration");
+        sku.setWeight((long)100);
+        sku.setImageUrl("http://47.52.88.176/file/images/201612/file_586227f3cd5c9.jpg");
+        sku.setInventory(9999);
+        sku.setDetail("detail");
+        sku.setDisabled(GoodsSku.State.ABLED);
+        ReturnObject<GoodsSkuRetVo> returnObject=goodsDao.createSKU((long)0,sku);
+        assertEquals(returnObject.getCode(),ResponseCode.OK);
+
+        returnObject=goodsDao.createSKU((long)0,sku);
+        assertEquals(returnObject.getCode(),ResponseCode.SKUSN_SAME);
+
+        returnObject=goodsDao.createSKU((long)1,sku);
+        assertEquals(returnObject.getCode(),ResponseCode.RESOURCE_ID_OUTSCOPE);
     }
 }
