@@ -1,12 +1,9 @@
 package cn.edu.xmu.goods.service;
 
 import cn.edu.xmu.goods.dao.GoodsDao;
-import cn.edu.xmu.goods.model.bo.FloatPrice;
 import cn.edu.xmu.goods.model.bo.GoodsSku;
 import cn.edu.xmu.goods.model.po.GoodsSkuPo;
 import cn.edu.xmu.goods.model.po.ShopPo;
-import cn.edu.xmu.goods.model.vo.FloatPriceRetVo;
-import cn.edu.xmu.goods.model.vo.GoodsSkuDetailRetVo;
 import cn.edu.xmu.goods.model.vo.GoodsSkuRetVo;
 import cn.edu.xmu.goods.model.vo.GoodsSkuVo;
 import cn.edu.xmu.ooad.model.VoObject;
@@ -54,10 +51,18 @@ public class GoodsService {
      * @return ReturnObject<PageInfo<VoObject>>
      */
     @Transactional
-    public ReturnObject<PageInfo<GoodsSkuRetVo>> getSkuList(Long shopId, String skuSn, Long spuId, String spuSn, Integer page, Integer pageSize)
+    public ReturnObject<PageInfo<VoObject>> getSkuList(Long shopId, String skuSn, Long spuId, String spuSn, Integer page, Integer pageSize)
     {
-        PageInfo<GoodsSkuRetVo> skuRetVos=goodsDao.getSkuList(shopId,skuSn,spuId,spuSn,page,pageSize);
-        return new ReturnObject<>(skuRetVos);
+        PageInfo<GoodsSkuPo> skuPos=goodsDao.getSkuList(shopId,skuSn,spuId,spuSn,page,pageSize);
+        List<VoObject> skus = skuPos.getList().stream().map(GoodsSku::new).collect(Collectors.toList());
+
+        PageInfo<VoObject> returnObject = new PageInfo<>(skus);
+        returnObject.setPages(skuPos.getPages());
+        returnObject.setPageNum(skuPos.getPageNum());
+        returnObject.setPageSize(skuPos.getPageSize());
+        returnObject.setTotal(skuPos.getTotal());
+
+        return new ReturnObject<>(returnObject);
     }
 
     /**
@@ -66,11 +71,10 @@ public class GoodsService {
      * @return ReturnObject<VoObject>
      */
     @Transactional
-    public ReturnObject<GoodsSkuDetailRetVo> getSku(Long id)
+    public ReturnObject<VoObject> getSku(Long id)
     {
-        GoodsSkuDetailRetVo retVo=goodsDao.getSku(id);
-        if(retVo==null)return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-        return new ReturnObject<>(retVo);
+        GoodsSku sku=new GoodsSku(goodsDao.getSku(id));
+        return new ReturnObject<>(sku);
     }
 
     /**
@@ -83,7 +87,7 @@ public class GoodsService {
     @Transactional
     public ReturnObject<VoObject> uploadSkuImg(Long shopId, Long id, MultipartFile file)
     {
-        GoodsSkuPo skuPo = goodsDao.internalGetSku(id);
+        GoodsSkuPo skuPo = goodsDao.getSku(id);
         if(skuPo == null) {
             return new ReturnObject<>(null);
         }
@@ -143,20 +147,5 @@ public class GoodsService {
     public ReturnObject modifySku(Long shopId, GoodsSku bo)
     {
         return goodsDao.modifySku(shopId,bo);
-    }
-
-    /**
-     * 管理员新增商品价格浮动
-     * @param shopId
-     * @param floatPrice
-     * @param userId
-     * @return ReturnObject
-     */
-    @Transactional
-    public ReturnObject<FloatPriceRetVo> addFloatPrice(Long shopId, FloatPrice floatPrice, Long userId)
-    {
-        ReturnObject<FloatPriceRetVo> returnObject= goodsDao.addFloatPrice(shopId,floatPrice,userId);
-
-        return returnObject;
     }
 }

@@ -14,6 +14,7 @@ import java.util.List;
  */
 @Data
 @ApiModel(description = "查看商品SPU信息视图对象")
+
 public class GoodsSpuVo {
     @ApiModelProperty(name = "Spuid")
     private Long id;
