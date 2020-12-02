@@ -1,9 +1,13 @@
 package cn.edu.xmu.goods.controller;
 
 import cn.edu.xmu.goods.model.bo.Comment;
+import cn.edu.xmu.goods.model.bo.FloatPrice;
 import cn.edu.xmu.goods.model.vo.CommentAuditVo;
 import cn.edu.xmu.goods.model.vo.CommentStateRetVo;
+import cn.edu.xmu.goods.model.vo.FloatPriceRetVo;
+import cn.edu.xmu.goods.model.vo.FloatPriceVo;
 import cn.edu.xmu.goods.service.CommentService;
+import cn.edu.xmu.goods.service.FloatPriceService;
 import cn.edu.xmu.ooad.annotation.Audit;
 import cn.edu.xmu.ooad.annotation.Depart;
 import cn.edu.xmu.ooad.annotation.LoginUser;
@@ -14,6 +18,7 @@ import cn.edu.xmu.ooad.util.ResponseUtil;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.*;
+import org.apache.ibatis.annotations.Delete;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +49,9 @@ public class CommentController {
 
     @Autowired
     CommentService commentService;
+
+    @Autowired
+    FloatPriceService floatPriceService;
 
     @Autowired
     HttpServletResponse httpServletResponse;
@@ -229,32 +237,43 @@ public class CommentController {
         return commentService.showUnAuditComments(state, page, pageSize);
     }
 
-//    @ApiOperation(value = "新增角色", produces = "application/json")
+//    @ApiOperation(value = "管理员新增商品价格浮动", produces = "application/json")
 //    @ApiImplicitParams({
 //            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
-//            @ApiImplicitParam(paramType = "body", dataType = "RoleVo", name = "vo", value = "可修改的用户信息", required = true)
+//            @ApiImplicitParam(paramType = "body", dataType = "RoleVo", name = "vo", value = "可修改的用户信息", required = true),
+//            @ApiImplicitParam(name="id", required = true, dataType="Integer", paramType="path"),
+//            @ApiImplicitParam(name="shopId", required = true, dataType="Integer", paramType="path")
 //    })
 //    @ApiResponses({
 //            @ApiResponse(code = 0, message = "成功"),
-//            @ApiResponse(code = 736, message = "角色名已存在"),
+//            @ApiResponse(code = 902, message = "商品浮动价格时间冲突"),
 //    })
 //    @Audit
-//    @PostMapping("/roles")
-//    public Object insertRole(@Validated @RequestBody RoleVo vo, BindingResult bindingResult,
-//                             @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
-//                             @Depart @ApiIgnore @RequestParam(required = false) Long departId) {
-//        logger.debug("insert role by userId:" + userId);
+//    @PostMapping("/shops/{shopId}/skus/{id}/floatPrices")
+//    public Object add_floating_price(@Validated @RequestBody FloatPriceVo vo,
+//                                     BindingResult bindingResult,
+//                             @PathVariable("id") Long id,
+//                             @PathVariable("shopId ") Long shopId,
+//                             @LoginUser Long userId) {
+////        logger.debug("insert role by userId:" + userId);
 //        //校验前端数据
 //        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
 //        if (null != returnObject) {
-//            logger.debug("validate fail");
+////            logger.debug("validate fail");
 //            return returnObject;
 //        }
-//        Role role = vo.createRole();
-//        role.setCreatorId(userId);
-//        role.setDepartId(departId);
-//        role.setGmtCreate(LocalDateTime.now());
-//        ReturnObject retObject = roleService.insertRole(role);
+//        //检查该shop下有没有这个sku
+//        FloatPrice floatPrice = vo.createFloatPrice();
+//        floatPrice.setGoodsSkuId(id);
+//        floatPrice.setBeginTime(vo.getBeginTime());
+//        floatPrice.setEndTime(vo.getEndTime());
+//        floatPrice.setQuantity(vo.getQuantity());
+//        floatPrice.setActivityPrice(vo.getActivityPrice());
+//        floatPrice.setCreatedBy(userId);
+//        //floatPrice.setInvalidBy(????);
+//        floatPrice.setValid(FloatPrice.Validation.getTypeByCode(0));
+//        floatPrice.setGmtCreate(LocalDateTime.now());
+//        ReturnObject retObject = floatPriceService.add_floating_price(floatPrice);
 //        if (retObject.getData() != null) {
 //            httpServletResponse.setStatus(HttpStatus.CREATED.value());
 //            return Common.getRetObject(retObject);
@@ -262,4 +281,25 @@ public class CommentController {
 //            return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
 //        }
 //    }
+
+    @ApiOperation(value="管理员失效商品价格浮动")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header",dataType = "String",name="authorization",required = true),
+            @ApiImplicitParam(paramType = "path",dataType = "Long",name = "shopId",value = "shop id",required = true),
+            @ApiImplicitParam(paramType = "path",dataType = "Long",name = "id",value = "shop id",required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功")
+    })
+    @Audit
+    @DeleteMapping("/shops/{shopId}/floatPrices/{id}")
+    public Object invalidFloatPrice(@PathVariable Long shopId, @PathVariable Long id,
+                                     @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
+                                     @Depart @ApiIgnore @RequestParam(required = false) Long departId)
+    {
+        //其实应该交给网关？
+        if(departId!=shopId)
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        return floatPriceService.invalidFloatPrice(id);
+    }
 }

@@ -17,4 +17,10 @@ public class FloatPriceService {
         ReturnObject<FloatPrice> retObj = floatPriceDao.add_floating_price(floatPrice);
         return retObj;
     }
+
+    @Transactional
+    public ReturnObject invalidFloatPrice(Long id) {
+        ReturnObject<Object> retObj = floatPriceDao.invalidFloatPrice(id);
+        return retObj;
+    }
 }
