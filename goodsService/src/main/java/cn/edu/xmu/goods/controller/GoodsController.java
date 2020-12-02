@@ -339,6 +339,104 @@ public class GoodsController {
     }
 
     /**
+     * spu008 业务: 上架商品SPU
+     * @param id 商品SPUID
+     * @param shopId 店铺ID
+     * @param userId 当前用户ID
+     * @return  Object
+     * @author 24320182203254 秦楚彦
+     * Created at 2020/12/01 15：36
+     */
+    @ApiOperation(value="店家商品上架",produces="application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "shopId", value = "商铺id", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "id", value = "SpuaId", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+
+    })
+    @Audit // 需要认证
+    @PutMapping("shops/{shopId}/spus/{id}/onshelves")
+    @ResponseBody
+    public Object putGoodsOnSale(@PathVariable Long shopId,@PathVariable Long id,BindingResult bindingResult,
+                                 @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
+                                 @Depart @ApiIgnore @RequestParam(required = false) Long departId) {
+        logger.debug("put SPU onsale by shopId:" + shopId+ " spuId" + id);
+        //校验前端数据
+        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (null != returnObject) {
+            logger.debug("validate fail");
+            return returnObject;
+        }
+
+
+        GoodsSpu spu=new GoodsSpu();
+        spu.setShopId(shopId);
+        spu.setId(id);
+        spu.setGmtModified(LocalDateTime.now());
+        ReturnObject retObject = spuService.addSpu(spu);
+        //校验是否为该商铺管理员
+        if(shopId!=departId)
+            return  Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
+        if(retObject.getData()!=null){
+            return Common.getRetObject(retObject);
+        }else{
+            return  Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
+        }
+
+    }
+
+    /**
+     * spu009 业务: 下架商品SPU
+     * @param id 商品SPUID
+     * @param shopId 店铺ID
+     * @param userId 当前用户ID
+     * @return  Object
+     * @author 24320182203254 秦楚彦
+     * Created at 2020/11/01 15：36
+     */
+    @ApiOperation(value="店家商品下架",produces="application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "shopId", value = "商铺id", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "id", value = "SpuaId", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+
+    })
+    @Audit // 需要认证
+    @PutMapping("shops/{shopId}/spus/{id}/offshelves")
+    @ResponseBody
+    public Object putOffGoodsOnSale(@PathVariable Long shopId,@PathVariable Long id,BindingResult bindingResult,
+                                    @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
+                                    @Depart @ApiIgnore @RequestParam(required = false) Long departId) {
+        logger.debug("put SPU offsale by shopId:" + shopId+ " spuId" + id);
+        //校验前端数据
+        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (null != returnObject) {
+            logger.debug("validate fail");
+            return returnObject;
+        }
+        //校验是否为该商铺管理员
+
+        GoodsSpu spu=new GoodsSpu();
+        spu.setShopId(shopId);
+        spu.setId(id);
+        spu.setGmtModified(LocalDateTime.now());
+        ReturnObject retObject = spuService.putGoodsOnSale(spu);
+        if(retObject.getData()!=null){
+            return Common.getRetObject(retObject);
+        }else{
+            return  Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
+        }
+
+    }
+
+
+    /**
      * 管理员新增商品价格浮动
      * @param shopId
      * @param id
