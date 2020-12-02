@@ -16,9 +16,8 @@ import java.util.Map;
 public class GoodsSku implements VoObject {
 
     public enum State {
-        ABLED(0, "可用"),
-        DISABLED(1, "废弃"),
-        UNKNOWN(4,"不晓得是啥");
+        ABLED(4, "可用"),
+        DISABLED(5, "废弃");
 
         private static final Map<Integer, GoodsSku.State> stateMap;
 
@@ -78,7 +77,7 @@ public class GoodsSku implements VoObject {
 
     private LocalDateTime gmtModified;
 
-    private String spuSpec;
+    //private String spuSpec;
 
     public GoodsSku() {
 

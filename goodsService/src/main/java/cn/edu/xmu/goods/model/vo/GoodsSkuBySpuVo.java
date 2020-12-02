@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @ApiModel(value = "在SPU下创建SKU的视图对象")
 public class GoodsSkuBySpuVo {
 
-    private String spuSpec;
+    //private String spuSpec;
 
     private String sn;
 
@@ -36,7 +36,7 @@ public class GoodsSkuBySpuVo {
     public GoodsSku createGoodsSku()
     {
         GoodsSku sku=new GoodsSku();
-        sku.setSpuSpec(spuSpec);
+        //sku.setSpuSpec(spuSpec);
         sku.setSkuSn(sn);
         sku.setName(name);
         sku.setOriginalPrice(originalPrice);
