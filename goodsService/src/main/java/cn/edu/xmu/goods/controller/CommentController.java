@@ -17,9 +17,14 @@ import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.servlet.http.HttpServletResponse;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +44,9 @@ public class CommentController {
 
     @Autowired
     CommentService commentService;
+
+    @Autowired
+    HttpServletResponse httpServletResponse;
 
     /**
      * 业务: comment001:获得评论的所有状态
@@ -128,7 +136,7 @@ public class CommentController {
     }
 
     /**
-     * 业务: comment004
+     * 业务: comment004 管理员审核评论
      * @param id
      * @param conclusion
      * @param shopid
@@ -193,4 +201,65 @@ public class CommentController {
         ReturnObject<PageInfo<VoObject>> returnObject =  commentService.showComment(id, page, pageSize);
         return Common.getPageRetObject(returnObject);
     }
+
+    //校验token里的部门id和参数里的店铺id是否一致
+    //校验部门id是不是0
+    @ApiOperation(value = "管理员查看未审核/已审核评论列表")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+            @ApiImplicitParam(name="id", required = true, dataType="Integer", paramType="path"),
+            @ApiImplicitParam(name="conclusion", required = true, dataType="Boolean", paramType="body")
+
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 504, message = "操作的资源id不存在"),
+            @ApiResponse(code = 705, message = "无权限访问")
+    })
+    @Audit // 需要认证
+    @GetMapping("/shops/{id}/comments/all")
+    public Object showUnAuditComments(@PathVariable("id") Long id,//路径中的店铺id
+                                      //@LoginUser Long user_id,
+                                      @Depart Long departId,//token中的部门id
+                                      @RequestParam(required = false, defaultValue = "2") Integer state,//默认查看已审核
+                                      @RequestParam(required = false, defaultValue = "1") Integer page,
+                                      @RequestParam(required = false, defaultValue = "10") Integer pageSize) {
+        if(!id.equals(departId))
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("部门id不匹配：" + id)), httpServletResponse);
+        return commentService.showUnAuditComments(state, page, pageSize);
+    }
+
+//    @ApiOperation(value = "新增角色", produces = "application/json")
+//    @ApiImplicitParams({
+//            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+//            @ApiImplicitParam(paramType = "body", dataType = "RoleVo", name = "vo", value = "可修改的用户信息", required = true)
+//    })
+//    @ApiResponses({
+//            @ApiResponse(code = 0, message = "成功"),
+//            @ApiResponse(code = 736, message = "角色名已存在"),
+//    })
+//    @Audit
+//    @PostMapping("/roles")
+//    public Object insertRole(@Validated @RequestBody RoleVo vo, BindingResult bindingResult,
+//                             @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
+//                             @Depart @ApiIgnore @RequestParam(required = false) Long departId) {
+//        logger.debug("insert role by userId:" + userId);
+//        //校验前端数据
+//        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+//        if (null != returnObject) {
+//            logger.debug("validate fail");
+//            return returnObject;
+//        }
+//        Role role = vo.createRole();
+//        role.setCreatorId(userId);
+//        role.setDepartId(departId);
+//        role.setGmtCreate(LocalDateTime.now());
+//        ReturnObject retObject = roleService.insertRole(role);
+//        if (retObject.getData() != null) {
+//            httpServletResponse.setStatus(HttpStatus.CREATED.value());
+//            return Common.getRetObject(retObject);
+//        } else {
+//            return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
+//        }
+//    }
 }
