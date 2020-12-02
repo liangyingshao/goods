@@ -13,7 +13,7 @@ public class FloatPrice implements VoObject {
 
     public enum Validation {
         VALID(4, "可用"),
-        INVALID(5, "废弃");
+        INVALID(6, "废弃");
 
         private static final Map<Integer, FloatPrice.Validation> stateMap;
 

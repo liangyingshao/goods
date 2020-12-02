@@ -1,6 +1,5 @@
 package cn.edu.xmu.goods.controller;
 
-import cn.edu.xmu.goods.model.bo.Comment;
 import cn.edu.xmu.goods.model.bo.FloatPrice;
 import cn.edu.xmu.goods.model.bo.GoodsSku;
 import cn.edu.xmu.goods.model.bo.GoodsSpu;
@@ -11,12 +10,8 @@ import cn.edu.xmu.goods.service.SpuService;
 import cn.edu.xmu.ooad.annotation.Audit;
 import cn.edu.xmu.ooad.annotation.Depart;
 import cn.edu.xmu.ooad.annotation.LoginUser;
-import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.*;
-import com.github.pagehelper.PageInfo;
-import com.sun.mail.iap.Response;
 import io.swagger.annotations.*;
-import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -313,7 +307,7 @@ public class GoodsController {
         if(departId!=shopId)return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
         GoodsSku sku=vo.createGoodsSku();
         sku.setGoodsSpuId(id);
-        sku.setDisabled(GoodsSku.State.ABLED);
+        sku.setDisabled(GoodsSku.State.ABLE);
         ReturnObject<GoodsSkuRetVo> retObject=goodsService.createSKU(shopId,sku);
         if (retObject.getData() != null) {
             return Common.decorateReturnObject(retObject);

@@ -286,7 +286,6 @@ class GoodsControllerTest {
     void createSKU() throws Exception
     {
         String requireJson="{\n" +
-                "  \"spuSpec\": \"{id: 0,name: spuSpecName,specItems: [{id: 0,name: specItemsName}]}\",\n" +
                 "  \"sn\": \"newSkuSn\",\n" +
                 "  \"name\": \"name\",\n" +
                 "  \"originalPrice\": 100,\n" +
