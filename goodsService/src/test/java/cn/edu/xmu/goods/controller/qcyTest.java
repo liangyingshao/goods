@@ -323,22 +323,22 @@ public class qcyTest {
     }
 
     /**
-     * description: 移除SPU品牌 (该商品本无品牌)
-     * date: 2020/12/02 22：52
+     * description: 逻辑删除商品SPU (成功)
+     * date: 2020/12/03 01：24
      * author: 秦楚彦 24320182203254
      * version: 1.0
      */
     @Test
-    public void removeSpuBrandTest3() throws JSONException {
+    public void deleteSpuBrandTest1() throws JSONException {
         String token = creatTestToken(1L,1L,100);
         String responseString=null;
         try{
-            responseString=this.mvc.perform(delete("/goods/shops/1/spus/681/brands/110")
+            responseString=this.mvc.perform(delete("/goods/shops/1/spus/681")
                     .header("authorization",token)
                     .contentType("application/json;charset=UTF-8"))
                     .andExpect(status().isOk())
                     .andExpect(content().contentType("application/json;charset=UTF-8"))
-                    .andExpect(jsonPath("$.errno").value(ResponseCode.BRANDALTER_INVALID.getCode()))
+                    .andExpect(jsonPath("$.errno").value(ResponseCode.OK.getCode()))
                     .andReturn().getResponse().getContentAsString();
         }catch (Exception e){
             e.printStackTrace();

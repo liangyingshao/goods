@@ -52,7 +52,7 @@ public class GoodsSpuVo {
     private Byte state;
 
     @ApiModelProperty(name = "是否失效")
-    private Byte disabled;
+    private boolean disabled;
 
     /**
      * 构造函数
@@ -67,7 +67,7 @@ public class GoodsSpuVo {
         this.imageUrl=bo.getImageUrl();
         this.state=bo.getState().getCode().byteValue();
         this.spec=bo.getSpec();
-        this.disabled=bo.getDisabled().getCode().byteValue();
+        this.disabled=bo.isDisabled();
     }
 
 }

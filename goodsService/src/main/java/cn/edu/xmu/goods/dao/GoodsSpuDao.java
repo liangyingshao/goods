@@ -302,8 +302,44 @@ public class GoodsSpuDao {
             if(!brandPo.getId().equals(spuPo.getBrandId())||spuPo.getBrandId().equals(0))
                 return returnObject=new ReturnObject<>(ResponseCode.BRANDALTER_INVALID);
             //将SPU移出该品牌
-            spu.setDisabled((false));//提前设置，避免空指针错误
+            spu.setDisabled(false);//提前设置，避免空指针错误
             spu.setBrandId((long)0);//提前设置，避免空指针错误
+            returnObject=modifyGoodsSpu(spu);
+        }
+        catch (DataAccessException e) {
+            // 其他数据库错误
+            logger.debug("other sql exception : " + e.getMessage());
+            returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
+        return returnObject;
+    }
+
+    /**
+     * 逻辑删除商品SPU，disable==true
+     * @param spu SPUbo
+     * @return  ReturnObject<Object> 修改结果
+     * @author 24320182203254 秦楚彦
+     * Created at 2020/12/02 22：32
+     */
+    public ReturnObject<Object> deleteGoodsSpu(GoodsSpu spu) {
+        ReturnObject<Object> returnObject = null;
+        try {
+            //获得该SPU信息
+            GoodsSpuPo spuPo=goodsSpuMapper.selectByPrimaryKey(spu.getId());
+            //该SPU不存在
+            if(spuPo==null)
+                return returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            //该SPU已被逻辑删除, disable==(Byte) 1 or state==DELETED
+            if(spuPo.getDisabled().equals((byte)1)||spuPo.getState().equals(GoodsSpu.SpuState.DELETED.getCode().byteValue()))
+                return returnObject=new ReturnObject<>(ResponseCode.BRANDALTER_INVALID);
+            //将SPU逻辑删除，disable==true and state==DELETED
+            spu.setDisabled(true);//提前设置，避免空指针错误
+            spu.setState(GoodsSpu.SpuState.DELETED);//提前设置，避免空指针错误
             returnObject=modifyGoodsSpu(spu);
         }
         catch (DataAccessException e) {

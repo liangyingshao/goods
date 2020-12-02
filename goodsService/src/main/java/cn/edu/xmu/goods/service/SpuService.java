@@ -135,4 +135,16 @@ public class SpuService {
         ReturnObject<Object> returnObject = spuDao.removeSpuBrand(spu);
         return returnObject;
     }
+
+    /**
+     * 逻辑删除SPU
+     * @param spu
+     * @return  ReturnObject
+     * @author 24320182203254 秦楚彦
+     * Created at 2020/12/03 01:07
+     */
+    public ReturnObject deleteGoodsSpu(GoodsSpu spu) {
+        ReturnObject<Object> returnObject = spuDao.deleteGoodsSpu(spu);
+        return returnObject;
+    }
 }

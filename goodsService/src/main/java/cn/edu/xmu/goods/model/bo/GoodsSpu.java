@@ -76,7 +76,7 @@ public class GoodsSpu {
 
     private String spec;
 
-    private boolean disabled=false;//还有点问题哦
+    private boolean disabled;//还有点问题哦
 
     private LocalDateTime gmtCreated;
 
