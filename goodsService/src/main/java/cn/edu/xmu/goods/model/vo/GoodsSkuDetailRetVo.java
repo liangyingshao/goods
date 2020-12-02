@@ -5,16 +5,17 @@ import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Data
-@ApiModel(description = "查询SKU列表视图对象")
-public class GoodsSkuRetVo {
+@ApiModel(description = "查询SKU详细信息视图对象")
+public class GoodsSkuDetailRetVo{
     private Long id;
 
     private String name;
 
     private String skuSn;
+
+    private String detail;
 
     private String imageUrl;
 
@@ -24,17 +25,29 @@ public class GoodsSkuRetVo {
 
     private Long price;
 
-    private Byte disabled;
+    private String configuration;
 
-    public GoodsSkuRetVo(GoodsSku obj)
+    private Long weight;
+
+    private LocalDateTime gmtCreated;
+
+    private LocalDateTime gmtModified;
+
+    private GoodsSpuVo spu;
+
+    public void set(GoodsSku obj)
     {
         id=obj.getId();
         name=obj.getName();
         skuSn=obj.getSkuSn();
+        detail = obj.getDetail();
         imageUrl=obj.getImageUrl();
         inventory=obj.getInventory();
         originalPrice=obj.getOriginalPrice();
         price=obj.getPrice();
-        disabled=obj.getDisabled().getCode().byteValue();
+        configuration = obj.getConfiguration();
+        weight = obj.getWeight();
+        gmtCreated = obj.getGmtCreated();
+        gmtModified = obj.getGmtModified();
     }
 }
