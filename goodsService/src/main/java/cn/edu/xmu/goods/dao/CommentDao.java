@@ -1,9 +1,14 @@
 package cn.edu.xmu.goods.dao;
 
 import cn.edu.xmu.goods.mapper.CommentPoMapper;
+import cn.edu.xmu.goods.mapper.GoodsSkuPoMapper;
+import cn.edu.xmu.goods.mapper.GoodsSpuPoMapper;
+import cn.edu.xmu.goods.mapper.ShopPoMapper;
 import cn.edu.xmu.goods.model.bo.Comment;
+import cn.edu.xmu.goods.model.bo.GoodsSpu;
 import cn.edu.xmu.goods.model.po.CommentPo;
 import cn.edu.xmu.goods.model.po.CommentPoExample;
+import cn.edu.xmu.goods.model.po.GoodsSpuPoExample;
 import cn.edu.xmu.goods.model.po.ShopPo;
 import cn.edu.xmu.ooad.annotation.Audit;
 import cn.edu.xmu.ooad.model.VoObject;
@@ -29,6 +34,12 @@ import java.util.*;
 public class CommentDao {
     @Autowired
     private CommentPoMapper commentPoMapper;
+
+    @Autowired
+    private GoodsSkuPoMapper goodsSkuPoMapper;
+
+    @Autowired
+    private GoodsSpuPoMapper goodsSpuPoMapper;
 
     private static final Logger logger = LoggerFactory.getLogger(CommentDao.class);
 
@@ -72,6 +83,7 @@ public class CommentDao {
         //增加state=2的查询
         Byte state = 2;
         criteria.andStateEqualTo(state);
+        criteria.andGoodsSkuIdEqualTo(SKU_Id);
         //criteria.andDepartIdEqualTo(departId);
         //分页查询
         PageHelper.startPage(pageNum, pageSize);
@@ -107,7 +119,7 @@ public class CommentDao {
             else {
                 Byte newState;
                 if(commentPo.getState() != 0){
-                    return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);//该评论已经审核过了，错误码需要调整
+                    return new ReturnObject<>(ResponseCode.COMMENT_AUDITED);//该评论已经审核过了
                 }
                 if(conclusion) {//通过审核
                     newState = 2;
@@ -133,6 +145,37 @@ public class CommentDao {
         criteria.andCustomerIdEqualTo(user_Id);
         //分页查询
         PageHelper.startPage(pageNum, pageSize);
+        List<CommentPo> commentPos = null;
+        try {
+            commentPos = commentPoMapper.selectByExample(example);
+            List<VoObject> ret = new ArrayList<>(commentPos.size());
+            for (CommentPo po : commentPos) {
+                Comment comment = new Comment(po);
+                ret.add(comment);
+            }
+            PageInfo<VoObject> commentPage = PageInfo.of(ret);
+            return new ReturnObject<>(commentPage);
+        }
+        catch (DataAccessException e){
+            logger.error("selectAllPassComment: DataAccessException:" + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
+    }
+
+    public ReturnObject<PageInfo<VoObject>> showUnAuditComments(Integer comment_state, Integer pageNum, Integer pageSize) {
+        CommentPoExample example = new CommentPoExample();
+        CommentPoExample.Criteria criteria = example.createCriteria();
+        //增加state=0或者1或者2的查询
+        Byte state = comment_state.byteValue();
+        criteria.andStateEqualTo(state);
+        //分页查询
+        PageHelper.startPage(pageNum, pageSize);
+//        logger.debug("page = " + pageNum + "pageSize = " + pageSize);
         List<CommentPo> commentPos = null;
         try {
             commentPos = commentPoMapper.selectByExample(example);

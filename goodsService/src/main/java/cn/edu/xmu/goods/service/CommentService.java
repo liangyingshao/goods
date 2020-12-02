@@ -64,4 +64,17 @@ public class CommentService {
         ReturnObject<PageInfo<VoObject>> returnObject = commentDao.showComment(user_Id, pageNum, pageSize);
         return returnObject;
     }
+
+    public ReturnObject<PageInfo<VoObject>> showUnAuditComments(Integer comment_state, Integer pageNum, Integer pageSize) {
+        //还得根据用户id找到用户信息封装进data里面，应该是其他模块的内部接口，但是在user模块里没找到对应的API，/users/{id}是外部接口
+//        "customer": {
+//            "id": 0,
+//            "userName": "string",
+//            "realName": "string"
+//        }
+        ReturnObject<PageInfo<VoObject>> returnObject = commentDao.showUnAuditComments(comment_state, pageNum, pageSize);
+        return returnObject;
+    }
+
+    //我觉得得另写一个函数，根据用户id找到用户信息封装进data里面
 }
