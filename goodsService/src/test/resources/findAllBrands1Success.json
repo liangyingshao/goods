@@ -1,0 +1,28 @@
+{
+  "errno": 0,
+  "errmsg": "成功",
+  "data": {
+    "page": 1,
+    "pageSize": 2,
+    "total": 2,
+    "pages": 1,
+    "list": [
+      {
+        "id": 71,
+        "name": "戴荣华",
+        "imageUrl": null,
+        "detail": null,
+        "gmtCreate": "2020-11-28T17:42:21",
+        "gmtModified": "2020-11-28T17:42:21"
+      },
+      {
+        "id": 72,
+        "name": "范敏祺",
+        "imageUrl": null,
+        "detail": null,
+        "gmtCreate": "2020-11-28T17:42:21",
+        "gmtModified": "2020-11-28T17:42:21"
+      }
+    ]
+  }
+}
