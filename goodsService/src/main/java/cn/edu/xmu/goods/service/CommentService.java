@@ -1,6 +1,8 @@
 package cn.edu.xmu.goods.service;
 
 import cn.edu.xmu.goods.dao.CommentDao;
+import cn.edu.xmu.goods.model.bo.Comment;
+import cn.edu.xmu.goods.model.vo.CommentRetVo;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
@@ -18,30 +20,42 @@ public class CommentService {
     CommentDao commentDao;
 
     @Transactional
-    public ReturnObject<VoObject> addSkuComment(Long id, String content, Long type, Long userId) {
-        //ReturnObject<VoObject> object;
-        long SKU_Id;
-        // 根据id查询对应的订单条目记录，需要调用订单的，这里先做个假数据，其实放在try和catch里面是不是比较好呢
-        // 查询不到记录
-        if(id == 0)// 记录不存在
+    public ReturnObject<CommentRetVo> addSkuComment(Comment comment) {
+        Comment orderItem=new Comment();//其实不应该是Comment类型的。。。
+        orderItem.setCustomerId(comment.getCustomerId());//保证现在的假数据满足一致条件
+        //根据comment.getOrderitemId()得到对应的订单条目记录orderItem
+        if(orderItem == null)// 记录不存在
         {
-            //返回903
+            // orderItem为null，返回903
             return new ReturnObject<>(ResponseCode.USER_NOTBUY);
         }
-        // 查到记录，从中拿出SKU_Id
-        else
+        else// 查到记录，从中拿出SKU_Id
         {
-            //给SKU_Id赋值
-            SKU_Id=1;
-            //判断顾客id和userId是否一致，否则返回903
+            //判断orderItem中的customerId和comment.getCustomerId()
+            if(orderItem.getCustomerId()!=comment.getCustomerId())
+            {
+                //如果不一致，返回903
+                return new ReturnObject<>(ResponseCode.USER_NOTBUY);
+            }
+            else
+            {
+                //一致，给SKU_Id赋值
+                orderItem.setGoodsSkuId(1L);
+                comment.setGoodsSkuId(orderItem.getGoodsSkuId());
+            }
         }
-        //还得根据用户id找到用户信息，应该是其他模块的内部接口，但是在user模块里没找到对应的API，/users/{id}是外部接口
-//        "customer": {
-//            "id": 0,
-//            "userName": "string",
-//            "realName": "string"
-//        }
-        return commentDao.addSkuComment(id,content,type,userId,SKU_Id);
+//        //根据用户id找到用户信息，应该是其他模块的内部接口，但是在user模块里没找到对应的API，/users/{id}是外部接口
+////        "customer": {
+////            "id": 0,
+////            "userName": "string",
+////            "realName": "string"
+////        }
+//        Long id=0L;
+//        String content="";
+//        Long userId=0L;
+//        Long type=0L;
+//        Long SKU_Id=0L;
+        return commentDao.addSkuComment(comment);
     }
 
     public ReturnObject<PageInfo<VoObject>> selectAllPassComment(Long SKU_Id, Integer pageNum, Integer pageSize) {

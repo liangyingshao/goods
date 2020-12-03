@@ -36,6 +36,10 @@ public class GoodsDao {
     private BrandPoMapper brandMapper;
     @Autowired
     private GoodsCategoryPoMapper categoryMapper;
+//上传图片相关变量
+    private String davUsername="oomall";
+    private String davPassword="admin";
+    private String baseUrl="http://192.168.148.131:8888/webdav/";
 
     public void initialize() throws Exception {
         //初始化sku

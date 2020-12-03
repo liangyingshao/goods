@@ -35,32 +35,43 @@ public class CommentControllerTest {
     }
 
     @Test
-    public void addSkuComment1() throws Exception{
-        String token = creatTestToken(1L, 0L, 100);
-        String responseString = this.mvc.perform(post("/goods/orderitems/1/comments").header("authorization",token).contentType("application/json;charset=UTF-8").queryParam("type", "0").queryParam("content", "购物体验良好"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json;charset=UTF-8"))
-                .andReturn().getResponse().getContentAsString();
-
-        String expectedResponse = "{\"errno\": 0, \"errmsg\": \"成功\"}";
-        JSONAssert.assertEquals(expectedResponse, responseString, true);
-        //一要检测返回值是否符合预期
-        //二要检查数据库的值是否符合预期
-    }
-
-    @Test
-    public void getcommentState1() throws Exception{
+    public void getcommentState() throws Exception{
         String token = creatTestToken(1L, 0L, 100);
         String responseString = this.mvc.perform(get("/goods/comments/states").header("authorization",token).contentType("application/json;charset=UTF-8"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
-        String expectedResponse="{\"errno\":0,\"data\":[{\"name\":\"待审核\",\"code\":0},{\"name\":\"审核通过\",\"code\":1},{\"name\":\"审核不通过\",\"code\":2}],\"errmsg\":\"成功\"}";
+        String expectedResponse="{\"errno\":0,\"data\":[{\"name\":\"未审核\",\"code\":0},{\"name\":\"评论成功\",\"code\":1},{\"name\":\"未通过\",\"code\":2}],\"errmsg\":\"成功\"}";
         JSONAssert.assertEquals(expectedResponse,responseString,true);
     }
 
     @Test
-    public void selectAllPassComment1() {
+    public void addSkuComment() throws Exception{
+        String token = creatTestToken(1L, 0L, 100);
+        String json = "{\"type\":\"0\",\"content\":\"购物体验良好\"}";
+        String responseString1 = this.mvc.perform(post("/goods/orderitems/1/comments").header("authorization",token)
+                .contentType("application/json;charset=UTF-8")
+                .content(json))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+
+        String expectedResponse1 = "{\"errno\":0,\"data\":{\"id\":10,\"customer\":{\"id\":1,\"userName\":\"用户姓名\",\"realName\":\"真实姓名\"},\"goodsSkuId\":1,\"type\":0,\"content\":\"购物体验良好\",\"state\":0,\"gmtCreate\":\"2020-12-03T19:03:53.4623637\",\"gmtModified\":null},\"errmsg\":\"成功\"}";
+        JSONAssert.assertEquals(expectedResponse1, responseString1, true);
+
+        String responseString2 = this.mvc.perform(post("/goods/orderitems/1/comments").header("authorization",token)
+                .contentType("application/json;charset=UTF-8")
+                .content(json))
+                //.andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+
+        String expectedResponse2 = "{\"errno\":941,\"errmsg\":\"该订单条目已评论\"}";
+        JSONAssert.assertEquals(expectedResponse2, responseString2, true);
+    }
+
+    @Test
+    public void selectAllPassComment() {
         String responseString = null;
         String token = creatTestToken(1L, 0L, 100);
         try {
