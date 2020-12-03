@@ -43,7 +43,7 @@
 
         <!--数据库链接URL，用户名、密码 -->
         <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
-                        connectionURL="jdbc:mysql://localhost:3306/oomall_goods?serverTimezone=GMT%2B8" userId="dbuser" password="123456">
+                        connectionURL="jdbc:mysql://localhost:3306/oomall_goods?serverTimezone=GMT%2B8" userId="root" password="database0227">
         </jdbcConnection>
         <javaTypeResolver>
             <!--
@@ -130,7 +130,7 @@
         -->
         <table tableName="brand" domainObjectName="BrandPo"
                enableCountByExample="false" enableUpdateByExample="false"
-               enableDeleteByExample="false" enableSelectByExample="true"
+               enableDeleteByExample="false" enableSelectByExample="false"
                selectByExampleQueryId="false">
             <!-- 如果设置为true，生成的model类会直接使用column本身的名字，而不会再使用驼峰命名方法，比如BORN_DATE，生成的属性名字就是BORN_DATE,而不会是bornDate -->
             <property name="useActualColumnNames" value="false"/>
@@ -139,9 +139,9 @@
         </table>
 
         <table tableName="coupon" domainObjectName="CouponPo"
-               enableCountByExample="false" enableUpdateByExample="false"
-               enableDeleteByExample="false" enableSelectByExample="true"
-               selectByExampleQueryId="false">
+               enableCountByExample="true" enableUpdateByExample="true"
+               enableDeleteByExample="true" enableSelectByExample="true"
+               selectByExampleQueryId="true">
             <!-- 如果设置为true，生成的model类会直接使用column本身的名字，而不会再使用驼峰命名方法，比如BORN_DATE，生成的属性名字就是BORN_DATE,而不会是bornDate -->
             <property name="useActualColumnNames" value="false"/>
             <!--mysql 配置-->
@@ -159,9 +159,9 @@
         </table>
 
         <table tableName="coupon_spu" domainObjectName="CouponSpuPo"
-               enableCountByExample="false" enableUpdateByExample="true"
+               enableCountByExample="true" enableUpdateByExample="true"
                enableDeleteByExample="true" enableSelectByExample="true"
-               selectByExampleQueryId="false" delimitAllColumns="true">
+               selectByExampleQueryId="true" delimitAllColumns="true">
             <!-- 如果设置为true，生成的model类会直接使用column本身的名字，而不会再使用驼峰命名方法，比如BORN_DATE，生成的属性名字就是BORN_DATE,而不会是bornDate -->
             <property name="useActualColumnNames" value="false"/>
             <!--mysql 配置-->
@@ -209,9 +209,9 @@
         </table>
 
         <table tableName="goods_sku" domainObjectName="GoodsSkuPo"
-               enableCountByExample="false" enableUpdateByExample="false"
-               enableDeleteByExample="false" enableSelectByExample="true"
-               selectByExampleQueryId="false">
+               enableCountByExample="true" enableUpdateByExample="true"
+               enableDeleteByExample="true" enableSelectByExample="true"
+               selectByExampleQueryId="true">
             <!-- 如果设置为true，生成的model类会直接使用column本身的名字，而不会再使用驼峰命名方法，比如BORN_DATE，生成的属性名字就是BORN_DATE,而不会是bornDate -->
             <property name="useActualColumnNames" value="false"/>
             <!--mysql 配置-->
@@ -219,9 +219,9 @@
         </table>
 
         <table tableName="goods_spu" domainObjectName="GoodsSpuPo"
-               enableCountByExample="false" enableUpdateByExample="false"
-               enableDeleteByExample="false" enableSelectByExample="true"
-               selectByExampleQueryId="false">
+               enableCountByExample="true" enableUpdateByExample="true"
+               enableDeleteByExample="true" enableSelectByExample="true"
+               selectByExampleQueryId="true">
             <!-- 如果设置为true，生成的model类会直接使用column本身的名字，而不会再使用驼峰命名方法，比如BORN_DATE，生成的属性名字就是BORN_DATE,而不会是bornDate -->
             <property name="useActualColumnNames" value="false"/>
             <!--mysql 配置-->

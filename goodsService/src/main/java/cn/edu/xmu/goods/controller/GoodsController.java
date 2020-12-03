@@ -1,14 +1,8 @@
 package cn.edu.xmu.goods.controller;
 
-import cn.edu.xmu.goods.model.bo.Brand;
-import cn.edu.xmu.goods.model.bo.GoodsCategory;
 import cn.edu.xmu.goods.model.bo.GoodsSku;
-import cn.edu.xmu.goods.model.vo.BrandVo;
-import cn.edu.xmu.goods.model.vo.GoodsCategoryVo;
 import cn.edu.xmu.goods.model.vo.GoodsSkuVo;
-import cn.edu.xmu.goods.service.BrandService;
-import cn.edu.xmu.goods.service.GoodsCategoryService;
-import cn.edu.xmu.goods.service.GoodsService;
+import cn.edu.xmu.goods.service.*;
 import cn.edu.xmu.ooad.annotation.Audit;
 import cn.edu.xmu.ooad.annotation.Depart;
 import cn.edu.xmu.ooad.annotation.LoginUser;
@@ -26,9 +20,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+
 
 
 /**
@@ -45,6 +42,12 @@ public class GoodsController {
 
     @Autowired
     GoodsService goodsService;
+
+    @Autowired
+    CommentService commentService;
+
+    @Autowired
+    SpuService spuService;
 
     @Autowired
     private HttpServletResponse httpServletResponse;
@@ -77,7 +80,6 @@ public class GoodsController {
         ReturnObject returnObject = goodsService.modifyShop(id,name);
         return Common.decorateReturnObject(returnObject);
     }
-
 
     /**
      *查询SKU
@@ -203,6 +205,8 @@ public class GoodsController {
         if (null != returnObject) {
             return returnObject;
         }
+        if(departId!=0&&departId!=shopId)
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
         GoodsSku sku=vo.createGoodsSku();
         sku.setId(id);
         ReturnObject retObject=goodsService.modifySku(shopId,sku);
@@ -212,317 +216,5 @@ public class GoodsController {
             return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }
     }
-
-    /**
-     * description: 根据种类ID获取商品下一级分类信息
-     * version: 1.0 
-     * date: 2020/12/2 23:23 
-     * author: 张悦 
-     * 
-     * @param id
-     * @return java.lang.Object
-     */ 
-    @ApiOperation(value = "根据种类ID获取商品下一级分类信息")
-    @ApiResponses({
-            @ApiResponse(code = 0, message = "成功"),
-            @ApiResponse(code = 504, message = "操作的资源id不存在")
-    })
-    //@Audit
-    @GetMapping("/categories/{id}/subcategories")
-    public Object getSubcategories(@PathVariable Long id){
-        ReturnObject<List> returnObject =  goodsCategoryService.getSubcategories(id);
-        return  Common.decorateReturnObject(returnObject);
-    }
-
-    /**
-     * description: 管理员新增商品类目
-     * version: 1.0
-     * date: 2020/12/2 19:00
-     * author: 张悦
-     *
-     * @param vo
-     * @param bindingResult
-     * @param userId
-     * @param departId
-     * @return java.lang.Object
-     */
-    @ApiOperation(value = "管理员新增商品类目", produces = "application/json")
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
-            @ApiImplicitParam(paramType = "body", dataType = "GoodsCategoryVo", name = "vo", value = "可修改的类目信息", required = true)
-    })
-    @ApiResponses({
-            @ApiResponse(code = 0, message = "成功"),
-            @ApiResponse(code = 991, message = "类目名称已存在")
-    })
-    @Audit
-    @PostMapping("/shops/{shopId}/categories/{id}/subcategories")
-    public Object insertBrand(@Validated @RequestBody GoodsCategoryVo vo, BindingResult bindingResult,
-                              @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
-                              @Depart @ApiIgnore @RequestParam(required = false) Long departId,
-                              @PathVariable Long id) {
-        logger.debug("insert category by userId:" + userId);
-        //校验前端数据
-        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
-        if (null != returnObject) {
-            logger.debug("validate fail");
-            return returnObject;
-        }
-        GoodsCategory goodsCategory = vo.createGoodsCategory();
-        goodsCategory.setGmtCreate(LocalDateTime.now());
-        ReturnObject retObject = goodsCategoryService.insertGoodsCategory(goodsCategory,id);
-        if (retObject.getData() != null) {
-            httpServletResponse.setStatus(HttpStatus.CREATED.value());
-            return Common.getRetObject(retObject);
-        } else {
-            return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
-        }
-    }
-
-    /**
-     * description: 修改商品类目信息
-     * version: 1.0 
-     * date: 2020/12/2 23:38 
-     * author: 张悦 
-     * 
-     * @param id
-     * @param vo
-     * @param bindingResult
-     * @param userId
-     * @param departId
-     * @param httpServletResponse
-     * @return java.lang.Object
-     */ 
-    @ApiOperation(value = "管理员修改商品类目信息")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
-            @ApiImplicitParam(name="id", required = true, dataType="String", paramType="path")
-    })
-    @ApiResponses({
-            @ApiResponse(code = 991, message = "类目名称已存在"),
-            @ApiResponse(code = 0, message = "成功"),
-    })
-    @Audit
-    @PutMapping("/shops/{shopId}/categories/{id}")
-    public Object changeCategory(@PathVariable Long id, @Validated @RequestBody GoodsCategoryVo vo, BindingResult bindingResult, @LoginUser Long userId, @Depart Long departId,
-                                 HttpServletResponse httpServletResponse){
-        logger.debug("changeCategory: id = "+ id +" vo" + vo);
-        //logger.debug("getAllPrivs: userId = " + userId +" departId = "+departId);
-        /* 处理参数校验错误 */
-        Object o = Common.processFieldErrors(bindingResult, httpServletResponse);
-        if(o != null){
-            return o;
-        }
-        ReturnObject<VoObject> returnObject = goodsCategoryService.changeCategory(id, vo);
-
-        if (returnObject.getCode() == ResponseCode.OK) {
-            return Common.getRetObject(returnObject);
-        } else {
-            return Common.decorateReturnObject(returnObject);
-        }
-    }
-
-
-    /**
-     * description: 删除商品类目信息 
-     * version: 1.0 
-     * date: 2020/12/2 23:38 
-     * author: 张悦 
-     * 
-     * @param id
-     * @return java.lang.Object
-     */ 
-    @ApiOperation(value = "删除商品类目信息")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
-            @ApiImplicitParam(name="id", required = true, dataType="Integer", paramType="path")
-    })
-    @ApiResponses({
-            @ApiResponse(code = 0, message = "成功"),
-    })
-    @Audit // 需要认证
-    @DeleteMapping("/shops/{shopId}/categories/{id}")
-    public Object deleteCategory(@PathVariable Long id) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("deleteCategory: id = "+ id);
-        }
-        ReturnObject returnObject = goodsCategoryService.deleteCategory(id);
-        return Common.decorateReturnObject(returnObject);
-    }
-
-
-    /**
-     * description: 管理员新增品牌
-     * version: 1.0
-     * date: 2020/12/2 19:00
-     * author: 张悦
-     *
-     * @param vo
-     * @param bindingResult
-     * @param userId
-     * @param departId
-     * @return java.lang.Object
-     */
-    @ApiOperation(value = "新增品牌", produces = "application/json")
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
-            @ApiImplicitParam(paramType = "body", dataType = "BrandVo", name = "vo", value = "可修改的品牌信息", required = true)
-    })
-    @ApiResponses({
-            @ApiResponse(code = 0, message = "成功"),
-            @ApiResponse(code = 990, message = "品牌名称已存在")
-    })
-    @Audit
-    @PostMapping("/shops/{shopId}/brands")
-    public Object insertBrand(@Validated @RequestBody BrandVo vo, BindingResult bindingResult,
-                              @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
-                              @Depart @ApiIgnore @RequestParam(required = false) Long departId) {
-        logger.debug("insert brand by userId:" + userId);
-        //校验前端数据
-        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
-        if (null != returnObject) {
-            logger.debug("validate fail");
-            return returnObject;
-        }
-        Brand brand = vo.createBrand();
-        brand.setGmtCreate(LocalDateTime.now());
-        ReturnObject retObject = brandService.insertBrand(brand);
-        if (retObject.getData() != null) {
-            httpServletResponse.setStatus(HttpStatus.CREATED.value());
-            return Common.getRetObject(retObject);
-        } else {
-            return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
-        }
-    }
-
-    /**
-     * description: 上传品牌图片
-     * version: 1.0
-     * date: 2020/12/3 14:57
-     * author: 张悦
-     *
-     * @param id
-     * @param file
-     * @return java.lang.Object
-     */
-    @ApiOperation(value="上传品牌图片")
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "header",dataType = "String",name = "authorization",value = "用户token",required = true),
-            @ApiImplicitParam(paramType = "formData", dataType = "file", name = "img", value ="文件", required = true)
-    })
-    @ApiResponses({
-            @ApiResponse(code = 0, message = "成功"),
-            @ApiResponse(code = 506, message = "该目录文件夹没有写入的权限"),
-            @ApiResponse(code = 508, message = "图片格式不正确"),
-            @ApiResponse(code = 509, message = "图片大小超限")
-    })
-    @Audit
-    @PostMapping("/shops/{shopId}/brands/{id}/uploadImg")
-    public Object uploadBrandImg(@PathVariable Long id, @RequestParam("img") MultipartFile file){
-        logger.debug("uploadBrandImg: id = "+ id+" shopId="+0 +" img=" + file.getOriginalFilename());
-        ReturnObject returnObject = brandService.uploadBrandImg(id,file);
-        return Common.getNullRetObj(returnObject, httpServletResponse);
-    }
-
-    /**
-     * description: 查看所有品牌
-     * version: 1.0
-     * date: 2020/12/1 22:52
-     * author: 张悦
-     *
-     * @param page
-     * @param pageSize
-     * @return java.lang.Object
-     */
-    @ApiOperation(value = "查看所有品牌")
-    @ApiResponses({
-            @ApiResponse(code = 0, message = "成功"),
-    })
-    //@Audit
-    @GetMapping("brands")
-    public Object findAllBrands(@RequestParam(required = false) Integer page, @RequestParam(required = false) Integer pageSize){
-
-        logger.debug("getAllBrands: page = "+ page +"  pageSize ="+pageSize);
-
-        page = (page == null)?1:page;
-        pageSize = (pageSize == null)?10:pageSize;
-
-        logger.debug("getAllBrands: page = "+ page +"  pageSize ="+pageSize);
-        ReturnObject<PageInfo<VoObject>> returnObject = brandService.findAllBrands(page, pageSize);
-        return Common.getPageRetObject(returnObject);
-    }
-
-    /**
-     * description: 修改商品品牌信息
-     * version: 1.0 
-     * date: 2020/12/2 23:38 
-     * author: 张悦 
-     * 
-     * @param id
-     * @param vo
-     * @param bindingResult
-     * @param userId
-     * @param departId
-     * @param httpServletResponse
-     * @return java.lang.Object
-     */ 
-    @ApiOperation(value = "管理员修改商品牌信息")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
-            @ApiImplicitParam(name="id", required = true, dataType="String", paramType="path")
-    })
-    @ApiResponses({
-            @ApiResponse(code = 990, message = "品牌名称已存在"),
-            @ApiResponse(code = 0, message = "成功")
-    })
-    @Audit
-    @PutMapping("/shops/{shopId}/brands/{id}")
-    public Object changeBrand(@PathVariable Long id, @Validated @RequestBody BrandVo vo, BindingResult bindingResult, @LoginUser Long userId, @Depart Long departId,
-                              HttpServletResponse httpServletResponse){
-        logger.debug("changeBrand: id = "+ id +" vo" + vo);
-        //logger.debug("getAllPrivs: userId = " + userId +" departId = "+departId);
-        /* 处理参数校验错误 */
-        Object o = Common.processFieldErrors(bindingResult, httpServletResponse);
-        if(o != null){
-            return o;
-        }
-        ReturnObject<VoObject> returnObject = brandService.changeBrand(id, vo);
-
-        if (returnObject.getCode() == ResponseCode.OK) {
-            return Common.getRetObject(returnObject);
-        } else {
-            return Common.decorateReturnObject(returnObject);
-        }
-    }
-
-    /**
-     * description: 删除品牌信息
-     * version: 1.0
-     * date: 2020/12/2 23:38
-     * author: 张悦
-     *
-     * @param id
-     * @return java.lang.Object
-     */
-    @ApiOperation(value = "删除品牌信息")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
-            @ApiImplicitParam(name="id", required = true, dataType="Integer", paramType="path")
-    })
-    @ApiResponses({
-            @ApiResponse(code = 0, message = "成功"),
-    })
-    @Audit // 需要认证
-    @DeleteMapping("/shops/{shopId}/brands/{id}")
-    public Object deleteBrand(@PathVariable Long id) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("deleteBrand: id = "+ id);
-        }
-        ReturnObject returnObject = brandService.deleteBrand(id);
-        return Common.decorateReturnObject(returnObject);
-    }
-
-
-
 }
 
