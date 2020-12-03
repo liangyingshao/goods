@@ -3,12 +3,12 @@ package cn.edu.xmu.goods.dao;
 import cn.edu.xmu.goods.mapper.BrandPoMapper;
 import cn.edu.xmu.goods.mapper.GoodsCategoryPoMapper;
 import cn.edu.xmu.goods.mapper.GoodsSpuPoMapper;
+import cn.edu.xmu.goods.model.bo.GoodsSku;
 import cn.edu.xmu.goods.model.bo.GoodsSpu;
-import cn.edu.xmu.goods.model.po.BrandPo;
-import cn.edu.xmu.goods.model.po.GoodsCategoryPo;
-import cn.edu.xmu.goods.model.po.GoodsSpuPo;
-import cn.edu.xmu.goods.model.po.GoodsSpuPoExample;
+import cn.edu.xmu.goods.model.po.*;
 import cn.edu.xmu.goods.model.vo.GoodsSpuVo;
+import cn.edu.xmu.ooad.model.VoObject;
+import cn.edu.xmu.ooad.util.ImgHelper;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import org.slf4j.Logger;
@@ -16,7 +16,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 /**
@@ -36,6 +39,11 @@ public class GoodsSpuDao {
 
     @Autowired
     private BrandPoMapper brandMapper;
+
+    //上传图片相关变量
+    private String davUsername="oomall";
+    private String davPassword="admin";
+    private String baseUrl="http://192.168.148.131:8888/webdav/";
 
     /**
      * 增加一个SPU
@@ -198,7 +206,7 @@ public class GoodsSpuDao {
             if(categoryPo.getPid().equals((long)0))
                 return returnObject=new ReturnObject<>(ResponseCode.CATEALTER_INVALID);
             //该分类为二级分类，将SPU加入
-            spu.setDisabled(false);//提前设置，避免空指针错误
+//            spu.setDisabled(false);//提前设置，避免空指针错误
             returnObject=modifyGoodsSpu(spu);
         }
         catch (DataAccessException e) {
@@ -233,7 +241,7 @@ public class GoodsSpuDao {
             if(!categoryPo.getId().equals(spu.getCategoryId())||categoryPo.getPid().equals((long)0))
                 return returnObject=new ReturnObject<>(ResponseCode.CATEALTER_INVALID);
             //将SPU移出该分类
-            spu.setDisabled(false);//提前设置，避免空指针错误
+//            spu.setDisabled(false);//提前设置，避免空指针错误
             spu.setCategoryId((long)0);//提前设置，避免空指针错误
             returnObject=modifyGoodsSpu(spu);
         }
@@ -266,7 +274,7 @@ public class GoodsSpuDao {
             if(brandPo==null)
                 return returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             //该品牌存在，将SPU加入
-            spu.setDisabled(false);//提前设置，避免空指针错误
+//            spu.setDisabled(false);//提前设置，避免空指针错误
             returnObject=modifyGoodsSpu(spu);
         }
         catch (DataAccessException e) {
@@ -302,7 +310,7 @@ public class GoodsSpuDao {
             if(!brandPo.getId().equals(spuPo.getBrandId())||spuPo.getBrandId().equals(0))
                 return returnObject=new ReturnObject<>(ResponseCode.BRANDALTER_INVALID);
             //将SPU移出该品牌
-            spu.setDisabled(false);//提前设置，避免空指针错误
+//            spu.setDisabled(false);//提前设置，避免空指针错误
             spu.setBrandId((long)0);//提前设置，避免空指针错误
             returnObject=modifyGoodsSpu(spu);
         }
@@ -320,7 +328,7 @@ public class GoodsSpuDao {
     }
 
     /**
-     * 逻辑删除商品SPU，disable==true
+     * 逻辑删除商品SPU
      * @param spu SPUbo
      * @return  ReturnObject<Object> 修改结果
      * @author 24320182203254 秦楚彦
@@ -338,7 +346,7 @@ public class GoodsSpuDao {
             if(spuPo.getDisabled().equals((byte)1)||spuPo.getState().equals(GoodsSpu.SpuState.DELETED.getCode().byteValue()))
                 return returnObject=new ReturnObject<>(ResponseCode.BRANDALTER_INVALID);
             //将SPU逻辑删除，disable==true and state==DELETED
-            spu.setDisabled(true);//提前设置，避免空指针错误
+//            spu.setDisabled(true);//提前设置，避免空指针错误
             spu.setState(GoodsSpu.SpuState.DELETED);//提前设置，避免空指针错误
             returnObject=modifyGoodsSpu(spu);
         }
@@ -348,6 +356,65 @@ public class GoodsSpuDao {
             returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
         }
         catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
+        return returnObject;
+    }
+
+    /**
+     * 上传商品SPU图片
+     * @param spu
+     * @return  GoodsSpuPo
+     * @author 24320182203254 秦楚彦
+     * Created at 2020/12/03 12：32
+     */
+    public ReturnObject<Object> uploadSpuImg(GoodsSpu spu,MultipartFile file) {
+
+        ReturnObject returnObject = null;
+        try {
+            //获得该SPU信息
+            GoodsSpuPo spuPo = goodsSpuMapper.selectByPrimaryKey(spu.getId());
+            //该SPU不存在
+            if (spuPo == null)
+                return returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            //对不属于操作者店铺的商品SPU进行操作
+            if (!spuPo.getShopId().equals(spu.getShopId()))
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+            // 该商品SPU已被删除
+            if (spuPo.getState().equals(GoodsSpu.SpuState.DELETED.getCode().byteValue()))
+                return returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+
+            returnObject = ImgHelper.remoteSaveImg(file, 2, davUsername, davPassword, baseUrl);
+
+            //文件上传错误
+            if (!returnObject.getCode().equals(ResponseCode.OK)) {
+                logger.debug(returnObject.getErrmsg());
+                return returnObject;
+            }
+            String oldFilename = spu.getImageUrl();
+            spu.setImageUrl(returnObject.getData().toString());
+            returnObject = modifyGoodsSpu(spu);
+
+            //数据库更新失败，需删除新增的图片
+            if (returnObject.getCode() == ResponseCode.FIELD_NOTVALID) {
+                ImgHelper.deleteRemoteImg(returnObject.getData().toString(), davUsername, davPassword, baseUrl);
+                return returnObject;
+            }
+
+            //数据库更新成功需删除旧图片，未设置则不删除
+            if (oldFilename != null) {
+                ImgHelper.deleteRemoteImg(oldFilename, davUsername, davPassword, baseUrl);
+            }
+        } catch (DataAccessException e) {
+            // 其他数据库错误
+            logger.debug("other sql exception : " + e.getMessage());
+            returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        } catch (IOException e) {
+            logger.debug("uploadImg: I/O Error:" + baseUrl);
+            return new ReturnObject(ResponseCode.FILE_NO_WRITE_PERMISSION);
+        } catch (Exception e) {
             // 其他Exception错误
             logger.error("other exception : " + e.getMessage());
             returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));

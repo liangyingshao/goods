@@ -3,6 +3,7 @@ package cn.edu.xmu.goods.dao;
 import cn.edu.xmu.goods.GoodsServiceApplication;
 import cn.edu.xmu.goods.model.bo.FloatPrice;
 import cn.edu.xmu.goods.model.bo.GoodsSku;
+import cn.edu.xmu.goods.model.bo.GoodsSpu;
 import cn.edu.xmu.goods.model.vo.GoodsSkuDetailRetVo;
 import cn.edu.xmu.goods.model.vo.GoodsSkuRetVo;
 import cn.edu.xmu.ooad.util.ResponseCode;
@@ -22,6 +23,9 @@ class GoodsDaoTest {
 
     @Autowired
     private GoodsDao goodsDao;
+
+    @Autowired
+    private GoodsSpuDao spuDao;
 
     @Test
     void getSkuList() {
@@ -100,6 +104,7 @@ class GoodsDaoTest {
         returnObject=goodsDao.uploadSkuImg(sku);
         assertEquals(returnObject.getCode(),ResponseCode.RESOURCE_ID_NOTEXIST);
     }
+
 
     @Test
     void addFloatPrice()

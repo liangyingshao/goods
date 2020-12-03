@@ -25,7 +25,7 @@ public class GoodsSpuCouponCreateRetVo {
 
     private LocalDateTime gmtModified;
 
-    private Boolean disabled;
+//    private Boolean disabled;
 
     public void set(GoodsSpu obj)
     {
@@ -37,6 +37,6 @@ public class GoodsSpuCouponCreateRetVo {
         state=obj.getState().getCode().byteValue();
         gmtCreate=obj.getGmtCreated();
         gmtModified=obj.getGmtModified();
-        disabled=obj.isDisabled();
+//        disabled=obj.isDisabled();
     }
 }
