@@ -312,7 +312,7 @@ public class GoodsController {
         if(departId!=shopId)return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
         GoodsSku sku=vo.createGoodsSku();
         sku.setGoodsSpuId(id);
-        sku.setDisabled(GoodsSku.State.ABLE);
+        sku.setDisabled(GoodsSku.State.ONSHELF);
         ReturnObject<GoodsSkuRetVo> retObject=goodsService.createSKU(shopId,sku);
         if (retObject.getData() != null) {
             return Common.decorateReturnObject(retObject);

@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -132,7 +133,8 @@ public class ActivityDao {
         if(activityPo==null)return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
 
         //活动“待上线”
-        if(CouponActivity.State.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.State.TO_BE_ONLINE))
+        if(activityPo.getBeginTime().isAfter(LocalDateTime.now())//考虑到惰性更新状态【待上线】->【进行中】的情况
+                &&CouponActivity.State.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.State.TO_BE_ONLINE))
         {
             CouponSpuPo couponSpuPo=couponSpu.getCouponSpuPo();
             try{
@@ -154,6 +156,7 @@ public class ActivityDao {
                     List<CouponSpuPo> checkPos=couponSpuMapper.selectByExample(couponSpuExample);
                     if(checkPos.size()==0)return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("couponSpu字段不合法：" + couponSpuPo.toString()));
                     else {
+                        //设置RetVo
                         CouponSpu retCouponSpu=new CouponSpu(checkPos.get(0));
                         CouponSpuRetVo retVo=new CouponSpuRetVo();
                         retVo.set(retCouponSpu);
@@ -177,5 +180,53 @@ public class ActivityDao {
             }
         }
         else return new ReturnObject<>(ResponseCode.COUPONACT_STATENOTALLOW);
+    }
+
+    /**
+     * 店家删除己方某优惠券活动的某限定范围
+     * @param shopId
+     * @param id
+     * @return ReturnObject
+     */
+    public ReturnObject deleteCouponSpu(Long shopId, Long id)
+    {
+        //CouponSpu存在
+        CouponSpuPo couponSpuPo=couponSpuMapper.selectByPrimaryKey(id);
+        if(couponSpuPo==null)return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+
+        //shopId和CouponSpu匹配
+        CouponActivityPo activityPo= activityMapper.selectByPrimaryKey(couponSpuPo.getActivityId());
+        if(activityPo.getShopId()!=shopId)return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+
+        //活动"未上线"
+        if(activityPo.getBeginTime().isAfter(LocalDateTime.now())//考虑到惰性更新状态【待上线】->【进行中】的情况
+                && CouponActivity.State.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.State.TO_BE_ONLINE))
+        {
+            try{
+                int ret=couponSpuMapper.deleteByPrimaryKey(id);
+                if(ret==0){
+                    //删除失败
+                    logger.debug("deleteCouponSpu: delete couponSpu fail : " + couponSpuPo.toString());
+                    return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("couponSpu字段不合法：" + couponSpuPo.toString()));
+                }
+                else {
+                    //删除成功
+                    logger.debug("deleteCouponSpu: delete couponSpu = " + couponSpuPo.toString());
+                    return new ReturnObject<>();
+                }
+            }
+            catch (DataAccessException e)
+            {
+                // 其他数据库错误
+                logger.debug("other sql exception : " + e.getMessage());
+                return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+            }
+            catch (Exception e) {
+                // 其他Exception错误
+                logger.error("other exception : " + e.getMessage());
+                return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+            }
+        }
+        else return new ReturnObject(ResponseCode.COUPONACT_STATENOTALLOW);
     }
 }

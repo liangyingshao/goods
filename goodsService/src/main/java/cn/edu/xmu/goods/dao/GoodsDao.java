@@ -165,7 +165,7 @@ public class GoodsDao {
     {
         GoodsSkuPo skuPo=skuMapper.selectByPrimaryKey(id);
         GoodsSkuDetailRetVo retVo=new GoodsSkuDetailRetVo();
-        if(skuPo!=null&&GoodsSku.State.getTypeByCode(skuPo.getDisabled().intValue()) != GoodsSku.State.DISABLED)retVo.set(new GoodsSku(skuPo));
+        if(skuPo!=null&&GoodsSku.State.getTypeByCode(skuPo.getDisabled().intValue()) != GoodsSku.State.DELETED)retVo.set(new GoodsSku(skuPo));
         else return null;
         GoodsSpuPo spuPo= spuMapper.selectByPrimaryKey(skuPo.getGoodsSpuId());
         GoodsSpu spu=new GoodsSpu(spuPo);
@@ -188,7 +188,7 @@ public class GoodsDao {
     {
         ReturnObject returnObject;
         GoodsSkuPo skuPo=skuMapper.selectByPrimaryKey(sku.getId());
-        if(skuPo==null|| GoodsSku.State.getTypeByCode(skuPo.getDisabled().intValue())== GoodsSku.State.DISABLED)return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        if(skuPo==null|| GoodsSku.State.getTypeByCode(skuPo.getDisabled().intValue())== GoodsSku.State.DELETED)return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         GoodsSkuPo newSkuPo = new GoodsSkuPo();
         newSkuPo.setId(sku.getId());
         newSkuPo.setImageUrl(sku.getImageUrl());
@@ -213,11 +213,11 @@ public class GoodsDao {
     public ReturnObject logicalDelete(Long shopId, Long id)
     {
         GoodsSkuPo skuPo=skuMapper.selectByPrimaryKey(id);
-        if(skuPo==null|| GoodsSku.State.getTypeByCode(skuPo.getDisabled().intValue())== GoodsSku.State.DISABLED)return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        if(skuPo==null|| GoodsSku.State.getTypeByCode(skuPo.getDisabled().intValue())== GoodsSku.State.DELETED)return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         GoodsSpuPo spuPo=spuMapper.selectByPrimaryKey(skuPo.getGoodsSpuId());
         if(spuPo.getShopId()==shopId)
         {
-            skuPo.setDisabled(GoodsSku.State.DISABLED.getCode().byteValue());
+            skuPo.setDisabled(GoodsSku.State.DELETED.getCode().byteValue());
             skuPo.setGmtModified(LocalDateTime.now());
             int ret=skuMapper.updateByPrimaryKey(skuPo);
             if(ret==0)
@@ -240,7 +240,7 @@ public class GoodsDao {
     {
         //SKU存在
         GoodsSkuPo selectSkuPo=skuMapper.selectByPrimaryKey(sku.getId());
-        if(selectSkuPo==null|| GoodsSku.State.getTypeByCode(selectSkuPo.getDisabled().intValue())== GoodsSku.State.DISABLED)
+        if(selectSkuPo==null|| GoodsSku.State.getTypeByCode(selectSkuPo.getDisabled().intValue())== GoodsSku.State.DELETED)
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
 
         //shopId和spuId匹配
@@ -307,7 +307,7 @@ public class GoodsDao {
     {
         //SKU存在
         GoodsSkuPo selectSkuPo=skuMapper.selectByPrimaryKey(floatPrice.getGoodsSkuId());
-        if(selectSkuPo==null|| GoodsSku.State.getTypeByCode(selectSkuPo.getDisabled().intValue())== GoodsSku.State.DISABLED)
+        if(selectSkuPo==null|| GoodsSku.State.getTypeByCode(selectSkuPo.getDisabled().intValue())== GoodsSku.State.DELETED)
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
 
         //库存充足

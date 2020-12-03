@@ -44,4 +44,17 @@ public class ActivityService {
         ReturnObject<CouponSpuRetVo> returnObject=activityDao.createCouponSpu(shopId,couponSpu);
         return returnObject;
     }
+
+    /**
+     * 店家删除己方某优惠券活动的某限定范围
+     * @param shopId
+     * @param id
+     * @return ReturnObject
+     */
+    @Transactional
+    public ReturnObject deleteCouponSpu(Long shopId, Long id)
+    {
+        ReturnObject returnObject=activityDao.deleteCouponSpu(shopId,id);
+        return returnObject;
+    }
 }

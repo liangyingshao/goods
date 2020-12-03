@@ -16,8 +16,9 @@ import java.util.Map;
 public class GoodsSku implements VoObject {
 
     public enum State {
-        ABLE(4, "可用"),
-        DISABLED(6, "废弃");
+        OFFSHELF(0,"未上架"),
+        ONSHELF(4,"上架"),
+        DELETED(6,"已删除");
 
         private static final Map<Integer, GoodsSku.State> stateMap;
 
