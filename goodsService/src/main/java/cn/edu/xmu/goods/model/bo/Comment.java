@@ -35,6 +35,10 @@ public class Comment implements VoObject {
         this.gmtModified = po.getGmtModified();
     }
 
+    public Comment() {
+
+    }
+
     @Override
     public Object createVo() {
         return new CommentRetVo(this);
@@ -49,9 +53,9 @@ public class Comment implements VoObject {
      * 评论状态
      */
     public enum State {
-        TOAUDIT(0, "待审核"),
-        AUDITPASS(1, "审核通过"),
-        AUDITFAIL(2, "审核不通过");
+        TOAUDIT(0, "未审核"),
+        AUDITPASS(1, "评论成功"),
+        AUDITFAIL(2, "未通过");
         // DELETE(3, "废弃");
 
         private static final Map<Integer, Comment.State> stateMap;

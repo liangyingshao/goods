@@ -10,6 +10,8 @@ import cn.edu.xmu.goods.model.po.CommentPo;
 import cn.edu.xmu.goods.model.po.CommentPoExample;
 import cn.edu.xmu.goods.model.po.GoodsSpuPoExample;
 import cn.edu.xmu.goods.model.po.ShopPo;
+import cn.edu.xmu.goods.model.vo.CommentRetVo;
+import cn.edu.xmu.goods.model.vo.Customer;
 import cn.edu.xmu.ooad.annotation.Audit;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.Common;
@@ -43,38 +45,72 @@ public class CommentDao {
 
     private static final Logger logger = LoggerFactory.getLogger(CommentDao.class);
 
-    public ReturnObject<VoObject> addSkuComment(Long id, String content, Long type, Long userId, Long SKU_Id) {
+    public ReturnObject<CommentRetVo> addSkuComment(Comment comment) {
         ReturnObject returnObject = null;
         CommentPo commentPo = new CommentPo();
-        commentPo.setCustomerId(userId);
-        commentPo.setGoodsSkuId(SKU_Id);
-        commentPo.setOrderitemId(id);
-        commentPo.setType((byte) type.intValue());
-        commentPo.setContent(content);
+        commentPo.setCustomerId(comment.getCustomerId());
+        commentPo.setGoodsSkuId(comment.getGoodsSkuId());
+        commentPo.setOrderitemId(comment.getOrderitemId());
+        commentPo.setType(comment.getType());
+        commentPo.setContent(comment.getContent());
         commentPo.setState((byte) Comment.State.TOAUDIT.getCode());
         commentPo.setGmtCreate(LocalDateTime.now());
-        logger.debug("success insert Comment: " + commentPo.getId());
-
+//        logger.debug("success insert Comment: " + commentPo.getId());
         try{
-            returnObject = new ReturnObject<>(commentPoMapper.insert(commentPo));
-        }
-        catch (DataAccessException e)
-        {
-            if (Objects.requireNonNull(e.getMessage()).contains("auth_user.user_name_uindex")) {
-                //断进来之后再看是什么错误
-                logger.debug("insert: " + commentPo.getContent());
-//                returnObject = new ReturnObject<>(ResponseCode.ROLE_REGISTERED, String.format("用户名重复：" + commentPo.getContent()));
-//            } else {
-//                logger.debug("sql exception : " + e.getMessage());
-//                returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+            //是不是该查一下orderItemId是否已经有评论了
+            CommentPoExample orderIdExample = new CommentPoExample();
+            CommentPoExample.Criteria orderItemCriteria = orderIdExample.createCriteria();
+            orderItemCriteria.andOrderitemIdEqualTo(commentPo.getOrderitemId());
+            List<CommentPo> orderIdList = commentPoMapper.selectByExample(orderIdExample);
+            if(orderIdList.size()!=0)
+            {
+                return new ReturnObject<>(ResponseCode.COMMENT_EXISTED);
             }
+            int ret = commentPoMapper.insert(commentPo);
+            if (ret == 0)
+            {
+                //修改失败
+//                logger.debug("addFloatPrice: insert floatPrice fail : " + floatPricePo.toString());
+                return new ReturnObject<>(ResponseCode.FIELD_NOTVALID,"插入失败");
+            }
+            else {
+                //检验是不是真的插入成功了
+                CommentPoExample example=new CommentPoExample();
+                CommentPoExample.Criteria criteria=example.createCriteria();
+                criteria.andCustomerIdEqualTo(comment.getCustomerId());
+                criteria.andGoodsSkuIdEqualTo(comment.getGoodsSkuId());
+                criteria.andOrderitemIdEqualTo(comment.getOrderitemId());
+                criteria.andTypeEqualTo(comment.getType());
+                criteria.andContentEqualTo(comment.getContent());
+                criteria.andStateEqualTo(commentPo.getState());
+                List<CommentPo> pos=commentPoMapper.selectByExample(example);
+                if(pos.size()==0)
+                {
+                    return new ReturnObject<>(ResponseCode.FIELD_NOTVALID,"插入失败");
+                }
+                else
+                {
+                    //构造CommentRetVo
+                    Customer customer=new Customer();
+                    //根据comment.getCustomerId()查询name和realName
+                    customer.setId(comment.getCustomerId());
+                    customer.setUserName("用户姓名");
+                    customer.setRealName("真实姓名");
+                    CommentRetVo commentRetVo=new CommentRetVo(comment);
+                    commentRetVo.setCustomer(customer);
+                    return new ReturnObject<>(commentRetVo);
+                }
+            }
+        }
+        catch (DataAccessException e){
+//            logger.error("selectAllPassComment: DataAccessException:" + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
         }
         catch (Exception e) {
             // 其他Exception错误
-            logger.error("other exception : " + e.getMessage());
-            returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+//            logger.error("other exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
         }
-        return new ReturnObject<>(ResponseCode.OK);
     }
 
     public ReturnObject<PageInfo<VoObject>> selectAllPassComment(Long SKU_Id, Integer pageNum, Integer pageSize) {

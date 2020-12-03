@@ -2,10 +2,7 @@ package cn.edu.xmu.goods.controller;
 
 import cn.edu.xmu.goods.model.bo.Comment;
 import cn.edu.xmu.goods.model.bo.FloatPrice;
-import cn.edu.xmu.goods.model.vo.CommentAuditVo;
-import cn.edu.xmu.goods.model.vo.CommentStateRetVo;
-import cn.edu.xmu.goods.model.vo.FloatPriceRetVo;
-import cn.edu.xmu.goods.model.vo.FloatPriceVo;
+import cn.edu.xmu.goods.model.vo.*;
 import cn.edu.xmu.goods.service.CommentService;
 import cn.edu.xmu.goods.service.FloatPriceService;
 import cn.edu.xmu.ooad.annotation.Audit;
@@ -40,7 +37,7 @@ import java.util.List;
  * Created at: 2020-12-01 21:24
  * version: 1.0
  */
-@Api(value = "商品服务", tags = "goods")
+@Api(value = "评论服务", tags = "comment")
 @RestController /*Restful的Controller对象*/
 @RequestMapping(value = "/goods", produces = "application/json;charset=UTF-8")
 public class CommentController {
@@ -69,8 +66,8 @@ public class CommentController {
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value ="用户token", required = true)
     })
     @ApiResponses({
+            @ApiResponse(code = 0, message = "成功")
     })
-    @Audit
     @GetMapping("/comments/states")
     public Object getcommentState() {
         Comment.State[] states=Comment.State.class.getEnumConstants();
@@ -84,8 +81,7 @@ public class CommentController {
     /**
      * 业务: comment002买家新增sku的评论
      * @param id 订单明细的id
-     * @param content
-     * @param type
+     * @param vo
      * @param userId
      * @return java.lang.Object
      * @author: 24320182203259 邵良颖
@@ -96,8 +92,7 @@ public class CommentController {
     @ApiImplicitParams({
             @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
             @ApiImplicitParam(name="id", required = true, dataType="String", paramType="path"),//订单明细的id
-            @ApiImplicitParam(name="content", required = true, dataType="String", paramType="body"),
-            @ApiImplicitParam(name="type", required = true, dataType="integer", paramType="body")
+            @ApiImplicitParam(paramType = "body",dataType = "CommentVo",name = "vo",value = "可修改的信息",required = true)
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
@@ -106,10 +101,14 @@ public class CommentController {
     @Audit
     @PostMapping("/orderitems/{id}/comments")
     @ResponseBody
-    public Object addSkuComment(@PathVariable Long id, String content, Long type, @LoginUser @ApiIgnore @RequestParam(required = false, defaultValue = "0") Long userId){
-        logger.debug("comment: id = "+ id+" userid: id = "+ userId + " type: " + type + " content: " + content);
-        ReturnObject<VoObject> returnObject = commentService.addSkuComment(id, content, type, userId);
-
+    public Object addSkuComment(@PathVariable Long id, @Validated @RequestBody CommentVo vo, @LoginUser @ApiIgnore @RequestParam(required = false, defaultValue = "0") Long userId){
+//        logger.debug("comment: id = "+ id+" userid: id = "+ userId + " type: " + type + " content: " + content);
+        Comment comment = vo.createComment();
+        comment.setType(vo.getType());
+        comment.setContent(vo.getContent());
+        comment.setOrderitemId(id);
+        comment.setCustomerId(userId);
+        ReturnObject<CommentRetVo> returnObject = commentService.addSkuComment(comment);
         return Common.decorateReturnObject(returnObject);
     }
 
@@ -132,6 +131,7 @@ public class CommentController {
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 941, message = "该订单条目已评论")
     })
     @Audit
     @GetMapping("/skus/{id}/comments")
