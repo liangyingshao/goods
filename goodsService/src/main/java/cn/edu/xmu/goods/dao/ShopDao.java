@@ -54,10 +54,10 @@ public class ShopDao {
     /**
      * description: addShop
      * version: 1.0
-     * date: 2020/11/29 23:11
+     * date: 2020/12/3 17:38
      * author: 杨铭
      *
-     * @param id 用户id
+     * @param id 店铺id
      * @param name 店铺名称
      * @return cn.edu.xmu.ooad.util.ReturnObject<cn.edu.xmu.ooad.model.VoObject>
      */
@@ -69,6 +69,7 @@ public class ShopDao {
         //新增店铺
         ShopPo shopPo = new ShopPo();
         shopPo.setName(name);
+        shopPo.setState(ShopStateVo.ShopStatus.NOT_AUDIT.getCode().byteValue());
 
         try {
             shopPoMapper.insertSelective(shopPo);
@@ -93,7 +94,7 @@ public class ShopDao {
     public ReturnObject<VoObject> deleteShop(Long shopId) {
 
         ShopPo shopPo = new ShopPo();
-        shopPo.setState(ShopPo.ShopStatus.CLOSED.getCode().byteValue());
+        shopPo.setState(ShopStateVo.ShopStatus.CLOSED.getCode().byteValue());
         shopPo.setId(shopId);
         try {
             shopPoMapper.updateByPrimaryKeySelective(shopPo);
@@ -119,7 +120,7 @@ public class ShopDao {
         //修改状态
         ShopPo shopPo = new ShopPo();
         shopPo.setId(shopId);
-        shopPo.setState(ShopPo.ShopStatus.ONLINE.getCode().byteValue());
+        shopPo.setState(ShopStateVo.ShopStatus.ONLINE.getCode().byteValue());
         try {
             shopPoMapper.updateByPrimaryKeySelective(shopPo);
         } catch (Exception e) {
@@ -143,7 +144,7 @@ public class ShopDao {
         //修改状态
         ShopPo shopPo = new ShopPo();
         shopPo.setId(shopId);
-        shopPo.setState(ShopPo.ShopStatus.OFFLINE.getCode().byteValue());
+        shopPo.setState(ShopStateVo.ShopStatus.OFFLINE.getCode().byteValue());
         try {
             shopPoMapper.updateByPrimaryKeySelective(shopPo);
         } catch (Exception e) {
@@ -168,9 +169,9 @@ public class ShopDao {
         ShopPo shopPo = new ShopPo();
         shopPo.setId(shopId);
         if(conclusion)
-            shopPo.setState(ShopPo.ShopStatus.ONLINE.getCode().byteValue());
+            shopPo.setState(ShopStateVo.ShopStatus.ONLINE.getCode().byteValue());
         else
-            shopPo.setState(ShopPo.ShopStatus.AUDIT_FAIL.getCode().byteValue());
+            shopPo.setState(ShopStateVo.ShopStatus.AUDIT_FAIL.getCode().byteValue());
 
         try {
             shopPoMapper.updateByPrimaryKeySelective(shopPo);

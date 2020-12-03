@@ -7,6 +7,7 @@ import cn.edu.xmu.goods.mapper.ShopPoMapper;
 import cn.edu.xmu.goods.model.po.GoodsSkuPo;
 import cn.edu.xmu.goods.model.po.GoodsSpuPo;
 import cn.edu.xmu.goods.model.po.ShopPo;
+import cn.edu.xmu.goods.model.vo.ShopStateVo;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.JwtHelper;
 import org.junit.jupiter.api.Test;
@@ -46,6 +47,57 @@ class GoodsControllerTest1 {
         return token;
     }
 
+
+    @Test
+    public void getshopState1() throws Exception {
+
+        String responseString=this.mvc.perform(get("/goods/shops/state"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        String expectedResponse="{\"errno\":0,\"data\":[{\"name\":\"未审核\",\"code\":0},{\"name\":\"未上线\",\"code\":1},{\"name\":\"上线\",\"code\":2},{\"name\":\"关闭\",\"code\":3},{\"name\":\"审核未通过\",\"code\":4}],\"errmsg\":\"成功\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+    }
+
+
+    @Test
+    public void addShop1() throws Exception {
+
+        String name ="testshop";
+        String Json = JacksonUtil.toJson(name);
+        String token = creatTestToken(1L, 0L, 100);
+        String responseString=this.mvc.perform(post("/goods/shops").header("authorization",token).contentType("application/json;charset=UTF-8").content(Json))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        String expectedResponse="{\"errno\": 0, \"errmsg\": \"成功\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+    }
+
+
+    @Test
+    public void auditShop1() throws Exception{
+
+
+        String token = creatTestToken(1L, 0L, 100);
+        boolean conclusion = true;
+        String Json = JacksonUtil.toJson(conclusion);
+        String responseString = this.mvc.perform(put("/goods/shops/0/newshops/1/audit").header("authorization",token).contentType("application/json;charset=UTF-8").content(Json))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+
+        String expectedResponse = "{\"errno\": 0, \"errmsg\": \"成功\"}";
+        JSONAssert.assertEquals(expectedResponse, responseString, true);
+
+        //检查是否真的修改了数据库
+        ShopPo newShopPo = shopPoMapper.selectByPrimaryKey(1L);
+        logger.debug("new:"+newShopPo.getState().toString());
+        logger.debug("old:"+ ShopStateVo.ShopStatus.ONLINE.getCode().toString());
+        Assert.state((newShopPo.getState().toString().equals(ShopStateVo.ShopStatus.ONLINE.getCode().toString())), "店铺状态未修改");//true则报错
+
+    }
+
     @Test
     public void modifyshop1() throws Exception{
 
@@ -72,24 +124,6 @@ class GoodsControllerTest1 {
     }
 
 
-    @Test
-    public void deleteshop1() throws Exception{
-
-
-        String token = creatTestToken(1L, 0L, 100);
-        String responseString = this.mvc.perform(delete("/goods/shops/1").header("authorization",token).contentType("application/json;charset=UTF-8"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json;charset=UTF-8"))
-                .andReturn().getResponse().getContentAsString();
-
-        String expectedResponse = "{\"errno\": 0, \"errmsg\": \"成功\"}";
-        JSONAssert.assertEquals(expectedResponse, responseString, true);
-
-        //检查是否真的修改了数据库
-        ShopPo newShopPo = shopPoMapper.selectByPrimaryKey(1L);
-        Assert.state((newShopPo.getState() == ShopPo.ShopStatus.CLOSED.getCode().byteValue()), "店铺状态未修改");//false则报错
-
-    }
 
 
     @Test
@@ -107,7 +141,7 @@ class GoodsControllerTest1 {
 
         //检查是否真的修改了数据库
         ShopPo newShopPo = shopPoMapper.selectByPrimaryKey(1L);
-        Assert.state((newShopPo.getState() == ShopPo.ShopStatus.ONLINE.getCode().byteValue()), "店铺状态未修改");//false则报错
+        Assert.state((newShopPo.getState() == ShopStateVo.ShopStatus.ONLINE.getCode().byteValue()), "店铺状态未修改");//false则报错
 
     }
 
@@ -127,19 +161,17 @@ class GoodsControllerTest1 {
 
         //检查是否真的修改了数据库
         ShopPo newShopPo = shopPoMapper.selectByPrimaryKey(1L);
-        Assert.state((newShopPo.getState() == ShopPo.ShopStatus.OFFLINE.getCode().byteValue()), "店铺状态未修改");//false则报错
+        Assert.state((newShopPo.getState() == ShopStateVo.ShopStatus.OFFLINE.getCode().byteValue()), "店铺状态未修改");//false则报错
 
     }
 
 
     @Test
-    public void auditShop1() throws Exception{
+    public void deleteshop1() throws Exception{
 
 
         String token = creatTestToken(1L, 0L, 100);
-        boolean conclusion = true;
-        String Json = JacksonUtil.toJson(conclusion);
-        String responseString = this.mvc.perform(put("/goods/shops/0/newshops/1/audit").header("authorization",token).contentType("application/json;charset=UTF-8").content(Json))
+        String responseString = this.mvc.perform(delete("/goods/shops/1").header("authorization",token).contentType("application/json;charset=UTF-8"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -149,37 +181,11 @@ class GoodsControllerTest1 {
 
         //检查是否真的修改了数据库
         ShopPo newShopPo = shopPoMapper.selectByPrimaryKey(1L);
-        logger.debug("new:"+newShopPo.getState().toString());
-        logger.debug("old:"+ShopPo.ShopStatus.ONLINE.getCode().toString());
-        Assert.state((newShopPo.getState().toString().equals(ShopPo.ShopStatus.ONLINE.getCode().toString())), "店铺状态未修改");//true则报错
+        Assert.state((newShopPo.getState() == ShopStateVo.ShopStatus.CLOSED.getCode().byteValue()), "店铺状态未修改");//false则报错
 
     }
 
-    @Test
-    public void getshopState1() throws Exception {
 
 
-
-        String responseString=this.mvc.perform(get("/goods/shops/state"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json;charset=UTF-8"))
-                .andReturn().getResponse().getContentAsString();
-        String expectedResponse="{\"errno\":0,\"data\":[{\"name\":\"未审核\",\"code\":0},{\"name\":\"未上线\",\"code\":1},{\"name\":\"上线\",\"code\":2},{\"name\":\"关闭\",\"code\":3},{\"name\":\"审核未通过\",\"code\":4}],\"errmsg\":\"成功\"}";
-        JSONAssert.assertEquals(expectedResponse,responseString,true);
-    }
-
-    @Test
-    public void addShop1() throws Exception {
-
-        String name ="testshop";
-        String Json = JacksonUtil.toJson(name);
-        String token = creatTestToken(1L, 0L, 100);
-        String responseString=this.mvc.perform(post("/goods/shops").header("authorization",token).contentType("application/json;charset=UTF-8").content(Json))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json;charset=UTF-8"))
-                .andReturn().getResponse().getContentAsString();
-        String expectedResponse="{\"errno\": 0, \"errmsg\": \"成功\"}";
-        JSONAssert.assertEquals(expectedResponse,responseString,true);
-    }
 
 }

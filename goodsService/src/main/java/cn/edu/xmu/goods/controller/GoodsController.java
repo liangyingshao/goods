@@ -144,7 +144,7 @@ public class GoodsController {
     @ResponseBody
     @GetMapping("/shops/state")
     public Object getshopState() {
-        ShopPo.ShopStatus[] states= ShopPo.ShopStatus.class.getEnumConstants();
+        ShopStateVo.ShopStatus[] states= ShopStateVo.ShopStatus.class.getEnumConstants();
         List<ShopStateVo> stateVos=new ArrayList<ShopStateVo>();
         for(int i=0;i<states.length;i++){
             stateVos.add(new ShopStateVo(states[i]));
