@@ -34,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SpringBootTest(classes = GoodsServiceApplication.class)
 @AutoConfigureMockMvc
-//@Transactional
+@Transactional
 public class qcyTest {
     @Autowired
     MockMvc mvc;

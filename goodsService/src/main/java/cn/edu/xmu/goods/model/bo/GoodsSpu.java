@@ -105,6 +105,8 @@ public class GoodsSpu {
         if(null!=po.getState()){
             this.state=SpuState.getTypeByCode(po.getState().intValue());
         }
+        this.gmtCreated=po.getGmtCreate();
+        this.gmtModified=po.getGmtModified();
 //        this.disabled=(po.getDisabled().intValue()==0)?false:true;
     }
 

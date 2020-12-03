@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -51,6 +52,12 @@ public class GoodsSpuVo {
     @ApiModelProperty(name = "SPU状态")
     private Byte state;
 
+    @ApiModelProperty(name = "SPU新建时间")
+    private LocalDateTime gmtCreate;
+
+    @ApiModelProperty(name = "SPU修改时间")
+    private LocalDateTime gmtModified;
+
 //    @ApiModelProperty(name = "是否失效")
 //    private boolean disabled;
 
@@ -67,6 +74,8 @@ public class GoodsSpuVo {
         this.imageUrl=bo.getImageUrl();
         this.state=bo.getState().getCode().byteValue();
         this.spec=bo.getSpec();
+        this.gmtCreate=bo.getGmtCreated();
+        this.gmtModified=bo.getGmtModified();
 //        this.disabled=bo.isDisabled();
     }
 
