@@ -56,7 +56,7 @@ public class CommentControllerTest {
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
 
-        String expectedResponse1 = "{\"errno\":0,\"data\":{\"id\":null,\"customerId\":1,\"customer\":{\"id\":1,\"userName\":\"用户姓名\",\"realName\":\"真实姓名\"},\"goodsSkuId\":1,\"type\":0,\"content\":\"购物体验良好\",\"state\":null,\"gmtCreate\":null,\"gmtModified\":null},\"errmsg\":\"成功\"}";
+        String expectedResponse1 = "{\"errno\":0,\"data\":{\"id\":10,\"customer\":{\"id\":1,\"userName\":\"用户姓名\",\"realName\":\"真实姓名\"},\"goodsSkuId\":1,\"type\":0,\"content\":\"购物体验良好\",\"state\":0,\"gmtCreate\":\"2020-12-03T19:03:53.4623637\",\"gmtModified\":null},\"errmsg\":\"成功\"}";
         JSONAssert.assertEquals(expectedResponse1, responseString1, true);
 
         String responseString2 = this.mvc.perform(post("/goods/orderitems/1/comments").header("authorization",token)

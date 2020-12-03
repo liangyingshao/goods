@@ -96,7 +96,8 @@ public class CommentController {
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
-            @ApiResponse(code = 903, message = "用户没有购买此商品")
+            @ApiResponse(code = 903, message = "用户没有购买此商品"),
+            @ApiResponse(code = 941, message = "该订单条目已评论")
     })
     @Audit
     @PostMapping("/orderitems/{id}/comments")
@@ -131,7 +132,6 @@ public class CommentController {
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
-            @ApiResponse(code = 941, message = "该订单条目已评论")
     })
     @Audit
     @GetMapping("/skus/{id}/comments")

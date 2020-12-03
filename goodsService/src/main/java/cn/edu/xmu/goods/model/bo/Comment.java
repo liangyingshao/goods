@@ -30,6 +30,7 @@ public class Comment implements VoObject {
         this.goodsSkuId = po.getGoodsSkuId();
         this.orderitemId = po.getOrderitemId();
         this.type = po.getType();
+        this.content = po.getContent();
         this.state = po.getState();
         this.gmtCreate = po.getGmtCreate();
         this.gmtModified = po.getGmtModified();

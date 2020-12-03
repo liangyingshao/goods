@@ -21,8 +21,8 @@ public class CommentRetVo {
     @ApiModelProperty(value = "评论id")
     private Long id;
 
-    @ApiModelProperty(value = "用户id")
-    private Long customerId;
+//    @ApiModelProperty(value = "用户id")
+//    private Long customerId;
 
     private Customer customer;
 
@@ -51,7 +51,7 @@ public class CommentRetVo {
 
     public CommentRetVo(Comment comment) {
         this.id = comment.getId();
-        this.customerId = comment.getCustomerId();
+//        this.customerId = comment.getCustomerId();
         this.goodsSkuId = comment.getGoodsSkuId();
         //this.orderitemId = comment.getOrderitemId();
         this.type = comment.getType();

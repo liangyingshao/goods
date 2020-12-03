@@ -96,7 +96,7 @@ public class CommentDao {
                     customer.setId(comment.getCustomerId());
                     customer.setUserName("用户姓名");
                     customer.setRealName("真实姓名");
-                    CommentRetVo commentRetVo=new CommentRetVo(comment);
+                    CommentRetVo commentRetVo=new CommentRetVo(new Comment(commentPo));
                     commentRetVo.setCustomer(customer);
                     return new ReturnObject<>(commentRetVo);
                 }
