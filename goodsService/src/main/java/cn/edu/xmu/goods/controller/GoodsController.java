@@ -1,8 +1,6 @@
 package cn.edu.xmu.goods.controller;
 
-import cn.edu.xmu.goods.model.bo.FloatPrice;
-import cn.edu.xmu.goods.model.bo.GoodsSku;
-import cn.edu.xmu.goods.model.bo.GoodsSpu;
+import cn.edu.xmu.goods.model.bo.*;
 import cn.edu.xmu.goods.model.vo.*;
 import cn.edu.xmu.goods.service.*;
 import cn.edu.xmu.ooad.annotation.Audit;
