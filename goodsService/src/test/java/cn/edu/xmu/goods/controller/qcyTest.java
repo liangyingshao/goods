@@ -93,6 +93,44 @@ public class qcyTest {
     }
 
     /**
+     * description: 查看一条商品SPU的详细信息 (成功)
+     * date: 2020/12/03 19：28
+     * author: 秦楚彦 24320182203254
+     * version: 1.0
+     */
+    @Test
+    public void showSpuTest1() throws JSONException {
+        String responseString=null;
+        try{
+            responseString=this.mvc.perform(get("/goods/spus/290"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andReturn().getResponse().getContentAsString();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * description: 查看一条商品SPU的详细信息 spuId不存在
+     * date: 2020/12/03 19：33
+     * author: 秦楚彦 24320182203254
+     * version: 1.0
+     */
+    @Test
+    public void showSpuTest2() throws JSONException {
+        String responseString=null;
+        try{
+            responseString=this.mvc.perform(get("/goods/spus/1000"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andReturn().getResponse().getContentAsString();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * description: 店家SPU上下架 不可重复上架/重复下架 shopId与spuId必须对应
      * date: 2020/12/01 19：10
      * author: 秦楚彦 24320182203254

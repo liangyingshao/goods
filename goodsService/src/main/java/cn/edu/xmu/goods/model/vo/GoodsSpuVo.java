@@ -28,7 +28,7 @@ public class GoodsSpuVo {
     private SimpleCategoryVo categoryVo;
 
     @ApiModelProperty(name = "SKU列表")
-    private List<SimpleSkuVo> goodsSkuList;
+    private List<GoodsSkuRetVo> goodsSkuList;
 
     @ApiModelProperty(name = "运费模板")
     private FreightVo freightvo;

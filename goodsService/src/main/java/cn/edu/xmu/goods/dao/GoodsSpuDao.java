@@ -1,11 +1,10 @@
 package cn.edu.xmu.goods.dao;
 
-import cn.edu.xmu.goods.mapper.BrandPoMapper;
-import cn.edu.xmu.goods.mapper.GoodsCategoryPoMapper;
-import cn.edu.xmu.goods.mapper.GoodsSpuPoMapper;
+import cn.edu.xmu.goods.mapper.*;
 import cn.edu.xmu.goods.model.bo.GoodsSku;
 import cn.edu.xmu.goods.model.bo.GoodsSpu;
 import cn.edu.xmu.goods.model.po.*;
+import cn.edu.xmu.goods.model.vo.GoodsSkuRetVo;
 import cn.edu.xmu.goods.model.vo.GoodsSpuVo;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ImgHelper;
@@ -20,7 +19,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 商品SPU访问类
@@ -35,15 +36,21 @@ public class GoodsSpuDao {
     private GoodsSpuPoMapper goodsSpuMapper;
 
     @Autowired
+    private GoodsSkuPoMapper goodsSkuMapper;
+
+    @Autowired
     private GoodsCategoryPoMapper goodsCategoryMapper;
 
     @Autowired
     private BrandPoMapper brandMapper;
 
+    @Autowired
+    private FloatPricePoMapper floatMapper;
+
     //上传图片相关变量
     private String davUsername="oomall";
     private String davPassword="admin";
-    private String baseUrl="http://192.168.148.131:8888/webdav/";
+    private String baseUrl="http://192.168.148.131:8888/webdav/";//需要写成我们组服务器的webdev地址
 
     /**
      * 增加一个SPU
@@ -99,8 +106,27 @@ public class GoodsSpuDao {
         GoodsSpuPo spuPo= goodsSpuMapper.selectByPrimaryKey(id);
         if(spuPo==null)
             return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+        //查找该spu下的所有sku
+        GoodsSkuPoExample skuPoExample=new GoodsSkuPoExample();
+        GoodsSkuPoExample.Criteria skuCriteria=skuPoExample.createCriteria();
+        skuCriteria.andGoodsSpuIdEqualTo(spuPo.getId());
+        List<GoodsSkuPo> skuPos=goodsSkuMapper.selectByExample(skuPoExample);
+        List<GoodsSku>skus=skuPos.stream().map(GoodsSku::new).collect(Collectors.toList());
+        for(GoodsSku sku:skus)
+        {
+            FloatPricePoExample floatExample=new FloatPricePoExample();
+            FloatPricePoExample.Criteria floatCriteria=floatExample.createCriteria();
+            floatCriteria.andGoodsSkuIdEqualTo(sku.getId());
+            floatCriteria.andBeginTimeLessThanOrEqualTo(LocalDateTime.now());
+            floatCriteria.andEndTimeGreaterThanOrEqualTo(LocalDateTime.now());
+            List<FloatPricePo> floatPos=floatMapper.selectByExample(floatExample);
+            if(floatPos.size()==0)sku.setPrice(sku.getOriginalPrice());
+            else if(floatPos.size()==1)sku.setPrice(floatPos.get(0).getActivityPrice());
+        }
+        List<GoodsSkuRetVo> ret = skus.stream().map(GoodsSkuRetVo::new).collect(Collectors.toList());
         GoodsSpu spu=new GoodsSpu(spuPo);
         GoodsSpuVo spuVo= new GoodsSpuVo(spu);
+        spuVo.setGoodsSkuList(ret);
         return new ReturnObject<>(spuVo);
 
     }
