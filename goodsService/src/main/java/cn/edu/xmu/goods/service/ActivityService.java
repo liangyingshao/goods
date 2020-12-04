@@ -2,6 +2,8 @@ package cn.edu.xmu.goods.service;
 
 import cn.edu.xmu.goods.dao.ActivityDao;
 import cn.edu.xmu.goods.model.bo.CouponSpu;
+import cn.edu.xmu.goods.model.vo.CouponNewRetVo;
+import cn.edu.xmu.goods.model.vo.CouponRetVo;
 import cn.edu.xmu.goods.model.vo.CouponSpuRetVo;
 import cn.edu.xmu.goods.model.vo.GoodsSpuCouponRetVo;
 import cn.edu.xmu.ooad.util.ReturnObject;
@@ -55,6 +57,73 @@ public class ActivityService {
     public ReturnObject deleteCouponSpu(Long shopId, Long id)
     {
         ReturnObject returnObject=activityDao.deleteCouponSpu(shopId,id);
+        return returnObject;
+    }
+
+    /**
+     * 买家查看优惠券列表
+     * @param userId
+     * @param state
+     * @param page
+     * @param pageSize
+     * @return ReturnObject<PageInfo<CouponRetVo>>
+     */
+    @Transactional
+    public ReturnObject<PageInfo<CouponRetVo>> showCoupons(Long userId, Integer state, Integer page, Integer pageSize)
+    {
+        PageInfo<CouponRetVo> returnObject=activityDao.showCoupons(userId,state,page,pageSize);
+        return new ReturnObject<PageInfo<CouponRetVo>>(returnObject);
+    }
+
+    /**
+     * 买家使用自己某优惠券
+     * @param userId
+     * @param id
+     * @return ReturnObject
+     */
+    @Transactional
+    public ReturnObject useCoupon(Long userId, Long id)
+    {
+        ReturnObject returnObject=activityDao.useCoupon(userId,id);
+        return returnObject;
+    }
+
+    //据说已废弃
+    /**
+     * 买家删除自己某优惠券
+     * @param userId
+     * @param id
+     * @return ReturnObject
+     */
+    @Transactional
+    public ReturnObject deleteCoupon(Long userId, Long id)
+    {
+        ReturnObject returnObject=activityDao.deleteCoupon(userId,id);
+        return returnObject;
+    }
+
+    /**
+     * 买家领取活动优惠券
+     * @param userId
+     * @param id
+     * @return ReturnObject<CouponNewRetVo>
+     */
+    @Transactional
+    public ReturnObject<CouponNewRetVo> getCoupon(Long userId, Long id)
+    {
+        ReturnObject<CouponNewRetVo> returnObject=activityDao.getCoupon(userId,id);
+        return returnObject;
+    }
+
+    /**
+     * 优惠券退回
+     * @param id
+     * @return ReturnObject
+     */
+    @Transactional
+    public ReturnObject returnCoupon(Long id)
+    {
+        ReturnObject returnObject=activityDao.returnCoupon(id);
         return returnObject;
     }
 }
