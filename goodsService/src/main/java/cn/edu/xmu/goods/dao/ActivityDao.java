@@ -173,6 +173,8 @@ public class ActivityDao {
                     && CouponActivity.DatabaseState.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.DatabaseState.EXECUTABLE))//【可执行】
             {
                 CouponSkuPo couponSkuPo = couponSku.getCouponSkuPo();
+                couponSkuPo.setGmtCreate(LocalDateTime.now());
+                couponSkuPo.setGmtModified(LocalDateTime.now());
                 try {
                     int ret = couponSkuMapper.insert(couponSkuPo);
                     if (ret == 0) {
@@ -347,15 +349,16 @@ public class ActivityDao {
         {
             //尝试更改状态
             couponPo.setState(Coupon.State.USED.getCode().byteValue());
+            couponPo.setGmtModified(LocalDateTime.now());
             try{
                 int ret=couponMapper.updateByPrimaryKeySelective(couponPo);
                 if(ret==0){
-                    //删除失败
+                    //更新失败
                     logger.debug("useCoupon: update coupon fail : " + couponPo.toString());
                     return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("coupon字段不合法：" + couponPo.toString()));
                 }
                 else {
-                    //删除成功
+                    //更新成功
                     logger.debug("useCoupon: update coupon = " + couponPo.toString());
                     return new ReturnObject<>();
                 }

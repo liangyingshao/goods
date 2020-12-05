@@ -10,9 +10,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -73,11 +75,71 @@ class ActivityControllerTest {
     }
 
     @Test
-    void createCouponSkus() {
+    void createCouponSkus() throws Exception{
+//        List<Long> body=new ArrayList<>();
+//        body.add((long)273);
+//        body.add((long)274);
+//        String requireJson="[\n    273\n]";
+//        String token = creatTestToken(1L, 0L, 100);
+//        String responseString=this.mvc.perform(post("/shops/0/couponactivities/3/skus")
+//                .header("authorization",token)
+//                .contentType("application/json;charset=UTF-8")
+//                .content(requireJson))
+//                .andExpect(status().isOk())
+//                .andExpect(content().contentType("application/json;charset=UTF-8"))
+//                .andReturn().getResponse().getContentAsString();
+//        System.out.println(responseString);
     }
 
     @Test
-    void deleteCouponSku() {
+    void deleteCouponSku() throws Exception
+    {
+        String token = creatTestToken(1L, 1L, 100);
+        String responseString=this.mvc.perform(delete("/goods/shops/1/couponskus/5")
+                .header("authorization",token))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        //System.out.println(responseString);
+        String expectedResponse="{\"errno\":0,\"errmsg\":\"成功\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+
+        responseString=this.mvc.perform(delete("/goods/shops/1/couponskus/5")
+                .header("authorization",token))
+                .andExpect(status().is4xxClientError())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        //System.out.println(responseString);
+        expectedResponse="{\"errno\":504,\"errmsg\":\"操作的资源id不存在\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+
+        responseString=this.mvc.perform(delete("/goods/shops/1/couponskus/1")
+                .header("authorization",token))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        //System.out.println(responseString);
+        expectedResponse="{\"errno\":904,\"errmsg\":\"优惠活动状态禁止\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+
+        responseString=this.mvc.perform(delete("/goods/shops/2/couponskus/5")
+                .header("authorization",token))
+                .andExpect(status().is4xxClientError())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        //System.out.println(responseString);
+        expectedResponse="{\"errno\":503,\"errmsg\":\"departId不匹配\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+
+        token = creatTestToken(1L, 2L, 100);
+        responseString=this.mvc.perform(delete("/goods/shops/2/couponskus/5")
+                .header("authorization",token))
+                .andExpect(status().is4xxClientError())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        //System.out.println(responseString);
+        expectedResponse="{\"errno\":504,\"errmsg\":\"操作的资源id不存在\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
     }
 
     @Test

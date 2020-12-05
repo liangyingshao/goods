@@ -66,7 +66,7 @@ public class ActivityController {
      * 管理员为己方某优惠券活动新增限定范围
      * @param shopId
      * @param id
-     * @param vos
+     * @param body
      * @param bindingResult
      * @param userId
      * @param departId
@@ -77,7 +77,7 @@ public class ActivityController {
             @ApiImplicitParam(paramType = "header",dataType = "String",name = "authorization",value = "用户token",required = true),
             @ApiImplicitParam(paramType = "path",dataType = "Long",name = "shopId",value = "店铺id",required = true),
             @ApiImplicitParam(paramType = "path",dataType = "Long",name = "id",value = "活动id",required = true),
-            @ApiImplicitParam(paramType = "body",dataType = "List<CouponSkuVo>",name = "vos",value = "可修改的SKU信息",required = true)
+            @ApiImplicitParam(paramType = "body",dataType = "Long[]",name = "body",value = "SKU id",required = true)
     })
     @Audit
     @ApiResponses({
@@ -86,11 +86,11 @@ public class ActivityController {
     @PostMapping("/shops/{shopId}/couponactivities/{id}/skus")
     @ResponseBody
     public Object createCouponSkus(@PathVariable Long shopId, @PathVariable Long id,
-                                  @Validated @RequestBody List<CouponSkuVo> vos, BindingResult bindingResult,
+                                  @Validated @RequestBody Long[] body, BindingResult bindingResult,
                                   @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
                                   @Depart @ApiIgnore @RequestParam(required = false) Long departId)
     {
-        logger.debug("createCouponSku: id = "+ id+" shopId="+shopId+" vos="+vos);
+        logger.debug("createCouponSku: id = "+ id+" shopId="+shopId+" vos="+body);
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != returnObject) {
             return returnObject;
@@ -98,10 +98,12 @@ public class ActivityController {
         if(departId!=shopId)
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
         List<CouponSku> couponSkus=new ArrayList<>();
-        for(CouponSkuVo vo:vos)
+        for(Long vo:body)
         {
-            vo.setActivityId(id);
-            couponSkus.add(vo.createCouponSku());
+            CouponSku couponSku=new CouponSku();
+            couponSku.setSkuId(vo);
+            couponSku.setActivityId(id);
+            couponSkus.add(couponSku);
         }
 
         ReturnObject<List<CouponSkuRetVo>> retObject=activityService.createCouponSkus(shopId, couponSkus);
