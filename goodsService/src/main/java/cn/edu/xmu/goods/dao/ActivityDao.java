@@ -1,9 +1,6 @@
 package cn.edu.xmu.goods.dao;
 
-import cn.edu.xmu.goods.mapper.CouponActivityPoMapper;
-import cn.edu.xmu.goods.mapper.CouponPoMapper;
-import cn.edu.xmu.goods.mapper.CouponSpuPoMapper;
-import cn.edu.xmu.goods.mapper.GoodsSpuPoMapper;
+import cn.edu.xmu.goods.mapper.*;
 import cn.edu.xmu.goods.model.bo.*;
 import cn.edu.xmu.goods.model.po.*;
 import cn.edu.xmu.goods.model.po.CouponSpuPoExample;
@@ -40,6 +37,9 @@ public class ActivityDao {
 
     @Autowired
     private CouponPoMapper couponMapper;
+
+    @Autowired
+    private ShopPoMapper shopMapper;
 
     public void initialize() throws Exception {
         //初始化couponSpu
@@ -564,5 +564,89 @@ public class ActivityDao {
             logger.error("other exception : " + e.getMessage());
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
         }
+    }
+
+    /**
+     * 店家查询己方某优惠券活动详情
+     * @param shopId
+     * @param id
+     * @return ReturnObject
+     */
+    public ReturnObject showCouponActivity(Long shopId, Long id) {
+
+        CouponActivityPo activityPo= activityMapper.selectByPrimaryKey(id);
+        if(activityPo==null)
+            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+        if(!activityPo.getShopId().equals(shopId))
+            return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
+
+        //查找该优惠活动所属商店
+        ShopPo shopPo=shopMapper.selectByPrimaryKey(shopId);
+        //查找创建活动管理员（待添加）
+        //CreatedBy
+        //查找修改活动管理员（待添加）
+        //ModifiedBy
+        CouponActivity couponActivity=new CouponActivity(activityPo);
+        CouponActivityVo couponActivityVo=new CouponActivityVo(couponActivity);
+        SimpleShopVo simpleShopVo=new SimpleShopVo(shopPo);
+        couponActivityVo.setShopVo(simpleShopVo);
+        //couponActivityVo.setCreatedBy();
+        //couponActivityVo.setModifiedBy();
+        return new ReturnObject<>(couponActivityVo);
+    }
+
+    /**
+     * 管理员新建己方优惠活动
+     * @param activity
+     * @return ReturnObject
+     */
+    public ReturnObject<CouponActivityVo> addCouponActivity(CouponActivity activity) {
+        CouponActivityPo activityPo=activity.createActivityPo();
+        ReturnObject<CouponActivityVo> returnObject=null;
+        try{
+            int ret = activityMapper.insertSelective(activityPo);
+            if (ret == 0) {
+                //插入失败
+                logger.debug("insertRole: insert coupon activity fail " + activityPo.toString());
+                returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("新增失败：" + activityPo.getName()));
+            } else {
+                //插入成功
+                logger.debug("insertRole: insert coupon activity = " + activityPo.toString());
+                //检验
+                CouponActivityPoExample couponActivityExample=new CouponActivityPoExample();
+                CouponActivityPoExample.Criteria couponActivityCriteria=couponActivityExample.createCriteria();
+                couponActivityCriteria.andNameEqualTo(activityPo.getName());
+                couponActivityCriteria.andShopIdEqualTo(activityPo.getShopId());
+                couponActivityCriteria.andBeginTimeEqualTo(activityPo.getBeginTime());
+                couponActivityCriteria.andEndTimeEqualTo(activityPo.getEndTime());
+                List<CouponActivityPo> checkPos=activityMapper.selectByExample(couponActivityExample);
+                if(checkPos.size()==0)return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("couponSpu字段不合法：" + activityPo.toString()));
+                else{//设置RetVo
+                    CouponActivity retActivity =new CouponActivity(checkPos.get(0));
+                    CouponActivityVo retVo=new CouponActivityVo(retActivity);
+                    //设置优惠活动所属商店
+                    ShopPo shopPo=shopMapper.selectByPrimaryKey(retActivity.getShopId());
+                    SimpleShopVo simpleShopVo=new SimpleShopVo(shopPo);
+                    retVo.setShopVo(simpleShopVo);
+                    //设置创建者、修改者
+                    //couponActivityVo.setCreatedBy();
+                    //couponActivityVo.setModifiedBy();
+                    return new ReturnObject<>(retVo);
+
+                }
+
+            }
+        }
+        catch (DataAccessException e) {
+            // 其他数据库错误
+            logger.debug("other sql exception : " + e.getMessage());
+            returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
+        return returnObject;
     }
 }

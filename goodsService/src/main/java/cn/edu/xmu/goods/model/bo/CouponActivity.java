@@ -9,7 +9,6 @@ import java.util.Map;
 
 @Data
 public class CouponActivity {
-
     public enum State {
         TO_BE_ONLINE(0, "待上线"),
         ONLINE(1, "进行中"),
@@ -45,7 +44,6 @@ public class CouponActivity {
             return description;
         }
     }
-
     public enum DatabaseState {
         EXECUTABLE(0, "可执行"),
         CANCELED(1, "已取消下线");
@@ -112,7 +110,7 @@ public class CouponActivity {
             return description;
         }
     }
-
+    
     private Long id;
 
     private String name;
@@ -145,23 +143,57 @@ public class CouponActivity {
 
     private Type quantitiyType;
 
-    public CouponActivity(CouponActivityPo activityPo)
-    {
-        id=-activityPo.getId();
-        name=activityPo.getName();
-        beginTime=activityPo.getBeginTime();
-        endTime=activityPo.getEndTime();
-        couponTime=activityPo.getCouponTime();
-        state=DatabaseState.getTypeByCode(activityPo.getState().intValue());
-        shopId=activityPo.getShopId();
-        quantity=activityPo.getQuantity();
-        validTerm=activityPo.getValidTerm();
-        imageUrl=activityPo.getImageUrl();
-        strategy=activityPo.getStrategy();
-        createdBy=activityPo.getCreatedBy();
-        modiBy=activityPo.getModiBy();
-        gmtCreate=activityPo.getGmtCreate();
-        gmtModified=activityPo.getGmtModified();
-        quantitiyType=CouponActivity.Type.getTypeByCode(activityPo.getQuantitiyType().intValue());
+    public CouponActivity(){
+
+    }
+
+    /**
+     * 构造函数 po->bo
+     * @param po Po对象
+     */
+    public CouponActivity(CouponActivityPo po){
+        this.id=po.getId();
+        this.name=po.getName();
+        this.beginTime=po.getBeginTime();
+        this.endTime=po.getEndTime();
+        this.couponTime=po.getCouponTime();
+        this.state=DatabaseState.getTypeByCode(po.getState().intValue());
+        this.shopId=po.getShopId();
+        this.quantity=po.getQuantity();
+        this.validTerm=po.getValidTerm();
+        this.imageUrl=po.getImageUrl();
+        this.strategy=po.getStrategy();
+        this.createdBy=po.getCreatedBy();
+        this.modiBy=po.getModiBy();
+        this.gmtCreate=po.getGmtCreate();
+        this.gmtModified=po.getGmtModified();
+        this.quantitiyType=CouponActivity.Type.getTypeByCode(po.getQuantitiyType().intValue());
+
+    }
+
+    /**
+     * 构造函数 bo->po
+     * @return couponActivityPo对象
+     * Created at 2020/12/04 23：01
+     */
+    public CouponActivityPo createActivityPo(){
+        CouponActivityPo activityPo=new CouponActivityPo();
+        activityPo.setId(this.id);
+        activityPo.setName(this.name);
+        activityPo.setBeginTime(this.beginTime);
+        activityPo.setEndTime(this.endTime);
+        activityPo.setCouponTime(this.couponTime);
+        activityPo.setState(this.state.getCode().byteValue());
+        activityPo.setShopId(this.shopId);
+        activityPo.setQuantity(this.quantity);
+        activityPo.setQuantitiyType(this.quantitiyType.getCode().byteValue());
+        activityPo.setValidTerm(this.getValidTerm());
+        activityPo.setImageUrl(this.imageUrl);
+        activityPo.setStrategy(this.strategy);
+        activityPo.setCreatedBy(this.createdBy);
+        activityPo.setModiBy(this.modiBy);
+        activityPo.setGmtCreate(this.gmtCreate);
+        activityPo.setGmtModified(this.gmtModified);
+        return activityPo;
     }
 }

@@ -122,7 +122,7 @@ public class GoodsSpu {
         spuPo.setShopId(this.shopId);
         spuPo.setFreightId(this.freightId);
         spuPo.setDetail(this.detail);
-//        spuPo.setDisabled(((this.disabled)?(byte)0:1));
+//      spuPo.setDisabled(((this.disabled)?(byte)0:1));
         spuPo.setGmtCreate(this.gmtCreated);
         spuPo.setGmtModified(this.gmtModified);
         spuPo.setGoodsSn(this.goodsSn);
