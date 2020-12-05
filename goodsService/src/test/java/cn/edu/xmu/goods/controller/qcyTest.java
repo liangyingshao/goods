@@ -36,7 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SpringBootTest(classes = GoodsServiceApplication.class)
 @AutoConfigureMockMvc
-@Transactional
+//@Transactional
 public class qcyTest {
     @Autowired
     MockMvc mvc;
@@ -492,6 +492,7 @@ public class qcyTest {
      * author: 秦楚彦 24320182203254
      * version: 1.0
      */
+
     @Test
     public void showCouponActivity1() throws JSONException {
         String token = creatTestToken(1L,1L,100);
@@ -637,7 +638,96 @@ public class qcyTest {
             responseString=this.mvc.perform(put("/goods/shops/1/couponactivities/100")
                     .header("authorization",token)
                     .contentType("application/json;charset=UTF-8").content(activityJson))
-                    .andExpect(status().isNotFound())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andReturn().getResponse().getContentAsString();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * description: 下线己方优惠活动 (成功)
+     * date: 2020/12/05 21:30
+     * author: 秦楚彦 24320182203254
+     * version: 1.0
+     */
+    @Test
+    public void offlineCouponActivity1() throws JSONException {
+        String token = creatTestToken(1L,1L,100);
+        String responseString=null;
+        try{
+            responseString=this.mvc.perform(delete("/goods/shops/1/couponactivities/5")
+                    .header("authorization",token)
+                    .contentType("application/json;charset=UTF-8"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andReturn().getResponse().getContentAsString();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * description: 下线己方优惠活动 (优惠活动已下线)
+     * date: 2020/12/05 21:46
+     * author: 秦楚彦 24320182203254
+     * version: 1.0
+     */
+    @Test
+    public void offlineCouponActivity2() throws JSONException {
+        String token = creatTestToken(1L,1L,100);
+        String responseString=null;
+        try{
+            responseString=this.mvc.perform(delete("/goods/shops/1/couponactivities/5")
+                    .header("authorization",token)
+                    .contentType("application/json;charset=UTF-8"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andExpect(jsonPath("$.errno").value(ResponseCode.ACTIVITYALTER_INVALID.getCode()))
+                    .andReturn().getResponse().getContentAsString();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * description: 下线己方优惠活动 (不发优惠券类型的优惠活动 成功)
+     * date: 2020/12/05 21:46
+     * author: 秦楚彦 24320182203254
+     * version: 1.0
+     */
+    @Test
+    public void offlineCouponActivity3() throws JSONException {
+        String token = creatTestToken(1L,1L,100);
+        String responseString=null;
+        try{
+            responseString=this.mvc.perform(delete("/goods/shops/1/couponactivities/10")
+                    .header("authorization",token)
+                    .contentType("application/json;charset=UTF-8"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andReturn().getResponse().getContentAsString();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * description: 下线己方优惠活动 (优惠活动无状态为【可用】优惠券)
+     * date: 2020/12/05 21:46
+     * author: 秦楚彦 24320182203254
+     * version: 1.0
+     */
+    @Test
+    public void offlineCouponActivity4() throws JSONException {
+        String token = creatTestToken(1L,1L,100);
+        String responseString=null;
+        try{
+            responseString=this.mvc.perform(delete("/goods/shops/1/couponactivities/5")
+                    .header("authorization",token)
+                    .contentType("application/json;charset=UTF-8"))
+                    .andExpect(status().isOk())
                     .andExpect(content().contentType("application/json;charset=UTF-8"))
                     .andReturn().getResponse().getContentAsString();
         }catch (Exception e){

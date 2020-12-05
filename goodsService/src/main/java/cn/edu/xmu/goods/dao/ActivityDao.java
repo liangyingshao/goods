@@ -678,6 +678,7 @@ public class ActivityDao {
         CouponActivityPoExample.Criteria criteria=activityPoExample.createCriteria();
         criteria.andIdEqualTo(activity.getId());
         criteria.andShopIdEqualTo(activity.getShopId());
+        criteria.andStateEqualTo((byte)0);//待修改活动必须为“可执行”
         try{
             int ret = activityMapper.updateByExampleSelective(activityPo,activityPoExample);
             if(ret==0){//修改失败
@@ -703,5 +704,75 @@ public class ActivityDao {
         }
         return returnObject;
 
+    }
+
+    /**
+     * 管理员下线己方优惠活动
+     * @param shopId
+     * @param id
+     * @return ReturnObject
+     */
+    public ReturnObject offlineCouponActivity(Long shopId, Long id) {
+        ReturnObject returnObject=null;
+        CouponActivityPoExample activityPoExample=new CouponActivityPoExample();
+        CouponActivityPoExample.Criteria criteria=activityPoExample.createCriteria();
+        criteria.andIdEqualTo(id);
+        criteria.andShopIdEqualTo(shopId);
+        //criteria.andStateEqualTo((byte)0);//待取消活动必须为“可执行”
+        try{
+            //下线优惠活动
+            List<CouponActivityPo> activityPo=activityMapper.selectByExample(activityPoExample);
+            if(!activityPo.get(0).getState().equals((byte)0)){//未找到符合条件的优惠活动
+//                returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,String.format("下线优惠活动失败"));
+                return returnObject=new ReturnObject<>(ResponseCode.ACTIVITYALTER_INVALID,String.format("下线优惠活动失败"));
+            }
+
+            activityPo.get(0).setState((byte)1);
+            int ret = activityMapper.updateByExampleSelective(activityPo.get(0),activityPoExample);
+            if(ret==0){//修改失败
+                logger.debug("updateCouponActivity fail:"+activityPo.toString());
+                //returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,String.format("下线优惠活动失败"));
+                returnObject=new ReturnObject<>(ResponseCode.ACTIVITYALTER_INVALID,String.format("下线优惠活动失败"));
+            }
+            else{//修改活动状态成功
+                logger.debug("updateCouponActivity success:"+activityPo.toString());
+                returnObject =new ReturnObject<>();
+                //若为发券类型优惠活动，将发行未用优惠券一并下线
+                if(!activityPo.get(0).getQuantity().equals(0)){
+                    CouponPoExample couponPoExample=new CouponPoExample();
+                    CouponPoExample.Criteria criteria1=couponPoExample.createCriteria();
+                    criteria1.andActivityIdEqualTo(activityPo.get(0).getId());
+                    criteria1.andStateEqualTo((byte)1);//下线状态为【可用】优惠券
+                    try {
+                        List<CouponPo> couponPos=couponMapper.selectByExample(couponPoExample);
+                        for(int i=0;i<couponPos.size();i++){
+                            //将优惠券状态设置为【失效】
+                            couponPos.get(i).setState((byte)3);
+                            //写回
+                            couponMapper.updateByPrimaryKey(couponPos.get(i));
+                        }
+                        returnObject =new ReturnObject<>();
+                    }
+                    catch (Exception e){//数据库中无状态为【可用】优惠券，仍然下线成功
+                        returnObject =new ReturnObject<>();
+                    }
+
+                }
+            }
+        }
+        catch (DataAccessException e) {
+
+            // 其他数据库错误
+            logger.debug("other sql exception : " + e.getMessage());
+            returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
+
+        return returnObject;
     }
 }

@@ -431,4 +431,46 @@ public class ActivityController {
 
     }
 
+    /**
+     * couponActivity 007 业务: 管理员下线己方某优惠活动
+     * @param shopId 商铺ID
+     * @param userId 当前用户ID
+     * @return  ReturnObject
+     * @author 24320182203254 秦楚彦
+     * Created at 2020/12/05 22：19
+     */
+    @ApiOperation(value="管理员新建己方优惠活动",produces="application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "shopId", value = "商铺id", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "id", value = "优惠活动id", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+
+    })
+    @Audit // 需要认证
+    @DeleteMapping("shops/{shopId}/couponactivities/{id}")
+    @ResponseBody
+    public Object offlineCouponActivity(@PathVariable Long shopId,@PathVariable Long id,
+                                       @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
+                                       @Depart @ApiIgnore @RequestParam(required = false) Long departId
+
+    ) {
+
+//        //设置activity状态，待修改
+//        activity.setState(CouponActivity.DatabaseState.CANCELED);
+//        activity.setId(id);
+//        activity.setShopId(shopId);
+//        activity.setGmtCreate(LocalDateTime.now());
+        ReturnObject retObject = activityService.offlineCouponActivity(shopId,id);
+        if (retObject.getData() != null) {
+            httpServletResponse.setStatus(HttpStatus.OK.value());
+            return retObject;
+        } else {
+            return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
+        }
+
+    }
+
 }

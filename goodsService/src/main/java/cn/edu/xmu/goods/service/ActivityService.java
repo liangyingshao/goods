@@ -162,4 +162,15 @@ public class ActivityService {
         ReturnObject returnObject=activityDao.modifyCouponActivity(activity);
         return returnObject;
     }
+
+    /**
+     * 管理员下线己方优惠活动
+     * @param shopId
+     * @param id
+     * @return ReturnObject
+     */
+    public ReturnObject offlineCouponActivity(Long shopId, Long id) {
+        ReturnObject returnObject=activityDao.offlineCouponActivity(shopId, id);
+        return returnObject;
+    }
 }
