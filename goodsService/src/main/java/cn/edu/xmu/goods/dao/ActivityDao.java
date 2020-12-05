@@ -463,7 +463,8 @@ public class ActivityDao {
             alreadyCriteria.andCustomerIdEqualTo(userId);
         List<CouponPo> alreadyPos=couponMapper.selectByExample(alreadyExample);
         //券已领罄
-        if(alreadyPos.size()==activityPo.getQuantity())
+        if(alreadyPos.size()==activityPo.getQuantity()//总量控制模式下券已发完或每人限量模式下该用户领的券已达上限
+        ||(CouponActivity.Type.getTypeByCode(activityPo.getQuantitiyType().intValue()).equals(CouponActivity.Type.LIMIT_TOTAL_NUM)&&alreadyPos.size()>0))//总量控制模式下该用户已领过券
             return new ReturnObject<>(ResponseCode.COUPON_FINISH);
         //可领券，设置券属性
         CouponPo newPo=new CouponPo();
@@ -499,11 +500,11 @@ public class ActivityDao {
                 //检验
                 CouponPoExample checkExample=new CouponPoExample();
                 CouponPoExample.Criteria checkCriteria=checkExample.createCriteria();
-                checkCriteria.andActivityIdEqualTo(id);
-                checkCriteria.andCustomerIdEqualTo(userId);
+                checkCriteria.andActivityIdEqualTo(newPo.getActivityId());
+                checkCriteria.andCustomerIdEqualTo(newPo.getCustomerId());
                 checkCriteria.andCouponSnEqualTo(newPo.getCouponSn());
-                checkCriteria.andGmtCreateEqualTo(newPo.getGmtCreate());
-                checkCriteria.andGmtModifiedEqualTo(newPo.getGmtModified());
+//                checkCriteria.andGmtCreateEqualTo(newPo.getGmtCreate());
+//                checkCriteria.andGmtModifiedEqualTo(newPo.getGmtModified());
                 checkCriteria.andNameEqualTo(newPo.getName());
                 checkCriteria.andStateEqualTo(Coupon.State.AVAILABLE.getCode().byteValue());
                 checkCriteria.andBeginTimeEqualTo(newPo.getBeginTime());

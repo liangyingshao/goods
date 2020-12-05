@@ -2,6 +2,8 @@ package cn.edu.xmu.goods.dao;
 
 import cn.edu.xmu.goods.GoodsServiceApplication;
 import cn.edu.xmu.goods.model.bo.CouponSku;
+import cn.edu.xmu.goods.model.vo.CouponNewRetVo;
+import cn.edu.xmu.goods.model.vo.CouponRetVo;
 import cn.edu.xmu.goods.model.vo.CouponSkuRetVo;
 import cn.edu.xmu.goods.model.vo.GoodsSkuCouponRetVo;
 import cn.edu.xmu.ooad.util.ResponseCode;
@@ -85,7 +87,19 @@ class ActivityDaoTest {
     }
 
     @Test
-    void showCoupons() {
+    void showCoupons()
+    {
+        activityDao.getCoupon((long)1,(long)1);
+        activityDao.getCoupon((long)1,(long)1);
+
+        PageInfo<CouponRetVo> retVos=activityDao.showCoupons((long)1,1,1,2);
+        assertEquals(retVos.getList().size(),2);
+
+        retVos=activityDao.showCoupons((long)1,1,2,1);
+        assertEquals(retVos.getList().size(),1);
+
+        retVos=activityDao.showCoupons((long)1,1,1,5);
+        assertEquals(retVos.getList().size(),2);
     }
 
     @Test
@@ -97,7 +111,23 @@ class ActivityDaoTest {
     }
 
     @Test
-    void getCoupon() {
+    void getCoupon()
+    {
+        ReturnObject<CouponNewRetVo> returnObject=activityDao.getCoupon((long)1,(long)2);
+        assertEquals(returnObject.getCode(),ResponseCode.OK);
+
+        returnObject=activityDao.getCoupon((long)1,(long)2);
+        assertEquals(returnObject.getCode(),ResponseCode.COUPON_FINISH);
+
+        returnObject=activityDao.getCoupon((long)1,(long)1);
+        assertEquals(returnObject.getCode(),ResponseCode.OK);
+        returnObject=activityDao.getCoupon((long)1,(long)1);
+        assertEquals(returnObject.getCode(),ResponseCode.OK);
+        returnObject=activityDao.getCoupon((long)1,(long)1);
+        assertEquals(returnObject.getCode(),ResponseCode.COUPON_FINISH);
+
+        returnObject=activityDao.getCoupon((long)1,(long)3);
+        assertEquals(returnObject.getCode(),ResponseCode.COUPON_NOTBEGIN);
     }
 
     @Test
