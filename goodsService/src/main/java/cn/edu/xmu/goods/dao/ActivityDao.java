@@ -1,17 +1,14 @@
 package cn.edu.xmu.goods.dao;
 
 import cn.edu.xmu.goods.mapper.CouponActivityPoMapper;
+import cn.edu.xmu.goods.mapper.CouponPoMapper;
 import cn.edu.xmu.goods.mapper.CouponSpuPoMapper;
 import cn.edu.xmu.goods.mapper.GoodsSpuPoMapper;
-import cn.edu.xmu.goods.model.bo.CouponActivity;
-import cn.edu.xmu.goods.model.bo.CouponSpu;
-import cn.edu.xmu.goods.model.bo.GoodsSku;
-import cn.edu.xmu.goods.model.bo.GoodsSpu;
+import cn.edu.xmu.goods.model.bo.*;
 import cn.edu.xmu.goods.model.po.*;
 import cn.edu.xmu.goods.model.po.CouponSpuPoExample;
-import cn.edu.xmu.goods.model.vo.CouponSpuRetVo;
-import cn.edu.xmu.goods.model.vo.GoodsSpuCouponCreateRetVo;
-import cn.edu.xmu.goods.model.vo.GoodsSpuCouponRetVo;
+import cn.edu.xmu.goods.model.vo.*;
+import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import com.github.pagehelper.PageHelper;
@@ -23,6 +20,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.time.temporal.TemporalAmount;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -39,6 +37,9 @@ public class ActivityDao {
 
     @Autowired
     private CouponActivityPoMapper activityMapper;
+
+    @Autowired
+    private CouponPoMapper couponMapper;
 
     public void initialize() throws Exception {
         //初始化couponSpu
@@ -81,6 +82,19 @@ public class ActivityDao {
             newPo.setId(po.getId());
             newPo.setShopId(po.getShopId());
             activityMapper.updateByPrimaryKeySelective(newPo);
+        }
+
+        //初始化coupon
+        CouponPoExample couponExample=new CouponPoExample();
+        CouponPoExample.Criteria couponCriteria=couponExample.createCriteria();
+        List<CouponPo> couponPos=couponMapper.selectByExample(couponExample);
+        for(CouponPo po:couponPos)
+        {
+            CouponPo newPo=new CouponPo();
+            newPo.setActivityId(po.getActivityId());
+            newPo.setCustomerId(po.getCustomerId());
+            newPo.setId(po.getId());
+            couponMapper.updateByPrimaryKeySelective(newPo);
         }
     }
 
@@ -134,7 +148,7 @@ public class ActivityDao {
 
         //活动“待上线”
         if(activityPo.getBeginTime().isAfter(LocalDateTime.now())//考虑到惰性更新状态【待上线】->【进行中】的情况
-                &&CouponActivity.State.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.State.TO_BE_ONLINE))
+                &&CouponActivity.DatabaseState.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.DatabaseState.EXECUTABLE))
         {
             CouponSpuPo couponSpuPo=couponSpu.getCouponSpuPo();
             try{
@@ -199,8 +213,8 @@ public class ActivityDao {
         if(activityPo.getShopId()!=shopId)return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
 
         //活动"未上线"
-        if(activityPo.getBeginTime().isAfter(LocalDateTime.now())//考虑到惰性更新状态【待上线】->【进行中】的情况
-                && CouponActivity.State.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.State.TO_BE_ONLINE))
+        if(activityPo.getBeginTime().isAfter(LocalDateTime.now())//未开始
+                && CouponActivity.DatabaseState.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.DatabaseState.EXECUTABLE))//【可执行】
         {
             try{
                 int ret=couponSpuMapper.deleteByPrimaryKey(id);
@@ -228,5 +242,327 @@ public class ActivityDao {
             }
         }
         else return new ReturnObject(ResponseCode.COUPONACT_STATENOTALLOW);
+    }
+
+    /**
+     * 买家查看优惠券列表
+     * @param userId
+     * @param state
+     * @param page
+     * @param pageSize
+     * @return PageInfo<CouponRetVo>
+     */
+    public PageInfo<CouponRetVo> showCoupons(Long userId, Integer state, Integer page, Integer pageSize)
+    {
+        //设置查询条件
+        CouponPoExample couponExample=new CouponPoExample();
+        CouponPoExample.Criteria couponCriteria=couponExample.createCriteria();
+        couponCriteria.andCustomerIdEqualTo(userId);
+        PageHelper.startPage(page,pageSize);
+        logger.debug("page="+page+" pageSize="+pageSize);
+        if(Coupon.State.getTypeByCode(state).equals(Coupon.State.UNAVAILABLE))
+        {
+            //未达上线时间
+            couponCriteria.andBeginTimeGreaterThan(LocalDateTime.now());
+
+            //未取消
+            couponCriteria.andStateNotEqualTo(Coupon.State.DISABLED.getCode().byteValue());
+        }
+        else if(Coupon.State.getTypeByCode(state).equals(Coupon.State.AVAILABLE))
+        {
+            //时间范围正确
+            couponCriteria.andBeginTimeLessThanOrEqualTo(LocalDateTime.now());
+            couponCriteria.andEndTimeGreaterThan(LocalDateTime.now());
+
+            //未紧急下线、未使用
+            couponCriteria.andStateNotEqualTo(Coupon.State.DISABLED.getCode().byteValue());
+            couponCriteria.andStateNotEqualTo(Coupon.State.USED.getCode().byteValue());
+        }
+        else if(Coupon.State.getTypeByCode(state).equals(Coupon.State.USED))
+            //已使用一定会改状态
+            couponCriteria.andStateEqualTo(Coupon.State.USED.getCode().byteValue());
+        else if(Coupon.State.getTypeByCode(state).equals(Coupon.State.DISABLED))
+            //失效了会及时更改状态
+            couponCriteria.andStateEqualTo(Coupon.State.DISABLED.getCode().byteValue());
+
+        List<CouponPo> couponPos= couponMapper.selectByExample(couponExample);
+
+        //构造RetVo
+        List<CouponRetVo> couponRetVos=new ArrayList<CouponRetVo>();
+        CouponActivityPo activityPo;
+        for(int i=0;i< couponPos.size();++i)
+        {
+            //coupon部分设置
+            Coupon coupon=new Coupon(couponPos.get(i));
+            CouponRetVo retVo=new CouponRetVo();
+            retVo.set(coupon);
+
+            //activity部分设置
+            activityPo= activityMapper.selectByPrimaryKey(couponPos.get(i).getActivityId());
+            CouponActivityByCouponRetVo activityRetVo=new CouponActivityByCouponRetVo();
+            CouponActivity activity=new CouponActivity(activityPo);
+            activityRetVo.set(activity);
+            retVo.setActivity(activityRetVo);
+
+            //添加
+            couponRetVos.add(retVo);
+        }
+        return new PageInfo<>(couponRetVos);
+    }
+
+    /**
+     * 买家使用自己某优惠券
+     * @param userId
+     * @param id
+     * @return ReturnObject
+     */
+    public ReturnObject useCoupon(Long userId, Long id)
+    {
+        //coupon存在
+        CouponPo couponPo=couponMapper.selectByPrimaryKey(id);
+        if(couponPo==null)return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+
+        //在用户名下
+        if(couponPo.getCustomerId()!=userId)return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
+
+        if(couponPo.getBeginTime().isBefore(LocalDateTime.now())&&couponPo.getEndTime().isAfter(LocalDateTime.now())//在进行中范围
+                &&!Coupon.State.getTypeByCode(couponPo.getState().intValue()).equals(Coupon.State.DISABLED)//未失效
+                &&!Coupon.State.getTypeByCode(couponPo.getState().intValue()).equals(Coupon.State.USED))//未使用
+        {
+            //尝试更改状态
+            couponPo.setState(Coupon.State.USED.getCode().byteValue());
+            try{
+                int ret=couponMapper.updateByPrimaryKeySelective(couponPo);
+                if(ret==0){
+                    //删除失败
+                    logger.debug("useCoupon: update coupon fail : " + couponPo.toString());
+                    return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("coupon字段不合法：" + couponPo.toString()));
+                }
+                else {
+                    //删除成功
+                    logger.debug("useCoupon: update coupon = " + couponPo.toString());
+                    return new ReturnObject<>();
+                }
+            }
+            catch (DataAccessException e)
+            {
+                // 其他数据库错误
+                logger.debug("other sql exception : " + e.getMessage());
+                return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+            }
+            catch (Exception e) {
+                // 其他Exception错误
+                logger.error("other exception : " + e.getMessage());
+                return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+            }
+        }
+        else return new ReturnObject(ResponseCode.COUPON_STATENOTALLOW);
+    }
+
+    //据说已废弃
+    /**
+     * 买家删除自己某优惠券
+     * @param userId
+     * @param id
+     * @return ReturnObject
+     */
+    public ReturnObject deleteCoupon(Long userId, Long id)
+    {
+        //coupon存在
+        CouponPo couponPo=couponMapper.selectByPrimaryKey(id);
+        if(couponPo==null)return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+
+        //在用户名下
+        if(couponPo.getCustomerId()!=userId)return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
+
+        //USED状态的优惠券不能删除
+        if(!Coupon.State.getTypeByCode(couponPo.getState().intValue()).equals(Coupon.State.USED))
+        {
+            //没有对应的属性，我先暂时设置为将state改为DISABLED
+            couponPo.setState(Coupon.State.DISABLED.getCode().byteValue());
+            try{
+                int ret=couponMapper.updateByPrimaryKeySelective(couponPo);
+                if(ret==0){
+                    //删除失败
+                    logger.debug("deleteCoupon: delete coupon fail : " + couponPo.toString());
+                    return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("coupon字段不合法：" + couponPo.toString()));
+                }
+                else {
+                    //删除成功
+                    logger.debug("deleteCoupon: delete coupon = " + couponPo.toString());
+                    return new ReturnObject<>();
+                }
+            }
+            catch (DataAccessException e)
+            {
+                // 其他数据库错误
+                logger.debug("other sql exception : " + e.getMessage());
+                return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+            }
+            catch (Exception e) {
+                // 其他Exception错误
+                logger.error("other exception : " + e.getMessage());
+                return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+            }
+        }
+        else return new ReturnObject(ResponseCode.COUPON_STATENOTALLOW);
+    }
+
+    /**
+     * 买家领取活动优惠券
+     * @param userId
+     * @param id
+     * @return ReturnObject<CouponNewRetVo>
+     */
+    public ReturnObject<CouponNewRetVo> getCoupon(Long userId, Long id)
+    {
+        CouponActivityPo activityPo=activityMapper.selectByPrimaryKey(id);
+
+        //活动不存在
+        if(activityPo==null)return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+
+        //状态为OFFLINE
+        if(CouponActivity.DatabaseState.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.DatabaseState.CANCELED))
+            return new ReturnObject<>(ResponseCode.COUPON_END);
+
+        //状态为FINISHED
+        //已达结束时间
+        if(LocalDateTime.now().isAfter(activityPo.getEndTime()))
+            return new ReturnObject<>(ResponseCode.COUPON_END);
+
+        //活动尚不能领券（含TO_BE_ONLINE和ONLINE的couponTime之前）
+        if(activityPo.getCouponTime().isAfter(LocalDateTime.now()))
+            return new ReturnObject<>(ResponseCode.COUPON_NOTBEGIN);
+
+        //活动进行中
+        //查询优惠券发放情况
+        CouponPoExample alreadyExample=new CouponPoExample();
+        CouponPoExample.Criteria alreadyCriteria= alreadyExample.createCriteria();
+        alreadyCriteria.andActivityIdEqualTo(id);
+        //每人限量模式
+        if(CouponActivity.Type.getTypeByCode(activityPo.getQuantitiyType().intValue()).equals(CouponActivity.Type.LIMIT_PER_PERSON))
+            alreadyCriteria.andCustomerIdEqualTo(userId);
+        List<CouponPo> alreadyPos=couponMapper.selectByExample(alreadyExample);
+        //券已领罄
+        if(alreadyPos.size()==activityPo.getQuantity())
+            return new ReturnObject<>(ResponseCode.COUPON_FINISH);
+        //可领券，设置券属性
+        CouponPo newPo=new CouponPo();
+        newPo.setCustomerId(userId);
+        newPo.setActivityId(id);
+        newPo.setCouponSn(Common.genSeqNum());
+        newPo.setGmtCreate(LocalDateTime.now());
+        newPo.setGmtModified(LocalDateTime.now());
+        newPo.setName(activityPo.getName());
+        newPo.setState(Coupon.State.AVAILABLE.getCode().byteValue());
+        if(activityPo.getValidTerm()==0)//与活动同时
+        {
+            newPo.setBeginTime(activityPo.getBeginTime());
+            newPo.setEndTime(activityPo.getEndTime());
+        }
+        else//自领券起
+        {
+            newPo.setBeginTime(LocalDateTime.now());
+            newPo.setEndTime(LocalDateTime.now().plusDays(activityPo.getValidTerm()));
+        }
+
+        try{
+            int ret=couponMapper.insertSelective(newPo);
+            if(ret==0){
+                //插入失败
+                logger.debug("getCoupon: insert coupon fail : " + newPo.toString());
+                return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("coupon字段不合法：" + newPo.toString()));
+            }
+            else {
+                //插入成功
+                logger.debug("getCoupon: insert coupon = " + newPo.toString());
+
+                //检验
+                CouponPoExample checkExample=new CouponPoExample();
+                CouponPoExample.Criteria checkCriteria=checkExample.createCriteria();
+                checkCriteria.andActivityIdEqualTo(id);
+                checkCriteria.andCustomerIdEqualTo(userId);
+                checkCriteria.andCouponSnEqualTo(newPo.getCouponSn());
+                checkCriteria.andGmtCreateEqualTo(newPo.getGmtCreate());
+                checkCriteria.andGmtModifiedEqualTo(newPo.getGmtModified());
+                checkCriteria.andNameEqualTo(newPo.getName());
+                checkCriteria.andStateEqualTo(Coupon.State.AVAILABLE.getCode().byteValue());
+                checkCriteria.andBeginTimeEqualTo(newPo.getBeginTime());
+                checkCriteria.andEndTimeEqualTo(newPo.getEndTime());
+                List<CouponPo> couponPos=couponMapper.selectByExample(checkExample);
+                if(couponPos.size()==0)
+                    return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("coupon字段不合法：" + newPo.toString()));
+                else
+                {
+                    //构造RetVo
+                    CouponNewRetVo retVo=new CouponNewRetVo();
+                    Coupon coupon=new Coupon(couponPos.get(0));
+                    retVo.set(coupon);
+                    CouponActivityByNewCouponRetVo activityRetVo=new CouponActivityByNewCouponRetVo();
+                    CouponActivity activity=new CouponActivity(activityPo);
+                    activityRetVo.set(activity);
+                    retVo.setActivity(activityRetVo);
+                    return new ReturnObject<CouponNewRetVo>(retVo);
+                }
+            }
+        }
+        catch (DataAccessException e)
+        {
+            // 其他数据库错误
+            logger.debug("other sql exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
+    }
+
+    /**
+     * 优惠券退回
+     * @param id
+     * @return ReturnObject
+     */
+    public ReturnObject returnCoupon(Long id)
+    {
+        CouponPo couponPo=couponMapper.selectByPrimaryKey(id);
+
+        //优惠券存在
+        if(couponPo==null)return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+
+        //设置新的有效期
+        LocalDateTime gmtModified=couponPo.getGmtModified();
+        couponPo.setEndTime(couponPo.getEndTime().minusSeconds(couponPo.getBeginTime().getSecond()).plusSeconds(gmtModified.getSecond()));
+        couponPo.setBeginTime(gmtModified);
+        couponPo.setGmtModified(LocalDateTime.now());
+        //设置状态
+        couponPo.setState(Coupon.State.AVAILABLE.getCode().byteValue());
+
+        //尝试修改
+        try{
+            int ret=couponMapper.updateByPrimaryKeySelective(couponPo);
+            if(ret==0){
+                //删除失败
+                logger.debug("returnCoupon: update coupon fail : " + couponPo.toString());
+                return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("coupon字段不合法：" + couponPo.toString()));
+            }
+            else {
+                //删除成功
+                logger.debug("returnCoupon: update coupon = " + couponPo.toString());
+                return new ReturnObject<>();
+            }
+        }
+        catch (DataAccessException e)
+        {
+            // 其他数据库错误
+            logger.debug("other sql exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
     }
 }

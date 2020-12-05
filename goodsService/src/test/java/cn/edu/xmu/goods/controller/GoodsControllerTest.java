@@ -332,4 +332,16 @@ class GoodsControllerTest {
         expectedResponse="{\"code\":\"RESOURCE_ID_OUTSCOPE\",\"errmsg\":\"操作的资源id不是自己的对象\",\"data\":null}";
         JSONAssert.assertEquals(expectedResponse,responseString,true);
     }
+
+    @Test
+    void getgoodskustate() throws Exception
+    {
+        String responseString = this.mvc.perform(get("/goods/skus/states"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+//        System.out.println(responseString);
+        String expectedResponse = "{\"errno\":0,\"data\":[{\"name\":\"未上架\",\"code\":0},{\"name\":\"上架\",\"code\":4},{\"name\":\"已删除\",\"code\":6}],\"errmsg\":\"成功\"}";
+        JSONAssert.assertEquals(expectedResponse, responseString, true);
+    }
 }

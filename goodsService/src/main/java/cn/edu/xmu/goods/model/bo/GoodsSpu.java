@@ -91,8 +91,6 @@ public class GoodsSpu {
      * @param po Po对象
      */
     public GoodsSpu(GoodsSpuPo po){
-
-
         this.id=po.getId();
         this.name=po.getName();
         this.brandId=po.getBrandId();

@@ -19,7 +19,7 @@ public class GoodsSpuCouponCreateRetVo {
 
     private String imageUrl;
 
-    private Byte state;
+    private Integer state;
 
     private LocalDateTime gmtCreate;
 
@@ -34,7 +34,7 @@ public class GoodsSpuCouponCreateRetVo {
         brandId= obj.getBrandId();
         goodsSn= obj.getGoodsSn();
         imageUrl= obj.getImageUrl();
-        state=obj.getState().getCode().byteValue();
+        state=obj.getState().getCode().intValue();
         gmtCreate=obj.getGmtCreated();
         gmtModified=obj.getGmtModified();
 //        disabled=obj.isDisabled();

@@ -2,6 +2,7 @@ package cn.edu.xmu.goods.model.vo;
 
 import cn.edu.xmu.goods.model.bo.GoodsSku;
 import io.swagger.annotations.ApiModel;
+import io.swagger.models.auth.In;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -24,7 +25,7 @@ public class GoodsSkuRetVo {
 
     private Long price;
 
-    private Byte disabled;
+    private Integer disabled;
 
     public GoodsSkuRetVo(GoodsSku obj)
     {
@@ -35,6 +36,6 @@ public class GoodsSkuRetVo {
         inventory=obj.getInventory();
         originalPrice=obj.getOriginalPrice();
         price=obj.getPrice();
-        disabled=obj.getDisabled().getCode().byteValue();
+        disabled=obj.getDisabled().getCode().intValue();
     }
 }

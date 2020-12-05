@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -320,28 +319,24 @@ public class GoodsController {
             return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }
     }
+
     /**
-     * spu001: 获得商品SPU的所有状态
+     * 获得商品SKU的所有状态
      * @return Object
-     * @author 24320182203254 秦楚彦
-     * Created at 2020/11/29 21:02
      */
-    @ApiOperation(value="获得商品SPU的所有状态",produces="application/json")
+    @ApiOperation(value="获得商品SKU的所有状态",produces="application/json")
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
             @ApiResponse(code = 504, message = "操作id不存在")
     })
-    @GetMapping("spus/states")
+    @GetMapping("skus/states")
     @ResponseBody
-    public Object getgoodspustate() {
+    public Object getgoodskustate() {
 
-        GoodsSpu.SpuState[] spustates=GoodsSpu.SpuState.class.getEnumConstants();
-        List<StateVo> stateVos=new ArrayList<StateVo>();
-        for(int i=0;i<spustates.length;i++){
-            stateVos.add(new StateVo(spustates[i]));
-
-        }
-
+        GoodsSku.State[] states=GoodsSku.State.class.getEnumConstants();
+        List<GoodsSkuStateRetVo> stateVos=new ArrayList<GoodsSkuStateRetVo>();
+        for(int i=0;i<states.length;i++)
+            stateVos.add(new GoodsSkuStateRetVo(states[i]));
         return ResponseUtil.ok(new ReturnObject<List>(stateVos).getData());
     }
 

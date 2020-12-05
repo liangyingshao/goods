@@ -156,4 +156,131 @@ public class ActivityController {
             stateRetVos.add(new CouponStateRetVo(states[i]));
         return ResponseUtil.ok(new ReturnObject<List>(stateRetVos).getData());
     }
+
+    /**
+     * 买家查看优惠券列表
+     * @param userId
+     * @param state
+     * @param page
+     * @param pageSize
+     * @return Object
+     */
+    @ApiOperation(value = "买家查看优惠券列表")
+    @ApiImplicitParam(paramType = "header",dataType = "String",name = "authorization",value = "用户token",required = true)
+    @Audit
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功")
+    })
+    @GetMapping("/coupons")
+    @ResponseBody
+    public Object showCoupons(@LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
+                              @RequestParam(required = false, defaultValue = "1") Integer state,
+                              @RequestParam(required = false, defaultValue = "1") Integer page,
+                              @RequestParam(required = false, defaultValue = "10") Integer pageSize)
+    {
+        logger.debug("showCoupons:page="+page+" pageSize="+pageSize);
+        if(state!=null&&Coupon.State.getTypeByCode(state)==null)return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+        ReturnObject<PageInfo<CouponRetVo>> returnObject=activityService.showCoupons(userId,state,page,pageSize);
+        return returnObject;
+    }
+
+
+    /**
+     * 买家使用自己某优惠券
+     * @param userId
+     * @param id
+     * @return Object
+     */
+    @ApiOperation(value = "买家使用自己某优惠券")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header",dataType = "String",name = "authorization",value = "用户token",required = true),
+            @ApiImplicitParam(paramType = "path",dataType = "Long",name = "id",value = "优惠券id",required = true)
+    })
+    @Audit
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功")
+    })
+    @PutMapping("/coupons/{id}")
+    @ResponseBody
+    public Object useCoupon(@LoginUser @ApiIgnore @RequestParam(required = false) Long userId, @PathVariable Long id)
+    {
+        ReturnObject returnObject=activityService.useCoupon(userId,id);
+        return returnObject;
+    }
+
+    //据说已废弃
+    /**
+     * 买家删除自己某优惠券
+     * @param userId
+     * @param id
+     * @return Object
+     */
+    @ApiOperation(value = "买家删除自己某优惠券")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header",dataType = "String",name = "authorization",value = "用户token",required = true),
+            @ApiImplicitParam(paramType = "path",dataType = "Long",name = "id",value = "优惠券id",required = true)
+    })
+    @Audit
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功")
+    })
+    @DeleteMapping("/coupons/{id}")
+    @ResponseBody
+    public Object deleteCoupon(@LoginUser @ApiIgnore @RequestParam(required = false) Long userId, @PathVariable Long id)
+    {
+        ReturnObject returnObject=activityService.deleteCoupon(userId,id);
+        return returnObject;
+    }
+
+    /**
+     * 买家领取活动优惠券
+     * @param userId
+     * @param id
+     * @return Object
+     */
+    @ApiOperation(value = "买家领取活动优惠券")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header",dataType = "String",name = "authorization",value = "用户token",required = true),
+            @ApiImplicitParam(paramType = "path",dataType = "Long",name = "id",value = "活动id",required = true)
+    })
+    @Audit
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功")
+    })
+    @PostMapping("/couponactivities/{id}/usercoupons")
+    @ResponseBody
+    public Object getCoupon(@LoginUser @ApiIgnore @RequestParam(required = false) Long userId, @PathVariable Long id)
+    {
+        ReturnObject<CouponNewRetVo> returnObject=activityService.getCoupon(userId,id);
+        return returnObject;
+    }
+
+    /**
+     * 优惠券退回
+     * @param shopId
+     * @param id
+     * @param userId
+     * @param departId
+     * @return Object
+     */
+    @ApiOperation(value = "优惠券退回")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header",dataType = "String",name = "authorization",value = "用户token",required = true),
+            @ApiImplicitParam(paramType = "path",dataType = "Long",name = "shopId",value = "店铺id",required = true),
+            @ApiImplicitParam(paramType = "path",dataType = "Long",name = "id",value = "优惠券id",required = true)
+    })
+    @Audit
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功")
+    })
+    @PutMapping("/shops/{shopId}/coupons/{id}")
+    @ResponseBody
+    public Object returnCoupon(@PathVariable Long shopId, @PathVariable Long id,
+                               @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
+                               @Depart @ApiIgnore @RequestParam(required = false) Long departId)
+    {
+        if(shopId!=departId)return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        ReturnObject returnObject=activityService.returnCoupon(id);
+        return returnObject;
+    }
 }

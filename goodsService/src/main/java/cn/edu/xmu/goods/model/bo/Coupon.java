@@ -1,10 +1,15 @@
 package cn.edu.xmu.goods.model.bo;
 
+import cn.edu.xmu.goods.model.po.CouponPo;
+import lombok.Data;
+
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+@Data
 public class Coupon {
+
     public enum State {
         UNAVAILABLE(0,"不可用"),
         AVAILABLE(1,"可用"),
@@ -54,9 +59,23 @@ public class Coupon {
 
     private LocalDateTime endTime;
 
-    private Byte state;
+    private State state;
 
     private LocalDateTime gmtCreate;
 
     private LocalDateTime gmtModified;
+
+    public Coupon(CouponPo couponPo)
+    {
+        id=couponPo.getId();
+        couponSn=couponPo.getCouponSn();
+        name=couponPo.getName();
+        customerId=couponPo.getCustomerId();
+        activityId= couponPo.getActivityId();
+        beginTime=couponPo.getBeginTime();
+        endTime=couponPo.getEndTime();
+        state=State.getTypeByCode(couponPo.getState().intValue());
+        gmtCreate=couponPo.getGmtCreate();
+        gmtModified=couponPo.getGmtModified();
+    }
 }
