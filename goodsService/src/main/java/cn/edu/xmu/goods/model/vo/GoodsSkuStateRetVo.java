@@ -1,6 +1,8 @@
 package cn.edu.xmu.goods.model.vo;
 
+import cn.edu.xmu.goods.model.bo.GoodsSku;
 import cn.edu.xmu.goods.model.bo.GoodsSpu;
+import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
 /**
@@ -9,11 +11,12 @@ import lombok.Data;
  * @date 2020/11/29 00:41
  */
 @Data
-public class StateVo {
+@ApiModel(value = "查询SKU所有状态视图对象")
+public class GoodsSkuStateRetVo {
     private Long Code;
 
     private String name;
-    public StateVo(GoodsSpu.SpuState state){
+    public GoodsSkuStateRetVo(GoodsSku.State state){
         Code=Long.valueOf(state.getCode());
         name=state.getDescription();
     }

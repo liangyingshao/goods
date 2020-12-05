@@ -52,20 +52,6 @@ public class qcyTest {
         return token;
     }
 
-    /**
-     * 获取SPU所有状态 成功
-     *
-     * @throws Exception
-     */
-    @Test
-    public void getAllState() throws Exception {
-        String responseString = this.mvc.perform(get("/goods/spus/states"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json;charset=UTF-8"))
-                .andReturn().getResponse().getContentAsString();
-        String expectedResponse = "{\"errno\":0,\"data\":[{\"name\":\"未上架\",\"code\":0},{\"name\":\"上架\",\"code\":4},{\"name\":\"已删除\",\"code\":6}],\"errmsg\":\"成功\"}";
-        JSONAssert.assertEquals(expectedResponse, responseString, true);
-    }
 
     /**
      * description: 店家新建商品SPU

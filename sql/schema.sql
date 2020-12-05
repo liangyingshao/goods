@@ -249,7 +249,6 @@ CREATE TABLE `goods_spu` (
   `disabled` tinyint DEFAULT NULL,
   `gmt_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `gmt_modified` datetime DEFAULT NULL,
-  UNIQUE KEY `goods_sn_uindex` (`goods_sn`),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=680 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
