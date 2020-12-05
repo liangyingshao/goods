@@ -112,7 +112,7 @@ public class GoodsSpu {
 
     /**
      * 构造函数 用bo对象创建po对象
-     * @return GoodsSpu
+     * @return GoodsSpuPo
      * Created at 2020/12/01 00：46
      * Modified at 2020/12/02 20:13
      */

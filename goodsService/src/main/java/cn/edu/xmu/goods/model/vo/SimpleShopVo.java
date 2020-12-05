@@ -1,5 +1,6 @@
 package cn.edu.xmu.goods.model.vo;
 
+import cn.edu.xmu.goods.model.po.ShopPo;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -18,6 +19,8 @@ public class SimpleShopVo {
     @ApiModelProperty(name = "店铺名", value = "userName")
     private String name;
 
-    public SimpleShopVo() {
+    public SimpleShopVo(ShopPo po) {
+        this.id=po.getId();
+        this.name=po.getName();
     }
 }

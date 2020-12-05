@@ -361,7 +361,7 @@ public class GoodsController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功")
     })
-    @GetMapping("spus/{id}")
+    @GetMapping("/spus/{id}")
     @ResponseBody
     public Object showSpu(@PathVariable Long id) {
         Object returnObject=null;

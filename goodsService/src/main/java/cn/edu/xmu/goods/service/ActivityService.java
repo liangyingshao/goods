@@ -1,7 +1,9 @@
 package cn.edu.xmu.goods.service;
 
 import cn.edu.xmu.goods.dao.ActivityDao;
+import cn.edu.xmu.goods.model.bo.CouponActivity;
 import cn.edu.xmu.goods.model.bo.CouponSpu;
+import cn.edu.xmu.goods.model.vo.CouponActivityVo;
 import cn.edu.xmu.goods.model.vo.CouponSpuRetVo;
 import cn.edu.xmu.goods.model.vo.GoodsSpuCouponRetVo;
 import cn.edu.xmu.ooad.util.ReturnObject;
@@ -55,6 +57,28 @@ public class ActivityService {
     public ReturnObject deleteCouponSpu(Long shopId, Long id)
     {
         ReturnObject returnObject=activityDao.deleteCouponSpu(shopId,id);
+        return returnObject;
+    }
+
+    /**
+     * 店家查询己方某优惠券活动
+     * @param shopId
+     * @param id
+     * @return ReturnObject
+     */
+    @Transactional
+    public ReturnObject<Object> showCouponActivity(Long shopId, Long id) {
+        ReturnObject returnObject=activityDao.showCouponActivity(shopId,id);
+        return returnObject;
+    }
+
+    /**
+     * 管理员新建己方优惠活动
+     * @param activity
+     * @return ReturnObject
+     */
+    public ReturnObject addCouponActivity(CouponActivity activity) {
+        ReturnObject<CouponActivityVo> returnObject=activityDao.addCouponActivity(activity);
         return returnObject;
     }
 }

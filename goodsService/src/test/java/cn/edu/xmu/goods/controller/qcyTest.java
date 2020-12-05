@@ -2,6 +2,7 @@ package cn.edu.xmu.goods.controller;
 
 import cn.edu.xmu.goods.GoodsServiceApplication;
 import cn.edu.xmu.goods.mapper.GoodsSpuPoMapper;
+import cn.edu.xmu.goods.model.vo.CouponActivityCreateVo;
 import cn.edu.xmu.goods.model.vo.GoodsSpuCreateVo;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.JwtHelper;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.time.LocalDateTime;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -34,13 +36,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SpringBootTest(classes = GoodsServiceApplication.class)
 @AutoConfigureMockMvc
-@Transactional
+//@Transactional
 public class qcyTest {
     @Autowired
     MockMvc mvc;
 
-    @Autowired
-    private GoodsSpuPoMapper spuPoMapper;
+//    @Autowired
+//    private GoodsSpuPoMapper spuPoMapper;
 
     /**
      * description: 创建测试用token
@@ -75,11 +77,11 @@ public class qcyTest {
      */
     @Test
     public void addSpuTest() throws JSONException {
+        String token = creatTestToken(1L,1L,100);
         GoodsSpuCreateVo vo = new GoodsSpuCreateVo();
         vo.setName("ipadair4");
         vo.setDescription("最新一代air系列产品");
-        String token = creatTestToken(1L,1L,100);
-        vo.setSpec("{\"id\":1,\"name\":\"ipadspec\", \"specItems\":{\"id\":1, \"name\":\"color\"},{\"id\":2, \"name\":\"memory\"}}");
+        vo.setSpec("{\"id\":1,\"name\":\"couponstrategy\", \"shresholds\":{\"type\":\"满减\",\"value\":\"200\",\"discount\":\"30\"}");
         String spuJson = JacksonUtil.toJson(vo);
         String responseString=null;
         try{
@@ -391,28 +393,124 @@ public class qcyTest {
     }
 
     /**
-     * description: 上传商品SPU图片 (成功)
-     * date: 2020/12/03 15：23
+     * description: 查看优惠活动详情 (成功)
+     * date: 2020/12/04 20：27
      * author: 秦楚彦 24320182203254
      * version: 1.0
      */
     @Test
-    public void uploadFileSutccess() throws Exception{
+    public void showCouponActivity1() throws JSONException {
         String token = creatTestToken(1L,1L,100);
-        File file = new File("."+File.separator + "src" + File.separator + "test" + File.separator+"resources" + File.separator + "img" + File.separator+"timg.png");
-        MockMultipartFile firstFile = new MockMultipartFile("img", "timg.png" , "multipart/form-data", new FileInputStream(file));
-        String responseString = this.mvc.perform(MockMvcRequestBuilders
-                .multipart("/goods/shops/1/spus/681/uploadImg")
-                .file(firstFile)
-                .header("authorization", token)
-                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\"}";
-        JSONAssert.assertEquals(expectedResponse, responseString, true);
+        String responseString=null;
+        try{
+            responseString=this.mvc.perform(get("/goods/shops/1/couponactivities/1")
+                    .header("authorization",token)
+                    .contentType("application/json;charset=UTF-8"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andReturn().getResponse().getContentAsString();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
+
+    /**
+     * description: 查看优惠活动详情 (活动不存在)
+     * date: 2020/12/04 20：48
+     * author: 秦楚彦 24320182203254
+     * version: 1.0
+     */
+    @Test
+    public void showCouponActivity2() throws JSONException {
+        String token = creatTestToken(1L,1L,100);
+        String responseString=null;
+        try{
+            responseString=this.mvc.perform(get("/goods/shops/1/couponactivities/2")
+                    .header("authorization",token)
+                    .contentType("application/json;charset=UTF-8"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andReturn().getResponse().getContentAsString();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * description: 查看优惠活动详情 (shopId不匹配)
+     * date: 2020/12/04 20：48
+     * author: 秦楚彦 24320182203254
+     * version: 1.0
+     */
+    @Test
+    public void showCouponActivity3() throws JSONException {
+        String token = creatTestToken(1L,1L,100);
+        String responseString=null;
+        try{
+            responseString=this.mvc.perform(get("/goods/shops/3/couponactivities/1")
+                    .header("authorization",token)
+                    .contentType("application/json;charset=UTF-8"))
+                    .andExpect(status().isForbidden())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andReturn().getResponse().getContentAsString();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * description: 新建己方优惠活动 (成功)
+     * date: 2020/12/05 15:32
+     * author: 秦楚彦 24320182203254
+     * version: 1.0
+     */
+    @Test
+    public void addCouponActivity1() throws JSONException {
+        CouponActivityCreateVo vo=new CouponActivityCreateVo();
+        vo.setName("candySale");
+        vo.setBeginTime(LocalDateTime.now().toString());
+        vo.setEndTime(LocalDateTime.of(2020,12,31,10,0,0).toString());
+        vo.setQuantity(10000);
+        vo.setQuantityType(1);
+        vo.setStrategy("{\"id\":1,\"name\":\"couponstrategy\", \"shresholds\":{\"type\":\"满减\",\"value\":\"200\",\"discount\":\"30\"}");
+        vo.setValidTerm(0);
+        String activityJson=JacksonUtil.toJson(vo);
+        String token = creatTestToken(1L,1L,100);
+        String responseString=null;
+        try{
+            responseString=this.mvc.perform(post("/goods/shops/1/couponactivities")
+                    .header("authorization",token)
+                    .contentType("application/json;charset=UTF-8").content(activityJson))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andReturn().getResponse().getContentAsString();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+//    /**
+//     * description: 上传商品SPU图片 (成功)
+//     * date: 2020/12/03 15：23
+//     * author: 秦楚彦 24320182203254
+//     * version: 1.0
+//     */
+//    @Test
+//    public void uploadFileSutccess() throws Exception{
+//        String token = creatTestToken(1L,1L,100);
+//        File file = new File("."+File.separator + "src" + File.separator + "test" + File.separator+"resources" + File.separator + "img" + File.separator+"timg.png");
+//        MockMultipartFile firstFile = new MockMultipartFile("img", "timg.png" , "multipart/form-data", new FileInputStream(file));
+//        String responseString = this.mvc.perform(MockMvcRequestBuilders
+//                .multipart("/goods/shops/1/spus/681/uploadImg")
+//                .file(firstFile)
+//                .header("authorization", token)
+//                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
+//                .andExpect(MockMvcResultMatchers.status().isOk())
+//                .andReturn()
+//                .getResponse()
+//                .getContentAsString();
+//        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\"}";
+//        JSONAssert.assertEquals(expectedResponse, responseString, true);
+//    }
 
 //    /*
 //     * 上传失败（id不存在）
