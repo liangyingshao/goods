@@ -158,7 +158,7 @@
             <generatedKey column="id" sqlStatement="Mysql" identity="true"/>
         </table>
 
-        <table tableName="coupon_spu" domainObjectName="CouponSpuPo"
+        <table tableName="coupon_sku" domainObjectName="CouponSkuPo"
                enableCountByExample="true" enableUpdateByExample="true"
                enableDeleteByExample="true" enableSelectByExample="true"
                selectByExampleQueryId="true" delimitAllColumns="true">

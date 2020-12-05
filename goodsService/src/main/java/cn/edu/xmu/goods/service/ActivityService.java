@@ -1,9 +1,11 @@
 package cn.edu.xmu.goods.service;
 
 import cn.edu.xmu.goods.dao.ActivityDao;
-import cn.edu.xmu.goods.model.bo.CouponActivity;
-import cn.edu.xmu.goods.model.bo.CouponSpu;
-import cn.edu.xmu.goods.model.vo.*;
+import cn.edu.xmu.goods.model.bo.CouponSku;
+import cn.edu.xmu.goods.model.vo.CouponNewRetVo;
+import cn.edu.xmu.goods.model.vo.CouponRetVo;
+import cn.edu.xmu.goods.model.vo.CouponSkuRetVo;
+import cn.edu.xmu.goods.model.vo.GoodsSkuCouponRetVo;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -11,6 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 public class ActivityService {
@@ -24,24 +28,24 @@ public class ActivityService {
      * @param id
      * @param page
      * @param pageSize
-     * @return ReturnObject<PageInfo<CouponSpu>>
+     * @return ReturnObject<PageInfo<CouponSku>>
      */
     @Transactional
-    public ReturnObject<PageInfo<GoodsSpuCouponRetVo>> getCouponSpuList(Long id, Integer page, Integer pageSize) {
+    public ReturnObject<PageInfo<GoodsSkuCouponRetVo>> getCouponSkuList(Long id, Integer page, Integer pageSize) {
 
-        PageInfo<GoodsSpuCouponRetVo>couponSpus=activityDao.getCouponSpuList(id,page,pageSize);
-        return new ReturnObject<>(couponSpus);
+        PageInfo<GoodsSkuCouponRetVo>couponSkus=activityDao.getCouponSkuList(id,page,pageSize);
+        return new ReturnObject<>(couponSkus);
     }
 
     /**
      * 管理员为己方某优惠券活动新增限定范围
      * @param shopId
-     * @param couponSpu
-     * @return ReturnObject<CouponSpuRetVo>
+     * @param couponSkus
+     * @return ReturnObject<CouponSkuRetVo>
      */
     @Transactional
-    public ReturnObject<CouponSpuRetVo> createCouponSpu(Long shopId, CouponSpu couponSpu) {
-        ReturnObject<CouponSpuRetVo> returnObject=activityDao.createCouponSpu(shopId,couponSpu);
+    public ReturnObject<List<CouponSkuRetVo>> createCouponSkus(Long shopId, List<CouponSku> couponSkus) {
+        ReturnObject<List<CouponSkuRetVo>> returnObject=activityDao.createCouponSkus(shopId, couponSkus);
         return returnObject;
     }
 
@@ -52,9 +56,9 @@ public class ActivityService {
      * @return ReturnObject
      */
     @Transactional
-    public ReturnObject deleteCouponSpu(Long shopId, Long id)
+    public ReturnObject deleteCouponSku(Long shopId, Long id)
     {
-        ReturnObject returnObject=activityDao.deleteCouponSpu(shopId,id);
+        ReturnObject returnObject=activityDao.deleteCouponSku(shopId,id);
         return returnObject;
     }
 
@@ -122,28 +126,6 @@ public class ActivityService {
     public ReturnObject returnCoupon(Long id)
     {
         ReturnObject returnObject=activityDao.returnCoupon(id);
-        return returnObject;
-    }
-
-    /**
-     * 店家查询己方某优惠券活动
-     * @param shopId
-     * @param id
-     * @return ReturnObject
-     */
-    @Transactional
-    public ReturnObject<Object> showCouponActivity(Long shopId, Long id) {
-        ReturnObject returnObject=activityDao.showCouponActivity(shopId,id);
-        return returnObject;
-    }
-
-    /**
-     * 管理员新建己方优惠活动
-     * @param activity
-     * @return ReturnObject
-     */
-    public ReturnObject addCouponActivity(CouponActivity activity) {
-        ReturnObject<CouponActivityVo> returnObject=activityDao.addCouponActivity(activity);
         return returnObject;
     }
 }

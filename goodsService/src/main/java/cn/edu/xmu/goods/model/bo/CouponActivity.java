@@ -9,6 +9,7 @@ import java.util.Map;
 
 @Data
 public class CouponActivity {
+
     public enum State {
         TO_BE_ONLINE(0, "待上线"),
         ONLINE(1, "进行中"),
@@ -110,7 +111,7 @@ public class CouponActivity {
             return description;
         }
     }
-    
+
     private Long id;
 
     private String name;
