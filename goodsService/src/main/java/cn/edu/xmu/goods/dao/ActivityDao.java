@@ -3,39 +3,29 @@ package cn.edu.xmu.goods.dao;
 import cn.edu.xmu.goods.mapper.CouponActivityPoMapper;
 import cn.edu.xmu.goods.mapper.CouponSpuPoMapper;
 import cn.edu.xmu.goods.mapper.GoodsSpuPoMapper;
-import cn.edu.xmu.goods.mapper.ShopPoMapper;
 import cn.edu.xmu.goods.model.bo.CouponActivity;
 import cn.edu.xmu.goods.model.bo.CouponSpu;
 import cn.edu.xmu.goods.model.bo.GoodsSku;
 import cn.edu.xmu.goods.model.bo.GoodsSpu;
 import cn.edu.xmu.goods.model.po.*;
 import cn.edu.xmu.goods.model.po.CouponSpuPoExample;
-import cn.edu.xmu.goods.model.vo.*;
-import cn.edu.xmu.ooad.annotation.Audit;
-import cn.edu.xmu.ooad.annotation.Depart;
-import cn.edu.xmu.ooad.annotation.LoginUser;
-import cn.edu.xmu.ooad.util.Common;
+import cn.edu.xmu.goods.model.vo.CouponSpuRetVo;
+import cn.edu.xmu.goods.model.vo.GoodsSpuCouponCreateRetVo;
+import cn.edu.xmu.goods.model.vo.GoodsSpuCouponRetVo;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Repository
 public class ActivityDao {
@@ -46,9 +36,6 @@ public class ActivityDao {
 
     @Autowired
     private GoodsSpuPoMapper spuMapper;
-
-    @Autowired
-    private ShopPoMapper shopMapper;
 
     @Autowired
     private CouponActivityPoMapper activityMapper;
@@ -241,89 +228,5 @@ public class ActivityDao {
             }
         }
         else return new ReturnObject(ResponseCode.COUPONACT_STATENOTALLOW);
-    }
-
-    /**
-     * 店家查询己方某优惠券活动详情
-     * @param shopId
-     * @param id
-     * @return ReturnObject
-     */
-    public ReturnObject showCouponActivity(Long shopId, Long id) {
-
-        CouponActivityPo activityPo= activityMapper.selectByPrimaryKey(id);
-        if(activityPo==null)
-            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
-        if(!activityPo.getShopId().equals(shopId))
-            return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
-
-        //查找该优惠活动所属商店
-        ShopPo shopPo=shopMapper.selectByPrimaryKey(shopId);
-        //查找创建活动管理员（待添加）
-        //CreatedBy
-        //查找修改活动管理员（待添加）
-        //ModifiedBy
-        CouponActivity couponActivity=new CouponActivity(activityPo);
-        CouponActivityVo couponActivityVo=new CouponActivityVo(couponActivity);
-        SimpleShopVo simpleShopVo=new SimpleShopVo(shopPo);
-        couponActivityVo.setShopVo(simpleShopVo);
-        //couponActivityVo.setCreatedBy();
-        //couponActivityVo.setModifiedBy();
-        return new ReturnObject<>(couponActivityVo);
-    }
-
-    /**
-     * 管理员新建己方优惠活动
-     * @param activity
-     * @return ReturnObject
-     */
-    public ReturnObject<CouponActivityVo> addCouponActivity(CouponActivity activity) {
-        CouponActivityPo activityPo=activity.createActivityPo();
-        ReturnObject<CouponActivityVo> returnObject=null;
-        try{
-            int ret = activityMapper.insertSelective(activityPo);
-            if (ret == 0) {
-                //插入失败
-                logger.debug("insertRole: insert coupon activity fail " + activityPo.toString());
-                returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("新增失败：" + activityPo.getName()));
-            } else {
-                //插入成功
-                logger.debug("insertRole: insert coupon activity = " + activityPo.toString());
-                //检验
-                CouponActivityPoExample couponActivityExample=new CouponActivityPoExample();
-                CouponActivityPoExample.Criteria couponActivityCriteria=couponActivityExample.createCriteria();
-                couponActivityCriteria.andNameEqualTo(activityPo.getName());
-                couponActivityCriteria.andShopIdEqualTo(activityPo.getShopId());
-                couponActivityCriteria.andBeginTimeEqualTo(activityPo.getBeginTime());
-                couponActivityCriteria.andEndTimeEqualTo(activityPo.getEndTime());
-                List<CouponActivityPo> checkPos=activityMapper.selectByExample(couponActivityExample);
-                if(checkPos.size()==0)return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("couponSpu字段不合法：" + activityPo.toString()));
-                else{//设置RetVo
-                    CouponActivity retActivity =new CouponActivity(checkPos.get(0));
-                    CouponActivityVo retVo=new CouponActivityVo(retActivity);
-                    //设置优惠活动所属商店
-                    ShopPo shopPo=shopMapper.selectByPrimaryKey(retActivity.getShopId());
-                    SimpleShopVo simpleShopVo=new SimpleShopVo(shopPo);
-                    retVo.setShopVo(simpleShopVo);
-                    //设置创建者、修改者
-                    //couponActivityVo.setCreatedBy();
-                    //couponActivityVo.setModifiedBy();
-                    return new ReturnObject<>(retVo);
-
-                }
-
-            }
-        }
-        catch (DataAccessException e) {
-                // 其他数据库错误
-                logger.debug("other sql exception : " + e.getMessage());
-                returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
-        }
-        catch (Exception e) {
-            // 其他Exception错误
-            logger.error("other exception : " + e.getMessage());
-            returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
-        }
-        return returnObject;
     }
 }

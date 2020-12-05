@@ -1,6 +1,5 @@
 package cn.edu.xmu.goods.model.bo;
 
-import cn.edu.xmu.goods.model.po.CouponActivityPo;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -76,58 +75,4 @@ public class CouponActivity {
     private LocalDateTime gmtModified;
 
     private Byte quantitiyType;
-
-    public CouponActivity(){
-
-    }
-
-    /**
-     * 构造函数 po->bo
-     * @param po Po对象
-     */
-    public CouponActivity(CouponActivityPo po){
-        this.id=po.getId();
-        this.name=po.getName();
-        this.beginTime=po.getBeginTime();
-        this.endTime=po.getEndTime();
-        this.couponTime=po.getCouponTime();
-        this.state=State.getTypeByCode(po.getState().intValue());
-        this.shopId=po.getShopId();
-        this.quantity=po.getQuantity();
-        this.validTerm=po.getValidTerm();
-        this.imageUrl=po.getImageUrl();
-        this.strategy=po.getStrategy();
-        this.createdBy=po.getCreatedBy();
-        this.modiBy=po.getModiBy();
-        this.gmtCreate=po.getGmtCreate();
-        this.gmtModified=po.getGmtModified();
-        this.quantitiyType=po.getQuantitiyType();
-
-    }
-
-    /**
-     * 构造函数 bo->po
-     * @return couponActivityPo对象
-     * Created at 2020/12/04 23：01
-     */
-    public CouponActivityPo createActivityPo(){
-        CouponActivityPo activityPo=new CouponActivityPo();
-        activityPo.setId(this.id);
-        activityPo.setName(this.name);
-        activityPo.setBeginTime(this.beginTime);
-        activityPo.setEndTime(this.endTime);
-        activityPo.setCouponTime(this.couponTime);
-        activityPo.setState(this.state.getCode().byteValue());
-        activityPo.setShopId(this.shopId);
-        activityPo.setQuantity(this.quantity);
-        activityPo.setQuantitiyType(this.quantitiyType);
-        activityPo.setValidTerm(this.getValidTerm());
-        activityPo.setImageUrl(this.imageUrl);
-        activityPo.setStrategy(this.strategy);
-        activityPo.setCreatedBy(this.createdBy);
-        activityPo.setModiBy(this.modiBy);
-        activityPo.setGmtCreate(this.gmtCreate);
-        activityPo.setGmtModified(this.gmtModified);
-        return activityPo;
-    }
 }
