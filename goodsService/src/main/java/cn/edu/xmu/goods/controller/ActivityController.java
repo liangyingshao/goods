@@ -1,6 +1,7 @@
 package cn.edu.xmu.goods.controller;
 
 import cn.edu.xmu.goods.model.bo.Coupon;
+import cn.edu.xmu.goods.model.bo.CouponActivity;
 import cn.edu.xmu.goods.model.bo.CouponSku;
 import cn.edu.xmu.goods.model.vo.*;
 import cn.edu.xmu.goods.service.ActivityService;
@@ -16,12 +17,14 @@ import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletResponse;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -288,4 +291,144 @@ public class ActivityController {
         ReturnObject returnObject=activityService.returnCoupon(id);
         return returnObject;
     }
+
+    /**
+     * couponActivity005 业务: 查看优惠活动详情
+     * @param shopId
+     * @param id
+     * @param userId
+     * @return  ReturnObject
+     * @author 24320182203254 秦楚彦
+     * Created at 2020/12/04 15:20
+     */
+    @ApiOperation(value="查看优惠活动的详细信息",produces="application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "shopId", value = "店铺id", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "id", value = "优惠活动id", required = true)
+
+    })
+    @Audit
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功")
+    })
+    @GetMapping("/shops/{shopId}/couponactivities/{id}")
+    @ResponseBody
+    public Object showCouponActivity(@PathVariable Long shopId,@PathVariable Long id,
+                                     @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
+                                     @Depart @ApiIgnore @RequestParam(required = false) Long departId) {
+        Object returnObject=null;
+        ReturnObject<Object> couponActivity = activityService.showCouponActivity(shopId,id);
+        logger.debug("showCouponActivity: couponActivity="+couponActivity.getData()+" code="+couponActivity.getCode());
+        if (!couponActivity.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST)) {
+            return couponActivity;
+        } else {
+            returnObject = Common.getNullRetObj(new ReturnObject<>(couponActivity.getCode(), couponActivity.getErrmsg()), httpServletResponse);
+        }
+
+        return returnObject;
+    }
+
+    /**
+     * couponActivity 001 业务: 管理员新建己方优惠活动
+     * @param shopId 商铺ID
+     * @param vo 新增SPU视图
+     * @param userId 当前用户ID
+     * @return  ReturnObject
+     * @author 24320182203254 秦楚彦
+     * Created at 2020/12/04 22：19
+     */
+    @ApiOperation(value="管理员新建己方优惠活动",produces="application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "shopId", value = "商铺id", required = true),
+            @ApiImplicitParam(paramType = "body", dataType = "", name = "body", value = "优惠活动详细信息", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+
+    })
+    @Audit // 需要认证
+    @PostMapping("shops/{shopId}/couponactivities")
+    @ResponseBody
+    public Object addCouponActivity(@Validated @RequestBody CouponActivityCreateVo vo,BindingResult bindingResult,
+                                    @PathVariable Long shopId,
+                                    @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
+                                    @Depart @ApiIgnore @RequestParam(required = false) Long departId
+
+    ) {
+        logger.debug("insert couponActivity by shopId:" + shopId);
+        //校验前端数据
+        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (null != returnObject) {
+            logger.debug("validate fail");
+            return returnObject;
+        }
+        CouponActivity activity=vo.createActivity();
+        //设置activity状态，待修改
+        activity.setState(CouponActivity.DatabaseState.EXECUTABLE);
+        activity.setShopId(shopId);
+        activity.setGmtCreate(LocalDateTime.now());
+        ReturnObject retObject = activityService.addCouponActivity(activity);
+        if (retObject.getData() != null) {
+            httpServletResponse.setStatus(HttpStatus.CREATED.value());
+            return retObject;
+        } else {
+            return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
+        }
+
+    }
+
+    /**
+     * couponActivity 006 业务: 管理员修改己方某优惠活动属性
+     * @param shopId 商铺ID
+     * @param vo 新增SPU视图
+     * @param userId 当前用户ID
+     * @return  ReturnObject
+     * @author 24320182203254 秦楚彦
+     * Created at 2020/12/05 22：19
+     */
+    @ApiOperation(value="管理员新建己方优惠活动",produces="application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "shopId", value = "商铺id", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "id", value = "优惠活动id", required = true),
+            @ApiImplicitParam(paramType = "body", dataType = "", name = "body", value = "优惠活动详细信息", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+
+    })
+    @Audit // 需要认证
+    @PutMapping("shops/{shopId}/couponactivities/{id}")
+    @ResponseBody
+    public Object modifyCouponActivity(@Validated @RequestBody CouponActivityCreateVo vo,BindingResult bindingResult,
+                                    @PathVariable Long shopId,@PathVariable Long id,
+                                    @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
+                                    @Depart @ApiIgnore @RequestParam(required = false) Long departId
+
+    ) {
+        logger.debug("modify a  couponActivity by shopId:" + shopId + "couponActivity id:" + id);
+        //校验前端数据
+        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (null != returnObject) {
+            logger.debug("validate fail");
+            return returnObject;
+        }
+        CouponActivity activity=vo.createActivity();
+        //设置activity状态，待修改
+        activity.setState(CouponActivity.DatabaseState.EXECUTABLE);
+        activity.setId(id);
+        activity.setShopId(shopId);
+        activity.setGmtCreate(LocalDateTime.now());
+        ReturnObject retObject = activityService.modifyCouponActivity(activity);
+        if (retObject.getData() != null) {
+            httpServletResponse.setStatus(HttpStatus.OK.value());
+            return retObject;
+        } else {
+            return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
+        }
+
+    }
+
 }
