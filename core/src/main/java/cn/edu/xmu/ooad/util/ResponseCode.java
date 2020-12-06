@@ -97,6 +97,7 @@ public enum ResponseCode {
     CATEALTER_INVALID(921,"对SPU类别操作无效"),
     BRANDALTER_INVALID(922,"对SPU品牌操作无效"),
     ACTIVITYALTER_INVALID(923,"对活动的无效操作"),
+    ACTIVITY_NOTFOUND(924,"无符合条件的优惠活动"),
     COMMENT_AUDITED(940,"评论已审核"),
     COMMENT_EXISTED(941,"该订单条目已评论");
     private int code;

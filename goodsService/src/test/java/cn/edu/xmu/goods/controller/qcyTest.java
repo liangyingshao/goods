@@ -734,4 +734,43 @@ public class qcyTest {
             e.printStackTrace();
         }
     }
+
+    /**
+     * description: 查看上线的活动列表 (成功)
+     * date: 2020/12/6 18:50
+     * author: 秦楚彦 24320182203254
+     * version: 1.0
+     */
+    @Test
+    void getCouponActivityList() throws Exception{
+//        String responseString=this.mvc.perform(get("/goods/couponactivities")
+//                .queryParam("page", "1").queryParam("pageSize", "3").queryParam("timeline","1"))
+//                .andExpect(status().isOk())
+//                .andExpect(content().contentType("application/json;charset=UTF-8"))
+//                .andReturn().getResponse().getContentAsString();
+//        System.out.println(responseString);
+
+//        responseString=this.mvc.perform(get("/goods/couponactivities")
+//                .queryParam("page", "2").queryParam("pageSize", "2").queryParam("shopId","1"))
+//                .andExpect(status().isOk())
+//                .andExpect(content().contentType("application/json;charset=UTF-8"))
+//                .andReturn().getResponse().getContentAsString();
+//        System.out.println(responseString);
+//
+//        responseString=this.mvc.perform(get("/goods/couponactivities")
+//                .queryParam("page", "2").queryParam("pageSize", "3"))
+//                .andExpect(status().isOk())
+//                .andExpect(content().contentType("application/json;charset=UTF-8"))
+//                .andReturn().getResponse().getContentAsString();
+//        System.out.println(responseString);
+
+        String responseString=this.mvc.perform(get("/goods/couponactivities")
+                .queryParam("page", "2").queryParam("pageSize", "2").queryParam("shopId","3"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        System.out.println(responseString);
+
+
+    }
 }

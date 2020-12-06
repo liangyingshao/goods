@@ -177,16 +177,16 @@ public class ActivityService {
         return returnObject;
     }
 
-//    /**
-//     * 查看上线的优惠活动列表
-//     * @param shopId
-//     * @param timeline
-//     * @param page
-//     * @param pageSize
-//     * @return ReturnObject
-//     */
-//    public ReturnObject<PageInfo<CouponActivityByNewCouponRetVo>> showActivities(Integer shopId, Integer timeline, Integer page, Integer pageSize) {
-//        PageInfo<CouponActivityByNewCouponRetVo> returnObject=activityDao.showActivities(shopId,timeline,page,pageSize);
-//        return new ReturnObject<PageInfo<CouponActivityByNewCouponRetVo>>(returnObject);
-//    }
+    /**
+     * 查看上线的优惠活动列表
+     * @param shopId
+     * @param timeline
+     * @param page
+     * @param pageSize
+     * @return ReturnObject
+     */
+    public ReturnObject<PageInfo<CouponActivityByNewCouponRetVo>> showActivities(Long shopId, Integer timeline, Integer page, Integer pageSize) {
+        ReturnObject<PageInfo<CouponActivityByNewCouponRetVo>> returnObject=activityDao.showActivities(shopId,timeline,page,pageSize);
+        return returnObject;
+    }
 }

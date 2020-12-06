@@ -12,9 +12,9 @@ public class CouponActivity {
 
     public enum State {
         TO_BE_ONLINE(0, "待上线"),
-        ONLINE(1, "进行中"),
-        OFFLINE(3,"已下线"),
-        FINISHED(4,"活动结束");
+        ONLINE(1, "明天开始"),
+        OFFLINE(2,"进行中"),
+        FINISHED(3,"活动结束");
 
         private static final Map<Integer, CouponActivity.State> stateMap;
 
@@ -153,22 +153,23 @@ public class CouponActivity {
      * @param po Po对象
      */
     public CouponActivity(CouponActivityPo po){
-        this.id=po.getId();
-        this.name=po.getName();
-        this.beginTime=po.getBeginTime();
-        this.endTime=po.getEndTime();
-        this.couponTime=po.getCouponTime();
-        this.state=DatabaseState.getTypeByCode(po.getState().intValue());
-        this.shopId=po.getShopId();
-        this.quantity=po.getQuantity();
-        this.validTerm=po.getValidTerm();
-        this.imageUrl=po.getImageUrl();
-        this.strategy=po.getStrategy();
-        this.createdBy=po.getCreatedBy();
-        this.modiBy=po.getModiBy();
-        this.gmtCreate=po.getGmtCreate();
-        this.gmtModified=po.getGmtModified();
-        this.quantitiyType=CouponActivity.Type.getTypeByCode(po.getQuantitiyType().intValue());
+        id=po.getId();
+        name=po.getName();
+        beginTime=po.getBeginTime();
+        endTime=po.getEndTime();
+        couponTime=po.getCouponTime();
+        state=DatabaseState.getTypeByCode(po.getState().intValue());
+        shopId=po.getShopId();
+        quantity=po.getQuantity();
+        validTerm=po.getValidTerm();
+        imageUrl=po.getImageUrl();
+        strategy=po.getStrategy();
+        createdBy=po.getCreatedBy();
+        modiBy=po.getModiBy();
+        gmtCreate=po.getGmtCreate();
+        gmtModified=po.getGmtModified();
+        if(po.getQuantitiyType()!=null)
+        quantitiyType=CouponActivity.Type.getTypeByCode(po.getQuantitiyType().intValue());
 
     }
 

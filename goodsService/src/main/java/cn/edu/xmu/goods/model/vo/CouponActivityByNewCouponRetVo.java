@@ -23,14 +23,16 @@ public class CouponActivityByNewCouponRetVo {
 
     private LocalDateTime couponTime;
 
+
+
     public void set(CouponActivity obj)
     {
-        id= obj.getId();
-        name=obj.getName();
-        imageUrl=obj.getImageUrl();
-        beginTime=obj.getBeginTime();
-        endTime=obj.getEndTime();
-        quantity=obj.getQuantity();
-        couponTime=obj.getCouponTime();
+        this.id= obj.getId();
+        this.name=obj.getName();
+        this.imageUrl=obj.getImageUrl();
+        this.beginTime=obj.getBeginTime();
+        this.endTime=obj.getEndTime();
+        this.quantity=obj.getQuantity();
+        this.couponTime=obj.getCouponTime();
     }
 }

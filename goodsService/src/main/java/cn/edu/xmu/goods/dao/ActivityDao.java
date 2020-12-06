@@ -793,15 +793,69 @@ public class ActivityDao {
         return returnObject;
     }
 
-//    /**
-//     * 查询上线优惠活动列表
-//     * @param shopId
-//     * @param timeline
-//     * @param page
-//     * @param pageSize
-//     * @return ReturnObject
-//     */
-//    public PageInfo<CouponActivityByNewCouponRetVo> showActivities(Integer shopId, Integer timeline, Integer page, Integer pageSize) {
-//
-//    }
+    /**
+     * 查询上线优惠活动列表
+     * @param shopId
+     * @param timeline
+     * @param page
+     * @param pageSize
+     * @return ReturnObject<PageInfo<CouponActivityByNewCouponRetVo>>
+     */
+    public ReturnObject<PageInfo<CouponActivityByNewCouponRetVo>> showActivities(Long shopId, Integer timeline, Integer page, Integer pageSize) {
+        CouponActivityPoExample activityExample=new CouponActivityPoExample();
+        CouponActivityPoExample.Criteria criteria=activityExample.createCriteria();
+        criteria.andStateEqualTo((byte)0);//必须为可执行活动
+        //设置shopId
+        if(shopId!=null)
+            criteria.andShopIdEqualTo(shopId);
+        //设置timeline
+        if(timeline==0)
+            criteria.andBeginTimeGreaterThan(LocalDateTime.now());
+        else if(timeline==2){
+            criteria.andBeginTimeLessThanOrEqualTo(LocalDateTime.now());
+            criteria.andEndTimeGreaterThanOrEqualTo(LocalDateTime.now());
+        }
+        else if(timeline==3)
+            criteria.andEndTimeLessThan(LocalDateTime.now());
+        else if(timeline==1){//明天上线的
+            LocalDateTime searchTime= LocalDateTime.now();
+            searchTime=searchTime.plusDays(2);
+            searchTime=searchTime.minusHours(searchTime.getHour());
+            searchTime=searchTime.minusMinutes(searchTime.getMinute());
+            searchTime=searchTime.minusSeconds(searchTime.getSecond());
+            searchTime=searchTime.minusNanos(searchTime.getNano());
+            LocalDateTime searchTimeMax=searchTime;//时间段上限
+            LocalDateTime searchTimeMin=searchTime.minusDays(1);//时间段下限
+            criteria.andBeginTimeGreaterThanOrEqualTo(searchTimeMin);//beginTime>=明日零点
+            criteria.andBeginTimeLessThan(searchTimeMax);//beginTime<后日零点
+        }
+        //分页查询
+        PageHelper.startPage(page, pageSize);
+        logger.debug("page = " + page + "pageSize = " + pageSize);
+        List<CouponActivityPo> activityPos=null;
+        try{
+            activityPos=activityMapper.selectByExample(activityExample);
+            if(activityPos.size()==0)
+                return new ReturnObject<>(ResponseCode.ACTIVITY_NOTFOUND);
+            List<CouponActivityByNewCouponRetVo> retList=new ArrayList<>(activityPos.size());
+            for(CouponActivityPo po:activityPos){
+                CouponActivity bo=new CouponActivity(po);
+                CouponActivityByNewCouponRetVo vo=new CouponActivityByNewCouponRetVo();
+                vo.set(bo);
+                retList.add(vo);
+            }
+            PageInfo<CouponActivityByNewCouponRetVo>activityPage=PageInfo.of(retList);
+            return new ReturnObject<>(activityPage) ;
+        }
+        catch (DataAccessException e){
+            logger.error("selectAllRole: DataAccessException:" + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
+
+    }
 }
