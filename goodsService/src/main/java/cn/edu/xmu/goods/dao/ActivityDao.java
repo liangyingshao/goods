@@ -792,4 +792,16 @@ public class ActivityDao {
 
         return returnObject;
     }
+
+//    /**
+//     * 查询上线优惠活动列表
+//     * @param shopId
+//     * @param timeline
+//     * @param page
+//     * @param pageSize
+//     * @return ReturnObject
+//     */
+//    public PageInfo<CouponActivityByNewCouponRetVo> showActivities(Integer shopId, Integer timeline, Integer page, Integer pageSize) {
+//
+//    }
 }

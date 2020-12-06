@@ -474,4 +474,40 @@ public class ActivityController {
 
     }
 
+//    /**
+//     * CouponActivity 003 查看上线的优惠活动列表
+//     * @param userId
+//     * @param timeline
+//     * @param shopId
+//     * @param page
+//     * @param pageSize
+//     * @return Object
+//     */
+//    @ApiOperation(value = "查看上线的优惠活动列表")
+//    @ApiImplicitParams({
+//            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+//            @ApiImplicitParam(paramType = "query", dataType = "int", name = "page", value = "页码", required = false),
+//            @ApiImplicitParam(paramType = "query", dataType = "int", name = "pageSize", value = "每页数目", required = false),
+//            @ApiImplicitParam(paramType = "query", dataType = "int", name = "timeline", value = "时间状态", required = false),
+//            @ApiImplicitParam(paramType = "query", dataType = "int", name = "shopId", value = "店铺Id", required = false)
+//    })
+//    @Audit
+//    @ApiResponses({
+//            @ApiResponse(code = 0, message = "成功")
+//    })
+//    @GetMapping("/couponactivities")
+//    @ResponseBody
+//    public Object showOnlineCouponActivities(@LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
+//                                             @Depart @ApiIgnore @RequestParam(required = false) Long departId,
+//                                             @RequestParam(required = false) Integer shopId,
+//                                             @RequestParam(required = false, defaultValue = "1") Integer timeline,
+//                                             @RequestParam(required = false, defaultValue = "1") Integer page,
+//                                             @RequestParam(required = false, defaultValue = "10") Integer pageSize)
+//    {
+//        logger.debug("showCoupons:page="+page+" pageSize="+pageSize);
+//        if(timeline!=null&&CouponActivity.State.getTypeByCode(timeline)==null)return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+//        ReturnObject<PageInfo<CouponRetVo>> returnObject=activityService.showActivities(shopId,timeline,page,pageSize);
+//        return returnObject;
+//    }
+
 }
