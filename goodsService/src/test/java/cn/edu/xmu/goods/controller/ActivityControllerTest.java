@@ -76,19 +76,90 @@ class ActivityControllerTest {
 
     @Test
     void createCouponSkus() throws Exception{
-//        List<Long> body=new ArrayList<>();
-//        body.add((long)273);
-//        body.add((long)274);
-//        String requireJson="[\n    273\n]";
-//        String token = creatTestToken(1L, 0L, 100);
-//        String responseString=this.mvc.perform(post("/shops/0/couponactivities/3/skus")
-//                .header("authorization",token)
-//                .contentType("application/json;charset=UTF-8")
-//                .content(requireJson))
-//                .andExpect(status().isOk())
-//                .andExpect(content().contentType("application/json;charset=UTF-8"))
-//                .andReturn().getResponse().getContentAsString();
-//        System.out.println(responseString);
+        List<Long> body=new ArrayList<>();
+        body.add((long)275);
+        body.add((long)276);
+        String token = creatTestToken(1L, 0L, 100);
+        String responseString=this.mvc.perform(post("/goods/shops/0/couponactivities/6/skus")
+                .header("authorization",token)
+                .contentType("application/json;charset=UTF-8")
+                .content(body.toString()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        //System.out.println(responseString);
+        String expectedResponse="{\"errno\":0,\"errmsg\":\"成功\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+
+        responseString=this.mvc.perform(post("/goods/shops/0/couponactivities/5/skus")
+                .header("authorization",token)
+                .contentType("application/json;charset=UTF-8")
+                .content(body.toString()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        //System.out.println(responseString);
+        expectedResponse="{\"errno\":904,\"errmsg\":\"优惠活动状态禁止\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+
+        responseString=this.mvc.perform(post("/goods/shops/0/couponactivities/4/skus")
+                .header("authorization",token)
+                .contentType("application/json;charset=UTF-8")
+                .content(body.toString()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        //System.out.println(responseString);
+        expectedResponse="{\"errno\":505,\"errmsg\":\"操作的资源id不是自己的对象\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+
+        responseString=this.mvc.perform(post("/goods/shops/0/couponactivities/7/skus")
+                .header("authorization",token)
+                .contentType("application/json;charset=UTF-8")
+                .content(body.toString()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        //System.out.println(responseString);
+        expectedResponse="{\"errno\":904,\"errmsg\":\"优惠活动状态禁止\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+
+        responseString=this.mvc.perform(post("/goods/shops/1/couponactivities/6/skus")
+                .header("authorization",token)
+                .contentType("application/json;charset=UTF-8")
+                .content(body.toString()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        //System.out.println(responseString);
+        expectedResponse="{\"code\":\"RESOURCE_ID_OUTSCOPE\",\"errmsg\":\"操作的资源id不是自己的对象\",\"data\":null}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+
+
+        this.mvc.perform(post("/goods/shops/0/couponactivities/6/skus")
+                .header("authorization",token)
+                .contentType("application/json;charset=UTF-8")
+                .content(body.toString()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        //System.out.println(responseString);
+        expectedResponse="{\"code\":\"RESOURCE_ID_OUTSCOPE\",\"errmsg\":\"操作的资源id不是自己的对象\",\"data\":null}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+
+        List<Long> body1=new ArrayList<>();
+        body1.add((long)1);
+        this.mvc.perform(post("/goods/shops/0/couponactivities/6/skus")
+                .header("authorization",token)
+                .contentType("application/json;charset=UTF-8")
+                .content(body1.toString()))
+                .andExpect(status().is4xxClientError())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        //System.out.println(responseString);
+        expectedResponse="{\"code\":\"RESOURCE_ID_OUTSCOPE\",\"errmsg\":\"操作的资源id不是自己的对象\",\"data\":null}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+
     }
 
     @Test
@@ -204,6 +275,7 @@ class ActivityControllerTest {
         //JSONAssert.assertEquals(expectedResponse,responseString,false);
     }
 
+    //从这里才导入了新的测试数据Coupon.sql，所以一开始导入了前面的测试应该过不了
     @Test
     void useCoupon() throws Exception
     {
@@ -246,9 +318,10 @@ class ActivityControllerTest {
         JSONAssert.assertEquals(expectedResponse,responseString,true);
     }
 
-    @Test
-    void deleteCoupon() {
-    }
+    //据说已废弃
+//    @Test
+//    void deleteCoupon() {
+//    }
 
     @Test
     void getCoupon() throws Exception
@@ -306,6 +379,53 @@ class ActivityControllerTest {
     }
 
     @Test
-    void returnCoupon() {
+    void returnCoupon() throws Exception
+    {
+        String token = creatTestToken(1L, 100L, 100);
+        String responseString=this.mvc.perform(put("/goods/shops/100/coupons/38")
+                .header("authorization",token))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        //System.out.println(responseString);
+        String expectedResponse="{\"code\":\"RESOURCE_ID_OUTSCOPE\",\"errmsg\":\"操作的资源id不是自己的对象\",\"data\":null}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+
+        token = creatTestToken(1L, 1L, 100);
+        responseString=this.mvc.perform(put("/goods/shops/1/coupons/38")
+                .header("authorization",token))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        //System.out.println(responseString);
+        expectedResponse ="{\"code\":\"OK\",\"errmsg\":\"成功\",\"data\":null}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+
+        responseString=this.mvc.perform(put("/goods/shops/1/coupons/36")
+                .header("authorization",token))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        //System.out.println(responseString);
+        expectedResponse="{\"code\":\"COUPON_STATENOTALLOW\",\"errmsg\":\"优惠卷状态禁止\",\"data\":null}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+
+        responseString=this.mvc.perform(put("/goods/shops/1/coupons/3600")
+                .header("authorization",token))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        //System.out.println(responseString);
+        expectedResponse="{\"code\":\"RESOURCE_ID_NOTEXIST\",\"errmsg\":\"操作的资源id不存在\",\"data\":null}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+
+        responseString=this.mvc.perform(put("/goods/shops/100/coupons/38")
+                .header("authorization",token))
+                .andExpect(status().is4xxClientError())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        //System.out.println(responseString);
+        expectedResponse="{\"errno\":503,\"errmsg\":\"departId不匹配\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
     }
 }

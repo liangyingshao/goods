@@ -4,7 +4,6 @@ import cn.edu.xmu.goods.GoodsServiceApplication;
 import cn.edu.xmu.goods.model.bo.CouponSku;
 import cn.edu.xmu.goods.model.vo.CouponNewRetVo;
 import cn.edu.xmu.goods.model.vo.CouponRetVo;
-import cn.edu.xmu.goods.model.vo.CouponSkuRetVo;
 import cn.edu.xmu.goods.model.vo.GoodsSkuCouponRetVo;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
@@ -40,33 +39,32 @@ class ActivityDaoTest {
     void createCouponSkus() {
         List<CouponSku> couponSkus=new ArrayList<>();
         CouponSku couponSku=new CouponSku();
-        couponSku.setActivityId((long)1);
         couponSku.setSkuId((long)273);
         couponSku.setGmtCreate(LocalDateTime.now());
         couponSku.setGmtModified(LocalDateTime.now());
         couponSkus.add(couponSku);
-        ReturnObject<List<CouponSkuRetVo>> returnObject=activityDao.createCouponSkus((long)0,couponSkus);
+        ReturnObject returnObject=activityDao.createCouponSkus((long)0, (long)1, couponSkus);
         assertEquals(returnObject.getCode(), ResponseCode.COUPONACT_STATENOTALLOW);
 
         couponSkus.remove(0);
         couponSku.setActivityId((long)3);
         couponSkus.add(couponSku);
-        returnObject=activityDao.createCouponSkus((long)0,couponSkus);
+        returnObject=activityDao.createCouponSkus((long)0, (long)1, couponSkus);
         assertEquals(returnObject.getCode(), ResponseCode.OK);
 
-        returnObject=activityDao.createCouponSkus((long)1,couponSkus);
+        returnObject=activityDao.createCouponSkus((long)1, (long)1, couponSkus);
         assertEquals(returnObject.getCode(), ResponseCode.RESOURCE_ID_OUTSCOPE);
 
         couponSkus.remove(0);
         couponSku.setSkuId((long)1);
         couponSkus.add(couponSku);
-        returnObject=activityDao.createCouponSkus((long)0,couponSkus);
+        returnObject=activityDao.createCouponSkus((long)0, (long)1, couponSkus);
         assertEquals(returnObject.getCode(), ResponseCode.RESOURCE_ID_NOTEXIST);
 
         couponSkus.remove(0);
         couponSku.setActivityId((long)100);
         couponSkus.add(couponSku);
-        returnObject=activityDao.createCouponSkus((long)0,couponSkus);
+        returnObject=activityDao.createCouponSkus((long)0, (long)1, couponSkus);
         assertEquals(returnObject.getCode(), ResponseCode.RESOURCE_ID_NOTEXIST);
     }
 
@@ -125,9 +123,12 @@ class ActivityDaoTest {
         assertEquals(returnObject.getCode(),ResponseCode.RESOURCE_ID_OUTSCOPE);
     }
 
-    @Test
-    void deleteCoupon() {
-    }
+    //据说已废弃
+//    @Test
+//    void deleteCoupon()
+//    {
+//
+//    }
 
     @Test
     void getCoupon()
@@ -150,6 +151,22 @@ class ActivityDaoTest {
     }
 
     @Test
-    void returnCoupon() {
+    void returnCoupon()
+    {
+        ReturnObject returnObject= activityDao.returnCoupon((long) 1, (long)36);
+        assertEquals(returnObject.getCode(),ResponseCode.COUPON_STATENOTALLOW);
+
+        activityDao.useCoupon((long)1,(long)36);
+        returnObject= activityDao.returnCoupon((long) 1, (long)36);
+        assertEquals(returnObject.getCode(),ResponseCode.OK);
+
+        returnObject=activityDao.returnCoupon((long) 1, (long)9999);
+        assertEquals(returnObject.getCode(),ResponseCode.RESOURCE_ID_NOTEXIST);
+
+        returnObject=activityDao.returnCoupon((long) 100, (long)38);
+        assertEquals(returnObject.getCode(),ResponseCode.RESOURCE_ID_OUTSCOPE);
+
+        returnObject=activityDao.returnCoupon((long) 1, (long)38);
+        assertEquals(returnObject.getCode(),ResponseCode.OK);
     }
 }

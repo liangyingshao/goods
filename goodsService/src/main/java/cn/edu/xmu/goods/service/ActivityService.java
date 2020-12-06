@@ -42,12 +42,13 @@ public class ActivityService {
     /**
      * 管理员为己方某优惠券活动新增限定范围
      * @param shopId
+     * @param id
      * @param couponSkus
      * @return ReturnObject<CouponSkuRetVo>
      */
     @Transactional
-    public ReturnObject<List<CouponSkuRetVo>> createCouponSkus(Long shopId, List<CouponSku> couponSkus) {
-        ReturnObject<List<CouponSkuRetVo>> returnObject=activityDao.createCouponSkus(shopId, couponSkus);
+    public ReturnObject createCouponSkus(Long shopId, Long id, List<CouponSku> couponSkus) {
+        ReturnObject returnObject=activityDao.createCouponSkus(shopId,id, couponSkus);
         return returnObject;
     }
 
@@ -121,13 +122,15 @@ public class ActivityService {
 
     /**
      * 优惠券退回
+     *
+     * @param shopId
      * @param id
      * @return ReturnObject
      */
     @Transactional
-    public ReturnObject returnCoupon(Long id)
+    public ReturnObject returnCoupon(Long shopId, Long id)
     {
-        ReturnObject returnObject=activityDao.returnCoupon(id);
+        ReturnObject returnObject=activityDao.returnCoupon(shopId,id);
         return returnObject;
     }
 

@@ -3,7 +3,6 @@ package cn.edu.xmu.goods.dao;
 import cn.edu.xmu.goods.mapper.*;
 import cn.edu.xmu.goods.model.bo.*;
 import cn.edu.xmu.goods.model.po.*;
-import cn.edu.xmu.goods.model.po.CouponSpuPoExample;
 import cn.edu.xmu.goods.model.po.CouponSkuPoExample;
 import cn.edu.xmu.goods.model.vo.*;
 import cn.edu.xmu.ooad.util.Common;
@@ -18,10 +17,8 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.time.temporal.TemporalAmount;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Repository
 public class ActivityDao {
@@ -148,11 +145,19 @@ public class ActivityDao {
     /**
      * 管理员为己方某优惠券活动新增限定范围
      * @param shopId
+     * @param id
      * @param couponSkus
      * @return CouponSkuRetVo
      */
-    public ReturnObject<List<CouponSkuRetVo>> createCouponSkus(Long shopId, List<CouponSku> couponSkus) {
-        List<CouponSkuRetVo> retVos = new ArrayList<>();
+    public ReturnObject createCouponSkus(Long shopId, Long id, List<CouponSku> couponSkus) {
+        //活动存在
+        CouponActivityPo activityPo = activityMapper.selectByPrimaryKey(id);
+        if (activityPo == null) return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+
+        //活动和shopId匹配
+        if(activityPo.getShopId()!=shopId)return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+
+        //对每个SKU进行判断、添加
         for(CouponSku couponSku:couponSkus)
         {
             //SKU存在
@@ -164,15 +169,20 @@ public class ActivityDao {
             GoodsSpuPo spuPo=spuMapper.selectByPrimaryKey(skuPo.getGoodsSpuId());
             if (spuPo.getShopId() != shopId) return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
 
-            //活动存在
-            CouponActivityPo activityPo = activityMapper.selectByPrimaryKey(couponSku.getActivityId());
-            if (activityPo == null) return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-
             //活动“待上线”
             if (activityPo.getBeginTime().isAfter(LocalDateTime.now())//考虑到惰性更新状态【待上线】->【进行中】的情况
                     && CouponActivity.DatabaseState.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.DatabaseState.EXECUTABLE))//【可执行】
             {
+                //之前没有添加过该SKU
+                CouponSkuPoExample alreadyExample=new CouponSkuPoExample();
+                CouponSkuPoExample.Criteria alreadyCriteria=alreadyExample.createCriteria();
+                alreadyCriteria.andSkuIdEqualTo(skuPo.getId());
+                alreadyCriteria.andActivityIdEqualTo(id);
+                List<CouponSkuPo> alreadyPos=couponSkuMapper.selectByExample(alreadyExample);
+                if(alreadyPos!=null&&alreadyPos.size()>0)return new ReturnObject(ResponseCode.ACTIVITYALTER_INVALID);
+
                 CouponSkuPo couponSkuPo = couponSku.getCouponSkuPo();
+                couponSkuPo.setActivityId(id);
                 couponSkuPo.setGmtCreate(LocalDateTime.now());
                 couponSkuPo.setGmtModified(LocalDateTime.now());
                 try {
@@ -192,13 +202,6 @@ public class ActivityDao {
                         List<CouponSkuPo> checkPos = couponSkuMapper.selectByExample(couponSpuExample);
                         if (checkPos.size() == 0)
                             return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("couponSku字段不合法：" + couponSkuPo.toString()));
-                        else {
-                            //设置RetVo
-                            CouponSku retCouponSku = new CouponSku(checkPos.get(0));
-                            CouponSkuRetVo retVo = new CouponSkuRetVo();
-                            retVo.set(retCouponSku);
-                            retVos.add(retVo);
-                        }
                     }
                 } catch (DataAccessException e) {
                     // 其他数据库错误
@@ -211,7 +214,7 @@ public class ActivityDao {
                 }
             } else return new ReturnObject<>(ResponseCode.COUPONACT_STATENOTALLOW);
         }
-        return new ReturnObject<List<CouponSkuRetVo>>(retVos);
+        return new ReturnObject();
     }
 
     /**
@@ -541,15 +544,25 @@ public class ActivityDao {
 
     /**
      * 优惠券退回
+     *
+     * @param shopId
      * @param id
      * @return ReturnObject
      */
-    public ReturnObject returnCoupon(Long id)
+    public ReturnObject returnCoupon(Long shopId, Long id)
     {
         CouponPo couponPo=couponMapper.selectByPrimaryKey(id);
 
         //优惠券存在
         if(couponPo==null)return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+
+        //是该商店下的活动
+        CouponActivityPo activityPo=activityMapper.selectByPrimaryKey(couponPo.getActivityId());
+        if(activityPo.getShopId()!=shopId)return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
+
+        //确实是之前使用了
+        if(!Coupon.State.getTypeByCode(couponPo.getState().intValue()).equals(Coupon.State.USED))
+            return new ReturnObject(ResponseCode.COUPON_STATENOTALLOW);
 
         //设置新的有效期
         LocalDateTime gmtModified=couponPo.getGmtModified();

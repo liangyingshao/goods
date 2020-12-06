@@ -102,11 +102,10 @@ public class ActivityController {
         {
             CouponSku couponSku=new CouponSku();
             couponSku.setSkuId(vo);
-            couponSku.setActivityId(id);
             couponSkus.add(couponSku);
         }
 
-        ReturnObject<List<CouponSkuRetVo>> retObject=activityService.createCouponSkus(shopId, couponSkus);
+        ReturnObject<List<CouponSkuRetVo>> retObject=activityService.createCouponSkus(shopId,id, couponSkus);
         if (retObject.getData() != null) {
             return Common.decorateReturnObject(retObject);
         } else {
@@ -190,7 +189,7 @@ public class ActivityController {
     {
         logger.debug("showCoupons:page="+page+" pageSize="+pageSize);
         if(state!=null&&Coupon.State.getTypeByCode(state)==null)return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
-        ReturnObject<PageInfo<CouponRetVo>> returnObject=activityService.showCoupons(userId,state,page,pageSize);
+        ReturnObject returnObject=activityService.showCoupons(userId,state,page,pageSize);
         return returnObject;
     }
 
@@ -290,7 +289,7 @@ public class ActivityController {
                                @Depart @ApiIgnore @RequestParam(required = false) Long departId)
     {
         if(shopId!=departId)return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
-        ReturnObject returnObject=activityService.returnCoupon(id);
+        ReturnObject returnObject=activityService.returnCoupon(shopId,id);
         return returnObject;
     }
 
