@@ -103,7 +103,26 @@ class ActivityDaoTest {
     }
 
     @Test
-    void useCoupon() {
+    void useCoupon()
+    {
+        ReturnObject returnObject=activityDao.getCoupon((long)1,(long)1);
+        assertEquals(returnObject.getCode(),ResponseCode.OK);
+        returnObject=activityDao.getCoupon((long)1,(long)1);
+        assertEquals(returnObject.getCode(),ResponseCode.OK);
+        PageInfo<CouponRetVo> retVos=activityDao.showCoupons((long)1,1,1,2);
+        assertEquals(retVos.getList().size(),2);
+
+        returnObject= activityDao.useCoupon((long)1,retVos.getList().get(0).getId());
+        assertEquals(returnObject.getCode(),ResponseCode.OK);
+
+        returnObject= activityDao.useCoupon((long)1,retVos.getList().get(0).getId());
+        assertEquals(returnObject.getCode(),ResponseCode.COUPON_STATENOTALLOW);
+
+        returnObject= activityDao.useCoupon((long)1,(long)9999);
+        assertEquals(returnObject.getCode(),ResponseCode.RESOURCE_ID_NOTEXIST);
+
+        returnObject= activityDao.useCoupon((long)9999,retVos.getList().get(1).getId());
+        assertEquals(returnObject.getCode(),ResponseCode.RESOURCE_ID_OUTSCOPE);
     }
 
     @Test

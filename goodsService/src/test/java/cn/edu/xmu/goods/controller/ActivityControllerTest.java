@@ -205,7 +205,45 @@ class ActivityControllerTest {
     }
 
     @Test
-    void useCoupon() {
+    void useCoupon() throws Exception
+    {
+        String token = creatTestToken(1L, 0L, 100);
+        String responseString=this.mvc.perform(put("/goods/coupons/36")
+                .header("authorization",token))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        //System.out.println(responseString);
+        String expectedResponse="{\"code\":\"OK\",\"errmsg\":\"成功\",\"data\":null}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+
+        responseString=this.mvc.perform(put("/goods/coupons/36")
+                .header("authorization",token))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        //System.out.println(responseString);
+        expectedResponse="{\"code\":\"COUPON_STATENOTALLOW\",\"errmsg\":\"优惠卷状态禁止\",\"data\":null}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+
+        responseString=this.mvc.perform(put("/goods/coupons/360")
+                .header("authorization",token))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        //System.out.println(responseString);
+        expectedResponse="{\"code\":\"RESOURCE_ID_NOTEXIST\",\"errmsg\":\"操作的资源id不存在\",\"data\":null}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+
+        token = creatTestToken(100L, 0L, 100);
+        responseString=this.mvc.perform(put("/goods/coupons/37")
+                .header("authorization",token))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        //System.out.println(responseString);
+        expectedResponse="{\"code\":\"RESOURCE_ID_OUTSCOPE\",\"errmsg\":\"操作的资源id不是自己的对象\",\"data\":null}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
     }
 
     @Test
