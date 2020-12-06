@@ -507,4 +507,34 @@ public class ActivityController {
         return returnObject;
     }
 
+    /**
+     * CouponActivity 004 查看本店下线的优惠活动列表
+     * @param id
+     * @param page
+     * @param pageSize
+     * @return Object
+     */
+    @ApiOperation(value = "查看本店下线的优惠活动列表")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "shopId", value = "商铺id", required = true),
+            @ApiImplicitParam(paramType = "query", dataType = "int", name = "page", value = "页码", required = false),
+            @ApiImplicitParam(paramType = "query", dataType = "int", name = "pageSize", value = "每页数目", required = false)
+    })
+    @Audit
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功")
+    })
+    @GetMapping("/shops/{id}/couponactivities/invalid")
+    @ResponseBody
+    public Object showInvalidCouponActivities(@PathVariable Long id,
+                                              @LoginUser @ApiIgnore @RequestParam(required = false) Long userId, @Depart @ApiIgnore @RequestParam(required = false) Long departId,
+                                              @RequestParam(required = false, defaultValue = "1") Integer page,
+                                              @RequestParam(required = false, defaultValue = "10") Integer pageSize)
+    {
+        logger.debug("showCoupons:page="+page+" pageSize="+pageSize);
+        ReturnObject<PageInfo<CouponActivityByNewCouponRetVo>> returnObject=activityService.showInvalidCouponActivities(id,page,pageSize);
+        return returnObject;
+    }
+
 }

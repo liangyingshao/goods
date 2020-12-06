@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -743,28 +744,28 @@ public class qcyTest {
      */
     @Test
     void getCouponActivityList() throws Exception{
-//        String responseString=this.mvc.perform(get("/goods/couponactivities")
-//                .queryParam("page", "1").queryParam("pageSize", "3").queryParam("timeline","1"))
-//                .andExpect(status().isOk())
-//                .andExpect(content().contentType("application/json;charset=UTF-8"))
-//                .andReturn().getResponse().getContentAsString();
-//        System.out.println(responseString);
-
-//        responseString=this.mvc.perform(get("/goods/couponactivities")
-//                .queryParam("page", "2").queryParam("pageSize", "2").queryParam("shopId","1"))
-//                .andExpect(status().isOk())
-//                .andExpect(content().contentType("application/json;charset=UTF-8"))
-//                .andReturn().getResponse().getContentAsString();
-//        System.out.println(responseString);
-//
-//        responseString=this.mvc.perform(get("/goods/couponactivities")
-//                .queryParam("page", "2").queryParam("pageSize", "3"))
-//                .andExpect(status().isOk())
-//                .andExpect(content().contentType("application/json;charset=UTF-8"))
-//                .andReturn().getResponse().getContentAsString();
-//        System.out.println(responseString);
-
         String responseString=this.mvc.perform(get("/goods/couponactivities")
+                .queryParam("page", "1").queryParam("pageSize", "3").queryParam("timeline","1"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        System.out.println(responseString);
+
+        responseString=this.mvc.perform(get("/goods/couponactivities")
+                .queryParam("page", "2").queryParam("pageSize", "2").queryParam("shopId","1"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        System.out.println(responseString);
+
+        responseString=this.mvc.perform(get("/goods/couponactivities")
+                .queryParam("page", "2").queryParam("pageSize", "3"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        System.out.println(responseString);
+
+        responseString=this.mvc.perform(get("/goods/couponactivities")
                 .queryParam("page", "2").queryParam("pageSize", "2").queryParam("shopId","3"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
@@ -772,5 +773,45 @@ public class qcyTest {
         System.out.println(responseString);
 
 
+    }
+
+    /**
+     * description: 查看下线的活动列表 (成功)
+     * date: 2020/12/6 22:46
+     * author: 秦楚彦 24320182203254
+     * version: 1.0
+     */
+    @Test
+    void getInvalidCouponActivityList1() throws Exception{
+        String token = creatTestToken(1L,1L,100);
+        String responseString=null;
+        //成功
+                 responseString=this.mvc.perform(get("/goods/shops/1/couponactivities/invalid")
+                 .header("authorization",token).contentType("application/json;charset=UTF-8")
+                .queryParam("page", "1").queryParam("pageSize", "3"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        System.out.println(responseString);
+    }
+
+    /**
+     * description: 查看下线的活动列表 (成功)
+     * date: 2020/12/6 22:46
+     * author: 秦楚彦 24320182203254
+     * version: 1.0
+     */
+    @Test
+    void getInvalidCouponActivityList2() throws Exception{
+        String token = creatTestToken(1L,2L,100);
+        String responseString=null;
+        //该店铺不存在invalid活动
+        responseString=this.mvc.perform(get("/goods/shops/2/couponactivities/invalid")
+                .header("authorization",token).contentType("application/json;charset=UTF-8")
+                .queryParam("page", "1").queryParam("pageSize", "3"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        System.out.println(responseString);
     }
 }

@@ -189,4 +189,16 @@ public class ActivityService {
         ReturnObject<PageInfo<CouponActivityByNewCouponRetVo>> returnObject=activityDao.showActivities(shopId,timeline,page,pageSize);
         return returnObject;
     }
+
+    /**
+     * 查看下线的优惠活动列表
+     * @param shopId
+     * @param page
+     * @param pageSize
+     * @return ReturnObject
+     */
+    public ReturnObject<PageInfo<CouponActivityByNewCouponRetVo>> showInvalidCouponActivities(Long shopId, Integer page, Integer pageSize) {
+        ReturnObject<PageInfo<CouponActivityByNewCouponRetVo>> returnObject=activityDao.showInvalidCouponActivities(shopId,page,pageSize);
+        return returnObject;
+    }
 }

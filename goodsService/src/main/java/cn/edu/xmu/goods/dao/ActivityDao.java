@@ -858,4 +858,46 @@ public class ActivityDao {
         }
 
     }
+
+    /**
+     * 查询下线优惠活动列表
+     * @param shopId
+     * @param page
+     * @param pageSize
+     * @return ReturnObject<PageInfo<CouponActivityByNewCouponRetVo>>
+     */
+    public ReturnObject<PageInfo<CouponActivityByNewCouponRetVo>> showInvalidCouponActivities(Long shopId, Integer page, Integer pageSize) {
+        CouponActivityPoExample activityExample=new CouponActivityPoExample();
+        CouponActivityPoExample.Criteria criteria=activityExample.createCriteria();
+        criteria.andStateEqualTo((byte)1);//必须为不可执行活动
+        //设置shopId
+        criteria.andShopIdEqualTo(shopId);
+        //分页查询
+        PageHelper.startPage(page, pageSize);
+        logger.debug("page = " + page + "pageSize = " + pageSize);
+        List<CouponActivityPo> activityPos=null;
+        try{
+            activityPos=activityMapper.selectByExample(activityExample);
+            if(activityPos.size()==0)
+                return new ReturnObject<>(ResponseCode.ACTIVITY_NOTFOUND);
+            List<CouponActivityByNewCouponRetVo> retList=new ArrayList<>(activityPos.size());
+            for(CouponActivityPo po:activityPos){
+                CouponActivity bo=new CouponActivity(po);
+                CouponActivityByNewCouponRetVo vo=new CouponActivityByNewCouponRetVo();
+                vo.set(bo);
+                retList.add(vo);
+            }
+            PageInfo<CouponActivityByNewCouponRetVo>activityPage=PageInfo.of(retList);
+            return new ReturnObject<>(activityPage) ;
+        }
+        catch (DataAccessException e){
+            logger.error("selectAllRole: DataAccessException:" + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
+    }
 }
