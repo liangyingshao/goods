@@ -5,14 +5,18 @@ management:
         include: "*"
 
 server:
-  port: 8081
+  port: 8082
   tomcat:
     threads:
       max: 1000
 
 spring:
   application:
-    name: goods-service
+    name: flashsale-service
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
   profiles:
     active: dev
   servlet:
@@ -27,9 +31,9 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
-#    initialization-mode: always
-    schema: classpath:schema.sql
-    data: classpath:testdata.sql
+    #    initialization-mode: always
+    #    schema: classpath:schema.sql
+    #    data: classpath:testdata.sql
     druid:
       #初始化时建立物理连接的个数
       initial-size: 3
@@ -66,30 +70,16 @@ spring:
 
 mybatis:
   #po对象的包
-  type-aliases-package: cn.edu.xmu.goods.model.po
+  type-aliases-package: cn.edu.xmu.flashsale.model.po
   #mapper.xml所在的位置
-  mapper-locations: classpath*:cn.edu.xmu.goods.mapper/*.xml
+  mapper-locations: classpath*:cn.edu.xmu.flashsale.mapper/*.xml
   #自动将SQL中查出来的带下划线的字段，转换为驼峰标志，再去匹配类中的属性
   configuration:
     #输出产生的SQL
     #log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     map-underscore-to-camel-case: true
-dubbo:
-  application:
-  name: goods-service
-#    qos-enable: false
-#    qos-accept-foreign-ip: false
-  registry:
-  address: nacos://127.0.0.1:8848
-  protocol:
-  name: dubbo
-  port: 20880
-  consumer:
-  timeout: 4000
-  check: false
 
-
-goodsservice:
+falshsaleService:
   #是否对数据库中的未初始化的数据初始化
   initialization: true
   #分布式锁失效时间（秒）
@@ -116,4 +106,21 @@ goodsservice:
 #pagehelper分页插件配置
 pagehelper:
   helper-dialect: mysql
+
+dubbo:
+  application:
+    name: flashsale-service
+    qos-enable: false
+    qos-accept-foreign-ip: false
+  registry:
+    address: nacos://127.0.0.1:8848
+  protocol:
+    name: dubbo
+    port: -1
+  consumer:
+    timeout: 4000
+    check: false
+
+
+
 
