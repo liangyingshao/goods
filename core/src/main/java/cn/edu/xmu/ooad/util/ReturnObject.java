@@ -2,12 +2,14 @@ package cn.edu.xmu.ooad.util;
 
 import lombok.Getter;
 
+import java.io.Serializable;
+
 /**
  * 返回对象
  * @author Ming Qiu
  **/
 @Getter
-public class ReturnObject<T> {
+public class ReturnObject<T> implements Serializable {
 
     /**
      * 错误号

@@ -27,7 +27,7 @@ public class ActivityDao {
 //    @Autowired
 //    private CouponSkuPoMapper couponSkuPoMapper;
 //
-//    @Autowired
+    @Autowired
     private CouponSkuPoMapper couponSkuMapper;
 
 //    @Autowired

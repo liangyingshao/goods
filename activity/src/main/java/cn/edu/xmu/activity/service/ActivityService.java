@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -28,7 +29,7 @@ public class ActivityService {
     private ActivityDao activityDao;
 
     @DubboReference
-    private IGoodsService IGoodsService;
+    private IGoodsService goodsService;
 
     /**
      * 查看优惠活动中的商品
@@ -42,13 +43,19 @@ public class ActivityService {
         //获取Sku的id列表，根据SKUid列表调用远程服务获取每一个sku的name
 //        PageInfo<GoodsSkuCouponRetVo>couponSkus=activityDao.getCouponSkuList(id,page,pageSize);
         List<CouponSkuPo> list = activityDao.getCouponSkuList(id,page,pageSize);
-        List<Long> idList = null;
+        List<Long> idList = new ArrayList<>();
         for (int i=0;i<list.size();i++)//好家伙用了个愚蠢的for。。做个示例不想一直改代码了，先用着吧
         {
             idList.add(list.get(i).getId());
         }
-        List<SkuNameInfoDTO> skuNameList = IGoodsService.getSelectSkuNameListBySkuIdList(idList).getData();
-        PageInfo<SkuNameInfoDTO> skuNameInfoDTOPageInfo = PageInfo.of(skuNameList);
+        PageInfo<SkuNameInfoDTO> skuNameInfoDTOPageInfo = new PageInfo<>();
+        try{
+            List<SkuNameInfoDTO> skuNameList = goodsService.getSelectSkuNameListBySkuIdList(idList).getData();
+            skuNameInfoDTOPageInfo = PageInfo.of(skuNameList);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
         return new ReturnObject<>(skuNameInfoDTOPageInfo);
     }
 

@@ -9,13 +9,16 @@ import cn.edu.xmu.oomall.goods.model.SkuInfoDTO;
 import cn.edu.xmu.oomall.goods.model.SkuNameInfoDTO;
 import cn.edu.xmu.oomall.goods.service.IGoodsService;
 //import com.alibaba.dubbo.config.annotation.Service;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 //@Component
 @DubboService
 public class IGoodsServiceImpl implements IGoodsService {
@@ -54,13 +57,16 @@ public class IGoodsServiceImpl implements IGoodsService {
 
     @Override
     public ReturnObject<List<SkuNameInfoDTO>> getSelectSkuNameListBySkuIdList(List<Long> idList) {
-        List<SkuNameInfoDTO> nameList = null;
+        log.error("getSelectSkuNameListBySkuIdList:" + idList.toString());
+        List<SkuNameInfoDTO> nameList = new ArrayList<>();
         for (int i=0;i<idList.size();i++)
         {
             GoodsSkuDetailRetVo goodsSkuRetVo = goodsDao.getSku(idList.get(i));
+            log.error("idList.get(i):",idList.get(i).toString());
             SkuNameInfoDTO skuNameInfoDTO = new SkuNameInfoDTO();
-            skuNameInfoDTO.setId(skuNameInfoDTO.getId());
+            skuNameInfoDTO.setId(goodsSkuRetVo.getId());
             skuNameInfoDTO.setName(goodsSkuRetVo.getName());
+            log.error("goodsSkuRetVo.getName():" + goodsSkuRetVo.getName());
             nameList.add(skuNameInfoDTO);
         }
         return new ReturnObject<List<SkuNameInfoDTO>>(nameList);
