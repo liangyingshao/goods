@@ -100,9 +100,9 @@ public class GoodsSpu {
         this.goodsSn=po.getGoodsSn();
         this.detail=po.getDetail();
         this.imageUrl=po.getImageUrl();
-        if(null!=po.getState()){
-            this.state=SpuState.getTypeByCode(po.getState().intValue());
-        }
+//        if(null!=po.getState()){
+//            this.state=SpuState.getTypeByCode(po.getState().intValue());
+//        }
         this.gmtCreated=po.getGmtCreate();
         this.gmtModified=po.getGmtModified();
 //        this.disabled=(po.getDisabled().intValue()==0)?false:true;
@@ -128,7 +128,7 @@ public class GoodsSpu {
         spuPo.setGoodsSn(this.goodsSn);
         spuPo.setImageUrl(this.imageUrl);
         spuPo.setName(this.name);
-        spuPo.setState(state.getCode().byteValue());
+//        spuPo.setState(state.getCode().byteValue());
         spuPo.setSpec(this.spec);
         return spuPo;
     }

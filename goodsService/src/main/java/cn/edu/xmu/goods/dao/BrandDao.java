@@ -3,33 +3,18 @@ package cn.edu.xmu.goods.dao;
 import cn.edu.xmu.goods.mapper.BrandPoMapper;
 import cn.edu.xmu.goods.model.bo.Brand;
 import cn.edu.xmu.goods.model.vo.BrandVo;
-import cn.edu.xmu.ooad.model.VoObject;
-import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
-import cn.edu.xmu.ooad.util.encript.AES;
-import cn.edu.xmu.ooad.util.encript.SHA256;
-import cn.edu.xmu.goods.mapper.*;
-import cn.edu.xmu.goods.model.bo.Brand;
 import cn.edu.xmu.goods.model.po.*;
-import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
-import java.time.LocalDateTime;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 品牌访问类

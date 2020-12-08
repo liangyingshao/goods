@@ -2,8 +2,6 @@ package cn.edu.xmu.goods.dao;
 
 import cn.edu.xmu.goods.mapper.FloatPricePoMapper;
 import cn.edu.xmu.goods.model.bo.FloatPrice;
-import cn.edu.xmu.goods.model.po.CommentPo;
-import cn.edu.xmu.goods.model.po.CommentPoExample;
 import cn.edu.xmu.goods.model.po.FloatPricePo;
 import cn.edu.xmu.goods.model.po.FloatPricePoExample;
 import cn.edu.xmu.ooad.util.ResponseCode;
@@ -14,11 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
-import java.util.Objects;
 
 @Repository
 public class FloatPriceDao {

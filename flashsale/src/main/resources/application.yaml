@@ -5,14 +5,14 @@ management:
         include: "*"
 
 server:
-  port: 8082
+  port: 8091
   tomcat:
     threads:
       max: 1000
 
 spring:
   application:
-    name: flashsale-service
+    name: activity-service
   cloud:
     nacos:
       discovery:
@@ -79,7 +79,7 @@ mybatis:
     #log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     map-underscore-to-camel-case: true
 
-falshsaleService:
+falshsaleservice:
   #是否对数据库中的未初始化的数据初始化
   initialization: true
   #分布式锁失效时间（秒）
@@ -106,20 +106,20 @@ falshsaleService:
 #pagehelper分页插件配置
 pagehelper:
   helper-dialect: mysql
-
-dubbo:
-  application:
-    name: flashsale-service
-    qos-enable: false
-    qos-accept-foreign-ip: false
-  registry:
-    address: nacos://127.0.0.1:8848
-  protocol:
-    name: dubbo
-    port: -1
-  consumer:
-    timeout: 4000
-    check: false
+#
+#dubbo:
+#  application:
+#    name: flashsale-service-dubbo
+#    qos-enable: false
+#    qos-accept-foreign-ip: false
+#  registry:
+#    address: nacos://127.0.0.1:8848
+#  protocol:
+#    name: dubbo
+#    port: 28088
+#  consumer:
+#    timeout: 4000
+#    check: false
 
 
 

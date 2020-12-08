@@ -9,13 +9,26 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>goodservicetest</artifactId>
+    <artifactId>goodsservice</artifactId>
     <packaging>jar</packaging>
 
     <dependencies>
         <dependency>
             <groupId>cn.edu.xmu.ooad</groupId>
             <artifactId>core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>cn.edu.xmu</groupId>
+            <artifactId>goods-client</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>cn.edu.xmu.ooad.goods</groupId>
+            <artifactId>goods-client</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -190,6 +203,7 @@
                     </includes>
                 </configuration>
             </plugin>
+
         </plugins>
     </build>
 

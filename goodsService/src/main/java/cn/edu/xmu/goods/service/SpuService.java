@@ -1,13 +1,7 @@
 package cn.edu.xmu.goods.service;
 
 import cn.edu.xmu.goods.dao.GoodsSpuDao;
-import cn.edu.xmu.goods.model.bo.GoodsSku;
 import cn.edu.xmu.goods.model.bo.GoodsSpu;
-import cn.edu.xmu.goods.model.po.GoodsSkuPo;
-import cn.edu.xmu.goods.model.po.GoodsSpuPo;
-import cn.edu.xmu.ooad.model.VoObject;
-import cn.edu.xmu.ooad.util.ImgHelper;
-import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
 
 /**
  * 商品SPU服务类

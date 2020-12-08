@@ -141,13 +141,13 @@ public class GoodsSpuDao {
         ReturnObject<Object> returnObject;
         GoodsSpuPo spuPo=goodsSpuMapper.selectByPrimaryKey(spu.getId());
         //判断是否重复更改
-        if(spu.getState().getCode().equals(spuPo.getState().intValue()))
-            return new ReturnObject<>(ResponseCode.STATE_NOCHANGE);
+//        if(spu.getState().getCode().equals(spuPo.getState().intValue()))
+//            return new ReturnObject<>(ResponseCode.STATE_NOCHANGE);
         //判断shopId是否对应的上
         if(spu.getShopId().equals(spuPo.getShopId()))
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("spuId与shopId不对应"));
         //执行修改
-        spuPo.setState(spu.getState().getCode().byteValue());
+//        spuPo.setState(spu.getState().getCode().byteValue());
         int ret;
         try{
             ret=goodsSpuMapper.updateByPrimaryKeySelective(spuPo);
@@ -369,7 +369,7 @@ public class GoodsSpuDao {
             if(spuPo==null)
                 return returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             //该SPU已被逻辑删除, disable==(Byte) 1 or state==DELETED
-            if(spuPo.getDisabled().equals((byte)1)||spuPo.getState().equals(GoodsSpu.SpuState.DELETED.getCode().byteValue()))
+            if(spuPo.getDisabled().equals((byte)1))//||spuPo.getState().equals(GoodsSpu.SpuState.DELETED.getCode().byteValue()))
                 return returnObject=new ReturnObject<>(ResponseCode.BRANDALTER_INVALID);
             //将SPU逻辑删除，disable==true and state==DELETED
 //            spu.setDisabled(true);//提前设置，避免空指针错误
@@ -409,8 +409,9 @@ public class GoodsSpuDao {
             if (!spuPo.getShopId().equals(spu.getShopId()))
                 return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
             // 该商品SPU已被删除
-            if (spuPo.getState().equals(GoodsSpu.SpuState.DELETED.getCode().byteValue()))
-                return returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+//            if (spuPo.getState().equals(GoodsSpu.SpuState.DELETED.getCode().byteValue()))
+//                return returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+
 
             returnObject = ImgHelper.remoteSaveImg(file, 2, davUsername, davPassword, baseUrl);
 

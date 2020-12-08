@@ -1,11 +1,10 @@
 package cn.edu.xmu.goods.model.bo;
 
-import cn.edu.xmu.goods.model.po.BrandPo;
+import cn.edu.xmu.goods.model.po.GoodsCategoryPo;
 import cn.edu.xmu.goods.model.vo.GoodsCategoryRetVo;
 import cn.edu.xmu.goods.model.vo.GoodsCategorySimpleRetVo;
 import cn.edu.xmu.goods.model.vo.GoodsCategoryVo;
 import cn.edu.xmu.ooad.model.VoObject;
-import cn.edu.xmu.goods.model.po.GoodsCategoryPo;
 import lombok.Data;
 
 import java.io.Serializable;

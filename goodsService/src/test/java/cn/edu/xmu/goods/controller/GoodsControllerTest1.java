@@ -1,15 +1,9 @@
 package cn.edu.xmu.goods.controller;
 
-import cn.edu.xmu.goods.mapper.GoodsCategoryPoMapper;
-import cn.edu.xmu.goods.model.po.GoodsCategoryPo;
 import cn.edu.xmu.goods.model.vo.BrandVo;
-import cn.edu.xmu.goods.model.vo.GoodsCategoryVo;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.JwtHelper;
-import cn.edu.xmu.ooad.util.ResponseCode;
-import cn.edu.xmu.ooad.util.encript.AES;
 import cn.edu.xmu.goods.GoodsServiceApplication;
-import cn.edu.xmu.goods.mapper.BrandPoMapper;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -24,8 +18,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
-import org.springframework.test.web.servlet.MockMvc;
 
 import java.io.File;
 import java.io.FileInputStream;

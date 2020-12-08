@@ -3,14 +3,11 @@ package cn.edu.xmu.goods.model.bo;
 import cn.edu.xmu.goods.model.po.CommentPo;
 import cn.edu.xmu.goods.model.vo.CommentRetVo;
 import cn.edu.xmu.goods.model.vo.CommentSimpleRetVo;
-import cn.edu.xmu.goods.model.vo.CommentStateRetVo;
 import cn.edu.xmu.ooad.model.VoObject;
 import lombok.Data;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Data
