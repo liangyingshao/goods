@@ -8,18 +8,27 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="core" />
+        <module name="Flashsale" />
+        <module name="goods-client" />
+        <module name="activity" />
         <module name="goodservicetest" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="11">
+      <module name="activity" target="11" />
       <module name="core" target="11" />
+      <module name="Flashsale" target="11" />
+      <module name="goods-client" target="11" />
       <module name="goodservicetest" target="11" />
       <module name="goodsmodule" target="11" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="Flashsale" options="-parameters" />
+      <module name="activity" options="-parameters" />
       <module name="core" options="-parameters" />
+      <module name="goods-client" options="-parameters" />
       <module name="goodservicetest" options="-parameters" />
     </option>
   </component>

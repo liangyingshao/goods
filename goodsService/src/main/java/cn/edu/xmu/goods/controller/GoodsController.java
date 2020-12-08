@@ -1096,7 +1096,33 @@ public class GoodsController {
         return Common.decorateReturnObject(returnObject);
     }
 
-
+    /**
+     * 查看一条分享商品SKU的详细信息（需登录）
+     * @param sid
+     * @param id
+     * @param userId
+     * @param departId
+     * @return Object
+     */
+    @ApiOperation(value = "查看一条分享商品SKU的详细信息（需登录）")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+            @ApiImplicitParam(name="sid", required = true, dataType="Integer", paramType="path",value = "分享ID"),
+            @ApiImplicitParam(name="id", required = true, dataType="Integer", paramType="path",value = "商品SKU ID")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @Audit // 需要认证
+    @GetMapping("/share/{sid}/skus/{id}")
+    @ResponseBody
+    public Object getShareSku(@PathVariable Long sid, @PathVariable Long id,
+                              @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
+                              @Depart @ApiIgnore @RequestParam(required = false) Long departId)
+    {
+        ReturnObject<GoodsSkuRetVo> returnObject=goodsService.getShareSku(sid,id,userId);
+        return returnObject;
+    }
 
 
 }

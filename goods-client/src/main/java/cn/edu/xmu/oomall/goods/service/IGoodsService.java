@@ -1,9 +1,7 @@
 package cn.edu.xmu.oomall.goods.service;
 
 import cn.edu.xmu.ooad.util.ReturnObject;
-import cn.edu.xmu.oomall.goods.model.GoodsInfoDTO;
-import cn.edu.xmu.oomall.goods.model.SkuInfoDTO;
-import cn.edu.xmu.oomall.goods.model.SkuNameInfoDTO;
+import cn.edu.xmu.oomall.goods.model.*;
 
 import java.util.List;
 import java.util.Map;
@@ -48,5 +46,8 @@ public interface IGoodsService {
     /**
      * 根据SkuId返回其id和name
      */
-    ReturnObject<List<SkuNameInfoDTO>> getSelectSkuNameListBySkuIdList(List<Long> idList);
+    List<SkuNameInfoDTO> getSelectSkuNameListBySkuIdList(List<Long> idList);
+
+    ReturnObject checkSkuUsableBySkuShop(Long skuId,Long shopId);
+
 }

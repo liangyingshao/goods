@@ -31,11 +31,8 @@ class ActivityDaoTest {
     @Test
     void getCouponSkuList()
     {
-        List<CouponSkuPo> skus=activityDao.getCouponSkuList((long)1,1,2);
-        Assertions.assertEquals(skus.size(),2);
-
-        skus=activityDao.getCouponSkuList((long)1,2,1);
-        Assertions.assertEquals(skus.size(),1);
+        List<CouponSkuPo> skus=activityDao.getCouponSkuList((long)1);
+        Assertions.assertEquals(skus.size(),3);
     }
 
     @Test
@@ -126,27 +123,13 @@ class ActivityDaoTest {
         Assertions.assertEquals(returnObject.getCode(),ResponseCode.RESOURCE_ID_OUTSCOPE);
     }
 
-    //据说已废弃
-//    @Test
-//    void deleteCoupon()
-//    {
-//
-//    }
-
     @Test
     void getCoupon()
     {
-        ReturnObject<CouponNewRetVo> returnObject=activityDao.getCoupon((long)1,(long)2);
+        ReturnObject<List<CouponNewRetVo>> returnObject=activityDao.getCoupon((long)1,(long)2);
         Assertions.assertEquals(returnObject.getCode(),ResponseCode.OK);
 
         returnObject=activityDao.getCoupon((long)1,(long)2);
-        Assertions.assertEquals(returnObject.getCode(),ResponseCode.COUPON_FINISH);
-
-        returnObject=activityDao.getCoupon((long)1,(long)1);
-        Assertions.assertEquals(returnObject.getCode(),ResponseCode.OK);
-        returnObject=activityDao.getCoupon((long)1,(long)1);
-        Assertions.assertEquals(returnObject.getCode(),ResponseCode.OK);
-        returnObject=activityDao.getCoupon((long)1,(long)1);
         Assertions.assertEquals(returnObject.getCode(),ResponseCode.COUPON_FINISH);
 
         returnObject=activityDao.getCoupon((long)1,(long)3);

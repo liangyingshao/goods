@@ -12,7 +12,7 @@ import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ResponseUtil;
 import cn.edu.xmu.ooad.util.ReturnObject;
-import cn.edu.xmu.oomall.goods.model.SkuNameInfoDTO;
+import cn.edu.xmu.oomall.goods.model.*;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
@@ -59,6 +59,7 @@ public class ActivityController {
             @RequestParam(required = false, defaultValue = "1") Integer page,
             @RequestParam(required = false, defaultValue = "10") Integer pageSize)
     {
+        
         ReturnObject<PageInfo<SkuNameInfoDTO>> returnObject=activityService.getCouponSkuList(id,page,pageSize);
         return returnObject;
     }
@@ -261,7 +262,7 @@ public class ActivityController {
     @ResponseBody
     public Object getCoupon(@LoginUser @ApiIgnore @RequestParam(required = false) Long userId, @PathVariable Long id)
     {
-        ReturnObject<CouponNewRetVo> returnObject=activityService.getCoupon(userId,id);
+        ReturnObject<List<CouponNewRetVo>> returnObject=activityService.getCoupon(userId,id);
         return returnObject;
     }
 

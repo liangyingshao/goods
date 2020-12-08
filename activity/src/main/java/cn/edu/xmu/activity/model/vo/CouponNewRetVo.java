@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 public class CouponNewRetVo {
     private Long id;
 
-//    private CouponActivityByNewCouponRetVo activity;
+    private CouponActivityByNewCouponRetVo activity;
 
     private Long customerId;
 

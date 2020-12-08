@@ -7,9 +7,11 @@ import cn.edu.xmu.activity.model.vo.*;
 import cn.edu.xmu.activity.model.bo.CouponSku;
 import cn.edu.xmu.activity.model.vo.CouponNewRetVo;
 import cn.edu.xmu.activity.model.vo.CouponRetVo;
+import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
-import cn.edu.xmu.oomall.goods.model.SkuNameInfoDTO;
-import cn.edu.xmu.oomall.goods.service.IGoodsService;
+import cn.edu.xmu.oomall.goods.service.*;
+import cn.edu.xmu.oomall.goods.model.*;
+import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.slf4j.Logger;
@@ -18,7 +20,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ActivityService {
@@ -41,13 +45,10 @@ public class ActivityService {
     public ReturnObject<PageInfo<SkuNameInfoDTO>> getCouponSkuList(Long id, Integer page, Integer pageSize) {
         //获取Sku的id列表，根据SKUid列表调用远程服务获取每一个sku的name
 //        PageInfo<GoodsSkuCouponRetVo>couponSkus=activityDao.getCouponSkuList(id,page,pageSize);
-        List<CouponSkuPo> list = activityDao.getCouponSkuList(id,page,pageSize);
-        List<Long> idList = null;
-        for (int i=0;i<list.size();i++)//好家伙用了个愚蠢的for。。做个示例不想一直改代码了，先用着吧
-        {
-            idList.add(list.get(i).getId());
-        }
-        List<SkuNameInfoDTO> skuNameList = IGoodsService.getSelectSkuNameListBySkuIdList(idList).getData();
+        List<CouponSkuPo> list = activityDao.getCouponSkuList(id);
+        List<Long> idList = new ArrayList<>(list.stream().map(CouponSkuPo::getSkuId).collect(Collectors.toList()));
+        List<SkuNameInfoDTO> skuNameList = IGoodsService.getSelectSkuNameListBySkuIdList(idList);
+        PageHelper.startPage(page,pageSize);
         PageInfo<SkuNameInfoDTO> skuNameInfoDTOPageInfo = PageInfo.of(skuNameList);
         return new ReturnObject<>(skuNameInfoDTOPageInfo);
     }
@@ -61,7 +62,13 @@ public class ActivityService {
      */
     @Transactional
     public ReturnObject createCouponSkus(Long shopId, Long id, List<CouponSku> couponSkus) {
-        ReturnObject returnObject=activityDao.createCouponSkus(shopId,id, couponSkus);
+        ReturnObject returnObject;
+        for(CouponSku couponSku:couponSkus)
+        {
+            returnObject= IGoodsService.checkSkuUsableBySkuShop(couponSku.getSkuId(), shopId);
+            if(returnObject.getCode()!= ResponseCode.OK)return returnObject;
+        }
+        returnObject=activityDao.createCouponSkus(shopId,id, couponSkus);
         return returnObject;
     }
 
@@ -127,9 +134,9 @@ public class ActivityService {
      * @return ReturnObject<CouponNewRetVo>
      */
     @Transactional
-    public ReturnObject<CouponNewRetVo> getCoupon(Long userId, Long id)
+    public ReturnObject<List<CouponNewRetVo>> getCoupon(Long userId, Long id)
     {
-        ReturnObject<CouponNewRetVo> returnObject=activityDao.getCoupon(userId,id);
+        ReturnObject<List<CouponNewRetVo>> returnObject=activityDao.getCoupon(userId,id);
         return returnObject;
     }
 

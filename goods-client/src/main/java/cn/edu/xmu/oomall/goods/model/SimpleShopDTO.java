@@ -2,7 +2,9 @@ package cn.edu.xmu.oomall.goods.model;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 简单店铺VO
@@ -10,7 +12,8 @@ import lombok.Data;
  * @date 2020/11/30 13:25
  */
 @Data
-@ApiModel
+@NoArgsConstructor
+@AllArgsConstructor
 public class SimpleShopDTO {
     @ApiModelProperty(name = "店铺id", value = "id")
     private Long id;

@@ -8,119 +8,165 @@ import cn.edu.xmu.activity.model.vo.*;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
+import cn.edu.xmu.ooad.util.bloom.BloomFilterHelper;
+import cn.edu.xmu.ooad.util.bloom.RedisBloomFilter;
+import cn.edu.xmu.oomall.goods.model.CouponInfoDTO;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.google.common.base.Charsets;
+import com.google.common.hash.Funnels;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.time.LocalDateTime;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Repository
-public class ActivityDao {
+public class ActivityDao  implements InitializingBean
+{
     private static final Logger logger = LoggerFactory.getLogger(ActivityDao.class);
-    
-//    @Autowired
-//    private CouponSkuPoMapper couponSkuPoMapper;
-//
-//    @Autowired
+
+    @Autowired
     private CouponSkuPoMapper couponSkuMapper;
 
-//    @Autowired
-//    private GoodsSkuPoMapper skuMapper;
-//
-//    @Autowired
-//    private GoodsSpuPoMapper spuMapper;
-
-//    @Autowired
+    @Autowired
     private CouponActivityPoMapper activityMapper;
-//
-//    @Autowired
+
+    @Autowired
     private CouponPoMapper couponMapper;
 
-//    @Autowired
-//    private ShopPoMapper shopMapper;
+
+    @Autowired
+    RedisTemplate redisTemplate;
+
+    RedisBloomFilter bloomFilter;
+
+    String[] fieldName;
+    final String suffixName="BloomFilter";
+
+    /**
+     * 通过该参数选择是否清空布隆过滤器
+     */
+    private boolean reinitialize=true;
+
+
+    /**
+     * 初始化布隆过滤器
+     * @throws Exception
+     * createdBy: LiangJi3229 2020-11-10 18:41
+     */
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        BloomFilterHelper bloomFilterHelper=new BloomFilterHelper<>(Funnels.stringFunnel(Charsets.UTF_8),1000,0.02);
+        fieldName=new String[]{"coupon"};
+        bloomFilter=new RedisBloomFilter(redisTemplate,bloomFilterHelper);
+        if(reinitialize){
+            for(int i=0;i<fieldName.length;i++){
+                redisTemplate.delete(fieldName[i]+suffixName);
+            }
+        }
+
+    }
+
+    /**
+     * 查找布隆过滤器里是否有该用户领过该活动优惠券的记录
+     * @param activityId
+     * @param userId
+     * @return ReturnObject
+     */
+    public ReturnObject checkCouponBloomFilter(Long activityId,Long userId){
+        Map.Entry<Long,Long> coupon=new AbstractMap.SimpleEntry<Long,Long>(activityId,userId);
+        if(bloomFilter.includeByBloomFilter("coupon"+suffixName,coupon.toString()))
+            return new ReturnObject(ResponseCode.COUPON_FINISH);
+        return null;
+    }
+
+    /**
+     * 由属性名及属性值设置相应布隆过滤器
+     * @param name 属性名
+     * @param po po对象
+     * createdBy: LiangJi3229 2020-11-10 18:41
+     */
+    public void setBloomFilterByName(String name,CouponPo po) {
+        try {
+            Field field = CouponPo.class.getDeclaredField(name);
+            Method method=po.getClass().getMethod("get"+name.substring(0,1).toUpperCase()+name.substring(1));
+            logger.debug("add value "+method.invoke(po)+" to "+field.getName()+suffixName);
+            bloomFilter.addByBloomFilter(field.getName()+suffixName,method.invoke(po));
+        }
+        catch (Exception ex){
+            logger.error("Exception happened:"+ex.getMessage());
+        }
+    }
+
+    /**
+     * 向布隆过滤器添加coupon的内容
+     * @param activityId
+     * @param userId
+     */
+    public void setBloomFilterOfCoupon(Long activityId,Long userId)
+    {
+        Map.Entry<Long,Long> coupon=new AbstractMap.SimpleEntry<Long,Long>(activityId,userId);
+        bloomFilter.addByBloomFilter("coupon"+suffixName,coupon.toString());
+    }
 
     public void initialize() throws Exception {
-//        //初始化couponSku
-//        CouponSkuPoExample example = new CouponSkuPoExample();
-//        CouponSkuPoExample.Criteria criteria = example.createCriteria();
-//
-//        List<CouponSkuPo> couponSkuPos = couponSkuMapper.selectByExample(example);
-//
-//        for (CouponSkuPo po : couponSkuPos) {
-//            CouponSkuPo newPo = new CouponSkuPo();
-//            newPo.setActivityId(po.getActivityId());
-//            newPo.setSkuId(po.getSkuId());
-//            newPo.setId(po.getId());
-//            couponSkuMapper.updateByPrimaryKeySelective(newPo);
-//        }
-//
-//        //初始化SKU
-//        GoodsSkuPoExample skuExample=new GoodsSkuPoExample();
-//        GoodsSkuPoExample.Criteria skuCriteria= skuExample.createCriteria();;
-//        List<GoodsSkuPo>skuPos=skuMapper.selectByExample(skuExample);
-//        for(GoodsSkuPo po:skuPos)
-//        {
-//            GoodsSkuPo newPo=new GoodsSkuPo();
-//            newPo.setId(po.getId());
-//            newPo.setGoodsSpuId(po.getGoodsSpuId());
-//            skuMapper.updateByPrimaryKeySelective(newPo);
-//        }
-//
-//        //初始化SPU
-//        GoodsSpuPoExample spuExample=new GoodsSpuPoExample();
-//        GoodsSpuPoExample.Criteria spuCriteria= spuExample.createCriteria();;
-//        List<GoodsSpuPo>spuPos=spuMapper.selectByExample(spuExample);
-//        for(GoodsSpuPo po:spuPos)
-//        {
-//            GoodsSpuPo newPo=new GoodsSpuPo();
-//            newPo.setId(po.getId());
-//            newPo.setFreightId(po.getFreightId());
-//            newPo.setCategoryId(po.getCategoryId());
-//            newPo.setBrandId(po.getBrandId());
-//            newPo.setShopId(po.getShopId());
-//            spuMapper.updateByPrimaryKeySelective(newPo);
-//        }
-//
-//        //初始化couponActivity
-//        CouponActivityPoExample activityExample=new CouponActivityPoExample();
-//        CouponActivityPoExample.Criteria activityCriteria=activityExample.createCriteria();
-//        List<CouponActivityPo> activityPos=activityMapper.selectByExample(activityExample);
-//        for(CouponActivityPo po:activityPos)
-//        {
-//            CouponActivityPo newPo=new CouponActivityPo();
-//            newPo.setId(po.getId());
-//            newPo.setShopId(po.getShopId());
-//            activityMapper.updateByPrimaryKeySelective(newPo);
-//        }
-//
-//        //初始化coupon
-//        CouponPoExample couponExample=new CouponPoExample();
-//        CouponPoExample.Criteria couponCriteria=couponExample.createCriteria();
-//        List<CouponPo> couponPos=couponMapper.selectByExample(couponExample);
-//        for(CouponPo po:couponPos)
-//        {
-//            CouponPo newPo=new CouponPo();
-//            newPo.setActivityId(po.getActivityId());
-//            newPo.setCustomerId(po.getCustomerId());
-//            newPo.setId(po.getId());
-//            couponMapper.updateByPrimaryKeySelective(newPo);
-//        }
+        //初始化couponSku
+        CouponSkuPoExample example = new CouponSkuPoExample();
+        CouponSkuPoExample.Criteria criteria = example.createCriteria();
+
+        List<CouponSkuPo> couponSkuPos = couponSkuMapper.selectByExample(example);
+
+        for (CouponSkuPo po : couponSkuPos) {
+            CouponSkuPo newPo = new CouponSkuPo();
+            newPo.setActivityId(po.getActivityId());
+            newPo.setSkuId(po.getSkuId());
+            newPo.setId(po.getId());
+            couponSkuMapper.updateByPrimaryKeySelective(newPo);
+        }
+
+        //初始化couponActivity
+        CouponActivityPoExample activityExample=new CouponActivityPoExample();
+        CouponActivityPoExample.Criteria activityCriteria=activityExample.createCriteria();
+        List<CouponActivityPo> activityPos=activityMapper.selectByExample(activityExample);
+        for(CouponActivityPo po:activityPos)
+        {
+            CouponActivityPo newPo=new CouponActivityPo();
+            newPo.setId(po.getId());
+            newPo.setShopId(po.getShopId());
+            activityMapper.updateByPrimaryKeySelective(newPo);
+        }
+
+        //初始化coupon
+        CouponPoExample couponExample=new CouponPoExample();
+        CouponPoExample.Criteria couponCriteria=couponExample.createCriteria();
+        List<CouponPo> couponPos=couponMapper.selectByExample(couponExample);
+        for(CouponPo po:couponPos)
+        {
+            CouponPo newPo=new CouponPo();
+            newPo.setActivityId(po.getActivityId());
+            newPo.setCustomerId(po.getCustomerId());
+            newPo.setId(po.getId());
+            couponMapper.updateByPrimaryKeySelective(newPo);
+        }
     }
 
     /**
      * 查看优惠活动中的商品
      * @param id
-     * @param page
-     * @param pageSize
      * @return PageInfo<CouponSku>
      */
-    public List<CouponSkuPo> getCouponSkuList(Long id, Integer page, Integer pageSize)
+    public List<CouponSkuPo> getCouponSkuList(Long id)
     {
 //        GoodsSkuPo skuPo;
 //        GoodsSku sku;
@@ -155,70 +201,62 @@ public class ActivityDao {
      * @return CouponSkuRetVo
      */
     public ReturnObject createCouponSkus(Long shopId, Long id, List<CouponSku> couponSkus) {
-//        //活动存在
-//        CouponActivityPo activityPo = activityMapper.selectByPrimaryKey(id);
-//        if (activityPo == null) return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-//
-//        //活动和shopId匹配
-//        if(activityPo.getShopId()!=shopId)return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
-//
-//        //对每个SKU进行判断、添加
-//        for(CouponSku couponSku:couponSkus)
-//        {
-//            //SKU存在
-//            GoodsSkuPo skuPo = skuMapper.selectByPrimaryKey(couponSku.getSkuId());
-//            if (skuPo == null || GoodsSpu.SpuState.getTypeByCode(skuPo.getDisabled().intValue()).equals(GoodsSku.State.DELETED))
-//                return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-//
-//            //SKU对应的SPU和shopId匹配
-//            GoodsSpuPo spuPo=spuMapper.selectByPrimaryKey(skuPo.getGoodsSpuId());
-//            if (spuPo.getShopId() != shopId) return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
-//
-//            //活动“待上线”
-//            if (activityPo.getBeginTime().isAfter(LocalDateTime.now())//考虑到惰性更新状态【待上线】->【进行中】的情况
-//                    && CouponActivity.DatabaseState.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.DatabaseState.EXECUTABLE))//【可执行】
-//            {
-//                //之前没有添加过该SKU
-//                CouponSkuPoExample alreadyExample=new CouponSkuPoExample();
-//                CouponSkuPoExample.Criteria alreadyCriteria=alreadyExample.createCriteria();
-//                alreadyCriteria.andSkuIdEqualTo(skuPo.getId());
-//                alreadyCriteria.andActivityIdEqualTo(id);
-//                List<CouponSkuPo> alreadyPos=couponSkuMapper.selectByExample(alreadyExample);
-//                if(alreadyPos!=null&&alreadyPos.size()>0)return new ReturnObject(ResponseCode.ACTIVITYALTER_INVALID);
-//
-//                CouponSkuPo couponSkuPo = couponSku.getCouponSkuPo();
-//                couponSkuPo.setActivityId(id);
-//                couponSkuPo.setGmtCreate(LocalDateTime.now());
-//                couponSkuPo.setGmtModified(LocalDateTime.now());
-//                try {
-//                    int ret = couponSkuMapper.insert(couponSkuPo);
-//                    if (ret == 0) {
-//                        //插入失败
-//                        logger.debug("createCouponSpu: insert couponSku fail : " + couponSkuPo.toString());
-//                        return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("couponSpu字段不合法：" + couponSkuPo.toString()));
-//                    } else {
-//                        //插入成功
-//                        logger.debug("createCouponSku: insert couponSku = " + couponSkuPo.toString());
-//                        //检验
-//                        CouponSkuPoExample couponSpuExample = new CouponSkuPoExample();
-//                        CouponSkuPoExample.Criteria couponSpuCriteria = couponSpuExample.createCriteria();
-//                        couponSpuCriteria.andActivityIdEqualTo(couponSkuPo.getActivityId());
-//                        couponSpuCriteria.andSkuIdEqualTo(couponSkuPo.getSkuId());
-//                        List<CouponSkuPo> checkPos = couponSkuMapper.selectByExample(couponSpuExample);
-//                        if (checkPos.size() == 0)
-//                            return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("couponSku字段不合法：" + couponSkuPo.toString()));
-//                    }
-//                } catch (DataAccessException e) {
-//                    // 其他数据库错误
-//                    logger.debug("other sql exception : " + e.getMessage());
-//                    return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
-//                } catch (Exception e) {
-//                    // 其他Exception错误
-//                    logger.error("other exception : " + e.getMessage());
-//                    return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
-//                }
-//            } else return new ReturnObject<>(ResponseCode.COUPONACT_STATENOTALLOW);
-//        }
+        //活动存在
+        CouponActivityPo activityPo = activityMapper.selectByPrimaryKey(id);
+        if (activityPo == null) return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+
+        //活动和shopId匹配
+        if(activityPo.getShopId()!=shopId)return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+
+        //对每个SKU进行判断、添加
+        for(CouponSku couponSku:couponSkus)
+        {
+
+            //活动“待上线”
+            if (activityPo.getBeginTime().isAfter(LocalDateTime.now())//考虑到惰性更新状态【待上线】->【进行中】的情况
+                    && CouponActivity.DatabaseState.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.DatabaseState.EXECUTABLE))//【可执行】
+            {
+                //之前没有添加过该SKU
+                CouponSkuPoExample alreadyExample=new CouponSkuPoExample();
+                CouponSkuPoExample.Criteria alreadyCriteria=alreadyExample.createCriteria();
+                alreadyCriteria.andSkuIdEqualTo(couponSku.getSkuId());
+                alreadyCriteria.andActivityIdEqualTo(id);
+                List<CouponSkuPo> alreadyPos=couponSkuMapper.selectByExample(alreadyExample);
+                if(alreadyPos!=null&&alreadyPos.size()>0)return new ReturnObject(ResponseCode.ACTIVITYALTER_INVALID);
+
+                CouponSkuPo couponSkuPo = couponSku.getCouponSkuPo();
+                couponSkuPo.setActivityId(id);
+                couponSkuPo.setGmtCreate(LocalDateTime.now());
+                couponSkuPo.setGmtModified(LocalDateTime.now());
+                try {
+                    int ret = couponSkuMapper.insert(couponSkuPo);
+                    if (ret == 0) {
+                        //插入失败
+                        logger.debug("createCouponSpu: insert couponSku fail : " + couponSkuPo.toString());
+                        return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("couponSpu字段不合法：" + couponSkuPo.toString()));
+                    } else {
+                        //插入成功
+                        logger.debug("createCouponSku: insert couponSku = " + couponSkuPo.toString());
+                        //检验
+                        CouponSkuPoExample couponSpuExample = new CouponSkuPoExample();
+                        CouponSkuPoExample.Criteria couponSpuCriteria = couponSpuExample.createCriteria();
+                        couponSpuCriteria.andActivityIdEqualTo(couponSkuPo.getActivityId());
+                        couponSpuCriteria.andSkuIdEqualTo(couponSkuPo.getSkuId());
+                        List<CouponSkuPo> checkPos = couponSkuMapper.selectByExample(couponSpuExample);
+                        if (checkPos.size() == 0)
+                            return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("couponSku字段不合法：" + couponSkuPo.toString()));
+                    }
+                } catch (DataAccessException e) {
+                    // 其他数据库错误
+                    logger.debug("other sql exception : " + e.getMessage());
+                    return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+                } catch (Exception e) {
+                    // 其他Exception错误
+                    logger.error("other exception : " + e.getMessage());
+                    return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+                }
+            } else return new ReturnObject<>(ResponseCode.COUPONACT_STATENOTALLOW);
+        }
         return new ReturnObject();
     }
 
@@ -441,7 +479,7 @@ public class ActivityDao {
      * @param id
      * @return ReturnObject<CouponNewRetVo>
      */
-    public ReturnObject<CouponNewRetVo> getCoupon(Long userId, Long id)
+    public ReturnObject<List<CouponNewRetVo>> getCoupon(Long userId, Long id)
     {
         CouponActivityPo activityPo=activityMapper.selectByPrimaryKey(id);
 
@@ -462,6 +500,10 @@ public class ActivityDao {
             return new ReturnObject<>(ResponseCode.COUPON_NOTBEGIN);
 
         //活动进行中
+        //先到bloom过滤器里查询未果
+        ReturnObject returnObject=checkCouponBloomFilter(id,userId);
+        if(returnObject.getCode().equals(ResponseCode.COUPON_FINISH))return returnObject;
+
         //查询优惠券发放情况
         CouponPoExample alreadyExample=new CouponPoExample();
         CouponPoExample.Criteria alreadyCriteria= alreadyExample.createCriteria();
@@ -472,79 +514,83 @@ public class ActivityDao {
         List<CouponPo> alreadyPos=couponMapper.selectByExample(alreadyExample);
         //券已领罄
         if(alreadyPos.size()==activityPo.getQuantity()//总量控制模式下券已发完或每人限量模式下该用户领的券已达上限
-        ||(CouponActivity.Type.getTypeByCode(activityPo.getQuantitiyType().intValue()).equals(CouponActivity.Type.LIMIT_TOTAL_NUM)&&alreadyPos.size()>0))//总量控制模式下该用户已领过券
+                ||(CouponActivity.Type.getTypeByCode(activityPo.getQuantitiyType().intValue()).equals(CouponActivity.Type.LIMIT_TOTAL_NUM)&&alreadyPos.size()>0))//总量控制模式下该用户已领过券
+        {
+            setBloomFilterOfCoupon(id,userId);
             return new ReturnObject<>(ResponseCode.COUPON_FINISH);
+        }
+
         //可领券，设置券属性
-        CouponPo newPo=new CouponPo();
-        newPo.setCustomerId(userId);
-        newPo.setActivityId(id);
-        newPo.setCouponSn(Common.genSeqNum());
-        newPo.setGmtCreate(LocalDateTime.now());
-        newPo.setGmtModified(LocalDateTime.now());
-        newPo.setName(activityPo.getName());
-        newPo.setState(Coupon.State.AVAILABLE.getCode().byteValue());
-        if(activityPo.getValidTerm()==0)//与活动同时
+        List<CouponNewRetVo>retVos=new ArrayList<>();
+        for(int i=0;i<(CouponActivity.Type.getTypeByCode(activityPo.getQuantitiyType().intValue()).equals(CouponActivity.Type.LIMIT_PER_PERSON)?activityPo.getQuantity():1);i++)
         {
-            newPo.setBeginTime(activityPo.getBeginTime());
-            newPo.setEndTime(activityPo.getEndTime());
-        }
-        else//自领券起
-        {
-            newPo.setBeginTime(LocalDateTime.now());
-            newPo.setEndTime(LocalDateTime.now().plusDays(activityPo.getValidTerm()));
-        }
-
-        try{
-            int ret=couponMapper.insertSelective(newPo);
-            if(ret==0){
-                //插入失败
-                logger.debug("getCoupon: insert coupon fail : " + newPo.toString());
-                return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("coupon字段不合法：" + newPo.toString()));
+            CouponPo newPo = new CouponPo();
+            newPo.setCustomerId(userId);
+            newPo.setActivityId(id);
+            newPo.setCouponSn(Common.genSeqNum());
+            newPo.setGmtCreate(LocalDateTime.now());
+            newPo.setGmtModified(LocalDateTime.now());
+            newPo.setName(activityPo.getName());
+            newPo.setState(Coupon.State.AVAILABLE.getCode().byteValue());
+            if (activityPo.getValidTerm() == 0)//与活动同时
+            {
+                newPo.setBeginTime(activityPo.getBeginTime());
+                newPo.setEndTime(activityPo.getEndTime());
+            } else//自领券起
+            {
+                newPo.setBeginTime(LocalDateTime.now());
+                newPo.setEndTime(LocalDateTime.now().plusDays(activityPo.getValidTerm()));
             }
-            else {
-                //插入成功
-                logger.debug("getCoupon: insert coupon = " + newPo.toString());
 
-                //检验
-                CouponPoExample checkExample=new CouponPoExample();
-                CouponPoExample.Criteria checkCriteria=checkExample.createCriteria();
-                checkCriteria.andActivityIdEqualTo(newPo.getActivityId());
-                checkCriteria.andCustomerIdEqualTo(newPo.getCustomerId());
-                checkCriteria.andCouponSnEqualTo(newPo.getCouponSn());
+            try {
+                int ret = couponMapper.insertSelective(newPo);
+                if (ret == 0) {
+                    //插入失败
+                    logger.debug("getCoupon: insert coupon fail : " + newPo.toString());
+                    return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("coupon字段不合法：" + newPo.toString()));
+                } else {
+                    //插入成功
+                    logger.debug("getCoupon: insert coupon = " + newPo.toString());
+
+                    //检验
+                    CouponPoExample checkExample = new CouponPoExample();
+                    CouponPoExample.Criteria checkCriteria = checkExample.createCriteria();
+                    checkCriteria.andActivityIdEqualTo(newPo.getActivityId());
+                    checkCriteria.andCustomerIdEqualTo(newPo.getCustomerId());
+                    checkCriteria.andCouponSnEqualTo(newPo.getCouponSn());
 //                checkCriteria.andGmtCreateEqualTo(newPo.getGmtCreate());
 //                checkCriteria.andGmtModifiedEqualTo(newPo.getGmtModified());
-                checkCriteria.andNameEqualTo(newPo.getName());
-                checkCriteria.andStateEqualTo(Coupon.State.AVAILABLE.getCode().byteValue());
-                checkCriteria.andBeginTimeEqualTo(newPo.getBeginTime());
-                checkCriteria.andEndTimeEqualTo(newPo.getEndTime());
-                List<CouponPo> couponPos=couponMapper.selectByExample(checkExample);
-                if(couponPos.size()==0)
-                    return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("coupon字段不合法：" + newPo.toString()));
-                else
-                {
-                    //构造RetVo
-                    CouponNewRetVo retVo=new CouponNewRetVo();
-                    Coupon coupon=new Coupon(couponPos.get(0));
-                    retVo.set(coupon);
-                    CouponActivityByNewCouponRetVo activityRetVo=new CouponActivityByNewCouponRetVo();
-                    CouponActivity activity=new CouponActivity(activityPo);
-                    activityRetVo.set(activity);
-//                    retVo.setActivity(activityRetVo);
-                    return new ReturnObject<CouponNewRetVo>(retVo);
+                    checkCriteria.andNameEqualTo(newPo.getName());
+                    checkCriteria.andStateEqualTo(Coupon.State.AVAILABLE.getCode().byteValue());
+                    checkCriteria.andBeginTimeEqualTo(newPo.getBeginTime());
+                    checkCriteria.andEndTimeEqualTo(newPo.getEndTime());
+                    List<CouponPo> couponPos = couponMapper.selectByExample(checkExample);
+                    if (couponPos.size() == 0)
+                        return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("coupon字段不合法：" + newPo.toString()));
+                    else {
+                        //构造RetVo
+                        CouponNewRetVo retVo = new CouponNewRetVo();
+                        Coupon coupon = new Coupon(couponPos.get(0));
+                        retVo.set(coupon);
+                        CouponActivityByNewCouponRetVo activityRetVo = new CouponActivityByNewCouponRetVo();
+                        CouponActivity activity = new CouponActivity(activityPo);
+                        activityRetVo.set(activity);
+                        retVo.setActivity(activityRetVo);
+                        retVos.add(retVo);
+                    }
                 }
+            } catch (DataAccessException e) {
+                // 其他数据库错误
+                logger.debug("other sql exception : " + e.getMessage());
+                return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+            } catch (Exception e) {
+                // 其他Exception错误
+                logger.error("other exception : " + e.getMessage());
+                return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
             }
         }
-        catch (DataAccessException e)
-        {
-            // 其他数据库错误
-            logger.debug("other sql exception : " + e.getMessage());
-            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
-        }
-        catch (Exception e) {
-            // 其他Exception错误
-            logger.error("other exception : " + e.getMessage());
-            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
-        }
+        setBloomFilterOfCoupon(id,userId);
+        return new ReturnObject<List<CouponNewRetVo>>(retVos);
     }
 
     /**
@@ -905,5 +951,32 @@ public class ActivityDao {
             logger.error("other exception : " + e.getMessage());
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
         }
+    }
+
+    public List<CouponInfoDTO> getCouponInfoBySkuId(Long skuId)
+    {
+        CouponActivityPo activityPo;
+        CouponSkuPoExample couponSkuExample=new CouponSkuPoExample();
+        CouponSkuPoExample.Criteria couponSkuCriteria=couponSkuExample.createCriteria();
+        couponSkuCriteria.andSkuIdEqualTo(skuId);
+        List<CouponSkuPo> couponSkuPos=couponSkuMapper.selectByExample(couponSkuExample);
+        List<CouponInfoDTO> couponInfoDTOs=new ArrayList<>();
+        for(CouponSkuPo couponSkuPo:couponSkuPos)
+        {
+            activityPo=activityMapper.selectByPrimaryKey(couponSkuPo.getActivityId());
+            LocalDateTime beginTime=activityPo.getBeginTime();
+            LocalDateTime endTime=activityPo.getEndTime();
+            if(CouponActivity.DatabaseState.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.DatabaseState.EXECUTABLE)&&
+            !beginTime.isAfter(LocalDateTime.now())&&endTime.isAfter(LocalDateTime.now()))
+            {
+                CouponInfoDTO couponInfoDTO=new CouponInfoDTO();
+                couponInfoDTO.setBeginTime(beginTime);
+                couponInfoDTO.setEndTime(endTime);
+                couponInfoDTO.setId(activityPo.getId());
+                couponInfoDTO.setName(activityPo.getName());
+                couponInfoDTOs.add(couponInfoDTO);
+            }
+        }
+        return couponInfoDTOs;
     }
 }
