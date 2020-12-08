@@ -14,6 +14,7 @@ import cn.edu.xmu.oomall.goods.model.GoodsSkuPoDTO;
 import cn.edu.xmu.oomall.goods.model.SkuInfoDTO;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Repository
 public class GoodsDao {
 
@@ -167,8 +169,13 @@ public class GoodsDao {
     {
         GoodsSkuPo skuPo=skuMapper.selectByPrimaryKey(id);
         GoodsSkuDetailRetVo retVo=new GoodsSkuDetailRetVo();
-        if(skuPo!=null&&GoodsSku.State.getTypeByCode(skuPo.getDisabled().intValue()) != GoodsSku.State.DELETED)retVo.set(new GoodsSku(skuPo));
+        if(skuPo!=null&&GoodsSku.State.getTypeByCode(skuPo.getDisabled().intValue()) != GoodsSku.State.DELETED)
+        {
+            log.error("retVo.set:"+skuPo.getName());
+            retVo.set(new GoodsSku(skuPo));
+        }
         else return null;
+        //此处取出的spuPo不可为null，否则返回的数据就是空的
         GoodsSpuPo spuPo= spuMapper.selectByPrimaryKey(skuPo.getGoodsSpuId());
         GoodsSpu spu=new GoodsSpu(spuPo);
         GoodsSpuVo spuVo= new GoodsSpuVo(spu);

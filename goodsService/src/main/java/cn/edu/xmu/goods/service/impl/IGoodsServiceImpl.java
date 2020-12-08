@@ -3,12 +3,14 @@ package cn.edu.xmu.goods.service.impl;
 import cn.edu.xmu.goods.dao.GoodsDao;
 import cn.edu.xmu.goods.model.po.GoodsSkuPo;
 import cn.edu.xmu.goods.model.vo.GoodsSkuDetailRetVo;
+import cn.edu.xmu.goods.model.vo.GoodsSkuRetVo;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.goods.model.*;
 import cn.edu.xmu.oomall.goods.service.IActivityService;
 import cn.edu.xmu.oomall.goods.service.IGoodsService;
 //import com.alibaba.dubbo.config.annotation.Service;
 import org.apache.dubbo.config.annotation.DubboReference;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.stereotype.Component;
@@ -18,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 //@Component
 @DubboService
 public class IGoodsServiceImpl implements IGoodsService {
