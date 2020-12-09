@@ -1,6 +1,5 @@
-package cn.edu.xmu.activity.test;
+package cn.edu.xmu.activity.controller;
 
-import cn.edu.xmu.oomall.goods.service.IGoodsService;
 import io.swagger.annotations.Api;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.slf4j.Logger;
@@ -14,13 +13,4 @@ import org.springframework.web.bind.annotation.RestController;
 public class FlashsaleController {
     private  static  final Logger logger = LoggerFactory.getLogger(FlashsaleController.class);
 
-    @DubboReference
-    private IGoodsService IGoodsService;
-
-    public void Test()
-    {
-        Long testILong = 0L;
-        testILong = IGoodsService.getShopIdBySpuId(100L);
-        logger.debug("成功调用goodsService的微服务：", testILong);
-    }
 }
