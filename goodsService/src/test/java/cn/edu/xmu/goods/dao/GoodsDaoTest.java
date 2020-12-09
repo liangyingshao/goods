@@ -8,6 +8,8 @@ import cn.edu.xmu.goods.model.vo.GoodsSkuDetailRetVo;
 import cn.edu.xmu.goods.model.vo.GoodsSkuRetVo;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
+import cn.edu.xmu.oomall.goods.model.GoodsInfoDTO;
+import cn.edu.xmu.oomall.goods.model.SkuInfoDTO;
 import com.github.pagehelper.PageInfo;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(classes = GoodsServiceApplication.class)
@@ -155,5 +160,95 @@ class GoodsDaoTest {
 
         returnObject=goodsDao.createSKU((long)1,sku);
         assertEquals(returnObject.getCode(),ResponseCode.RESOURCE_ID_OUTSCOPE);
+    }
+
+    @Test
+    void checkSkuUsableBySkuShop()
+    {
+        ReturnObject returnObject=goodsDao.checkSkuUsableBySkuShop((long)273,(long)0);
+        assertEquals(returnObject.getCode(),ResponseCode.OK);
+
+        returnObject=goodsDao.checkSkuUsableBySkuShop((long)1,(long)0);
+        assertEquals(returnObject.getCode(),ResponseCode.RESOURCE_ID_NOTEXIST);
+
+        returnObject=goodsDao.checkSkuUsableBySkuShop((long)273,(long)100);
+        assertEquals(returnObject.getCode(),ResponseCode.RESOURCE_ID_OUTSCOPE);
+    }
+
+    @Test
+    void getShareSku()
+    {
+        ReturnObject<GoodsSkuRetVo> returnObject= goodsDao.getShareSku((long)0,(long)273,(long)0);
+        assertEquals(returnObject.getCode(),ResponseCode.OK);
+
+        returnObject= goodsDao.getShareSku((long)0,(long)274,(long)0);
+        assertEquals(returnObject.getCode(),ResponseCode.RESOURCE_ID_OUTSCOPE);
+
+        returnObject= goodsDao.getShareSku((long)0,(long)273,(long)100);
+        assertEquals(returnObject.getCode(),ResponseCode.RESOURCE_ID_OUTSCOPE);
+    }
+
+    @Test
+    void getAllSkuIdByShopId()
+    {
+        ReturnObject<List<Long>> returnObject=goodsDao.getAllSkuIdByShopId((long)0);
+        assertEquals(returnObject.getCode(),ResponseCode.OK);
+
+        returnObject=goodsDao.getAllSkuIdByShopId((long)1000);
+        assertEquals(returnObject.getData(),null);
+    }
+
+    @Test
+    void getShopIdBySkuId() {
+        ReturnObject<Long> returnObject=goodsDao.getShopIdBySkuId((long)273);
+        assertEquals(returnObject.getData(),(long)0);
+
+        returnObject=goodsDao.getShopIdBySkuId((long)0);
+        assertEquals(returnObject.getData(),null);
+    }
+
+    @Test
+    void getVaildSkuId()
+    {
+        ReturnObject<Boolean> returnObject= goodsDao.getVaildSkuId((long)273);
+        assertEquals(returnObject.getData(),true);
+
+        returnObject= goodsDao.getVaildSkuId((long)0);
+        assertEquals(returnObject.getData(),false);
+    }
+
+    @Test
+    void getSelectSkuInfoBySkuId()
+    {
+        SkuInfoDTO skuInfoDTO=goodsDao.getSelectSkuInfoBySkuId((long)273);
+        assertEquals(skuInfoDTO.getSkuId(),(long)273);
+
+        skuInfoDTO=goodsDao.getSelectSkuInfoBySkuId((long)0);
+        assertEquals(skuInfoDTO,null);
+    }
+
+    @Test
+    void listSelectSkuInfoById()
+    {
+        List<Long>list=new ArrayList<>();
+        list.add((long)273);
+        list.add((long)274);
+        ReturnObject<Map<Long, SkuInfoDTO>> returnObject= goodsDao.listSelectSkuInfoById(list);
+        assertEquals(returnObject.getData().size(),2);
+
+        list.add((long)0);
+        returnObject= goodsDao.listSelectSkuInfoById(list);
+        assertEquals(returnObject.getData().size(),3);
+        assertEquals(returnObject.getData().get((long)0),null);
+    }
+
+    @Test
+    void getSelectGoodsInfoBySkuId()
+    {
+        GoodsInfoDTO goodsInfoDTO= goodsDao.getSelectGoodsInfoBySkuId((long)273);
+        assertNotEquals(goodsInfoDTO,null);
+
+        goodsInfoDTO= goodsDao.getSelectGoodsInfoBySkuId((long)0);
+        assertEquals(goodsInfoDTO,null);
     }
 }
