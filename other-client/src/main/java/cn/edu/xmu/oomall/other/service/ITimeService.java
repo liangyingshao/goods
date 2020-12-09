@@ -1,7 +1,7 @@
 package cn.edu.xmu.oomall.other.service;
 
 import cn.edu.xmu.oomall.other.model.TimeDTO;
-import cn.edu.xmu.oomall.util.ReturnObject;
+import cn.edu.xmu.ooad.util.ReturnObject;
 
 import java.util.List;
 
