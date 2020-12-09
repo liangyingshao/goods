@@ -344,4 +344,37 @@ class GoodsControllerTest {
         String expectedResponse = "{\"errno\":0,\"data\":[{\"name\":\"未上架\",\"code\":0},{\"name\":\"上架\",\"code\":4},{\"name\":\"已删除\",\"code\":6}],\"errmsg\":\"成功\"}";
         JSONAssert.assertEquals(expectedResponse, responseString, true);
     }
+
+    @Test
+    void getShareSku() throws Exception
+    {
+        String token = creatTestToken(0L, 0L, 100);
+        String responseString = this.mvc.perform(get("/goods/share/0/skus/273")
+                .header("authorization",token))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        System.out.println(responseString);
+        String expectedResponse="{\"code\":\"OK\",\"errmsg\":\"成功\",\"data\":{\"id\":273,\"name\":\"+\",\"skuSn\":null,\"imageUrl\":\"http://47.52.88.176/file/images/201612/file_586206d4c7d2f.jpg\",\"inventory\":1,\"originalPrice\":980000,\"price\":null,\"disabled\":4}}";
+        JSONAssert.assertEquals(expectedResponse, responseString, true);
+
+        token = creatTestToken(1L, 0L, 100);
+        responseString = this.mvc.perform(get("/goods/share/0/skus/273")
+                .header("authorization",token))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        //System.out.println(responseString);
+        expectedResponse="{\"code\":\"RESOURCE_ID_OUTSCOPE\",\"errmsg\":\"操作的资源id不是自己的对象\",\"data\":null}";
+        JSONAssert.assertEquals(expectedResponse, responseString, true);
+
+        responseString = this.mvc.perform(get("/goods/share/0/skus/274")
+                .header("authorization",token))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        //System.out.println(responseString);
+        expectedResponse="{\"code\":\"RESOURCE_ID_OUTSCOPE\",\"errmsg\":\"操作的资源id不是自己的对象\",\"data\":null}";
+        JSONAssert.assertEquals(expectedResponse, responseString, true);
+    }
 }

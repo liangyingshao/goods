@@ -15,7 +15,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
         "cn.edu.xmu.activity"
 })
 @MapperScan("cn.edu.xmu.activity.mapper")
-@EnableDubbo
+@EnableDubbo(scanBasePackages = "cn.edu.xmu.activity.service.impl")
 @EnableDiscoveryClient
 public class ActivityServiceApplication implements ApplicationRunner{
     private  static  final Logger logger = LoggerFactory.getLogger(ActivityServiceApplication.class);

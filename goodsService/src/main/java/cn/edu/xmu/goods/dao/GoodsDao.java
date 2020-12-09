@@ -139,8 +139,7 @@ public class GoodsDao {
             for (int i=0;i<spuPos.size();++i)
             {
                 skuCriteria.andGoodsSpuIdEqualTo(spuPos.get(i).getId());
-                if(i==0)skuPos=skuMapper.selectByExample(skuExample);
-                else skuPos.addAll(skuMapper.selectByExample(skuExample));
+                skuPos.addAll(skuMapper.selectByExample(skuExample));
             }
         }
         else skuPos=skuMapper.selectByExample(skuExample);
@@ -506,9 +505,10 @@ public class GoodsDao {
         //provide：sid
         //return：至少要userId、skuId
         //if(XXX==null)return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-        Long uid=0L;
-        Long skuId=273L;
-        if(userId!=uid)return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        Long uid=(long)0;
+        Long skuId=(long)273;
+        if(!userId.equals(uid))return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        if(!skuId.equals(id))return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
         GoodsSkuPo skuPo=skuMapper.selectByPrimaryKey(skuId);
         GoodsSku sku=new GoodsSku(skuPo);
         GoodsSkuRetVo skuRetVo=new GoodsSkuRetVo(sku);
