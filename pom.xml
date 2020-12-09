@@ -19,6 +19,8 @@
         <module>goodsservice</module>
         <module>flashsale</module>
         <module>goods-client</module>
+        <module>order-client</module>
+        <module>other-client</module>
         <module>activity</module>
     </modules>
     <name>goods module</name>
