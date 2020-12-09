@@ -178,14 +178,8 @@ class GoodsDaoTest {
     @Test
     void getShareSku()
     {
-        ReturnObject<GoodsSkuRetVo> returnObject= goodsDao.getShareSku((long)0,(long)273,(long)0);
+        ReturnObject<GoodsSkuRetVo> returnObject= goodsDao.getShareSku((long)273);
         assertEquals(returnObject.getCode(),ResponseCode.OK);
-
-        returnObject= goodsDao.getShareSku((long)0,(long)274,(long)0);
-        assertEquals(returnObject.getCode(),ResponseCode.RESOURCE_ID_OUTSCOPE);
-
-        returnObject= goodsDao.getShareSku((long)0,(long)273,(long)100);
-        assertEquals(returnObject.getCode(),ResponseCode.RESOURCE_ID_OUTSCOPE);
     }
 
     @Test

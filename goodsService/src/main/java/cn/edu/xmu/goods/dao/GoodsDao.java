@@ -494,22 +494,12 @@ public class GoodsDao {
 
     /**
      * 查看一条分享商品SKU的详细信息（需登录）
-     * @param sid
      * @param id
-     * @param userId
      * @return ReturnObject<GoodsSkuRetVo>
      */
-    public ReturnObject<GoodsSkuRetVo> getShareSku(Long sid, Long id, Long userId)
+    public ReturnObject<GoodsSkuRetVo> getShareSku(Long id)
     {
-        //调用其他模块
-        //provide：sid
-        //return：至少要userId、skuId
-        //if(XXX==null)return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-        Long uid=(long)0;
-        Long skuId=(long)273;
-        if(!userId.equals(uid))return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
-        if(!skuId.equals(id))return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
-        GoodsSkuPo skuPo=skuMapper.selectByPrimaryKey(skuId);
+        GoodsSkuPo skuPo=skuMapper.selectByPrimaryKey(id);
         GoodsSku sku=new GoodsSku(skuPo);
         GoodsSkuRetVo skuRetVo=new GoodsSkuRetVo(sku);
         return new ReturnObject<GoodsSkuRetVo>(skuRetVo);

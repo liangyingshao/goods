@@ -25,4 +25,12 @@ public interface IShareService {
      * created at 12/6/20 8:29 PM
      */
     ReturnObject<List<Long>> setShareRebate(Long orderItemId, Long userId, Integer quantity, Long price, Long skuId, LocalDateTime gmtCreated);
+
+    /**
+     * 判断sid和skuId是否匹配（不符合请设置错误码，符合返回默认的）
+     * @param sid
+     * @param skuId
+     * @return
+     */
+    ReturnObject shareUserSkuMatch(Long sid,Long skuId,Long userId);
 }

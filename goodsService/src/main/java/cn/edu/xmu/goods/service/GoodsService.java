@@ -11,13 +11,16 @@ import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ImgHelper;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
+import cn.edu.xmu.oomall.other.service.IShareService;
 import com.github.pagehelper.PageInfo;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import cn.edu.xmu.oomall.other.service.*;
 
 import java.io.IOException;
 
@@ -30,6 +33,9 @@ public class GoodsService {
     private String davUsername="oomall";
     private String davPassword="admin";
     private String baseUrl="http://192.168.148.131:8888/webdav/";
+
+    @DubboReference
+    private IShareService IShareService;
 
     @Transactional
     public ReturnObject modifyShop(Long id, String name) {
@@ -178,7 +184,8 @@ public class GoodsService {
     @Transactional
     public ReturnObject<GoodsSkuRetVo> getShareSku(Long sid, Long id, Long userId)
     {
-        ReturnObject<GoodsSkuRetVo> returnObject=goodsDao.getShareSku(sid,id,userId);
+        ReturnObject<GoodsSkuRetVo> returnObject=new ReturnObject<>(IShareService.shareUserSkuMatch(sid,id,userId).getCode());
+        if(returnObject.getCode().equals(ResponseCode.OK)) returnObject=goodsDao.getShareSku(id);
         return returnObject;
     }
 }
