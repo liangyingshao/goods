@@ -1,4 +1,4 @@
-package cn.edu.xmu.activity.dao;
+package cn.edu.xmu.flashsale.dao;
 
 public class FlashSaleItemDao {
 }

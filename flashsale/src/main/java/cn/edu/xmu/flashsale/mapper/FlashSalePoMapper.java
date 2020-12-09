@@ -1,7 +1,7 @@
-package cn.edu.xmu.activity.mapper;
+package cn.edu.xmu.flashsale.mapper;
 
-import cn.edu.xmu.activity.model.po.FlashSalePo;
-import cn.edu.xmu.activity.model.po.FlashSalePoExample;
+import cn.edu.xmu.flashsale.model.po.FlashSalePo;
+import cn.edu.xmu.flashsale.model.po.FlashSalePoExample;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 

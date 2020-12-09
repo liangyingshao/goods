@@ -1,4 +1,4 @@
-package cn.edu.xmu.activity;
+package cn.edu.xmu.flashsale;
 
 import org.apache.dubbo.config.spring.context.annotation.EnableDubbo;
 import org.mybatis.spring.annotation.MapperScan;
@@ -12,7 +12,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 @SpringBootApplication(scanBasePackages = {
         "cn.edu.xmu.ooad",
-        "cn.edu.xmu.activity"
+        "cn.edu.xmu.flashsale"
 })
 @MapperScan("cn.edu.xmu.flashsale.mapper")
 @EnableDubbo

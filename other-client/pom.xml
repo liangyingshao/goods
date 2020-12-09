@@ -9,7 +9,6 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>cn.edu.xmu.oomall.other</groupId>
 	<artifactId>other-client</artifactId>
 	<packaging>jar</packaging>
 

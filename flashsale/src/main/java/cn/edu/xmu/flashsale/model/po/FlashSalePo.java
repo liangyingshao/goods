@@ -1,4 +1,4 @@
-package cn.edu.xmu.activity.model.po;
+package cn.edu.xmu.flashsale.model.po;
 
 import java.time.LocalDateTime;
 
