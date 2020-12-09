@@ -25,11 +25,13 @@ import org.springframework.stereotype.Repository;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Repository
 public class CouponDao implements InitializingBean
@@ -988,5 +990,62 @@ public class CouponDao implements InitializingBean
             }
         }
         return couponInfoDTOs;
+    }
+
+    /**
+     * 将明天要上线的优惠活动详情load到redis
+     */
+    public void loadingTomorrowActivities(){
+
+        CouponActivityPoExample activityExample=new CouponActivityPoExample();
+        CouponActivityPoExample.Criteria criteria=activityExample.createCriteria();
+        criteria.andStateEqualTo((byte)0);//必须为可执行活动
+        //明天上线的活动
+        LocalDateTime searchTime= LocalDateTime.now();
+        searchTime=searchTime.plusDays(2);
+        searchTime=searchTime.minusHours(searchTime.getHour());
+        searchTime=searchTime.minusMinutes(searchTime.getMinute());
+        searchTime=searchTime.minusSeconds(searchTime.getSecond());
+        searchTime=searchTime.minusNanos(searchTime.getNano());
+        LocalDateTime searchTimeMax=searchTime;//时间段上限
+        LocalDateTime searchTimeMin=searchTime.minusDays(1);//时间段下限
+        criteria.andBeginTimeGreaterThanOrEqualTo(searchTimeMin);//beginTime>=明日零点
+        criteria.andBeginTimeLessThan(searchTimeMax);//beginTime<后日零点
+
+        List<CouponActivityPo> activityPos=null;
+        try{
+            activityPos=activityMapper.selectByExample(activityExample);
+            if(activityPos.size()==0)
+                return;
+
+            for(CouponActivityPo po:activityPos){
+                CouponActivity bo=new CouponActivity(po);
+                String key="ca_"+po.getId();
+                //若redis中无该优惠活动或该活动quantity有变化
+                if(!redisTemplate.opsForHash().hasKey(key,"quantity")||!redisTemplate.opsForHash().get(key,"quantity").equals(po.getQuantity())){
+
+                    redisTemplate.opsForHash().delete(key,"quantity");
+                    redisTemplate.opsForHash().put(key,"quantity",po.getQuantity());
+                }
+                //若redis中无该优惠活动或该活动quantityType有变化
+                if(!redisTemplate.opsForHash().hasKey(key,"quantityType")||!redisTemplate.opsForHash().get(key,"quantityType").equals(po.getQuantitiyType())){
+
+                    redisTemplate.opsForHash().delete(key,"quantityType");
+                    redisTemplate.opsForHash().put(key,"quantityType",po.getQuantitiyType());
+                }
+                //设置过期时间为活动结束时间
+                LocalDateTime timeNow=LocalDateTime.now();
+                Duration duration = Duration.between(timeNow,po.getEndTime());
+                long timeOut=duration.toHours();
+                redisTemplate.expire(key,timeOut, TimeUnit.HOURS);
+            }
+        }
+        catch (DataAccessException e){
+            logger.error("selectAllRole: DataAccessException:" + e.getMessage());
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+        }
     }
 }
