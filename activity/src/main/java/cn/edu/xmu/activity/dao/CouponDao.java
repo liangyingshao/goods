@@ -25,11 +25,13 @@ import org.springframework.stereotype.Repository;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Repository
 public class CouponDao implements InitializingBean
@@ -75,8 +77,8 @@ public class CouponDao implements InitializingBean
                 redisTemplate.delete(fieldName[i]+suffixName);
             }
         }
-
     }
+
 
     /**
      * 查找布隆过滤器里是否有该用户领过该活动优惠券的记录
@@ -168,24 +170,6 @@ public class CouponDao implements InitializingBean
      */
     public List<CouponSkuPo> getCouponSkuList(Long id)
     {
-//        GoodsSkuPo skuPo;
-//        GoodsSku sku;
-        //根据活动id得到SKU的id列表，返回给service层，service根据sku的id调用远程服务得到{name,id}
-//        PageHelper.startPage(page,pageSize);
-//        logger.debug("page="+page+" pageSize="+pageSize);
-//        CouponSkuPoExample couponSkuExample=new CouponSkuPoExample();
-//        CouponSkuPoExample.Criteria couponSpuCriteria =couponSkuExample.createCriteria();
-//        couponSpuCriteria.andActivityIdEqualTo(id);
-//        List<CouponSkuPo>couponSkuPos=couponSkuMapper.selectByExample(couponSkuExample);
-//        List<GoodsSkuCouponRetVo>skuCouponRetVos=new ArrayList<>();
-//        for(CouponSkuPo couponSkuPo:couponSkuPos)
-//        {
-//            skuPo=skuMapper.selectByPrimaryKey(couponSkuPo.getSkuId());
-//            sku=new GoodsSku(skuPo);
-//            GoodsSkuCouponRetVo retVo=new GoodsSkuCouponRetVo();
-//            retVo.set(sku);
-//            skuCouponRetVos.add(retVo);
-//        }
         CouponSkuPoExample example = new CouponSkuPoExample();
         CouponSkuPoExample.Criteria criteria = example.createCriteria();
         criteria.andActivityIdEqualTo(id);
@@ -489,6 +473,7 @@ public class CouponDao implements InitializingBean
      */
     public ReturnObject<List<CouponNewRetVo>> getCoupon(Long userId, Long id)
     {
+        int quantity;
         CouponActivityPo activityPo=activityMapper.selectByPrimaryKey(id);
 
         //活动不存在
@@ -515,24 +500,58 @@ public class CouponDao implements InitializingBean
         if(returnObject.getCode().equals(ResponseCode.COUPON_FINISH))return returnObject;
 
         //查询优惠券发放情况
-        CouponPoExample alreadyExample=new CouponPoExample();
-        CouponPoExample.Criteria alreadyCriteria= alreadyExample.createCriteria();
-        alreadyCriteria.andActivityIdEqualTo(id);
-        //每人限量模式
-        if(CouponActivity.Type.getTypeByCode(activityPo.getQuantitiyType().intValue()).equals(CouponActivity.Type.LIMIT_PER_PERSON))
-            alreadyCriteria.andCustomerIdEqualTo(userId);
-        List<CouponPo> alreadyPos=couponMapper.selectByExample(alreadyExample);
-        //券已领罄
-        if(alreadyPos.size()==activityPo.getQuantity()//总量控制模式下券已发完或每人限量模式下该用户领的券已达上限
-                ||(CouponActivity.Type.getTypeByCode(activityPo.getQuantitiyType().intValue()).equals(CouponActivity.Type.LIMIT_TOTAL_NUM)&&alreadyPos.size()>0))//总量控制模式下该用户已领过券
+        //先找redis
+        String key="ca_"+id;
+        if(redisTemplate.opsForHash().hasKey(key,"quantity"))
         {
-            setBloomFilterOfCoupon(id,userId);
-            return new ReturnObject<>(ResponseCode.COUPON_FINISH);
+            if(redisTemplate.opsForHash().get(key,"quantityType").equals(CouponActivity.Type.LIMIT_PER_PERSON))
+                quantity= (int) redisTemplate.opsForHash().get(key,"quantity");
+            else if(redisTemplate.opsForHash().get(key,"quantity").equals(0))
+                    return new ReturnObject<>(ResponseCode.COUPON_FINISH);
+            else quantity=1;
+        }
+        //没在redis找到，需查数据库
+        else {
+            CouponPoExample alreadyExample = new CouponPoExample();
+            CouponPoExample.Criteria alreadyCriteria = alreadyExample.createCriteria();
+            alreadyCriteria.andActivityIdEqualTo(id);
+            //每人限量模式
+            if (CouponActivity.Type.getTypeByCode(activityPo.getQuantitiyType().intValue()).equals(CouponActivity.Type.LIMIT_PER_PERSON))
+                alreadyCriteria.andCustomerIdEqualTo(userId);
+            List<CouponPo> alreadyPos = couponMapper.selectByExample(alreadyExample);
+
+            CouponActivity.DatabaseState state=CouponActivity.DatabaseState.getTypeByCode(activityPo.getQuantitiyType().intValue());
+            redisTemplate.opsForHash().put(key,"quantityType",state.getCode().byteValue());
+            int size= alreadyPos.size();
+            int couponQuantity=activityPo.getQuantity();
+            //券已领罄
+            //总量控制模式下券已发完或每人限量模式下该用户领的券已达上限
+            if (couponQuantity==size)
+            {
+                //每人限发模式下领取数量达到上限
+                if(state.equals(CouponActivity.Type.LIMIT_PER_PERSON))
+                {
+                    redisTemplate.opsForHash().put(key,"quantity",couponQuantity);
+                    setBloomFilterOfCoupon(id, userId);
+                }
+                else redisTemplate.opsForHash().put(key,"quantity",0);
+                return new ReturnObject<>(ResponseCode.COUPON_FINISH);
+            }
+
+            //总量控制模式下该用户已领过券
+            if(state.equals(CouponActivity.Type.LIMIT_TOTAL_NUM) && size > 0)
+            {
+                setBloomFilterOfCoupon(id, userId);
+                redisTemplate.opsForHash().put(key,"quantity",couponQuantity-size);
+                return new ReturnObject<>(ResponseCode.COUPON_FINISH);
+            }
+
+            quantity=CouponActivity.Type.getTypeByCode(activityPo.getQuantitiyType().intValue()).equals(CouponActivity.Type.LIMIT_PER_PERSON)?activityPo.getQuantity():1;
         }
 
         //可领券，设置券属性
         List<CouponNewRetVo>retVos=new ArrayList<>();
-        for(int i=0;i<(CouponActivity.Type.getTypeByCode(activityPo.getQuantitiyType().intValue()).equals(CouponActivity.Type.LIMIT_PER_PERSON)?activityPo.getQuantity():1);i++)
+        for(int i=0;i<quantity;i++)
         {
             CouponPo newPo = new CouponPo();
             newPo.setCustomerId(userId);
@@ -988,5 +1007,62 @@ public class CouponDao implements InitializingBean
             }
         }
         return couponInfoDTOs;
+    }
+
+    /**
+     * 将明天要上线的优惠活动详情load到redis
+     */
+    public void loadingTomorrowActivities(){
+
+        CouponActivityPoExample activityExample=new CouponActivityPoExample();
+        CouponActivityPoExample.Criteria criteria=activityExample.createCriteria();
+        criteria.andStateEqualTo((byte)0);//必须为可执行活动
+        //明天上线的活动
+        LocalDateTime searchTime= LocalDateTime.now();
+        searchTime=searchTime.plusDays(2);
+        searchTime=searchTime.minusHours(searchTime.getHour());
+        searchTime=searchTime.minusMinutes(searchTime.getMinute());
+        searchTime=searchTime.minusSeconds(searchTime.getSecond());
+        searchTime=searchTime.minusNanos(searchTime.getNano());
+        LocalDateTime searchTimeMax=searchTime;//时间段上限
+        LocalDateTime searchTimeMin=searchTime.minusDays(1);//时间段下限
+        criteria.andBeginTimeGreaterThanOrEqualTo(searchTimeMin);//beginTime>=明日零点
+        criteria.andBeginTimeLessThan(searchTimeMax);//beginTime<后日零点
+
+        List<CouponActivityPo> activityPos=null;
+        try{
+            activityPos=activityMapper.selectByExample(activityExample);
+            if(activityPos.size()==0)
+                return;
+
+            for(CouponActivityPo po:activityPos){
+                CouponActivity bo=new CouponActivity(po);
+                String key="ca_"+po.getId();
+                //若redis中无该优惠活动或该活动quantity有变化
+                if(!redisTemplate.opsForHash().hasKey(key,"quantity")||!redisTemplate.opsForHash().get(key,"quantity").equals(po.getQuantity())){
+
+                    redisTemplate.opsForHash().delete(key,"quantity");
+                    redisTemplate.opsForHash().put(key,"quantity",po.getQuantity());
+                }
+                //若redis中无该优惠活动或该活动quantityType有变化
+                if(!redisTemplate.opsForHash().hasKey(key,"quantityType")||!redisTemplate.opsForHash().get(key,"quantityType").equals(po.getQuantitiyType())){
+
+                    redisTemplate.opsForHash().delete(key,"quantityType");
+                    redisTemplate.opsForHash().put(key,"quantityType",po.getQuantitiyType());
+                }
+                //设置过期时间为活动结束时间
+                LocalDateTime timeNow=LocalDateTime.now();
+                Duration duration = Duration.between(timeNow,po.getEndTime());
+                long timeOut=duration.toHours();
+                redisTemplate.expire(key,timeOut, TimeUnit.HOURS);
+            }
+        }
+        catch (DataAccessException e){
+            logger.error("selectAllRole: DataAccessException:" + e.getMessage());
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+        }
     }
 }
