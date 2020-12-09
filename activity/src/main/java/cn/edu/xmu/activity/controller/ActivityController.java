@@ -370,7 +370,7 @@ public class ActivityController {
         }
         CouponActivity activity=vo.createActivity();
         //设置activity状态，待修改
-        activity.setState(CouponActivity.DatabaseState.EXECUTABLE);
+        activity.setState(CouponActivity.DatabaseState.ONLINE);
         activity.setShopId(shopId);
         activity.setGmtCreate(LocalDateTime.now());
         ReturnObject retObject = activityService.addCouponActivity(activity);
@@ -421,7 +421,7 @@ public class ActivityController {
         }
         CouponActivity activity=vo.createActivity();
         //设置activity状态，待修改
-        activity.setState(CouponActivity.DatabaseState.EXECUTABLE);
+        activity.setState(CouponActivity.DatabaseState.ONLINE);
         activity.setId(id);
         activity.setShopId(shopId);
         activity.setGmtCreate(LocalDateTime.now());

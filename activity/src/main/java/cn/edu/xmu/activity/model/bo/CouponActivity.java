@@ -46,8 +46,9 @@ public class CouponActivity {
         }
     }
     public enum DatabaseState {
-        EXECUTABLE(0, "可执行"),
-        CANCELED(1, "已取消下线");
+        OFFLINE(0, "已下线"),
+        ONLINE(1, "已上线"),
+        DELETED(2,"已删除");
 
         private static final Map<Integer, CouponActivity.DatabaseState> stateMap;
 

@@ -214,7 +214,7 @@ public class CouponDao implements InitializingBean
 
             //活动“待上线”
             if (activityPo.getBeginTime().isAfter(LocalDateTime.now())//考虑到惰性更新状态【待上线】->【进行中】的情况
-                    && CouponActivity.DatabaseState.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.DatabaseState.EXECUTABLE))//【可执行】
+                    && CouponActivity.DatabaseState.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.DatabaseState.ONLINE))//【可执行】
             {
                 //之前没有添加过该SKU
                 CouponSkuPoExample alreadyExample=new CouponSkuPoExample();
@@ -278,7 +278,7 @@ public class CouponDao implements InitializingBean
 
         //活动"未上线"
         if(activityPo.getBeginTime().isAfter(LocalDateTime.now())//未开始
-                && CouponActivity.DatabaseState.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.DatabaseState.EXECUTABLE))//【可执行】
+                && CouponActivity.DatabaseState.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.DatabaseState.ONLINE))//【可执行】
         {
             try{
                 int ret=couponSkuMapper.deleteByPrimaryKey(id);
@@ -487,7 +487,7 @@ public class CouponDao implements InitializingBean
         if(activityPo==null)return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
 
         //状态为OFFLINE
-        if(CouponActivity.DatabaseState.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.DatabaseState.CANCELED))
+        if(CouponActivity.DatabaseState.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.DatabaseState.OFFLINE))
             return new ReturnObject<>(ResponseCode.COUPON_END);
 
         //状态为FINISHED
@@ -966,7 +966,7 @@ public class CouponDao implements InitializingBean
             activityPo=activityMapper.selectByPrimaryKey(couponSkuPo.getActivityId());
             LocalDateTime beginTime=activityPo.getBeginTime();
             LocalDateTime endTime=activityPo.getEndTime();
-            if(CouponActivity.DatabaseState.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.DatabaseState.EXECUTABLE)&&
+            if(CouponActivity.DatabaseState.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.DatabaseState.ONLINE)&&
             !beginTime.isAfter(LocalDateTime.now())&&endTime.isAfter(LocalDateTime.now()))
             {
                 CouponInfoDTO couponInfoDTO=new CouponInfoDTO();
