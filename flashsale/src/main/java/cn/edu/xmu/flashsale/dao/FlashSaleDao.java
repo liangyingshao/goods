@@ -104,4 +104,35 @@ public class FlashSaleDao {
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
         }
     }
+
+    public ReturnObject updateflashsale(Long id, LocalDateTime flashDate) {
+        try {
+            //读出该条记录
+            FlashSalePo flashSalePo = flashSalePoMapper.selectByPrimaryKey(id);
+            if (null == flashSalePo)//id没有对应数据
+            {
+                return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+            }
+            //修改flashDate
+            flashSalePo.setFlashDate(flashDate);
+            //更新记录
+            int ret = flashSalePoMapper.updateByPrimaryKeySelective(flashSalePo);
+            if(ret == 0)
+            {
+                return new ReturnObject(ResponseCode.FIELD_NOTVALID);
+            }
+            return new ReturnObject(ResponseCode.OK);
+        }
+        catch (DataAccessException e)
+        {
+            // 其他数据库错误
+            logger.debug("other sql exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
+    }
 }

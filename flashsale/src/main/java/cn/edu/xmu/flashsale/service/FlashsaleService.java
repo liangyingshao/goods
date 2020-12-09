@@ -65,4 +65,8 @@ public class FlashsaleService {
     public ReturnObject deleteflashsale(Long id) {
         return flashsaleDao.deleteflashsale(id);
     }
+
+    public ReturnObject updateflashsale(Long id, LocalDateTime flashDate) {
+        return flashsaleDao.updateflashsale(id, flashDate);
+    }
 }

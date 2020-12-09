@@ -8,6 +8,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDateTime;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -66,4 +68,28 @@ public class FlashsaleControllerTest {
             e.printStackTrace();
         }
     }
+
+    @Test
+    public void updateflashsale() {
+        String responseString = null;
+        String token = creatTestToken(1L, 0L, 100);
+        String json = "{\"flashDate\":\""+ LocalDateTime.now().plusDays(3).toString() +"\"}";
+        try {
+            responseString = this.mvc.perform(put("/flashsale/flashsales/1").header("authorization", token)
+                    .contentType("application/json;charset=UTF-8")
+                    .content(json))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andReturn().getResponse().getContentAsString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\"}";
+        try {
+            JSONAssert.assertEquals(expectedResponse, responseString, false);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
