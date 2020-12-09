@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = ActivityServiceApplication.class)   //标识本类是一个SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-class ActivityControllerTest {
+class CouponControllerTest {
 
     @Autowired
     private MockMvc mvc;

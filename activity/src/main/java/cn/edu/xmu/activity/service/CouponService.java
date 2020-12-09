@@ -1,6 +1,6 @@
 package cn.edu.xmu.activity.service;
 
-import cn.edu.xmu.activity.dao.ActivityDao;
+import cn.edu.xmu.activity.dao.CouponDao;
 import cn.edu.xmu.activity.model.bo.CouponActivity;
 import cn.edu.xmu.activity.model.po.CouponSkuPo;
 import cn.edu.xmu.activity.model.vo.*;
@@ -25,11 +25,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class ActivityService {
-    private Logger logger = LoggerFactory.getLogger(ActivityService.class);
+public class CouponService {
+    private Logger logger = LoggerFactory.getLogger(CouponService.class);
 
     @Autowired
-    private ActivityDao activityDao;
+    private CouponDao couponDao;
 
     @DubboReference
     private IGoodsService IGoodsService;
@@ -45,7 +45,7 @@ public class ActivityService {
     public ReturnObject<PageInfo<SkuNameInfoDTO>> getCouponSkuList(Long id, Integer page, Integer pageSize) {
         //获取Sku的id列表，根据SKUid列表调用远程服务获取每一个sku的name
 //        PageInfo<GoodsSkuCouponRetVo>couponSkus=activityDao.getCouponSkuList(id,page,pageSize);
-        List<CouponSkuPo> list = activityDao.getCouponSkuList(id);
+        List<CouponSkuPo> list = couponDao.getCouponSkuList(id);
         List<Long> idList = new ArrayList<>(list.stream().map(CouponSkuPo::getSkuId).collect(Collectors.toList()));
         List<SkuNameInfoDTO> skuNameList = IGoodsService.getSelectSkuNameListBySkuIdList(idList);
         PageHelper.startPage(page,pageSize);
@@ -68,7 +68,7 @@ public class ActivityService {
             returnObject= IGoodsService.checkSkuUsableBySkuShop(couponSku.getSkuId(), shopId);
             if(returnObject.getCode()!= ResponseCode.OK)return returnObject;
         }
-        returnObject=activityDao.createCouponSkus(shopId,id, couponSkus);
+        returnObject= couponDao.createCouponSkus(shopId,id, couponSkus);
         return returnObject;
     }
 
@@ -81,7 +81,7 @@ public class ActivityService {
     @Transactional
     public ReturnObject deleteCouponSku(Long shopId, Long id)
     {
-        ReturnObject returnObject=activityDao.deleteCouponSku(shopId,id);
+        ReturnObject returnObject= couponDao.deleteCouponSku(shopId,id);
         return returnObject;
     }
 
@@ -96,7 +96,7 @@ public class ActivityService {
     @Transactional
     public ReturnObject<PageInfo<CouponRetVo>> showCoupons(Long userId, Integer state, Integer page, Integer pageSize)
     {
-        PageInfo<CouponRetVo> returnObject=activityDao.showCoupons(userId,state,page,pageSize);
+        PageInfo<CouponRetVo> returnObject= couponDao.showCoupons(userId,state,page,pageSize);
         return new ReturnObject<PageInfo<CouponRetVo>>(returnObject);
     }
 
@@ -109,7 +109,7 @@ public class ActivityService {
     @Transactional
     public ReturnObject useCoupon(Long userId, Long id)
     {
-        ReturnObject returnObject=activityDao.useCoupon(userId,id);
+        ReturnObject returnObject= couponDao.useCoupon(userId,id);
         return returnObject;
     }
 
@@ -123,7 +123,7 @@ public class ActivityService {
     @Transactional
     public ReturnObject deleteCoupon(Long userId, Long id)
     {
-        ReturnObject returnObject=activityDao.deleteCoupon(userId,id);
+        ReturnObject returnObject= couponDao.deleteCoupon(userId,id);
         return returnObject;
     }
 
@@ -136,7 +136,7 @@ public class ActivityService {
     @Transactional
     public ReturnObject<List<CouponNewRetVo>> getCoupon(Long userId, Long id)
     {
-        ReturnObject<List<CouponNewRetVo>> returnObject=activityDao.getCoupon(userId,id);
+        ReturnObject<List<CouponNewRetVo>> returnObject= couponDao.getCoupon(userId,id);
         return returnObject;
     }
 
@@ -150,7 +150,7 @@ public class ActivityService {
     @Transactional
     public ReturnObject returnCoupon(Long shopId, Long id)
     {
-        ReturnObject returnObject=activityDao.returnCoupon(shopId,id);
+        ReturnObject returnObject= couponDao.returnCoupon(shopId,id);
         return returnObject;
     }
 
@@ -162,7 +162,7 @@ public class ActivityService {
      */
     @Transactional
     public ReturnObject<Object> showCouponActivity(Long shopId, Long id) {
-        ReturnObject returnObject=activityDao.showCouponActivity(shopId,id);
+        ReturnObject returnObject= couponDao.showCouponActivity(shopId,id);
         return returnObject;
     }
 
@@ -172,7 +172,7 @@ public class ActivityService {
      * @return ReturnObject
      */
     public ReturnObject addCouponActivity(CouponActivity activity) {
-        ReturnObject<CouponActivityVo> returnObject=activityDao.addCouponActivity(activity);
+        ReturnObject<CouponActivityVo> returnObject= couponDao.addCouponActivity(activity);
         return returnObject;
     }
 
@@ -182,7 +182,7 @@ public class ActivityService {
      * @return ReturnObject
      */
     public ReturnObject modifyCouponActivity(CouponActivity activity) {
-        ReturnObject returnObject=activityDao.modifyCouponActivity(activity);
+        ReturnObject returnObject= couponDao.modifyCouponActivity(activity);
         return returnObject;
     }
 
@@ -193,7 +193,7 @@ public class ActivityService {
      * @return ReturnObject
      */
     public ReturnObject offlineCouponActivity(Long shopId, Long id) {
-        ReturnObject returnObject=activityDao.offlineCouponActivity(shopId, id);
+        ReturnObject returnObject= couponDao.offlineCouponActivity(shopId, id);
         return returnObject;
     }
 
@@ -206,7 +206,7 @@ public class ActivityService {
      * @return ReturnObject
      */
     public ReturnObject<PageInfo<CouponActivityByNewCouponRetVo>> showActivities(Long shopId, Integer timeline, Integer page, Integer pageSize) {
-        ReturnObject<PageInfo<CouponActivityByNewCouponRetVo>> returnObject=activityDao.showActivities(shopId,timeline,page,pageSize);
+        ReturnObject<PageInfo<CouponActivityByNewCouponRetVo>> returnObject= couponDao.showActivities(shopId,timeline,page,pageSize);
         return returnObject;
     }
 
@@ -218,7 +218,7 @@ public class ActivityService {
      * @return ReturnObject
      */
     public ReturnObject<PageInfo<CouponActivityByNewCouponRetVo>> showInvalidCouponActivities(Long shopId, Integer page, Integer pageSize) {
-        ReturnObject<PageInfo<CouponActivityByNewCouponRetVo>> returnObject=activityDao.showInvalidCouponActivities(shopId,page,pageSize);
+        ReturnObject<PageInfo<CouponActivityByNewCouponRetVo>> returnObject= couponDao.showInvalidCouponActivities(shopId,page,pageSize);
         return returnObject;
     }
 }

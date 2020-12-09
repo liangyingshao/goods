@@ -32,9 +32,9 @@ import java.util.List;
 import java.util.Map;
 
 @Repository
-public class ActivityDao  implements InitializingBean
+public class CouponDao implements InitializingBean
 {
-    private static final Logger logger = LoggerFactory.getLogger(ActivityDao.class);
+    private static final Logger logger = LoggerFactory.getLogger(CouponDao.class);
 
     @Autowired
     private CouponSkuPoMapper couponSkuMapper;

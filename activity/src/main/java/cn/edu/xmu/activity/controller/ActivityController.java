@@ -4,7 +4,7 @@ import cn.edu.xmu.activity.model.bo.Coupon;
 import cn.edu.xmu.activity.model.bo.CouponActivity;
 import cn.edu.xmu.activity.model.bo.CouponSku;
 import cn.edu.xmu.activity.model.vo.*;
-import cn.edu.xmu.activity.service.ActivityService;
+import cn.edu.xmu.activity.service.CouponService;
 import cn.edu.xmu.ooad.annotation.Audit;
 import cn.edu.xmu.ooad.annotation.Depart;
 import cn.edu.xmu.ooad.annotation.LoginUser;
@@ -26,6 +26,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,7 +37,7 @@ public class ActivityController {
     private  static  final Logger logger = LoggerFactory.getLogger(ActivityController.class);
 
     @Autowired
-    private ActivityService activityService;
+    private CouponService activityService;
 
     @Autowired
     private HttpServletResponse httpServletResponse;
@@ -538,5 +539,9 @@ public class ActivityController {
         ReturnObject<PageInfo<CouponActivityByNewCouponRetVo>> returnObject=activityService.showInvalidCouponActivities(id,page,pageSize);
         return returnObject;
     }
+
+    /* groupon begin */
+
+    /* groupon end */
 
 }
