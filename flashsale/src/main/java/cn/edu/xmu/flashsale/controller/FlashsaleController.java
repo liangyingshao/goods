@@ -53,9 +53,7 @@ public class FlashsaleController {
     @PostMapping("/timesegments/{id}/flashsales")
     public Object createflash(@PathVariable Long id, @RequestParam(required = true) String flashDate) {
         //falshDate不能小于当前日期，先获取当前日期转化为字符串，与flashDate相比较，flashDate不能小于当前字符串
-//    public Object createflash(@PathVariable Long id) {
         LocalDate date = LocalDate.now(); // get the current date
-//        String flashDate = "2021-01-07";
         if(date.toString().compareTo(flashDate) > 0)
         {
             return new ReturnObject<>(ResponseCode.TIMESEG_CONFLICT);
@@ -63,6 +61,20 @@ public class FlashsaleController {
         //falshDate不小于当前日期
         LocalDateTime flashDateParse = LocalDate.parse(flashDate,DateTimeFormatter.ISO_DATE).atStartOfDay();
         ReturnObject object = flashsaleService.createflash(id, flashDateParse);
+        return Common.decorateReturnObject(object);
+    }
+
+    @ApiOperation(value = "flashsale004:平台管理员删除某个时段秒杀",  produces="application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+            @ApiImplicitParam(name="id", required = true, dataType="String", paramType="path"),//秒杀id
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功")
+    })
+    @DeleteMapping("/flashsales/{id}")
+    public Object deleteflashsale(@PathVariable Long id) {
+        ReturnObject object = flashsaleService.deleteflashsale(id);
         return Common.decorateReturnObject(object);
     }
 }

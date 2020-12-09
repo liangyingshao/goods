@@ -8,8 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -39,6 +38,28 @@ public class FlashsaleControllerTest {
             e.printStackTrace();
         }
         String expectedResponse = "{\"errno\":0,\"data\":{\"id\":1,\"flashDate\":\"2021-01-07T00:00:00\",\"timeDTO\":{\"id\":null,\"type\":null,\"beginTime\":null,\"endTime\":null},\"gmtCreate\":\"2020-12-09T19:53:01\",\"gmtModified\":null},\"errmsg\":\"成功\"}";
+        try {
+            JSONAssert.assertEquals(expectedResponse, responseString, false);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void deleteflashsale() {
+        String responseString = null;
+        String token = creatTestToken(1L,0L,100);
+        try {
+            responseString = this.mvc.perform(delete("/flashsale/flashsales/1").header("authorization", token))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andReturn().getResponse().getContentAsString();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\"}";
         try {
             JSONAssert.assertEquals(expectedResponse, responseString, false);
         } catch (JSONException e) {

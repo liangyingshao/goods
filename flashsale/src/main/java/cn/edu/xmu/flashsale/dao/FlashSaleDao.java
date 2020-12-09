@@ -81,4 +81,27 @@ public class FlashSaleDao {
         }
     }
 
+    public ReturnObject deleteflashsale(Long id) {
+        try
+        {
+            int ret = flashSalePoMapper.deleteByPrimaryKey(id);
+            if(ret == 0)
+            {
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            }
+            else
+                return new ReturnObject(ResponseCode.OK);
+        }
+        catch (DataAccessException e)
+        {
+            // 其他数据库错误
+            logger.debug("other sql exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
+    }
 }

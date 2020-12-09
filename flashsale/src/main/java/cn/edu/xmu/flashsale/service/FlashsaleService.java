@@ -61,4 +61,8 @@ public class FlashsaleService {
         }
         return returnObject;
     }
+
+    public ReturnObject deleteflashsale(Long id) {
+        return flashsaleDao.deleteflashsale(id);
+    }
 }
