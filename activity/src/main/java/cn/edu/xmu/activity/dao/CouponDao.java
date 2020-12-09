@@ -520,22 +520,32 @@ public class CouponDao implements InitializingBean
                 alreadyCriteria.andCustomerIdEqualTo(userId);
             List<CouponPo> alreadyPos = couponMapper.selectByExample(alreadyExample);
 
+            CouponActivity.DatabaseState state=CouponActivity.DatabaseState.getTypeByCode(activityPo.getQuantitiyType().intValue());
+            redisTemplate.opsForHash().put(key,"quantityType",state.getCode().byteValue());
+            int size= alreadyPos.size();
+            int couponQuantity=activityPo.getQuantity();
             //券已领罄
             //总量控制模式下券已发完或每人限量模式下该用户领的券已达上限
-            if (alreadyPos.size() == activityPo.getQuantity())
+            if (couponQuantity==size)
             {
                 //每人限发模式下领取数量达到上限
-                if(CouponActivity.Type.getTypeByCode(activityPo.getQuantitiyType().intValue()).equals(CouponActivity.Type.LIMIT_PER_PERSON))
+                if(state.equals(CouponActivity.Type.LIMIT_PER_PERSON))
+                {
+                    redisTemplate.opsForHash().put(key,"quantity",couponQuantity);
                     setBloomFilterOfCoupon(id, userId);
+                }
+                else redisTemplate.opsForHash().put(key,"quantity",0);
                 return new ReturnObject<>(ResponseCode.COUPON_FINISH);
             }
 
             //总量控制模式下该用户已领过券
-            if(CouponActivity.Type.getTypeByCode(activityPo.getQuantitiyType().intValue()).equals(CouponActivity.Type.LIMIT_TOTAL_NUM) && alreadyPos.size() > 0)
+            if(state.equals(CouponActivity.Type.LIMIT_TOTAL_NUM) && size > 0)
             {
                 setBloomFilterOfCoupon(id, userId);
+                redisTemplate.opsForHash().put(key,"quantity",couponQuantity-size);
                 return new ReturnObject<>(ResponseCode.COUPON_FINISH);
             }
+
             quantity=CouponActivity.Type.getTypeByCode(activityPo.getQuantitiyType().intValue()).equals(CouponActivity.Type.LIMIT_PER_PERSON)?activityPo.getQuantity():1;
         }
 
