@@ -77,8 +77,8 @@ public class CouponDao implements InitializingBean
                 redisTemplate.delete(fieldName[i]+suffixName);
             }
         }
-
     }
+
 
     /**
      * 查找布隆过滤器里是否有该用户领过该活动优惠券的记录
@@ -170,24 +170,6 @@ public class CouponDao implements InitializingBean
      */
     public List<CouponSkuPo> getCouponSkuList(Long id)
     {
-//        GoodsSkuPo skuPo;
-//        GoodsSku sku;
-        //根据活动id得到SKU的id列表，返回给service层，service根据sku的id调用远程服务得到{name,id}
-//        PageHelper.startPage(page,pageSize);
-//        logger.debug("page="+page+" pageSize="+pageSize);
-//        CouponSkuPoExample couponSkuExample=new CouponSkuPoExample();
-//        CouponSkuPoExample.Criteria couponSpuCriteria =couponSkuExample.createCriteria();
-//        couponSpuCriteria.andActivityIdEqualTo(id);
-//        List<CouponSkuPo>couponSkuPos=couponSkuMapper.selectByExample(couponSkuExample);
-//        List<GoodsSkuCouponRetVo>skuCouponRetVos=new ArrayList<>();
-//        for(CouponSkuPo couponSkuPo:couponSkuPos)
-//        {
-//            skuPo=skuMapper.selectByPrimaryKey(couponSkuPo.getSkuId());
-//            sku=new GoodsSku(skuPo);
-//            GoodsSkuCouponRetVo retVo=new GoodsSkuCouponRetVo();
-//            retVo.set(sku);
-//            skuCouponRetVos.add(retVo);
-//        }
         CouponSkuPoExample example = new CouponSkuPoExample();
         CouponSkuPoExample.Criteria criteria = example.createCriteria();
         criteria.andActivityIdEqualTo(id);
@@ -491,6 +473,7 @@ public class CouponDao implements InitializingBean
      */
     public ReturnObject<List<CouponNewRetVo>> getCoupon(Long userId, Long id)
     {
+        int quantity;
         CouponActivityPo activityPo=activityMapper.selectByPrimaryKey(id);
 
         //活动不存在
@@ -517,24 +500,48 @@ public class CouponDao implements InitializingBean
         if(returnObject.getCode().equals(ResponseCode.COUPON_FINISH))return returnObject;
 
         //查询优惠券发放情况
-        CouponPoExample alreadyExample=new CouponPoExample();
-        CouponPoExample.Criteria alreadyCriteria= alreadyExample.createCriteria();
-        alreadyCriteria.andActivityIdEqualTo(id);
-        //每人限量模式
-        if(CouponActivity.Type.getTypeByCode(activityPo.getQuantitiyType().intValue()).equals(CouponActivity.Type.LIMIT_PER_PERSON))
-            alreadyCriteria.andCustomerIdEqualTo(userId);
-        List<CouponPo> alreadyPos=couponMapper.selectByExample(alreadyExample);
-        //券已领罄
-        if(alreadyPos.size()==activityPo.getQuantity()//总量控制模式下券已发完或每人限量模式下该用户领的券已达上限
-                ||(CouponActivity.Type.getTypeByCode(activityPo.getQuantitiyType().intValue()).equals(CouponActivity.Type.LIMIT_TOTAL_NUM)&&alreadyPos.size()>0))//总量控制模式下该用户已领过券
+        //先找redis
+        String key="ca_"+id;
+        if(redisTemplate.opsForHash().hasKey(key,"quantity"))
         {
-            setBloomFilterOfCoupon(id,userId);
-            return new ReturnObject<>(ResponseCode.COUPON_FINISH);
+            if(redisTemplate.opsForHash().get(key,"quantityType").equals(CouponActivity.Type.LIMIT_PER_PERSON))
+                quantity= (int) redisTemplate.opsForHash().get(key,"quantity");
+            else if(redisTemplate.opsForHash().get(key,"quantity").equals(0))
+                    return new ReturnObject<>(ResponseCode.COUPON_FINISH);
+            else quantity=1;
+        }
+        //没在redis找到，需查数据库
+        else {
+            CouponPoExample alreadyExample = new CouponPoExample();
+            CouponPoExample.Criteria alreadyCriteria = alreadyExample.createCriteria();
+            alreadyCriteria.andActivityIdEqualTo(id);
+            //每人限量模式
+            if (CouponActivity.Type.getTypeByCode(activityPo.getQuantitiyType().intValue()).equals(CouponActivity.Type.LIMIT_PER_PERSON))
+                alreadyCriteria.andCustomerIdEqualTo(userId);
+            List<CouponPo> alreadyPos = couponMapper.selectByExample(alreadyExample);
+
+            //券已领罄
+            //总量控制模式下券已发完或每人限量模式下该用户领的券已达上限
+            if (alreadyPos.size() == activityPo.getQuantity())
+            {
+                //每人限发模式下领取数量达到上限
+                if(CouponActivity.Type.getTypeByCode(activityPo.getQuantitiyType().intValue()).equals(CouponActivity.Type.LIMIT_PER_PERSON))
+                    setBloomFilterOfCoupon(id, userId);
+                return new ReturnObject<>(ResponseCode.COUPON_FINISH);
+            }
+
+            //总量控制模式下该用户已领过券
+            if(CouponActivity.Type.getTypeByCode(activityPo.getQuantitiyType().intValue()).equals(CouponActivity.Type.LIMIT_TOTAL_NUM) && alreadyPos.size() > 0)
+            {
+                setBloomFilterOfCoupon(id, userId);
+                return new ReturnObject<>(ResponseCode.COUPON_FINISH);
+            }
+            quantity=CouponActivity.Type.getTypeByCode(activityPo.getQuantitiyType().intValue()).equals(CouponActivity.Type.LIMIT_PER_PERSON)?activityPo.getQuantity():1;
         }
 
         //可领券，设置券属性
         List<CouponNewRetVo>retVos=new ArrayList<>();
-        for(int i=0;i<(CouponActivity.Type.getTypeByCode(activityPo.getQuantitiyType().intValue()).equals(CouponActivity.Type.LIMIT_PER_PERSON)?activityPo.getQuantity():1);i++)
+        for(int i=0;i<quantity;i++)
         {
             CouponPo newPo = new CouponPo();
             newPo.setCustomerId(userId);
