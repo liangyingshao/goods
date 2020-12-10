@@ -379,7 +379,7 @@ public class qcyTest {
      * version: 1.0
      */
     @Test
-    public void uploadFileSutccess() throws Exception{
+    public void uploadFileSuccess() throws Exception{
         String token = creatTestToken(1L,1L,100);
         File file = new File("."+File.separator + "src" + File.separator + "test" + File.separator+"resources" + File.separator + "img" + File.separator+"timg.png");
         MockMultipartFile firstFile = new MockMultipartFile("img", "timg.png" , "multipart/form-data", new FileInputStream(file));

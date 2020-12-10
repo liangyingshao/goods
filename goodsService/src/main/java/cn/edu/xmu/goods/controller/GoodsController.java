@@ -27,11 +27,7 @@ import java.util.List;
 
 
 
-/**
- * 权限控制器
- * @author Ming Qiu
- * Modified at 2020/11/5 13:21
- **/
+
 @Api(value = "商品服务", tags = "goods")
 @RestController /*Restful的Controller对象*/
 @RequestMapping(value = "/goods", produces = "application/json;charset=UTF-8")
@@ -57,28 +53,6 @@ public class GoodsController {
     @Autowired
     private GoodsCategoryService goodsCategoryService;
 
-    /**
-     * auth002: 用户重置密码
-     * @return Object
-     * @author 24320182203311 杨铭
-     * Created at 2020/11/11 19:32
-     */
-    @ApiOperation(value="店家修改店铺信息")
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "body", dataType = "String", name = "name", value = "店铺名称", required = true)
-
-    })
-    @ApiResponses({
-            @ApiResponse(code = 0, message = "成功")
-    })
-    @PutMapping("shops/{id}")
-    @ResponseBody
-    public Object modifyShop(@LoginUser @PathVariable Long id, String name) {
-
-
-        ReturnObject returnObject = goodsService.modifyShop(id,name);
-        return Common.decorateReturnObject(returnObject);
-    }
 
     /**
      *查询SKU
@@ -708,7 +682,7 @@ public class GoodsController {
      * @param userId 当前用户ID
      * @return  Object
      * @author 24320182203254 秦楚彦
-     * Created at 2020/11/02 22：27
+     * Created at 2020/12/02 22：27
      */
     @ApiOperation(value="将SPU移出分类",produces="application/json")
     @ApiImplicitParams({
@@ -753,7 +727,7 @@ public class GoodsController {
      * @param userId 当前用户ID
      * @return  Object
      * @author 24320182203254 秦楚彦
-     * Created at 2020/11/02 23：57
+     * Created at 2020/12/02 23：57
      */
     @ApiOperation(value="将SPU移出分类",produces="application/json")
     @ApiImplicitParams({
@@ -1124,6 +1098,41 @@ public class GoodsController {
         return returnObject;
     }
 
+    /**
+     * spu上传图片
+     * @param shopId
+     * @param id
+     * @param file
+     * @return Object
+     */
+    @ApiOperation(value="spu上传图片")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header",dataType = "String",name = "authorization",value = "用户token",required = true),
+            @ApiImplicitParam(paramType = "formData", dataType = "file", name = "img", value ="文件", required = true),
+            @ApiImplicitParam(paramType = "path",dataType = "Long",name = "shopId",value = "店铺id",required = true),
+            @ApiImplicitParam(paramType = "path",dataType = "Long",name = "id",value = "spu id",required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 506, message = "该目录文件夹没有写入的权限"),
+            @ApiResponse(code = 508, message = "图片格式不正确"),
+            @ApiResponse(code = 509, message = "图片大小超限")
+    })
+    @Audit
+    @PostMapping("/shops/{shopId}/spus/{id}/uploadImg")
+    public Object uploadSpuImg(@PathVariable Long shopId,@PathVariable Long id,
+                               @RequestParam("img") MultipartFile file,
+                               @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
+                               @Depart @ApiIgnore @RequestParam(required = false) Long departId){
+        logger.debug("uploadSpuImg: id = "+ id+" shopId="+shopId +" img=" + file.getOriginalFilename());
+
+        GoodsSpu spu=new GoodsSpu();
+        spu.setShopId(shopId);
+        spu.setId(id);
+        spu.setGmtModified(LocalDateTime.now());
+        ReturnObject retObject = spuService.uploadSpuImg(spu,file);
+        return Common.getNullRetObj(retObject, httpServletResponse);
+    }
 
 }
 

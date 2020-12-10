@@ -5,6 +5,7 @@ import cn.edu.xmu.activity.model.bo.CouponActivity;
 import cn.edu.xmu.activity.model.bo.CouponSku;
 import cn.edu.xmu.activity.model.vo.*;
 import cn.edu.xmu.activity.service.CouponService;
+import cn.edu.xmu.activity.service.GrouponService;
 import cn.edu.xmu.ooad.annotation.Audit;
 import cn.edu.xmu.ooad.annotation.Depart;
 import cn.edu.xmu.ooad.annotation.LoginUser;
@@ -41,6 +42,13 @@ public class ActivityController {
 
     @Autowired
     private HttpServletResponse httpServletResponse;
+
+
+    @Autowired
+    private GrouponService grouponService;
+
+    public ActivityController() {
+    }
 
     /**
      * 查看优惠活动中的商品
@@ -370,7 +378,7 @@ public class ActivityController {
         }
         CouponActivity activity=vo.createActivity();
         //设置activity状态，待修改
-        activity.setState(CouponActivity.DatabaseState.ONLINE);
+        activity.setState(CouponActivity.DatabaseState.EXECUTABLE);
         activity.setShopId(shopId);
         activity.setGmtCreate(LocalDateTime.now());
         ReturnObject retObject = activityService.addCouponActivity(activity);
@@ -421,7 +429,7 @@ public class ActivityController {
         }
         CouponActivity activity=vo.createActivity();
         //设置activity状态，待修改
-        activity.setState(CouponActivity.DatabaseState.ONLINE);
+        activity.setState(CouponActivity.DatabaseState.EXECUTABLE);
         activity.setId(id);
         activity.setShopId(shopId);
         activity.setGmtCreate(LocalDateTime.now());
@@ -541,6 +549,54 @@ public class ActivityController {
     }
 
     /* groupon begin */
+    /**
+     * description: modifyGrouponofSPU
+     * version: 1.0
+     * date: 2020/12/6 23:11
+     * author: 杨铭
+     *
+     * @param shopId 店铺id
+     * @param id 团购活动id
+     * @param grouponVo 修改vo
+     * @return java.lang.Object
+     */
+    @ApiOperation(value="管理员修改SPU团购活动")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "authorization", value ="用户token", paramType = "header", dataType = "String",  required = true),
+            @ApiImplicitParam(name = "shopId", value ="商铺id", paramType = "path", dataType = "Integer",  required = true),
+            @ApiImplicitParam(name = "id", value ="团购活动id", paramType = "path", dataType = "Integer",  required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 907, message = "团购活动状态禁止"),
+            @ApiResponse(code = 0, message = "成功")
+    })
+    @Audit
+    @ResponseBody
+    @PutMapping("/shops/{shopId}/groupons/{id}")
+    public Object modifyGrouponofSPU(@PathVariable Long shopId, @PathVariable Long id,@RequestBody(required = true) GrouponVo grouponVo){
+
+        //BeginTime，EndTime的验证
+        LocalDateTime beginTime = null;
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        try {
+            beginTime= LocalDateTime.parse(grouponVo.getBeginTime(),dtf);
+        } catch (Exception e) {
+            return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+        }
+        LocalDateTime endTime = null;
+        try {
+            endTime = LocalDateTime.parse(grouponVo.getEndTime(),dtf);
+        } catch (Exception e) {
+            return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+        }
+        if(endTime.isBefore(LocalDateTime.now())||
+                beginTime.isBefore(LocalDateTime.now())||
+                endTime.isBefore(beginTime))
+            return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+
+        ReturnObject returnObject = grouponService.modifyGrouponofSPU(shopId,id,grouponVo);
+        return Common.getRetObject(returnObject);
+    }
 
     /* groupon end */
 
