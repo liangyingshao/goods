@@ -17,7 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * description: GrouponControllerTest
+ * description: 团购测试
  * date: 2020/12/9 15:15
  * author: 杨铭
  * version: 1.0

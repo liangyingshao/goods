@@ -42,9 +42,13 @@ public class ActivityController {
 
     @Autowired
     private HttpServletResponse httpServletResponse;
-    
+
+
     @Autowired
     private GrouponService grouponService;
+
+    public ActivityController() {
+    }
 
     /**
      * 查看优惠活动中的商品
@@ -543,6 +547,7 @@ public class ActivityController {
         ReturnObject<PageInfo<CouponActivityByNewCouponRetVo>> returnObject=activityService.showInvalidCouponActivities(id,page,pageSize);
         return returnObject;
     }
+
 
     /* groupon begin */
     /**

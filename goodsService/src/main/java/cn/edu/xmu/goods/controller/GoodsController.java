@@ -57,28 +57,6 @@ public class GoodsController {
     @Autowired
     private GoodsCategoryService goodsCategoryService;
 
-    /**
-     * auth002: 用户重置密码
-     * @return Object
-     * @author 24320182203311 杨铭
-     * Created at 2020/11/11 19:32
-     */
-    @ApiOperation(value="店家修改店铺信息")
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "body", dataType = "String", name = "name", value = "店铺名称", required = true)
-
-    })
-    @ApiResponses({
-            @ApiResponse(code = 0, message = "成功")
-    })
-    @PutMapping("shops/{id}")
-    @ResponseBody
-    public Object modifyShop(@LoginUser @PathVariable Long id, String name) {
-
-
-        ReturnObject returnObject = goodsService.modifyShop(id,name);
-        return Common.decorateReturnObject(returnObject);
-    }
 
     /**
      *查询SKU
