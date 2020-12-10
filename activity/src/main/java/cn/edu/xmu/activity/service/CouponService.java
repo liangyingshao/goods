@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +33,7 @@ public class CouponService {
     private CouponDao couponDao;
 
     @DubboReference
-    private IGoodsService IGoodsService;
+    private IGoodsService iGoodsService;
 
     /**
      * 查看优惠活动中的商品
@@ -47,7 +48,7 @@ public class CouponService {
 //        PageInfo<GoodsSkuCouponRetVo>couponSkus=activityDao.getCouponSkuList(id,page,pageSize);
         List<CouponSkuPo> list = couponDao.getCouponSkuList(id);
         List<Long> idList = new ArrayList<>(list.stream().map(CouponSkuPo::getSkuId).collect(Collectors.toList()));
-        List<SkuNameInfoDTO> skuNameList = IGoodsService.getSelectSkuNameListBySkuIdList(idList);
+        List<SkuNameInfoDTO> skuNameList = iGoodsService.getSelectSkuNameListBySkuIdList(idList);
         PageHelper.startPage(page,pageSize);
         PageInfo<SkuNameInfoDTO> skuNameInfoDTOPageInfo = PageInfo.of(skuNameList);
         return new ReturnObject<>(skuNameInfoDTOPageInfo);
@@ -65,7 +66,7 @@ public class CouponService {
         ReturnObject returnObject;
         for(CouponSku couponSku:couponSkus)
         {
-            returnObject= IGoodsService.checkSkuUsableBySkuShop(couponSku.getSkuId(), shopId);
+            returnObject= iGoodsService.checkSkuUsableBySkuShop(couponSku.getSkuId(), shopId);
             if(returnObject.getCode()!= ResponseCode.OK)return returnObject;
         }
         returnObject= couponDao.createCouponSkus(shopId,id, couponSkus);
@@ -172,7 +173,9 @@ public class CouponService {
      * @return ReturnObject
      */
     public ReturnObject addCouponActivity(CouponActivity activity) {
-        ReturnObject<CouponActivityVo> returnObject= couponDao.addCouponActivity(activity);
+        Long shopId = activity.getShopId();
+        ReturnObject<SimpleShopDTO> simpleShopDTOReturnObject=iGoodsService.getSimpleShopByShopId(shopId);
+        ReturnObject<CouponActivityVo> returnObject= couponDao.addCouponActivity(activity,simpleShopDTOReturnObject.getData());
         return returnObject;
     }
 
@@ -219,6 +222,17 @@ public class CouponService {
      */
     public ReturnObject<PageInfo<CouponActivityByNewCouponRetVo>> showInvalidCouponActivities(Long shopId, Integer page, Integer pageSize) {
         ReturnObject<PageInfo<CouponActivityByNewCouponRetVo>> returnObject= couponDao.showInvalidCouponActivities(shopId,page,pageSize);
+        return returnObject;
+    }
+
+    /**
+     * 上传优惠活动图片
+     * @param activity
+     * @param file
+     * @return ReturnObject
+     */
+    public ReturnObject uploadActivityImg(CouponActivity activity, MultipartFile file) {
+        ReturnObject<Object> returnObject = couponDao.uploadActivityImg(activity,file);
         return returnObject;
     }
 }

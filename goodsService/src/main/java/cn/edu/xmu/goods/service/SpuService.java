@@ -160,7 +160,7 @@ public class SpuService {
     }
 
     /**
-     * 逻辑删除SPU
+     * SPU上传图片
      * @param spu
      * @param file
      * @return  ReturnObject

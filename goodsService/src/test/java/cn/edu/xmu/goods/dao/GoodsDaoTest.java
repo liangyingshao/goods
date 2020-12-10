@@ -9,6 +9,7 @@ import cn.edu.xmu.goods.model.vo.GoodsSkuRetVo;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.goods.model.GoodsInfoDTO;
+import cn.edu.xmu.oomall.goods.model.SimpleShopDTO;
 import cn.edu.xmu.oomall.goods.model.SkuInfoDTO;
 import com.github.pagehelper.PageInfo;
 import org.junit.jupiter.api.Test;
@@ -244,5 +245,11 @@ class GoodsDaoTest {
 
         goodsInfoDTO= goodsDao.getSelectGoodsInfoBySkuId((long)0);
         assertEquals(goodsInfoDTO,null);
+    }
+
+    @Test
+    void getSimpleShopById(){
+        ReturnObject<SimpleShopDTO> simpleShopDTO = goodsDao.getSimpleShopByShopId(1L);
+        assertEquals(simpleShopDTO.getCode(),ResponseCode.OK);
     }
 }

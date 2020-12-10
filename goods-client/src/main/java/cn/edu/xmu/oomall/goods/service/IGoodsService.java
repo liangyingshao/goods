@@ -50,4 +50,9 @@ public interface IGoodsService {
 
     ReturnObject checkSkuUsableBySkuShop(Long skuId,Long shopId);
 
+    /**
+     * 根据shopId返回其id和name
+     */
+    ReturnObject<SimpleShopDTO> getSimpleShopByShopId(Long shopId);
+
 }

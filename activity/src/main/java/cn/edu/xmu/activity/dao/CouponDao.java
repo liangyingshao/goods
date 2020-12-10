@@ -6,11 +6,13 @@ import cn.edu.xmu.activity.model.po.*;
 import cn.edu.xmu.activity.model.po.CouponSkuPoExample;
 import cn.edu.xmu.activity.model.vo.*;
 import cn.edu.xmu.ooad.util.Common;
+import cn.edu.xmu.ooad.util.ImgHelper;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.ooad.util.bloom.BloomFilterHelper;
 import cn.edu.xmu.ooad.util.bloom.RedisBloomFilter;
 import cn.edu.xmu.oomall.goods.model.CouponInfoDTO;
+import cn.edu.xmu.oomall.goods.model.SimpleShopDTO;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.base.Charsets;
@@ -22,7 +24,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.time.Duration;
@@ -746,53 +750,51 @@ public class CouponDao implements InitializingBean
      * @param activity
      * @return ReturnObject
      */
-    public ReturnObject<CouponActivityVo> addCouponActivity(CouponActivity activity) {
+    public ReturnObject<CouponActivityVo> addCouponActivity(CouponActivity activity,SimpleShopDTO simpleShop) {
         CouponActivityPo activityPo=activity.createActivityPo();
         ReturnObject<CouponActivityVo> returnObject=null;
-//        try{
-//            int ret = activityMapper.insertSelective(activityPo);
-//            if (ret == 0) {
-//                //插入失败
-//                logger.debug("insertRole: insert coupon activity fail " + activityPo.toString());
-//                returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("新增失败：" + activityPo.getName()));
-//            } else {
-//                //插入成功
-//                logger.debug("insertRole: insert coupon activity = " + activityPo.toString());
-//                //检验
-//                CouponActivityPoExample couponActivityExample=new CouponActivityPoExample();
-//                CouponActivityPoExample.Criteria couponActivityCriteria=couponActivityExample.createCriteria();
-//                couponActivityCriteria.andNameEqualTo(activityPo.getName());
-//                couponActivityCriteria.andShopIdEqualTo(activityPo.getShopId());
-//                couponActivityCriteria.andBeginTimeEqualTo(activityPo.getBeginTime());
-//                couponActivityCriteria.andEndTimeEqualTo(activityPo.getEndTime());
-//                List<CouponActivityPo> checkPos=activityMapper.selectByExample(couponActivityExample);
-//                if(checkPos.size()==0)return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("couponSpu字段不合法：" + activityPo.toString()));
-//                else{//设置RetVo
-//                    CouponActivity retActivity =new CouponActivity(checkPos.get(0));
-//                    CouponActivityVo retVo=new CouponActivityVo(retActivity);
-//                    //设置优惠活动所属商店
-//                    ShopPo shopPo=shopMapper.selectByPrimaryKey(retActivity.getShopId());
-//                    SimpleShopVo simpleShopVo=new SimpleShopVo(shopPo);
-//                    retVo.setShopVo(simpleShopVo);
-//                    //设置创建者、修改者
-//                    //couponActivityVo.setCreatedBy();
-//                    //couponActivityVo.setModifiedBy();
-//                    return new ReturnObject<>(retVo);
-//
-//                }
-//
-//            }
-//        }
-//        catch (DataAccessException e) {
-//            // 其他数据库错误
-//            logger.debug("other sql exception : " + e.getMessage());
-//            returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
-//        }
-//        catch (Exception e) {
-//            // 其他Exception错误
-//            logger.error("other exception : " + e.getMessage());
-//            returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
-//        }
+        try{
+            int ret = activityMapper.insertSelective(activityPo);
+            if (ret == 0) {
+                //插入失败
+                logger.debug("insertRole: insert coupon activity fail " + activityPo.toString());
+                returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("新增失败：" + activityPo.getName()));
+            } else {
+                //插入成功
+                logger.debug("insertRole: insert coupon activity = " + activityPo.toString());
+                //检验
+                CouponActivityPoExample couponActivityExample=new CouponActivityPoExample();
+                CouponActivityPoExample.Criteria couponActivityCriteria=couponActivityExample.createCriteria();
+                couponActivityCriteria.andNameEqualTo(activityPo.getName());
+                couponActivityCriteria.andShopIdEqualTo(activityPo.getShopId());
+                couponActivityCriteria.andBeginTimeEqualTo(activityPo.getBeginTime());
+                couponActivityCriteria.andEndTimeEqualTo(activityPo.getEndTime());
+                List<CouponActivityPo> checkPos=activityMapper.selectByExample(couponActivityExample);
+                if(checkPos.size()==0)return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("couponSpu字段不合法：" + activityPo.toString()));
+                else{//设置RetVo
+                    CouponActivity retActivity =new CouponActivity(checkPos.get(0));
+                    CouponActivityVo retVo=new CouponActivityVo(retActivity);
+                    //设置优惠活动所属商店
+                    retVo.setShopVo(simpleShop);
+                    //设置创建者、修改者
+                    //couponActivityVo.setCreatedBy();
+                    //couponActivityVo.setModifiedBy();
+                    return new ReturnObject<>(retVo);
+
+                }
+
+            }
+        }
+        catch (DataAccessException e) {
+            // 其他数据库错误
+            logger.debug("other sql exception : " + e.getMessage());
+            returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
         return returnObject;
     }
 
@@ -808,7 +810,7 @@ public class CouponDao implements InitializingBean
         CouponActivityPoExample.Criteria criteria=activityPoExample.createCriteria();
         criteria.andIdEqualTo(activity.getId());
         criteria.andShopIdEqualTo(activity.getShopId());
-        criteria.andStateEqualTo((byte)0);//待修改活动必须为“可执行”
+        criteria.andStateEqualTo((byte)0);//待修改活动必须为“已下线”
         try{
             int ret = activityMapper.updateByExampleSelective(activityPo,activityPoExample);
             if(ret==0){//修改失败
@@ -1096,5 +1098,67 @@ public class CouponDao implements InitializingBean
             // 其他Exception错误
             logger.error("other exception : " + e.getMessage());
         }
+    }
+
+    //上传图片相关变量
+    private String davUsername="night";
+    private String davPassword="tiesuolianhuan123";
+    private String baseUrl="http://172.16.4.146:8888/webdav/";//需要写成我们组服务器的webdev地址
+
+
+    /**
+     * 上传优惠活动图片
+     * @param activity
+     * @param file
+     * @return  ReturnObject
+     * @author 24320182203254 秦楚彦
+     * Created at 2020/12/10 10：51
+     */
+    public ReturnObject<Object> uploadActivityImg(CouponActivity activity, MultipartFile file) {
+        ReturnObject returnObject = null;
+        try {
+            //获得该活动信息
+            CouponActivityPo activityPo = activityMapper.selectByPrimaryKey(activity.getId());
+            //该优惠活动不存在
+            if (activityPo == null)
+                return returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            //对不属于操作者店铺的商品SPU进行操作
+            if (!activityPo.getShopId().equals(activity.getShopId()))
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+
+            returnObject = ImgHelper.remoteSaveImg(file, 2, davUsername, davPassword, baseUrl);
+
+            //文件上传错误
+            if (!returnObject.getCode().equals(ResponseCode.OK)) {
+                logger.debug(returnObject.getErrmsg());
+                return returnObject;
+            }
+            String oldFilename = activity.getImageUrl();
+            activity.setImageUrl(returnObject.getData().toString());
+            returnObject = modifyCouponActivity(activity);
+
+            //数据库更新失败，需删除新增的图片
+            if (returnObject.getCode() == ResponseCode.FIELD_NOTVALID) {
+                ImgHelper.deleteRemoteImg(returnObject.getData().toString(), davUsername, davPassword, baseUrl);
+                return returnObject;
+            }
+
+            //数据库更新成功需删除旧图片，未设置则不删除
+            if (oldFilename != null) {
+                ImgHelper.deleteRemoteImg(oldFilename, davUsername, davPassword, baseUrl);
+            }
+        } catch (DataAccessException e) {
+            // 其他数据库错误
+            logger.debug("other sql exception : " + e.getMessage());
+            returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        } catch (IOException e) {
+            logger.debug("uploadImg: I/O Error:" + baseUrl);
+            return new ReturnObject(ResponseCode.FILE_NO_WRITE_PERMISSION);
+        } catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
+        return returnObject;
     }
 }

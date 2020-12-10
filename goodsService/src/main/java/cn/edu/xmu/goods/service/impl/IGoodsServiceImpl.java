@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
-//@Component
+
 @DubboService
 public class IGoodsServiceImpl implements IGoodsService {
     @Autowired
@@ -91,6 +91,11 @@ public class IGoodsServiceImpl implements IGoodsService {
     public ReturnObject checkSkuUsableBySkuShop(Long skuId, Long shopId) {
         ReturnObject returnObject=goodsDao.checkSkuUsableBySkuShop(skuId,shopId);
         return returnObject;
+    }
+
+    @Override
+    public ReturnObject<SimpleShopDTO> getSimpleShopByShopId(Long shopId) {
+        return goodsDao.getSimpleShopByShopId(shopId);
     }
 
 }

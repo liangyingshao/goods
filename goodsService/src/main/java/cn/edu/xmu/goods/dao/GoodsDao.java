@@ -11,10 +11,12 @@ import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.goods.model.GoodsInfoDTO;
 import cn.edu.xmu.oomall.goods.model.GoodsSkuPoDTO;
+import cn.edu.xmu.oomall.goods.model.SimpleShopDTO;
 import cn.edu.xmu.oomall.goods.model.SkuInfoDTO;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
+import net.bytebuddy.asm.Advice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +42,8 @@ public class GoodsDao {
     private BrandPoMapper brandMapper;
     @Autowired
     private GoodsCategoryPoMapper categoryMapper;
+    @Autowired
+    private ShopPoMapper shopMapper;
 //上传图片相关变量
     private String davUsername="oomall";
     private String davPassword="admin";
@@ -608,5 +612,21 @@ public class GoodsDao {
         List<FloatPricePo> floatPo=floatMapper.selectByExample(floatExample);
         goodsInfoDTO.setPrice((floatPo==null||floatPo.size()==0)?skuPo.getOriginalPrice():floatPo.get(0).getActivityPrice());
         return goodsInfoDTO;
+    }
+
+    /**
+     * 根据shopID获取simple shop对象
+     */
+    public ReturnObject<SimpleShopDTO> getSimpleShopByShopId(Long shopId) {
+        ShopPo shopPo=shopMapper.selectByPrimaryKey(shopId);
+        log.info("in simpleShop");
+        if(shopPo==null){
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"shopId对应的商店不存在");
+        }
+        SimpleShopDTO simpleShopDTO=new SimpleShopDTO();
+        simpleShopDTO.setId(shopPo.getId());
+        simpleShopDTO.setName(shopPo.getName());
+        ReturnObject<SimpleShopDTO> returnObject = new ReturnObject<SimpleShopDTO>(simpleShopDTO);
+        return returnObject;
     }
 }

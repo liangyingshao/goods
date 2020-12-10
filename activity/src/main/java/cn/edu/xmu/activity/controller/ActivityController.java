@@ -23,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletResponse;
@@ -378,7 +379,7 @@ public class ActivityController {
         }
         CouponActivity activity=vo.createActivity();
         //设置activity状态，待修改
-        activity.setState(CouponActivity.DatabaseState.EXECUTABLE);
+        activity.setState(CouponActivity.DatabaseState.ONLINE);
         activity.setShopId(shopId);
         activity.setGmtCreate(LocalDateTime.now());
         ReturnObject retObject = activityService.addCouponActivity(activity);
@@ -429,7 +430,7 @@ public class ActivityController {
         }
         CouponActivity activity=vo.createActivity();
         //设置activity状态，待修改
-        activity.setState(CouponActivity.DatabaseState.EXECUTABLE);
+        activity.setState(CouponActivity.DatabaseState.OFFLINE);
         activity.setId(id);
         activity.setShopId(shopId);
         activity.setGmtCreate(LocalDateTime.now());
@@ -546,6 +547,42 @@ public class ActivityController {
         logger.debug("showCoupons:page="+page+" pageSize="+pageSize);
         ReturnObject<PageInfo<CouponActivityByNewCouponRetVo>> returnObject=activityService.showInvalidCouponActivities(id,page,pageSize);
         return returnObject;
+    }
+
+    /**
+     * 优惠活动上传图片
+     * @param shopId
+     * @param id
+     * @param file
+     * @return Object
+     */
+    @ApiOperation(value="优惠活动上传图片")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header",dataType = "String",name = "authorization",value = "用户token",required = true),
+            @ApiImplicitParam(paramType = "formData", dataType = "file", name = "img", value ="文件", required = true),
+            @ApiImplicitParam(paramType = "path",dataType = "Long",name = "shopId",value = "店铺id",required = true),
+            @ApiImplicitParam(paramType = "path",dataType = "Long",name = "id",value = "活动id",required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 506, message = "该目录文件夹没有写入的权限"),
+            @ApiResponse(code = 508, message = "图片格式不正确"),
+            @ApiResponse(code = 509, message = "图片大小超限")
+    })
+    @Audit
+    @PostMapping("/shops/{shopId}/couponactivities/{id}/uploadImg")
+    public Object uploadSpuImg(@PathVariable Long shopId,@PathVariable Long id,
+                               @RequestParam("img") MultipartFile file,
+                               @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
+                               @Depart @ApiIgnore @RequestParam(required = false) Long departId){
+        logger.debug("uploadSpuImg: activityid = "+ id+" shopId="+shopId +" img=" + file.getOriginalFilename());
+
+        CouponActivity activity=new CouponActivity();
+        activity.setShopId(shopId);
+        activity.setId(id);
+        activity.setGmtModified(LocalDateTime.now());
+        ReturnObject retObject = activityService.uploadActivityImg(activity,file);
+        return Common.getNullRetObj(retObject, httpServletResponse);
     }
 
     /* groupon begin */

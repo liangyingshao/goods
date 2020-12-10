@@ -125,10 +125,10 @@ public class qcyTest2 {
     @Test
     public void addCouponActivity1() throws JSONException {
         CouponActivityCreateVo vo=new CouponActivityCreateVo();
-        vo.setName("appleSale");
+        vo.setName("lipstickSale");
         vo.setBeginTime(LocalDateTime.now().toString());
-        vo.setEndTime(LocalDateTime.of(2020,12,31,10,0,0).toString());
-        vo.setQuantity(10000);
+        vo.setEndTime(LocalDateTime.of(2020,12,31,8,0,0).toString());
+        vo.setQuantity(30000);
         vo.setQuantityType(1);
         vo.setStrategy("{\"id\":1,\"name\":\"couponstrategy\", \"shresholds\":{\"type\":\"满减\",\"value\":\"200\",\"discount\":\"30\"}");
         vo.setValidTerm(0);

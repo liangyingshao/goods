@@ -392,7 +392,7 @@ public class GoodsSpuDao {
     /**
      * 上传商品SPU图片
      * @param spu
-     * @return  GoodsSpuPo
+     * @return  ReturnObject
      * @author 24320182203254 秦楚彦
      * Created at 2020/12/03 12：32
      */
