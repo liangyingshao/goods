@@ -1,9 +1,12 @@
 package cn.edu.xmu.flashsale.service;
 import cn.edu.xmu.flashsale.dao.FlashSaleDao;
+import cn.edu.xmu.flashsale.model.vo.FlashsaleItemRetVo;
 import cn.edu.xmu.flashsale.model.vo.FlashsaleNewRetVo;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
+import cn.edu.xmu.oomall.goods.model.SkuInfoDTO;
+import cn.edu.xmu.oomall.goods.service.IGoodsService;
 import cn.edu.xmu.oomall.other.model.TimeDTO;
 import cn.edu.xmu.oomall.other.service.ITimeService;
 import org.apache.dubbo.config.annotation.DubboReference;
@@ -69,4 +72,5 @@ public class FlashsaleService {
     public ReturnObject updateflashsale(Long id, LocalDateTime flashDate) {
         return flashsaleDao.updateflashsale(id, flashDate);
     }
+
 }

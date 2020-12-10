@@ -92,4 +92,20 @@ public class FlashsaleControllerTest {
         }
     }
 
+    @Test
+    public void addSKUofTopic() {
+        String responseString = null;
+        String token = creatTestToken(1L, 0L, 100);
+        String json = "{ \"skuId\": 1,\"price\": 100,\"quantity\": 500}";
+        try {
+            responseString = this.mvc.perform(post("/flashsale/flashsales/1/flashitems").header("authorization", token)
+                    .contentType("application/json;charset=UTF-8")
+                    .content(json))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andReturn().getResponse().getContentAsString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

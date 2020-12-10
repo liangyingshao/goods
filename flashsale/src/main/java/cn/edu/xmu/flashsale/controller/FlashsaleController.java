@@ -1,6 +1,8 @@
 package cn.edu.xmu.flashsale.controller;
 
+import cn.edu.xmu.flashsale.model.vo.FlashsaleItemVo;
 import cn.edu.xmu.flashsale.model.vo.FlashsaleModifVo;
+import cn.edu.xmu.flashsale.service.FlashsaleItemService;
 import cn.edu.xmu.flashsale.service.FlashsaleService;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
@@ -14,6 +16,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -34,6 +37,9 @@ public class FlashsaleController {
 
     @Autowired
     private HttpServletResponse httpServletResponse;
+
+    @Autowired
+    private FlashsaleItemService flashslaeItemService;
 
     @ApiOperation(value = "flashsale001:查询某一时段秒杀活动详情",  produces="application/json")
     @ApiImplicitParams({
@@ -112,4 +118,30 @@ public class FlashsaleController {
         ReturnObject returnObject = flashsaleService.updateflashsale(id, vo.getFlashDate());
         return Common.decorateReturnObject(returnObject);
     }
+
+    @ApiOperation(value = "flashsale006:平台管理员向秒杀活动添加商品SKU",produces = "application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value = "Token", required = true, dataType = "String", paramType = "header"),
+            @ApiImplicitParam(name = "id", required = true, dataType = "Long", paramType = "path"),
+            @ApiImplicitParam(name = "vo", required = true, dataType = "FlashsaleItemVo", paramType = "body")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功")
+    })
+    @PostMapping("flashsales/{id}/flashitems")
+    public Object addSKUofTopic(@PathVariable Long id, @Validated @RequestBody FlashsaleItemVo vo, BindingResult bindingResult) {
+        Object object = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if(null != object)
+        {
+            return object;
+        }
+        ReturnObject returnObject = flashslaeItemService.addSKUofTopic(id, vo.getSkuId(), vo.getPrice(), vo.getQuantity());
+        if(returnObject.getData()!=null) {
+            return Common.decorateReturnObject(returnObject);
+        } else {
+            return Common.getNullRetObj(new ReturnObject<>(returnObject.getCode(), returnObject.getErrmsg()), httpServletResponse);
+        }
+    }
+
+
 }

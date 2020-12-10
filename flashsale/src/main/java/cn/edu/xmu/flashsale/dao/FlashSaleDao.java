@@ -1,8 +1,10 @@
 package cn.edu.xmu.flashsale.dao;
 
 import cn.edu.xmu.flashsale.mapper.FlashSalePoMapper;
+import cn.edu.xmu.flashsale.model.po.FlashSaleItemPoExample;
 import cn.edu.xmu.flashsale.model.po.FlashSalePo;
 import cn.edu.xmu.flashsale.model.po.FlashSalePoExample;
+import cn.edu.xmu.flashsale.model.vo.FlashsaleItemRetVo;
 import cn.edu.xmu.flashsale.model.vo.FlashsaleNewRetVo;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
@@ -135,4 +137,5 @@ public class FlashSaleDao {
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
         }
     }
+
 }
