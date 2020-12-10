@@ -4,9 +4,11 @@ import cn.edu.xmu.flashsale.model.vo.FlashsaleItemVo;
 import cn.edu.xmu.flashsale.model.vo.FlashsaleModifVo;
 import cn.edu.xmu.flashsale.service.FlashsaleItemService;
 import cn.edu.xmu.flashsale.service.FlashsaleService;
+import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
+import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -143,5 +145,36 @@ public class FlashsaleController {
         }
     }
 
+    @ApiOperation(value = "flashsale007:获取秒杀活动商品",produces = "application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value = "Token", required = true, dataType = "String", paramType = "header"),
+            @ApiImplicitParam(name = "id", required = true, dataType = "Long", paramType = "path"),//秒杀id
+            @ApiImplicitParam(name="page", required = false, dataType = "int", paramType = "query", value="页码"),
+            @ApiImplicitParam(name="pageSize", required = false, dataType = "int", paramType = "query", value="每页数目")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功")
+    })
+    @GetMapping("/flashsales/{id}/flashitems")
+    public Object getSKUofTopic(@PathVariable Long id, @RequestParam(required = false, defaultValue = "1") Integer page, @RequestParam(required = false, defaultValue = "10") Integer pageSize)
+    {
+        ReturnObject<PageInfo<VoObject>> returnObject = flashslaeItemService.getSKUofTopic(id, page, pageSize);
+        return Common.getPageRetObject(returnObject);
+    }
+
+    @ApiOperation(value = "flashsale008:平台管理员在秒杀活动删除商品SKU",produces = "application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value = "Token", required = true, dataType = "String", paramType = "header"),
+            @ApiImplicitParam(name = "fid", required = true, dataType = "Long", paramType = "path"),//秒杀id
+            @ApiImplicitParam(name = "id", required = true, dataType = "Long", paramType = "path")//秒杀项id
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功")
+    })
+    @DeleteMapping("/flashsales/{fid}/flashitems/{id}")
+    public Object deleteKUofTopic(@PathVariable Long fid, @PathVariable Long id) {
+        ReturnObject object = flashslaeItemService.deleteKUofTopic(fid, id);
+        return Common.decorateReturnObject(object);
+    }
 
 }
