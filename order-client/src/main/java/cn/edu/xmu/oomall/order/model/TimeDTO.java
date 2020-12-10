@@ -1,4 +1,4 @@
-package cn.edu.xmu.oomall.other.model;
+package cn.edu.xmu.oomall.order.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

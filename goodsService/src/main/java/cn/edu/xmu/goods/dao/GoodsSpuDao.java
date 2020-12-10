@@ -48,9 +48,9 @@ public class GoodsSpuDao {
     private FloatPricePoMapper floatMapper;
 
     //上传图片相关变量
-    private String davUsername="oomall";
-    private String davPassword="admin";
-    private String baseUrl="http://192.168.148.131:8888/webdav/";//需要写成我们组服务器的webdev地址
+    private String davUsername="night";
+    private String davPassword="tiesuolianhuan123";
+    private String baseUrl="http://172.16.4.146:8888/webdav/";//需要写成我们组服务器的webdev地址
 
     /**
      * 增加一个SPU

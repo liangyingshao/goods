@@ -25,11 +25,13 @@ import org.springframework.stereotype.Repository;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Repository
 public class CouponDao implements InitializingBean
@@ -75,8 +77,8 @@ public class CouponDao implements InitializingBean
                 redisTemplate.delete(fieldName[i]+suffixName);
             }
         }
-
     }
+
 
     /**
      * 查找布隆过滤器里是否有该用户领过该活动优惠券的记录
@@ -168,24 +170,6 @@ public class CouponDao implements InitializingBean
      */
     public List<CouponSkuPo> getCouponSkuList(Long id)
     {
-//        GoodsSkuPo skuPo;
-//        GoodsSku sku;
-        //根据活动id得到SKU的id列表，返回给service层，service根据sku的id调用远程服务得到{name,id}
-//        PageHelper.startPage(page,pageSize);
-//        logger.debug("page="+page+" pageSize="+pageSize);
-//        CouponSkuPoExample couponSkuExample=new CouponSkuPoExample();
-//        CouponSkuPoExample.Criteria couponSpuCriteria =couponSkuExample.createCriteria();
-//        couponSpuCriteria.andActivityIdEqualTo(id);
-//        List<CouponSkuPo>couponSkuPos=couponSkuMapper.selectByExample(couponSkuExample);
-//        List<GoodsSkuCouponRetVo>skuCouponRetVos=new ArrayList<>();
-//        for(CouponSkuPo couponSkuPo:couponSkuPos)
-//        {
-//            skuPo=skuMapper.selectByPrimaryKey(couponSkuPo.getSkuId());
-//            sku=new GoodsSku(skuPo);
-//            GoodsSkuCouponRetVo retVo=new GoodsSkuCouponRetVo();
-//            retVo.set(sku);
-//            skuCouponRetVos.add(retVo);
-//        }
         CouponSkuPoExample example = new CouponSkuPoExample();
         CouponSkuPoExample.Criteria criteria = example.createCriteria();
         criteria.andActivityIdEqualTo(id);
@@ -211,51 +195,55 @@ public class CouponDao implements InitializingBean
         //对每个SKU进行判断、添加
         for(CouponSku couponSku:couponSkus)
         {
+            //【已删除】
+            if(CouponActivity.DatabaseState.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.DatabaseState.DELETED))
+                return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
 
-            //活动“待上线”
-            if (activityPo.getBeginTime().isAfter(LocalDateTime.now())//考虑到惰性更新状态【待上线】->【进行中】的情况
-                    && CouponActivity.DatabaseState.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.DatabaseState.EXECUTABLE))//【可执行】
-            {
-                //之前没有添加过该SKU
-                CouponSkuPoExample alreadyExample=new CouponSkuPoExample();
-                CouponSkuPoExample.Criteria alreadyCriteria=alreadyExample.createCriteria();
-                alreadyCriteria.andSkuIdEqualTo(couponSku.getSkuId());
-                alreadyCriteria.andActivityIdEqualTo(id);
-                List<CouponSkuPo> alreadyPos=couponSkuMapper.selectByExample(alreadyExample);
-                if(alreadyPos!=null&&alreadyPos.size()>0)return new ReturnObject(ResponseCode.ACTIVITYALTER_INVALID);
+            //【已上线】
+            if(CouponActivity.DatabaseState.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.DatabaseState.DELETED))
+                return new ReturnObject(ResponseCode.COUPONACT_STATENOTALLOW);
 
-                CouponSkuPo couponSkuPo = couponSku.getCouponSkuPo();
-                couponSkuPo.setActivityId(id);
-                couponSkuPo.setGmtCreate(LocalDateTime.now());
-                couponSkuPo.setGmtModified(LocalDateTime.now());
-                try {
-                    int ret = couponSkuMapper.insert(couponSkuPo);
-                    if (ret == 0) {
-                        //插入失败
-                        logger.debug("createCouponSpu: insert couponSku fail : " + couponSkuPo.toString());
-                        return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("couponSpu字段不合法：" + couponSkuPo.toString()));
-                    } else {
-                        //插入成功
-                        logger.debug("createCouponSku: insert couponSku = " + couponSkuPo.toString());
-                        //检验
-                        CouponSkuPoExample couponSpuExample = new CouponSkuPoExample();
-                        CouponSkuPoExample.Criteria couponSpuCriteria = couponSpuExample.createCriteria();
-                        couponSpuCriteria.andActivityIdEqualTo(couponSkuPo.getActivityId());
-                        couponSpuCriteria.andSkuIdEqualTo(couponSkuPo.getSkuId());
-                        List<CouponSkuPo> checkPos = couponSkuMapper.selectByExample(couponSpuExample);
-                        if (checkPos.size() == 0)
-                            return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("couponSku字段不合法：" + couponSkuPo.toString()));
-                    }
-                } catch (DataAccessException e) {
-                    // 其他数据库错误
-                    logger.debug("other sql exception : " + e.getMessage());
-                    return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
-                } catch (Exception e) {
-                    // 其他Exception错误
-                    logger.error("other exception : " + e.getMessage());
-                    return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+            //【已下线】
+            //之前没有添加过该SKU
+            CouponSkuPoExample alreadyExample=new CouponSkuPoExample();
+            CouponSkuPoExample.Criteria alreadyCriteria=alreadyExample.createCriteria();
+            alreadyCriteria.andSkuIdEqualTo(couponSku.getSkuId());
+            alreadyCriteria.andActivityIdEqualTo(id);
+            List<CouponSkuPo> alreadyPos=couponSkuMapper.selectByExample(alreadyExample);
+            if(alreadyPos!=null&&alreadyPos.size()>0)return new ReturnObject(ResponseCode.ACTIVITYALTER_INVALID);
+
+            //尝试插入
+            CouponSkuPo couponSkuPo = couponSku.getCouponSkuPo();
+            couponSkuPo.setActivityId(id);
+            couponSkuPo.setGmtCreate(LocalDateTime.now());
+            couponSkuPo.setGmtModified(LocalDateTime.now());
+            try {
+                int ret = couponSkuMapper.insert(couponSkuPo);
+                if (ret == 0) {
+                    //插入失败
+                    logger.debug("createCouponSpu: insert couponSku fail : " + couponSkuPo.toString());
+                    return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("couponSpu字段不合法：" + couponSkuPo.toString()));
+                } else {
+                    //插入成功
+                    logger.debug("createCouponSku: insert couponSku = " + couponSkuPo.toString());
+                    //检验
+                    CouponSkuPoExample couponSpuExample = new CouponSkuPoExample();
+                    CouponSkuPoExample.Criteria couponSpuCriteria = couponSpuExample.createCriteria();
+                    couponSpuCriteria.andActivityIdEqualTo(couponSkuPo.getActivityId());
+                    couponSpuCriteria.andSkuIdEqualTo(couponSkuPo.getSkuId());
+                    List<CouponSkuPo> checkPos = couponSkuMapper.selectByExample(couponSpuExample);
+                    if (checkPos.size() == 0)
+                        return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("couponSku字段不合法：" + couponSkuPo.toString()));
                 }
-            } else return new ReturnObject<>(ResponseCode.COUPONACT_STATENOTALLOW);
+            } catch (DataAccessException e) {
+                // 其他数据库错误
+                logger.debug("other sql exception : " + e.getMessage());
+                return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+            } catch (Exception e) {
+                // 其他Exception错误
+                logger.error("other exception : " + e.getMessage());
+                return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+            }
         }
         return new ReturnObject();
     }
@@ -276,36 +264,40 @@ public class CouponDao implements InitializingBean
         CouponActivityPo activityPo= activityMapper.selectByPrimaryKey(couponSkuPo.getActivityId());
         if(activityPo.getShopId()!=shopId)return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
 
-        //活动"未上线"
-        if(activityPo.getBeginTime().isAfter(LocalDateTime.now())//未开始
-                && CouponActivity.DatabaseState.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.DatabaseState.EXECUTABLE))//【可执行】
-        {
-            try{
-                int ret=couponSkuMapper.deleteByPrimaryKey(id);
-                if(ret==0){
-                    //删除失败
-                    logger.debug("deleteCouponSpu: delete couponSpu fail : " + couponSkuPo.toString());
-                    return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("couponSpu字段不合法：" + couponSkuPo.toString()));
-                }
-                else {
-                    //删除成功
-                    logger.debug("deleteCouponSpu: delete couponSpu = " + couponSkuPo.toString());
-                    return new ReturnObject<>();
-                }
+        //【已删除】
+        if(CouponActivity.DatabaseState.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.DatabaseState.DELETED))
+            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+
+        //【已上线】
+        if(CouponActivity.DatabaseState.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.DatabaseState.DELETED))
+            return new ReturnObject(ResponseCode.COUPONACT_STATENOTALLOW);
+
+        //【已下线】
+        //尝试删除
+        try{
+            int ret=couponSkuMapper.deleteByPrimaryKey(id);
+            if(ret==0){
+                //删除失败
+                logger.debug("deleteCouponSpu: delete couponSpu fail : " + couponSkuPo.toString());
+                return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("couponSpu字段不合法：" + couponSkuPo.toString()));
             }
-            catch (DataAccessException e)
-            {
-                // 其他数据库错误
-                logger.debug("other sql exception : " + e.getMessage());
-                return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
-            }
-            catch (Exception e) {
-                // 其他Exception错误
-                logger.error("other exception : " + e.getMessage());
-                return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+            else {
+                //删除成功
+                logger.debug("deleteCouponSpu: delete couponSpu = " + couponSkuPo.toString());
+                return new ReturnObject<>();
             }
         }
-        else return new ReturnObject(ResponseCode.COUPONACT_STATENOTALLOW);
+        catch (DataAccessException e)
+        {
+            // 其他数据库错误
+            logger.debug("other sql exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
     }
 
     /**
@@ -389,7 +381,7 @@ public class CouponDao implements InitializingBean
         //在用户名下
         if(couponPo.getCustomerId()!=userId)return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
 
-        if(couponPo.getBeginTime().isBefore(LocalDateTime.now())&&couponPo.getEndTime().isAfter(LocalDateTime.now())//在进行中范围
+        if(!couponPo.getBeginTime().isAfter(LocalDateTime.now())&&couponPo.getEndTime().isAfter(LocalDateTime.now())//在进行中范围
                 &&!Coupon.State.getTypeByCode(couponPo.getState().intValue()).equals(Coupon.State.DISABLED)//未失效
                 &&!Coupon.State.getTypeByCode(couponPo.getState().intValue()).equals(Coupon.State.USED))//未使用
         {
@@ -481,13 +473,16 @@ public class CouponDao implements InitializingBean
      */
     public ReturnObject<List<CouponNewRetVo>> getCoupon(Long userId, Long id)
     {
+        int quantity;
         CouponActivityPo activityPo=activityMapper.selectByPrimaryKey(id);
 
         //活动不存在
-        if(activityPo==null)return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        if(activityPo==null||
+                CouponActivity.DatabaseState.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.DatabaseState.DELETED))
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
 
         //状态为OFFLINE
-        if(CouponActivity.DatabaseState.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.DatabaseState.CANCELED))
+        if(CouponActivity.DatabaseState.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.DatabaseState.OFFLINE))
             return new ReturnObject<>(ResponseCode.COUPON_END);
 
         //状态为FINISHED
@@ -505,24 +500,58 @@ public class CouponDao implements InitializingBean
         if(returnObject.getCode().equals(ResponseCode.COUPON_FINISH))return returnObject;
 
         //查询优惠券发放情况
-        CouponPoExample alreadyExample=new CouponPoExample();
-        CouponPoExample.Criteria alreadyCriteria= alreadyExample.createCriteria();
-        alreadyCriteria.andActivityIdEqualTo(id);
-        //每人限量模式
-        if(CouponActivity.Type.getTypeByCode(activityPo.getQuantitiyType().intValue()).equals(CouponActivity.Type.LIMIT_PER_PERSON))
-            alreadyCriteria.andCustomerIdEqualTo(userId);
-        List<CouponPo> alreadyPos=couponMapper.selectByExample(alreadyExample);
-        //券已领罄
-        if(alreadyPos.size()==activityPo.getQuantity()//总量控制模式下券已发完或每人限量模式下该用户领的券已达上限
-                ||(CouponActivity.Type.getTypeByCode(activityPo.getQuantitiyType().intValue()).equals(CouponActivity.Type.LIMIT_TOTAL_NUM)&&alreadyPos.size()>0))//总量控制模式下该用户已领过券
+        //先找redis
+        String key="ca_"+id;
+        if(redisTemplate.opsForHash().hasKey(key,"quantity"))
         {
-            setBloomFilterOfCoupon(id,userId);
-            return new ReturnObject<>(ResponseCode.COUPON_FINISH);
+            if(redisTemplate.opsForHash().get(key,"quantityType").equals(CouponActivity.Type.LIMIT_PER_PERSON))
+                quantity= (int) redisTemplate.opsForHash().get(key,"quantity");
+            else if(redisTemplate.opsForHash().get(key,"quantity").equals(0))
+                    return new ReturnObject<>(ResponseCode.COUPON_FINISH);
+            else quantity=1;
+        }
+        //没在redis找到，需查数据库
+        else {
+            CouponPoExample alreadyExample = new CouponPoExample();
+            CouponPoExample.Criteria alreadyCriteria = alreadyExample.createCriteria();
+            alreadyCriteria.andActivityIdEqualTo(id);
+            //每人限量模式
+            if (CouponActivity.Type.getTypeByCode(activityPo.getQuantitiyType().intValue()).equals(CouponActivity.Type.LIMIT_PER_PERSON))
+                alreadyCriteria.andCustomerIdEqualTo(userId);
+            List<CouponPo> alreadyPos = couponMapper.selectByExample(alreadyExample);
+
+            CouponActivity.DatabaseState state=CouponActivity.DatabaseState.getTypeByCode(activityPo.getQuantitiyType().intValue());
+            redisTemplate.opsForHash().put(key,"quantityType",state.getCode().byteValue());
+            int size= alreadyPos.size();
+            int couponQuantity=activityPo.getQuantity();
+            //券已领罄
+            //总量控制模式下券已发完或每人限量模式下该用户领的券已达上限
+            if (couponQuantity==size)
+            {
+                //每人限发模式下领取数量达到上限
+                if(state.equals(CouponActivity.Type.LIMIT_PER_PERSON))
+                {
+                    redisTemplate.opsForHash().put(key,"quantity",couponQuantity);
+                    setBloomFilterOfCoupon(id, userId);
+                }
+                else redisTemplate.opsForHash().put(key,"quantity",0);
+                return new ReturnObject<>(ResponseCode.COUPON_FINISH);
+            }
+
+            //总量控制模式下该用户已领过券
+            if(state.equals(CouponActivity.Type.LIMIT_TOTAL_NUM) && size > 0)
+            {
+                setBloomFilterOfCoupon(id, userId);
+                redisTemplate.opsForHash().put(key,"quantity",couponQuantity-size);
+                return new ReturnObject<>(ResponseCode.COUPON_FINISH);
+            }
+
+            quantity=CouponActivity.Type.getTypeByCode(activityPo.getQuantitiyType().intValue()).equals(CouponActivity.Type.LIMIT_PER_PERSON)?activityPo.getQuantity():1;
         }
 
         //可领券，设置券属性
         List<CouponNewRetVo>retVos=new ArrayList<>();
-        for(int i=0;i<(CouponActivity.Type.getTypeByCode(activityPo.getQuantitiyType().intValue()).equals(CouponActivity.Type.LIMIT_PER_PERSON)?activityPo.getQuantity():1);i++)
+        for(int i=0;i<quantity;i++)
         {
             CouponPo newPo = new CouponPo();
             newPo.setCustomerId(userId);
@@ -966,7 +995,7 @@ public class CouponDao implements InitializingBean
             activityPo=activityMapper.selectByPrimaryKey(couponSkuPo.getActivityId());
             LocalDateTime beginTime=activityPo.getBeginTime();
             LocalDateTime endTime=activityPo.getEndTime();
-            if(CouponActivity.DatabaseState.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.DatabaseState.EXECUTABLE)&&
+            if(CouponActivity.DatabaseState.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.DatabaseState.ONLINE)&&
             !beginTime.isAfter(LocalDateTime.now())&&endTime.isAfter(LocalDateTime.now()))
             {
                 CouponInfoDTO couponInfoDTO=new CouponInfoDTO();
@@ -978,5 +1007,62 @@ public class CouponDao implements InitializingBean
             }
         }
         return couponInfoDTOs;
+    }
+
+    /**
+     * 将明天要上线的优惠活动详情load到redis
+     */
+    public void loadingTomorrowActivities(){
+
+        CouponActivityPoExample activityExample=new CouponActivityPoExample();
+        CouponActivityPoExample.Criteria criteria=activityExample.createCriteria();
+        criteria.andStateEqualTo((byte)0);//必须为可执行活动
+        //明天上线的活动
+        LocalDateTime searchTime= LocalDateTime.now();
+        searchTime=searchTime.plusDays(2);
+        searchTime=searchTime.minusHours(searchTime.getHour());
+        searchTime=searchTime.minusMinutes(searchTime.getMinute());
+        searchTime=searchTime.minusSeconds(searchTime.getSecond());
+        searchTime=searchTime.minusNanos(searchTime.getNano());
+        LocalDateTime searchTimeMax=searchTime;//时间段上限
+        LocalDateTime searchTimeMin=searchTime.minusDays(1);//时间段下限
+        criteria.andBeginTimeGreaterThanOrEqualTo(searchTimeMin);//beginTime>=明日零点
+        criteria.andBeginTimeLessThan(searchTimeMax);//beginTime<后日零点
+
+        List<CouponActivityPo> activityPos=null;
+        try{
+            activityPos=activityMapper.selectByExample(activityExample);
+            if(activityPos.size()==0)
+                return;
+
+            for(CouponActivityPo po:activityPos){
+                CouponActivity bo=new CouponActivity(po);
+                String key="ca_"+po.getId();
+                //若redis中无该优惠活动或该活动quantity有变化
+                if(!redisTemplate.opsForHash().hasKey(key,"quantity")||!redisTemplate.opsForHash().get(key,"quantity").equals(po.getQuantity())){
+
+                    redisTemplate.opsForHash().delete(key,"quantity");
+                    redisTemplate.opsForHash().put(key,"quantity",po.getQuantity());
+                }
+                //若redis中无该优惠活动或该活动quantityType有变化
+                if(!redisTemplate.opsForHash().hasKey(key,"quantityType")||!redisTemplate.opsForHash().get(key,"quantityType").equals(po.getQuantitiyType())){
+
+                    redisTemplate.opsForHash().delete(key,"quantityType");
+                    redisTemplate.opsForHash().put(key,"quantityType",po.getQuantitiyType());
+                }
+                //设置过期时间为活动结束时间
+                LocalDateTime timeNow=LocalDateTime.now();
+                Duration duration = Duration.between(timeNow,po.getEndTime());
+                long timeOut=duration.toHours();
+                redisTemplate.expire(key,timeOut, TimeUnit.HOURS);
+            }
+        }
+        catch (DataAccessException e){
+            logger.error("selectAllRole: DataAccessException:" + e.getMessage());
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+        }
     }
 }

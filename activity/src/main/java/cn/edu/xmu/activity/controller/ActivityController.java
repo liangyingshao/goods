@@ -548,7 +548,6 @@ public class ActivityController {
         return returnObject;
     }
 
-
     /* groupon begin */
     /**
      * description: modifyGrouponofSPU
