@@ -136,9 +136,9 @@ public class GoodsDao {
             if(!spuSn.isBlank())spuCriteria.andGoodsSnEqualTo(spuSn);
             if(shopId!=null)spuCriteria.andShopIdEqualTo(shopId);
             List<GoodsSpuPo> spuPos=spuMapper.selectByExample(spuExample);
-            for (int i=0;i<spuPos.size();++i)
+            for (GoodsSpuPo spuPo:spuPos)
             {
-                skuCriteria.andGoodsSpuIdEqualTo(spuPos.get(i).getId());
+                skuCriteria.andGoodsSpuIdEqualTo(spuPo.getId());
                 skuPos.addAll(skuMapper.selectByExample(skuExample));
             }
         }
