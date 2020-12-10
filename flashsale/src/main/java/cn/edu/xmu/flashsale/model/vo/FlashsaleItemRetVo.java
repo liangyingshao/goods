@@ -33,6 +33,10 @@ public class FlashsaleItemRetVo implements VoObject {
         this.gmtModified = bo.getGmtModified();
     }
 
+    public FlashsaleItemRetVo() {
+
+    }
+
     @Override
     public Object createVo() {
         return null;

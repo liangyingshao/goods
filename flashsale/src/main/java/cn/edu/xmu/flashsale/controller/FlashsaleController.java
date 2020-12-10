@@ -1,5 +1,6 @@
 package cn.edu.xmu.flashsale.controller;
 
+import cn.edu.xmu.flashsale.model.vo.FlashsaleItemRetVo;
 import cn.edu.xmu.flashsale.model.vo.FlashsaleItemVo;
 import cn.edu.xmu.flashsale.model.vo.FlashsaleModifVo;
 import cn.edu.xmu.flashsale.service.FlashsaleItemService;
@@ -16,9 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -51,9 +52,8 @@ public class FlashsaleController {
             @ApiResponse(code = 0, message = "成功")
     })
     @GetMapping("/timesegments/{id}/flashsales")
-    public Object queryTopicsByTime(@PathVariable Long id) {
-        ReturnObject object = flashsaleService.queryTopicsByTime(id);
-        return Common.decorateReturnObject(object);
+    public Flux<FlashsaleItemRetVo> queryTopicsByTime(@PathVariable Long id) {
+        return flashslaeItemService.queryTopicsByTime(id);
     }
 
     @ApiOperation(value = "flashsale002:平台管理员在某个时段下新建秒杀",  produces="application/json")
