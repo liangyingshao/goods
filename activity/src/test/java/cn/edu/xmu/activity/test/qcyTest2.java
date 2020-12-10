@@ -313,26 +313,26 @@ public class qcyTest2 {
                 .andReturn().getResponse().getContentAsString();
         System.out.println(responseString);
 
-        responseString=this.mvc.perform(get("/goods/couponactivities")
-                .queryParam("page", "2").queryParam("pageSize", "2").queryParam("shopId","1"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json;charset=UTF-8"))
-                .andReturn().getResponse().getContentAsString();
-        System.out.println(responseString);
-
-        responseString=this.mvc.perform(get("/goods/couponactivities")
-                .queryParam("page", "2").queryParam("pageSize", "3"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json;charset=UTF-8"))
-                .andReturn().getResponse().getContentAsString();
-        System.out.println(responseString);
-
-        responseString=this.mvc.perform(get("/goods/couponactivities")
-                .queryParam("page", "2").queryParam("pageSize", "2").queryParam("shopId","3"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json;charset=UTF-8"))
-                .andReturn().getResponse().getContentAsString();
-        System.out.println(responseString);
+//        responseString=this.mvc.perform(get("/goods/couponactivities")
+//                .queryParam("page", "2").queryParam("pageSize", "2").queryParam("shopId","1"))
+//                .andExpect(status().isOk())
+//                .andExpect(content().contentType("application/json;charset=UTF-8"))
+//                .andReturn().getResponse().getContentAsString();
+//        System.out.println(responseString);
+//
+//        responseString=this.mvc.perform(get("/goods/couponactivities")
+//                .queryParam("page", "2").queryParam("pageSize", "3"))
+//                .andExpect(status().isOk())
+//                .andExpect(content().contentType("application/json;charset=UTF-8"))
+//                .andReturn().getResponse().getContentAsString();
+//        System.out.println(responseString);
+//
+//        responseString=this.mvc.perform(get("/goods/couponactivities")
+//                .queryParam("page", "2").queryParam("pageSize", "2").queryParam("shopId","3"))
+//                .andExpect(status().isOk())
+//                .andExpect(content().contentType("application/json;charset=UTF-8"))
+//                .andReturn().getResponse().getContentAsString();
+//        System.out.println(responseString);
 
 
     }
