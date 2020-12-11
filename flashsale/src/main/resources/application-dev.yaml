@@ -1,10 +1,50 @@
+#
+#spring:
+#  cloud:
+#    nacos:
+#      discovery:
+#        server-addr: 127.0.0.1:8848
+#        group: flashsaleDubboGroup
+#  boot:
+#    admin:
+#      client:
+#        url: http://localhost:8081
+#  datasource:
+#    url: jdbc:mysql://localhost:3306/oomall_goods?serverTimezone=GMT%2B8
+#    username: dbuser
+#    password: 123456
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    druid:
+#      stat-view-servlet:
+#        login-username: admin
+#        login-password: 123456
+#        enabled: true
+#        url-pattern: /druid/*
+#  redis:
+#    # Redis服务器地址
+#    host: localhost
+#    # Redis服务器连接端口
+#    port: 6379
+#    # Redis服务器连接密码
+#    password: 123456
+#    #config set requirepass 123456
+#
+##dubbo:
+##  application:
+##    name: flashsale-service-dubbo
+##    qos-enable: false
+##    qos-accept-foreign-ip: false
+##  registry:
+##    address: nacos://127.0.0.1:8848
+##  protocol:
+##    name: dubbo
+##    port: 20880
+##  consumer:
+##    timeout: 4000
+##    check: false
+
 
 spring:
-  cloud:
-    nacos:
-      discovery:
-        server-addr: 127.0.0.1:8848
-        group: flashsaleDubboGroup
   boot:
     admin:
       client:
@@ -13,7 +53,6 @@ spring:
     url: jdbc:mysql://localhost:3306/oomall_goods?serverTimezone=GMT%2B8
     username: dbuser
     password: 123456
-    driver-class-name: com.mysql.cj.jdbc.Driver
     druid:
       stat-view-servlet:
         login-username: admin
@@ -27,18 +66,3 @@ spring:
     port: 6379
     # Redis服务器连接密码
     password: 123456
-    #config set requirepass 123456
-
-dubbo:
-  application:
-    name: flashsale-service-dubbo
-    qos-enable: false
-    qos-accept-foreign-ip: false
-  registry:
-    address: nacos://127.0.0.1:8848
-  protocol:
-    name: dubbo
-    port: 20880
-  consumer:
-    timeout: 4000
-    check: false

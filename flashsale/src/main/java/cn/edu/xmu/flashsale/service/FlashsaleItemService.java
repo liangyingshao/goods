@@ -4,12 +4,14 @@ import cn.edu.xmu.flashsale.dao.FlashSaleDao;
 import cn.edu.xmu.flashsale.dao.FlashSaleItemDao;
 import cn.edu.xmu.flashsale.model.bo.FlashSaleItem;
 import cn.edu.xmu.flashsale.model.po.FlashSaleItemPo;
+import cn.edu.xmu.flashsale.model.po.FlashSaleItemPoExample;
 import cn.edu.xmu.flashsale.model.vo.FlashsaleItemRetVo;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.goods.model.SkuInfoDTO;
 import cn.edu.xmu.oomall.goods.service.IGoodsService;
+import cn.edu.xmu.oomall.other.service.ITimeService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +38,9 @@ public class FlashsaleItemService {
 
     @DubboReference
     private IGoodsService goodsService;
+
+    @DubboReference
+    private ITimeService iTimeService;
 
     @Autowired
     private FlashSaleItemDao flashSaleItemDao;
@@ -98,5 +103,21 @@ public class FlashsaleItemService {
         }
         PageInfo<VoObject> flashsaleItemPage = PageInfo.of(itemRetVoList);
         return new ReturnObject<>(flashsaleItemPage);
+    }
+
+    public void loadRedis() {
+
+        Byte type = 1;
+        //List<Long> list = iTimeService.listSelectAllTimeSegmentId(type).getData();
+        List<Long> list = new ArrayList<>();
+        list.add(1L);
+        list.add(2L);
+        for (Long id : list) {
+            FlashSaleItemPoExample example = new FlashSaleItemPoExample();
+            FlashSaleItemPoExample.Criteria criteria = example.createCriteria();
+            //根据时段id查出该时段所有的item
+            //根据时段id+今天的date构造key
+            //存进redis
+        }
     }
 }

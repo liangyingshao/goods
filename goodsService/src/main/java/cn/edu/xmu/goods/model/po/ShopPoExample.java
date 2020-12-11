@@ -385,63 +385,63 @@ public class ShopPoExample {
             return (Criteria) this;
         }
 
-        public Criteria andGmtCreateIsNull() {
-            addCriterion("gmt_create is null");
+        public Criteria andGmtCreatedIsNull() {
+            addCriterion("gmt_created is null");
             return (Criteria) this;
         }
 
-        public Criteria andGmtCreateIsNotNull() {
-            addCriterion("gmt_create is not null");
+        public Criteria andGmtCreatedIsNotNull() {
+            addCriterion("gmt_created is not null");
             return (Criteria) this;
         }
 
-        public Criteria andGmtCreateEqualTo(LocalDateTime value) {
-            addCriterion("gmt_create =", value, "gmtCreate");
+        public Criteria andGmtCreatedEqualTo(LocalDateTime value) {
+            addCriterion("gmt_created =", value, "gmtCreated");
             return (Criteria) this;
         }
 
-        public Criteria andGmtCreateNotEqualTo(LocalDateTime value) {
-            addCriterion("gmt_create <>", value, "gmtCreate");
+        public Criteria andGmtCreatedNotEqualTo(LocalDateTime value) {
+            addCriterion("gmt_created <>", value, "gmtCreated");
             return (Criteria) this;
         }
 
-        public Criteria andGmtCreateGreaterThan(LocalDateTime value) {
-            addCriterion("gmt_create >", value, "gmtCreate");
+        public Criteria andGmtCreatedGreaterThan(LocalDateTime value) {
+            addCriterion("gmt_created >", value, "gmtCreated");
             return (Criteria) this;
         }
 
-        public Criteria andGmtCreateGreaterThanOrEqualTo(LocalDateTime value) {
-            addCriterion("gmt_create >=", value, "gmtCreate");
+        public Criteria andGmtCreatedGreaterThanOrEqualTo(LocalDateTime value) {
+            addCriterion("gmt_created >=", value, "gmtCreated");
             return (Criteria) this;
         }
 
-        public Criteria andGmtCreateLessThan(LocalDateTime value) {
-            addCriterion("gmt_create <", value, "gmtCreate");
+        public Criteria andGmtCreatedLessThan(LocalDateTime value) {
+            addCriterion("gmt_created <", value, "gmtCreated");
             return (Criteria) this;
         }
 
-        public Criteria andGmtCreateLessThanOrEqualTo(LocalDateTime value) {
-            addCriterion("gmt_create <=", value, "gmtCreate");
+        public Criteria andGmtCreatedLessThanOrEqualTo(LocalDateTime value) {
+            addCriterion("gmt_created <=", value, "gmtCreated");
             return (Criteria) this;
         }
 
-        public Criteria andGmtCreateIn(List<LocalDateTime> values) {
-            addCriterion("gmt_create in", values, "gmtCreate");
+        public Criteria andGmtCreatedIn(List<LocalDateTime> values) {
+            addCriterion("gmt_created in", values, "gmtCreated");
             return (Criteria) this;
         }
 
-        public Criteria andGmtCreateNotIn(List<LocalDateTime> values) {
-            addCriterion("gmt_create not in", values, "gmtCreate");
+        public Criteria andGmtCreatedNotIn(List<LocalDateTime> values) {
+            addCriterion("gmt_created not in", values, "gmtCreated");
             return (Criteria) this;
         }
 
-        public Criteria andGmtCreateBetween(LocalDateTime value1, LocalDateTime value2) {
-            addCriterion("gmt_create between", value1, value2, "gmtCreate");
+        public Criteria andGmtCreatedBetween(LocalDateTime value1, LocalDateTime value2) {
+            addCriterion("gmt_created between", value1, value2, "gmtCreated");
             return (Criteria) this;
         }
 
-        public Criteria andGmtCreateNotBetween(LocalDateTime value1, LocalDateTime value2) {
-            addCriterion("gmt_create not between", value1, value2, "gmtCreate");
+        public Criteria andGmtCreatedNotBetween(LocalDateTime value1, LocalDateTime value2) {
+            addCriterion("gmt_created not between", value1, value2, "gmtCreated");
             return (Criteria) this;
         }
 

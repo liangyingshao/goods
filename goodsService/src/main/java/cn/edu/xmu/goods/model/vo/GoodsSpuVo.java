@@ -12,6 +12,7 @@ import java.util.List;
  * 商品SPU VO
  * @author 24320182203254 秦楚彦
  * @date 2020/11/30 13:10
+ * modified 2020/12/11 12:20
  */
 @Data
 @ApiModel(description = "查看商品SPU信息视图对象")
@@ -23,19 +24,16 @@ public class GoodsSpuVo {
     private String name;
 
     @ApiModelProperty(name = "品牌")
-    private SimpleBrandVo brandVo;
+    private SimpleBrandVo brand;
 
     @ApiModelProperty(name = "类别")
-    private SimpleCategoryVo categoryVo;
-
-    @ApiModelProperty(name = "SKU列表")
-    private List<GoodsSkuRetVo> goodsSkuList;
+    private SimpleCategoryVo category;
 
     @ApiModelProperty(name = "运费模板")
-    private FreightVo freightvo;
+    private FreightVo freight;
 
     @ApiModelProperty(name = "店铺")
-    private SimpleShopVo shopVo;
+    private SimpleShopVo shop;
 
     @ApiModelProperty(name = "商品序列号")
     private String goodsSn;
@@ -49,6 +47,9 @@ public class GoodsSpuVo {
     @ApiModelProperty(name = "规格")
     private String spec;
 
+    @ApiModelProperty(name = "SKU列表")
+    private List<GoodsSkuRetVo> skuList;
+
     @ApiModelProperty(name = "SPU状态")
     private Byte state;
 
@@ -58,8 +59,8 @@ public class GoodsSpuVo {
     @ApiModelProperty(name = "SPU修改时间")
     private LocalDateTime gmtModified;
 
-//    @ApiModelProperty(name = "是否失效")
-//    private boolean disabled;
+    @ApiModelProperty(name = "是否失效")
+    private boolean disable;
 
     /**
      * 构造函数
@@ -72,11 +73,10 @@ public class GoodsSpuVo {
         this.goodsSn=bo.getGoodsSn();
         this.detail=bo.getDetail();
         this.imageUrl=bo.getImageUrl();
-        this.state=bo.getState().getCode().byteValue();
         this.spec=bo.getSpec();
         this.gmtCreate=bo.getGmtCreated();
         this.gmtModified=bo.getGmtModified();
-//        this.disabled=bo.isDisabled();
+        this.disable=bo.isDisable();
     }
 
 }
