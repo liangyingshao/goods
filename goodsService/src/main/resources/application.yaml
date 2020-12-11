@@ -1,3 +1,131 @@
+#management:
+#  endpoints:
+#    web:
+#      exposure:
+#        include: "*"
+#
+#server:
+#  port: 8090
+#  tomcat:
+#    threads:
+#      max: 1000
+#
+#dubbo:
+#  application:
+#    name: goods-service
+#    qos-enable: false
+#    qos-accept-foreign-ip: false
+#  registry:
+#    address: nacos://192.168.137.1:8848
+#  protocol:
+#    name: dubbo
+#    port: -1
+##    host:
+#  consumer:
+#    timeout: 4000
+#    check: false
+#  cloud:
+#    subscribed-services: activity-service
+#
+#spring:
+#  cloud:
+#    nacos:
+#      discovery:
+#        server-addr: 192.168.137.1:8848
+#  application:
+#    name: goods-service
+#  profiles:
+#    active: dev
+#  servlet:
+#    multipart:
+#      #是否使用http上传
+#      enabled: true
+#      #最大请求文件的大小
+#      max-request-size: 10MB
+#  main:
+#    allow-bean-definition-overriding: true
+#
+#  datasource:
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    type: com.alibaba.druid.pool.DruidDataSource
+##    initialization-mode: always
+#    schema: classpath:schema.sql
+#    data: classpath:testdata.sql
+#    druid:
+#      #初始化时建立物理连接的个数
+#      initial-size: 3
+#      #最小连接池数量
+#      min-idle: 3
+#      #最大连接池数量
+#      max-active: 100
+#      #获取连接时最大等待时间
+#      max-wait: 60000
+#      filter:
+#        stat:
+#          #是否开启慢sql查询监控
+#          log-slow-sql: true
+#          #慢SQL执行时间
+#          slow-sql-millis: 100
+#      validation-query: select 1
+#    sql-script-encoding: UTF-8
+#
+#  redis:
+#    # Redis数据库索引（默认为0）
+#    database: 0
+#    #连接池最大连接数（使用负值表示没有限制）
+#    lettuce:
+#      pool:
+#        max-active: 100
+#        # 连接池中的最大空闲连接
+#        max-idle: 100
+#        # 连接池中的最小空闲连接
+#        min-idle: 0
+#        #连接池最大阻塞等待时间（使用负值表示没有限制）
+#        max-wait: -1
+#    # 连接超时时间（毫秒）
+#    timeout: 5000
+#
+#mybatis:
+#  #po对象的包
+#  type-aliases-package: cn.edu.xmu.activity.model.po
+#  #mapper.xml所在的位置
+#  mapper-locations: classpath*:cn.edu.xmu.activity.mapper/*.xml
+#  #自动将SQL中查出来的带下划线的字段，转换为驼峰标志，再去匹配类中的属性
+#  configuration:
+#    #输出产生的SQL
+#    #log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+#    map-underscore-to-camel-case: true
+#
+#
+#goodsservice:
+#  #是否对数据库中的未初始化的数据初始化
+#  initialization: true
+#  #分布式锁失效时间（秒）
+#  lockerExpireTime: 30
+#  #dav信息配置
+#  dav:
+#    username: oomall
+#    password: admin
+#    baseUrl: http://192.168.148.131:8888/webdav/
+#
+#  user:
+#    # user的权限字在Redis中失效秒数
+#    expiretime: 600
+#  role:
+#    # role的权限字在Redis中失效秒数
+#    expiretime: 600
+#  login:
+#    #是否允许重复登录
+#    multiply: false
+#    #jwt过期的时间(秒)
+#    jwtExpire: 3600
+#
+#
+##pagehelper分页插件配置
+#pagehelper:
+#  helper-dialect: mysql
+#
+
 management:
   endpoints:
     web:
@@ -11,45 +139,42 @@ server:
       max: 1000
 
 dubbo:
+  # 配置服务信息
   application:
     name: goods-service
+    # 禁用QOS同一台机器可能会有端口冲突现象
     qos-enable: false
     qos-accept-foreign-ip: false
+  # 配置注册中心
   registry:
     address: nacos://127.0.0.1:8848
+    #192.168.137.1:8848
+  # 设置协议-协议由提供方指定消费方被动接受
   protocol:
     name: dubbo
-    port: -1
+    port: -1 # -1 表示端口自增 from 20880
+    # 设置超时时间
   consumer:
     timeout: 4000
     check: false
-  cloud:
-    subscribed-services: activity-service
 
 spring:
+  main:
+    # 解决Bean重复定义问题
+    allow-bean-definition-overriding: true
+  application:
+    name: goods-service
   cloud:
     nacos:
       discovery:
         server-addr: 127.0.0.1:8848
-  application:
-    name: goods-service
+        #192.168.137.1:8848
   profiles:
     active: dev
-  servlet:
-    multipart:
-      #是否使用http上传
-      enabled: true
-      #最大请求文件的大小
-      max-request-size: 10MB
-  main:
-    allow-bean-definition-overriding: true
-
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
-#    initialization-mode: always
-    schema: classpath:schema.sql
-    data: classpath:testdata.sql
+    initialization-mode: never
     druid:
       #初始化时建立物理连接的个数
       initial-size: 3
@@ -67,7 +192,6 @@ spring:
           slow-sql-millis: 100
       validation-query: select 1
     sql-script-encoding: UTF-8
-
   redis:
     # Redis数据库索引（默认为0）
     database: 0
@@ -86,41 +210,35 @@ spring:
 
 mybatis:
   #po对象的包
-  type-aliases-package: cn.edu.xmu.activity.model.po
+  type-aliases-package: cn.edu.xmu.goods.model.po
   #mapper.xml所在的位置
-  mapper-locations: classpath*:cn.edu.xmu.activity.mapper/*.xml
+  mapper-locations: classpath*:cn.edu.xmu.goods.mapper/*.xml
   #自动将SQL中查出来的带下划线的字段，转换为驼峰标志，再去匹配类中的属性
   configuration:
     #输出产生的SQL
     #log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     map-underscore-to-camel-case: true
 
-
-goodsservice:
-  #是否对数据库中的未初始化的数据初始化
-  initialization: true
-  #分布式锁失效时间（秒）
-  lockerExpireTime: 30
-  #dav信息配置
-  dav:
-    username: oomall
-    password: admin
-    baseUrl: http://192.168.148.131:8888/webdav/
-
-  user:
-    # user的权限字在Redis中失效秒数
-    expiretime: 600
-  role:
-    # role的权限字在Redis中失效秒数
-    expiretime: 600
-  login:
-    #是否允许重复登录
-    multiply: false
-    #jwt过期的时间(秒)
-    jwtExpire: 3600
+#privilegeservice:
+#  #是否对数据库中的未初始化的数据初始化
+#  initialization: false
+#  #分布式锁失效时间（秒）
+#  lockerExpireTime: 30
+#  #图片存储位置
+#  imglocation: ./img
+#  user:
+#    # user的权限字在Redis中失效秒数
+#    expiretime: 600
+#  role:
+#    # role的权限字在Redis中失效秒数
+#    expiretime: 600
+#  login:
+#    #是否允许重复登录
+#    multiply: false
+#    #jwt过期的时间(秒)
+#    jwtExpire: 3600
 
 
 #pagehelper分页插件配置
 pagehelper:
   helper-dialect: mysql
-

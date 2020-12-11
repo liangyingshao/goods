@@ -5,7 +5,6 @@ import cn.edu.xmu.activity.mapper.GrouponActivityPoMapper;
 import cn.edu.xmu.activity.model.bo.ActivityStatus;
 import cn.edu.xmu.activity.model.po.GrouponActivityPo;
 import cn.edu.xmu.activity.model.vo.GrouponVo;
-import cn.edu.xmu.goods.GoodsServiceApplication;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.JwtHelper;
 import org.junit.jupiter.api.Test;

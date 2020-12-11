@@ -163,6 +163,7 @@ dubbo:
     name: dubbo
     port: -1 # -1 表示端口自增 from 20880
     # 设置超时时间
+#    host:
   consumer:
     timeout: 4000
     check: false

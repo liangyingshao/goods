@@ -1,7 +1,5 @@
 package cn.edu.xmu.activity.model.vo;
 
-import cn.edu.xmu.activity.model.bo.Shop;
-import cn.edu.xmu.goods.model.po.GoodsSpuPo;
 import cn.edu.xmu.oomall.goods.model.GoodsSpuPoDTO;
 import cn.edu.xmu.oomall.goods.model.SimpleShopDTO;
 import lombok.Data;

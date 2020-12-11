@@ -2,8 +2,6 @@ package cn.edu.xmu.activity.model.bo;
 
 import cn.edu.xmu.activity.model.po.GrouponActivityPo;
 import cn.edu.xmu.activity.model.vo.NewGrouponRetVo;
-import cn.edu.xmu.goods.model.po.GoodsSpuPo;
-import cn.edu.xmu.goods.model.po.ShopPo;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.oomall.goods.model.GoodsSpuPoDTO;
 import cn.edu.xmu.oomall.goods.model.SimpleShopDTO;

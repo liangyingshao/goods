@@ -21,7 +21,7 @@ import java.util.List;
 @EnableSwagger2
 public class Swagger2Config {
 
-    public static final String SWAGGER_SCAN_BASE_PACKAGE = "cn.edu.xmu.oomall.address.controller";
+    public static final String SWAGGER_SCAN_BASE_PACKAGE = "cn.edu.xmu.activity.controller";
 
     public static final String VERSION = "1.0.0";
 
@@ -46,9 +46,9 @@ public class Swagger2Config {
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                 //页面标题
-                .title("其他模块")
+                .title("活动模块")
                 //描述
-                .description("其他模块 Restful API接口")
+                .description("活动模块 Restful API接口")
                 //创建人
                 .contact(new Contact("Weice Wang", "http://software.xmu.edu.cn", "PaddlerV@stu.xmu.edu.cn"))
                 //版本号
