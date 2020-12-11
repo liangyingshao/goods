@@ -23,6 +23,8 @@ dubbo:
   consumer:
     timeout: 4000
     check: false
+  cloud:
+    subscribed-services: activity-service
 
 spring:
   cloud:

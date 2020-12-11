@@ -448,4 +448,18 @@ public class GoodsSpuDao {
         }
         return returnObject;
     }
+
+    public ReturnObject<GoodsSpuPo> getSpuBySpuId(Long id)
+    {
+        GoodsSpuPo goodsSpuPo = null;
+        try {
+            goodsSpuPo = goodsSpuMapper.selectByPrimaryKey(id);
+        } catch (Exception e) {
+            logger.debug("other sql exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        }
+
+        return new ReturnObject<>(goodsSpuPo);
+    }
+
 }

@@ -1,7 +1,11 @@
 package cn.edu.xmu.goods.service.impl;
 
 import cn.edu.xmu.goods.dao.GoodsDao;
+import cn.edu.xmu.goods.dao.GoodsSpuDao;
+import cn.edu.xmu.goods.dao.ShopDao;
 import cn.edu.xmu.goods.model.po.GoodsSkuPo;
+import cn.edu.xmu.goods.model.po.GoodsSpuPo;
+import cn.edu.xmu.goods.model.po.ShopPo;
 import cn.edu.xmu.goods.model.vo.GoodsSkuDetailRetVo;
 import cn.edu.xmu.goods.model.vo.GoodsSkuRetVo;
 import cn.edu.xmu.ooad.util.ReturnObject;
@@ -26,6 +30,12 @@ import java.util.Map;
 public class IGoodsServiceImpl implements IGoodsService {
     @Autowired
     GoodsDao goodsDao;
+    
+    @Autowired
+    GoodsSpuDao goodsSpuDao;
+
+    @Autowired
+    ShopDao shopDao;
 
     @DubboReference
     private IActivityService IActivityService;
@@ -93,9 +103,43 @@ public class IGoodsServiceImpl implements IGoodsService {
         return returnObject;
     }
 
+
+
     @Override
-    public ReturnObject<SimpleShopDTO> getSimpleShopByShopId(Long shopId) {
-        return goodsDao.getSimpleShopByShopId(shopId);
+    public ReturnObject<SimpleShopDTO> getSimpleShopByShopId(Long id) {
+        SimpleShopDTO simpleShopDTO = null;
+        ShopPo shopPo = shopDao.getShopById(id);
+        if(shopPo!=null)
+        {
+            simpleShopDTO = new SimpleShopDTO();
+            simpleShopDTO.setId(shopPo.getId());
+            simpleShopDTO.setName(shopPo.getName());
+        }
+        return new ReturnObject<>(simpleShopDTO);
     }
 
+    @Override
+    public ReturnObject<GoodsSpuPoDTO> getSpuBySpuId(Long id) {
+        GoodsSpuPoDTO goodsSpuPoDTO = null;
+        GoodsSpuPo goodsSpuPo = goodsSpuDao.getSpuBySpuId(id).getData();
+        if(goodsSpuPo!=null)
+        {
+            goodsSpuPoDTO.setId(goodsSpuPo.getId());
+            goodsSpuPoDTO.setName(goodsSpuPo.getName());
+            goodsSpuPoDTO.setBrandId(goodsSpuPo.getBrandId());
+            goodsSpuPoDTO.setCategoryId(goodsSpuPo.getCategoryId());
+            goodsSpuPoDTO.setFreightId(goodsSpuPo.getFreightId());
+            goodsSpuPoDTO.setShopId(goodsSpuPo.getShopId());
+            goodsSpuPoDTO.setGoodsSn(goodsSpuPo.getGoodsSn());
+            goodsSpuPoDTO.setDetail(goodsSpuPo.getDetail());
+            goodsSpuPoDTO.setImageUrl(goodsSpuPo.getImageUrl());
+            goodsSpuPoDTO.setSpec(goodsSpuPo.getSpec());
+            goodsSpuPoDTO.setDisabled(goodsSpuPo.getDisabled());
+            goodsSpuPoDTO.setGmtCreate(goodsSpuPo.getGmtCreate());
+            goodsSpuPoDTO.setGmtModified(goodsSpuPo.getGmtModified());
+
+        }
+        return new ReturnObject<>(goodsSpuPoDTO);
+        
+    }
 }

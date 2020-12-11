@@ -55,4 +55,6 @@ public interface IGoodsService {
      */
     ReturnObject<SimpleShopDTO> getSimpleShopByShopId(Long shopId);
 
+    
+    ReturnObject<GoodsSpuPoDTO> getSpuBySpuId(Long id);
 }
