@@ -32,5 +32,5 @@ public interface IShareService {
      * @param skuId
      * @return
      */
-    ReturnObject<Boolean> shareSkuMatch(Long sid,Long skuId);
+    ReturnObject<Boolean> shareUserSkuMatch(Long sid,Long skuId,Long userId);
 }
