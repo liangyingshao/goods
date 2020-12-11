@@ -1,7 +1,9 @@
 package cn.edu.xmu.flashsale.model.bo;
 
 import cn.edu.xmu.flashsale.model.po.FlashSaleItemPo;
+import cn.edu.xmu.flashsale.model.vo.FlashsaleItemRetVo;
 import cn.edu.xmu.ooad.model.VoObject;
+import cn.edu.xmu.oomall.goods.model.SkuInfoDTO;
 import lombok.Data;
 
 import java.time.LocalDateTime;

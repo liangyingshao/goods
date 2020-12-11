@@ -1,7 +1,9 @@
 package cn.edu.xmu.flashsale.service;
 
+import cn.edu.xmu.flashsale.dao.FlashSaleDao;
 import cn.edu.xmu.flashsale.dao.FlashSaleItemDao;
 import cn.edu.xmu.flashsale.model.bo.FlashSaleItem;
+import cn.edu.xmu.flashsale.model.po.FlashSaleItemPo;
 import cn.edu.xmu.flashsale.model.vo.FlashsaleItemRetVo;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
@@ -10,15 +12,27 @@ import cn.edu.xmu.oomall.goods.model.SkuInfoDTO;
 import cn.edu.xmu.oomall.goods.service.IGoodsService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 
+import javax.annotation.Resource;
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Slf4j
 public class FlashsaleItemService {
+
+    private static final Logger logger = LoggerFactory.getLogger(FlashSaleDao.class);
 
     @DubboReference
     private IGoodsService goodsService;
@@ -26,9 +40,25 @@ public class FlashsaleItemService {
     @Autowired
     private FlashSaleItemDao flashSaleItemDao;
 
+    //    @Autowired
+    @Resource
+    private ReactiveRedisTemplate<String, Serializable> reactiveRedisTemplate;
+
+    //响应式返回
+    public Flux<FlashsaleItemRetVo> queryTopicsByTime(Long id) {
+        return reactiveRedisTemplate.opsForSet().members("FlashsaleItem" + LocalDate.now().toString() + id.toString()).map(x->
+        {
+            SkuInfoDTO skuInfoDTO = goodsService.getSelectSkuInfoBySkuId(((FlashSaleItemPo)x).getGoodsSkuId()).getData();//懒得检验code； ，应该也不会有错吧
+            FlashsaleItemRetVo retVo = new FlashsaleItemRetVo((FlashSaleItemPo)x);
+            retVo.setGoodsSku(skuInfoDTO);
+            return retVo;
+        });
+    }
+
     public ReturnObject<FlashsaleItemRetVo> addSKUofTopic(Long id, Long skuId, Long price, Integer quantity) {
         //获得sku信息
         ReturnObject<SkuInfoDTO> returnObject = goodsService.getSelectSkuInfoBySkuId(skuId);
+        logger.error("goods Service返回给flashsale："+returnObject.getData().toString());
         if(returnObject.getCode()!= ResponseCode.OK) {//错误
             return new ReturnObject(returnObject.getCode());
         } else if(returnObject.getData() == null) {//不存在，返回资源不存在

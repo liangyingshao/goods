@@ -1,12 +1,8 @@
 package cn.edu.xmu.flashsale.service;
 import cn.edu.xmu.flashsale.dao.FlashSaleDao;
-import cn.edu.xmu.flashsale.model.vo.FlashsaleItemRetVo;
 import cn.edu.xmu.flashsale.model.vo.FlashsaleNewRetVo;
-import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
-import cn.edu.xmu.oomall.goods.model.SkuInfoDTO;
-import cn.edu.xmu.oomall.goods.service.IGoodsService;
 import cn.edu.xmu.oomall.other.model.TimeDTO;
 import cn.edu.xmu.oomall.other.service.ITimeService;
 import org.apache.dubbo.config.annotation.DubboReference;
@@ -22,22 +18,6 @@ public class FlashsaleService {
 
     @Autowired
     private FlashSaleDao flashsaleDao;
-
-    //响应式返回
-    public ReturnObject<VoObject> queryTopicsByTime(Long id) {
-        ReturnObject<VoObject> returnObject = new ReturnObject<>();
-        try
-        {
-            Byte timeType = 1;//0代表广告，1代表秒杀
-            //调用other的微服务得到id对应的时段的具体数据
-            ReturnObject<TimeDTO> timeDTOReturnObject = timeService.getTimeSegmentId(timeType,id);
-            //根据flash_date=today+时段id查询flashsale
-        }
-        catch (Exception e) {
-
-        }
-        return returnObject;
-    }
 
     public ReturnObject<FlashsaleNewRetVo> createflash(Long id, LocalDateTime flashDate) {
         ReturnObject<FlashsaleNewRetVo> returnObject = new ReturnObject<>();
