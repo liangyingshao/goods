@@ -82,7 +82,7 @@ public class FloatPrice implements VoObject {
         createdBy=po.getCreatedBy();
         invalidBy=po.getInvalidBy();
         valid= Validation.getTypeByCode(po.getValid().intValue());
-        gmtCreate=po.getGmtCreate();
+        gmtCreate=po.getGmtCreated();
         gmtModified=po.getGmtModified();
     }
 

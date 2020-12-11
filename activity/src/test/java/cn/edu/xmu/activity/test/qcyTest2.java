@@ -17,6 +17,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -34,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SpringBootTest(classes = ActivityServiceApplication.class)
 @AutoConfigureMockMvc
-//@Transactional
+@Transactional
 public class qcyTest2 {
     @Autowired
     MockMvc mvc;
@@ -136,7 +137,7 @@ public class qcyTest2 {
         String token = creatTestToken(1L,1L,100);
         String responseString=null;
         try{
-            responseString=this.mvc.perform(post("/goods/shops/1/couponactivities")
+            responseString=this.mvc.perform(MockMvcRequestBuilders.post("/goods/shops/1/couponactivities")
                     .header("authorization",token)
                     .contentType("application/json;charset=UTF-8").content(activityJson))
                     .andExpect(status().isOk())

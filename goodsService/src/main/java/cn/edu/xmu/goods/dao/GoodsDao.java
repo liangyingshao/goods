@@ -344,7 +344,7 @@ public class GoodsDao {
 
         //尝试插入
         FloatPricePo floatPricePo=floatPrice.getFloatPricePo();
-        floatPricePo.setGmtCreate(LocalDateTime.now());
+        floatPricePo.setGmtCreated(LocalDateTime.now());
         floatPricePo.setGmtModified(LocalDateTime.now());
         try{
             int ret = floatMapper.insertSelective(floatPricePo);
@@ -414,7 +414,7 @@ public class GoodsDao {
     {
         //SPU存在
         GoodsSpuPo spuPo=spuMapper.selectByPrimaryKey(sku.getGoodsSpuId());
-        if(spuPo==null||spuPo.getDisabled().equals(GoodsSpu.SpuState.DELETED))
+        if(spuPo==null||spuPo.getDisabled().equals(true))
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
 
         //shopId和SPU匹配
@@ -482,7 +482,7 @@ public class GoodsDao {
     public ReturnObject checkSkuUsableBySkuShop(Long skuId, Long shopId) {
         //SKU存在
         GoodsSkuPo skuPo = skuMapper.selectByPrimaryKey(skuId);
-        if (skuPo == null || GoodsSpu.SpuState.getTypeByCode(skuPo.getDisabled().intValue()).equals(GoodsSku.State.DELETED))
+        if (skuPo == null || GoodsSku.State.getTypeByCode(skuPo.getDisabled().intValue()).equals(GoodsSku.State.DELETED))
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
 
         //SKU对应的SPU和shopId匹配

@@ -35,48 +35,48 @@ public class GoodsSpu {
 
 
 
-    /**
-     * 商品SPU状态
-     */
-    public enum SpuState{
-        OFFSHELF(0,"未上架"),
-        ONSHELF(4,"上架"),
-        DELETED(6,"已删除")
-        ;
-
-        private static final Map<Integer, SpuState> stateMap;
-
-        static{//由类加载机制，静态块初始加载对应的枚举属性到map中，而不用每次取属性时，遍历一次所有枚举值
-            stateMap=new HashMap();
-            for(SpuState enum1:values()){
-                stateMap.put(enum1.code,enum1);
-            }
-        }
-        private int code;
-        private String description;
-
-        SpuState(int code, String description) {
-            this.code = code;
-            this.description = description;
-        }
-        public static SpuState getTypeByCode(Integer code) {
-            return stateMap.get(code);
-        }
-
-        public Integer getCode() {
-            return code;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-    }
-
-    private SpuState state= SpuState.OFFSHELF;
+//    /**
+//     * 商品SPU状态
+//     */
+//    public enum SpuState{
+//        OFFSHELF(0,"未上架"),
+//        ONSHELF(4,"上架"),
+//        DELETED(6,"已删除")
+//        ;
+//
+//        private static final Map<Integer, SpuState> stateMap;
+//
+//        static{//由类加载机制，静态块初始加载对应的枚举属性到map中，而不用每次取属性时，遍历一次所有枚举值
+//            stateMap=new HashMap();
+//            for(SpuState enum1:values()){
+//                stateMap.put(enum1.code,enum1);
+//            }
+//        }
+//        private int code;
+//        private String description;
+//
+//        SpuState(int code, String description) {
+//            this.code = code;
+//            this.description = description;
+//        }
+//        public static SpuState getTypeByCode(Integer code) {
+//            return stateMap.get(code);
+//        }
+//
+//        public Integer getCode() {
+//            return code;
+//        }
+//
+//        public String getDescription() {
+//            return description;
+//        }
+//    }
+//
+//    private SpuState state= SpuState.OFFSHELF;
 
     private String spec;
 
-//    private boolean disabled;//还有点问题哦
+    private boolean disable;
 
     private LocalDateTime gmtCreated;
 
@@ -100,12 +100,10 @@ public class GoodsSpu {
         this.goodsSn=po.getGoodsSn();
         this.detail=po.getDetail();
         this.imageUrl=po.getImageUrl();
-//        if(null!=po.getState()){
-//            this.state=SpuState.getTypeByCode(po.getState().intValue());
-//        }
+
         this.gmtCreated=po.getGmtCreate();
         this.gmtModified=po.getGmtModified();
-//        this.disabled=(po.getDisabled().intValue()==0)?false:true;
+        this.disable=(po.getDisabled().intValue()==0)?false:true;
     }
 
     /**
@@ -122,7 +120,7 @@ public class GoodsSpu {
         spuPo.setShopId(this.shopId);
         spuPo.setFreightId(this.freightId);
         spuPo.setDetail(this.detail);
-//      spuPo.setDisabled(((this.disabled)?(byte)0:1));
+        spuPo.setDisabled(((this.disable)?(byte)0:1));
         spuPo.setGmtCreate(this.gmtCreated);
         spuPo.setGmtModified(this.gmtModified);
         spuPo.setGoodsSn(this.goodsSn);
