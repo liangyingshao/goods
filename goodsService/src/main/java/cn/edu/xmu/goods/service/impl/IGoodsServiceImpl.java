@@ -10,6 +10,9 @@ import cn.edu.xmu.goods.model.vo.GoodsSkuDetailRetVo;
 import cn.edu.xmu.goods.model.vo.GoodsSkuRetVo;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.goods.model.*;
+import cn.edu.xmu.oomall.goods.model.GoodsDetailDTO;
+import cn.edu.xmu.oomall.goods.model.GoodsFreightDTO;
+import cn.edu.xmu.oomall.goods.model.ShopDetailDTO;
 import cn.edu.xmu.oomall.goods.service.IActivityService;
 import cn.edu.xmu.oomall.goods.service.IGoodsService;
 //import com.alibaba.dubbo.config.annotation.Service;
@@ -30,7 +33,7 @@ import java.util.Map;
 public class IGoodsServiceImpl implements IGoodsService {
     @Autowired
     GoodsDao goodsDao;
-    
+
     @Autowired
     GoodsSpuDao goodsSpuDao;
 
@@ -119,27 +122,17 @@ public class IGoodsServiceImpl implements IGoodsService {
     }
 
     @Override
-    public ReturnObject<GoodsSpuPoDTO> getSpuBySpuId(Long id) {
-        GoodsSpuPoDTO goodsSpuPoDTO = null;
-        GoodsSpuPo goodsSpuPo = goodsSpuDao.getSpuBySpuId(id).getData();
-        if(goodsSpuPo!=null)
-        {
-            goodsSpuPoDTO.setId(goodsSpuPo.getId());
-            goodsSpuPoDTO.setName(goodsSpuPo.getName());
-            goodsSpuPoDTO.setBrandId(goodsSpuPo.getBrandId());
-            goodsSpuPoDTO.setCategoryId(goodsSpuPo.getCategoryId());
-            goodsSpuPoDTO.setFreightId(goodsSpuPo.getFreightId());
-            goodsSpuPoDTO.setShopId(goodsSpuPo.getShopId());
-            goodsSpuPoDTO.setGoodsSn(goodsSpuPo.getGoodsSn());
-            goodsSpuPoDTO.setDetail(goodsSpuPo.getDetail());
-            goodsSpuPoDTO.setImageUrl(goodsSpuPo.getImageUrl());
-            goodsSpuPoDTO.setSpec(goodsSpuPo.getSpec());
-            goodsSpuPoDTO.setDisabled(goodsSpuPo.getDisabled());
-            goodsSpuPoDTO.setGmtCreate(goodsSpuPo.getGmtCreate());
-            goodsSpuPoDTO.setGmtModified(goodsSpuPo.getGmtModified());
+    public ReturnObject<ShopDetailDTO> getShopInfoBySkuId(Long skuId) {
+        return null;
+    }
 
-        }
-        return new ReturnObject<>(goodsSpuPoDTO);
-        
+    @Override
+    public ReturnObject<GoodsDetailDTO> getGoodsBySkuId(Long skuId) {
+        return goodsDao.getGoodsBySkuId(skuId);
+    }
+
+    @Override
+    public ReturnObject<GoodsFreightDTO> getGoodsFreightDetailBySkuId(Long skuId) {
+        return null;
     }
 }
