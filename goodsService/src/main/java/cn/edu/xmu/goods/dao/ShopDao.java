@@ -183,7 +183,7 @@ public class ShopDao {
         return new ReturnObject<>(ResponseCode.OK);
     }
 
-    public ShopPo getShopById(Long id)
+    public ReturnObject<ShopPo> getShopById(Long id)
     {
         ShopPo shopPo = null;
         try {
@@ -192,7 +192,9 @@ public class ShopDao {
             StringBuilder message = new StringBuilder().append("getShopById: ").append(e.getMessage());
             logger.error(message.toString());
         }
-        return shopPo;
+        return new ReturnObject<>(shopPo);
 
     }
+
+
 }

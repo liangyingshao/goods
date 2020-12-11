@@ -650,4 +650,25 @@ public class GoodsDao {
 
         return new ReturnObject<>(goodsDetailDTO);
     }
+
+    /**
+     * description: 根据id查询sku,预售返回时需要使用此函数
+     * version: 1.0
+     * date: 2020/12/11 12:30
+     * author: 杨铭
+     * 
+     * @param skuId
+     * @return cn.edu.xmu.ooad.util.ReturnObject<cn.edu.xmu.goods.model.po.GoodsSkuPo>
+     */ 
+    public ReturnObject<GoodsSkuPo> getGoodsSkuById(Long skuId) {
+        GoodsSkuPo goodsSkuPo = null;
+        try {
+            goodsSkuPo = skuMapper.selectByPrimaryKey(skuId);
+        } catch (Exception e) {
+            StringBuilder message = new StringBuilder().append("getGoodsSkuById: ").append(e.getMessage());
+            logger.error(message.toString());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+        }
+        return new ReturnObject<>(goodsSkuPo);
+    }
 }

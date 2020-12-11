@@ -1,14 +1,22 @@
 package cn.edu.xmu.activity.controller;
 
 import cn.edu.xmu.activity.model.bo.ActivityStatus;
+import cn.edu.xmu.activity.model.vo.PresaleVo;
+import cn.edu.xmu.activity.service.PresaleService;
 import cn.edu.xmu.ooad.annotation.Audit;
+import cn.edu.xmu.ooad.model.VoObject;
+import cn.edu.xmu.ooad.util.Common;
+import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ResponseUtil;
 import cn.edu.xmu.ooad.util.ReturnObject;
+import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.*;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +30,12 @@ import java.util.List;
 @RestController /*Restful的Controller对象*/
 @RequestMapping(value = "/goods", produces = "application/json;charset=UTF-8")
 public class PresaleController {
+
+    @Autowired
+    private PresaleService presaleService;
+
+    @Autowired
+    private HttpServletResponse httpServletResponse;
 
 
     /**
@@ -50,7 +64,183 @@ public class PresaleController {
     }
 
 
+    @ApiOperation("顾客查询所有预售活动")
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @Audit
+    @ResponseBody
+    @GetMapping("/presales")
+    public Object customerQueryPresales(
+            @RequestParam(required = false) int timeline,
+            @RequestParam(required = false) Long skuId,
+            @RequestParam(required = false) Long shopId,
+            @RequestParam(required = false, defaultValue = "1") Integer page,
+            @RequestParam(required = false, defaultValue = "10") Integer pagesize){
 
+
+        Object object = null;
+
+        if(page <= 0 || pagesize <= 0) {
+            object = Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
+        } else {
+            ReturnObject<PageInfo<VoObject>> returnObject = presaleService.QueryPresales(shopId, skuId, null, timeline, page, pagesize, false);
+            object = Common.getPageRetObject(returnObject);
+        }
+
+        return object;
+    }
+
+
+    @ApiOperation("管理员查询所有预售活动(包括下线的)")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "authorization", value ="用户token", paramType = "header", dataType = "String",  required = true),
+            @ApiImplicitParam(name = "id", value ="店铺id", paramType = "path", dataType = "Integer",  required = true),
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @Audit
+    @ResponseBody
+    @GetMapping("/shops/{id}/presales")
+    public Object adminQueryPresales(
+            @PathVariable Long shopId,
+            @RequestParam(required = false) Integer state,
+            @RequestParam(required = false) Long skuId,
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "10") int pagesize
+    ){
+
+        Object object = null;
+
+        if(page <= 0 || pagesize <= 0) {
+            object = Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
+        } else {
+            ReturnObject<PageInfo<VoObject>> returnObject = presaleService.QueryPresales(shopId, skuId, state, null, page, pagesize,true);
+            object = Common.getPageRetObject(returnObject);
+        }
+
+        return object;
+    }
+
+
+
+
+    @ApiOperation(value="管理员新增SPU预售活动")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "authorization", value ="用户token", paramType = "header", dataType = "String",  required = true),
+            @ApiImplicitParam(name = "shopId", value ="商铺id", paramType = "path", dataType = "Integer",  required = true),
+            @ApiImplicitParam(name = "id", value ="商品SPUid", paramType = "path", dataType = "Integer",  required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功")
+    })
+    @Audit
+    @PostMapping("/shops/{shopid}/skus/{id}/presales")
+    @ResponseBody
+    public Object createPresaleOfSKU(@PathVariable(name = "id") Long id, @PathVariable(name="shopId") Long shopId, @RequestBody PresaleVo presaleVo ){
+
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        if(LocalDateTime.parse(presaleVo.getBeginTime(),dtf).isBefore(LocalDateTime.now())||
+                LocalDateTime.parse(presaleVo.getEndTime(),dtf).isBefore(LocalDateTime.now())||
+                LocalDateTime.parse(presaleVo.getEndTime(),dtf).isBefore(LocalDateTime.parse(presaleVo.getBeginTime(),dtf)))
+            return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+
+        ReturnObject returnObject = null;
+        try {
+            returnObject = presaleService.createPresaleOfSKU(shopId,id,presaleVo);
+        } catch (Exception e) {
+            return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+        }
+        if (returnObject.getCode() == ResponseCode.OK) {
+            return Common.getRetObject(returnObject);
+        } else {
+            return Common.decorateReturnObject(returnObject);
+        }
+    }
+
+
+
+    @ApiOperation(value="管理员修改Sku预售活动")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "authorization", value ="用户token", paramType = "header", dataType = "String",  required = true),
+            @ApiImplicitParam(name = "shopId", value ="商铺id", paramType = "path", dataType = "Integer",  required = true),
+            @ApiImplicitParam(name = "id", value ="预售活动id", paramType = "path", dataType = "Integer",  required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 906, message = "预售活动状态禁止"),
+            @ApiResponse(code = 0, message = "成功")
+    })
+    @Audit
+    @PutMapping("/shops/{shopId}/presales/{id}")
+    public Object modifyPresaleofSPU(@PathVariable Long shopId, @PathVariable Long id,@RequestBody(required = true) PresaleVo presaleVo){
+
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        if(LocalDateTime.parse(presaleVo.getBeginTime(),dtf).isBefore(LocalDateTime.now())||
+                LocalDateTime.parse(presaleVo.getEndTime(),dtf).isBefore(LocalDateTime.now())||
+                LocalDateTime.parse(presaleVo.getEndTime(),dtf).isBefore(LocalDateTime.parse(presaleVo.getBeginTime(),dtf)))
+            return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+
+        ReturnObject returnObject = presaleService.modifyPresaleOfSKU(shopId,id,presaleVo);
+        return Common.getRetObject(returnObject);
+    }
+
+
+    @ApiOperation(value="管理员逻辑删除sku预售活动")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "authorization", value ="用户token", paramType = "header", dataType = "String",  required = true),
+            @ApiImplicitParam(name = "shopId", value ="商铺id", paramType = "path", dataType = "Integer",  required = true),
+            @ApiImplicitParam(name = "id", value ="预售活动id", paramType = "path", dataType = "Integer",  required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 906, message = "预售活动状态禁止"),
+            @ApiResponse(code = 0, message = "成功")
+    })
+    @Audit
+    @DeleteMapping("/shops/{shopId}/presales/{id}")
+    public Object cancelPresaleOfSKU(@PathVariable Long shopId, @PathVariable Long id) {
+        ReturnObject returnObject =  presaleService.cancelPresaleOfSKU(shopId, id);
+        return Common.getRetObject(returnObject);
+    }
+
+
+    @ApiOperation(value="管理员上架sku预售活动")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "authorization", value ="用户token", paramType = "header", dataType = "String",  required = true),
+            @ApiImplicitParam(name = "shopId", value ="商铺id", paramType = "path", dataType = "Integer",  required = true),
+            @ApiImplicitParam(name = "id", value ="预售活动id", paramType = "path", dataType = "Integer",  required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 906, message = "预售活动状态禁止"),
+            @ApiResponse(code = 0, message = "成功")
+    })
+    @Audit
+    @ResponseBody
+    @PutMapping("/shops/{shopId}/presales/{id}/onshelves")
+    public Object putPresaleOnShelves(@PathVariable Long id,@PathVariable Long shopId){
+
+        ReturnObject returnObject = presaleService.putPresaleOnShelves(shopId,id);
+        return Common.getRetObject(returnObject);
+    }
+
+    @ApiOperation(value="管理员上架sku预售活动")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "authorization", value ="用户token", paramType = "header", dataType = "String",  required = true),
+            @ApiImplicitParam(name = "shopId", value ="商铺id", paramType = "path", dataType = "Integer",  required = true),
+            @ApiImplicitParam(name = "id", value ="预售活动id", paramType = "path", dataType = "Integer",  required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 906, message = "预售活动状态禁止"),
+            @ApiResponse(code = 0, message = "成功")
+    })
+    @Audit
+    @ResponseBody
+    @PutMapping("/shops/{shopId}/presales/{id}/offshelves")
+    public Object putPresaleOffShelves(@PathVariable Long id,@PathVariable Long shopId){
+
+        ReturnObject returnObject = presaleService.putPresaleOffShelves(shopId,id);
+        return Common.getRetObject(returnObject);
+    }
 
 
 }
