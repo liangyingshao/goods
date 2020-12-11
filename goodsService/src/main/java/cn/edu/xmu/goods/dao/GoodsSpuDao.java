@@ -110,6 +110,7 @@ public class GoodsSpuDao {
         GoodsSkuPoExample skuPoExample=new GoodsSkuPoExample();
         GoodsSkuPoExample.Criteria skuCriteria=skuPoExample.createCriteria();
         skuCriteria.andGoodsSpuIdEqualTo(spuPo.getId());
+        skuCriteria.andDisabledEqualTo((byte)0);
         List<GoodsSkuPo> skuPos=goodsSkuMapper.selectByExample(skuPoExample);
         List<GoodsSku>skus=skuPos.stream().map(GoodsSku::new).collect(Collectors.toList());
         for(GoodsSku sku:skus)
@@ -126,7 +127,7 @@ public class GoodsSpuDao {
         List<GoodsSkuRetVo> ret = skus.stream().map(GoodsSkuRetVo::new).collect(Collectors.toList());
         GoodsSpu spu=new GoodsSpu(spuPo);
         GoodsSpuVo spuVo= new GoodsSpuVo(spu);
-        spuVo.setGoodsSkuList(ret);
+        spuVo.setSkuList(ret);
         return new ReturnObject<>(spuVo);
 
     }
@@ -365,16 +366,42 @@ public class GoodsSpuDao {
         try {
             //获得该SPU信息
             GoodsSpuPo spuPo=goodsSpuMapper.selectByPrimaryKey(spu.getId());
-            //该SPU不存在
-            if(spuPo==null)
+            //该SPU不存在或shopId不对应
+            if(spuPo==null||!spuPo.getShopId().equals(spu.getShopId()))
                 return returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             //该SPU已被逻辑删除, disable==(Byte) 1 or state==DELETED
             if(spuPo.getDisabled().equals((byte)1))//||spuPo.getState().equals(GoodsSpu.SpuState.DELETED.getCode().byteValue()))
                 return returnObject=new ReturnObject<>(ResponseCode.BRANDALTER_INVALID);
-            //将SPU逻辑删除，disable==true and state==DELETED
-//            spu.setDisabled(true);//提前设置，避免空指针错误
-            spu.setState(GoodsSpu.SpuState.DELETED);//提前设置，避免空指针错误
-            returnObject=modifyGoodsSpu(spu);
+            //查找该spu下的所有sku
+            GoodsSkuPoExample skuPoExample=new GoodsSkuPoExample();
+            GoodsSkuPoExample.Criteria skuCriteria=skuPoExample.createCriteria();
+            skuCriteria.andGoodsSpuIdEqualTo(spuPo.getId());
+            skuCriteria.andDisabledEqualTo((byte)0);
+            List<GoodsSkuPo> skuPos=goodsSkuMapper.selectByExample(skuPoExample);
+            //若SPU无SKU，物理删除SPU
+            if(skuPos==null)
+            {
+                goodsSpuMapper.deleteByPrimaryKey(spu.getId());
+                return new ReturnObject<>(ResponseCode.OK);
+            }
+            //若SPU下有SKU，将SKU的state设为6：已删除
+            for(GoodsSkuPo skuPo:skuPos)
+            {
+                GoodsSkuPoExample skuExample = new GoodsSkuPoExample();
+                GoodsSkuPoExample.Criteria criteria = skuExample.createCriteria();
+                criteria.andIdEqualTo(skuPo.getId());
+                criteria.andGoodsSpuIdEqualTo(spu.getId());
+                skuPo.setState((byte)6);
+                int ret=goodsSkuMapper.updateByExample(skuPo,skuExample);
+                if (ret == 0) {
+                    //修改失败
+                    logger.debug("deleteSKUofSPU: update spu fail : " + skuPo.toString());
+                    returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("skuid不存在：" + skuPo.getId()));
+                }
+            }
+            //将SPU物理删除
+            goodsSpuMapper.deleteByPrimaryKey(spu.getId());
+            return new ReturnObject<>(ResponseCode.OK);
         }
         catch (DataAccessException e) {
             // 其他数据库错误

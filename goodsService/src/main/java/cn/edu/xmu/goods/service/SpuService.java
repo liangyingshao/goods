@@ -61,7 +61,7 @@ public class SpuService {
     @Transactional
     public ReturnObject putGoodsOnSale(GoodsSpu spu) {
         ReturnObject<Object> returnObject;
-        spu.setState(GoodsSpu.SpuState.ONSHELF);
+        //spu.setState(GoodsSpu.SpuState.ONSHELF);
         returnObject=spuDao.changeState(spu);
         return returnObject;
     }
@@ -76,7 +76,7 @@ public class SpuService {
     @Transactional
     public ReturnObject putOffGoodsOnSale(GoodsSpu spu) {
         ReturnObject<Object> returnObject;
-        spu.setState(GoodsSpu.SpuState.OFFSHELF);
+        //spu.setState(GoodsSpu.SpuState.OFFSHELF);
         returnObject=spuDao.changeState(spu);
         return returnObject;
     }

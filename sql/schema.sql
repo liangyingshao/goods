@@ -29,7 +29,6 @@ CREATE TABLE `brand` (
   `image_url` varchar(255) DEFAULT NULL,
   `gmt_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `gmt_modified` datetime DEFAULT NULL,
-  UNIQUE KEY `brand_name_uindex` (`name`),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=120 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -73,7 +72,6 @@ CREATE TABLE `coupon` (
   `state` tinyint DEFAULT NULL,
   `gmt_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `gmt_modified` datetime DEFAULT NULL,
-  UNIQUE KEY `coupon_sn_uindex` (`coupon_sn`),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -107,10 +105,10 @@ CREATE TABLE `coupon_activity` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `coupon_spu`
+-- Table structure for table `coupon_sku`
 --
 
-DROP TABLE IF EXISTS `coupon_spu`;
+DROP TABLE IF EXISTS `coupon_sku`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `coupon_sku` (
@@ -136,6 +134,7 @@ CREATE TABLE `flash_sale` (
   `time_seg_id` bigint DEFAULT NULL,
   `gmt_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `gmt_modified` datetime DEFAULT NULL,
+  `state` tinyint DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -195,7 +194,6 @@ CREATE TABLE `goods_category` (
   `pid` bigint DEFAULT NULL,
   `gmt_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `gmt_modified` datetime DEFAULT NULL,
-  UNIQUE KEY `goods_category_name_uindex` (`name`),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=140 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -221,8 +219,7 @@ CREATE TABLE `goods_sku` (
   `disabled` tinyint DEFAULT NULL,
   `gmt_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `gmt_modified` datetime DEFAULT NULL,
-  UNIQUE KEY `sku_sn_uindex` (`sku_sn`),
-  UNIQUE KEY `spu_configuration_uindex` (`goods_spu_id`,`configuration`),
+  `state` tinyint DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=680 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -244,7 +241,6 @@ CREATE TABLE `goods_spu` (
   `goods_sn` varchar(128) DEFAULT NULL,
   `detail` varchar(500) DEFAULT NULL,
   `image_url` varchar(255) DEFAULT NULL,
-  `state` tinyint DEFAULT NULL,
   `spec` varchar(500) DEFAULT NULL,
   `disabled` tinyint DEFAULT NULL,
   `gmt_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -290,7 +286,7 @@ CREATE TABLE `presale_activity` (
   `end_time` datetime DEFAULT NULL,
   `state` tinyint DEFAULT NULL,
   `shop_id` bigint DEFAULT NULL,
-  `goods_spu_id` bigint DEFAULT NULL,
+  `goods_sku_id` bigint DEFAULT NULL,
   `quantity` int DEFAULT NULL,
   `advance_pay_price` bigint DEFAULT NULL,
   `rest_pay_price` bigint DEFAULT NULL,
@@ -326,4 +322,4 @@ CREATE TABLE `shop` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-12-03 21:20:38
+-- Dump completed on 2020-12-10 22:36:43
