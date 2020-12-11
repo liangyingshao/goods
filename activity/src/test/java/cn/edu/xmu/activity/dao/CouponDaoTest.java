@@ -1,10 +1,8 @@
-package cn.edu.xmu.activity.test;
+package cn.edu.xmu.activity.dao;
 
 import cn.edu.xmu.activity.ActivityServiceApplication;
-import cn.edu.xmu.activity.dao.CouponDao;
 import cn.edu.xmu.activity.model.bo.CouponSku;
 import cn.edu.xmu.activity.model.po.CouponSkuPo;
-import cn.edu.xmu.activity.model.vo.CouponNewRetVo;
 import cn.edu.xmu.activity.model.vo.CouponRetVo;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
@@ -125,13 +123,13 @@ class CouponDaoTest {
     @Test
     void getCoupon()
     {
-        ReturnObject<List<String>> returnObject= couponDao.getCoupon((long)1,(long)2);
+        ReturnObject<List<String>> returnObject= couponDao.getCoupon((long)1,(long)5);
         Assertions.assertEquals(returnObject.getCode(),ResponseCode.OK);
 
-        returnObject= couponDao.getCoupon((long)1,(long)2);
+        returnObject= couponDao.getCoupon((long)1,(long)5);
         Assertions.assertEquals(returnObject.getCode(),ResponseCode.COUPON_FINISH);
 
-        returnObject= couponDao.getCoupon((long)1,(long)3);
+        returnObject= couponDao.getCoupon((long)1,(long)6);
         Assertions.assertEquals(returnObject.getCode(),ResponseCode.COUPON_NOTBEGIN);
     }
 

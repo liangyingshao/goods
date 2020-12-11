@@ -111,7 +111,7 @@ public class IGoodsServiceImpl implements IGoodsService {
     @Override
     public ReturnObject<SimpleShopDTO> getSimpleShopByShopId(Long id) {
         SimpleShopDTO simpleShopDTO = null;
-        ShopPo shopPo = shopDao.getShopById(id);
+        ShopPo shopPo = shopDao.getShopById(id).getData();
         if(shopPo!=null)
         {
             simpleShopDTO = new SimpleShopDTO();
@@ -133,6 +133,11 @@ public class IGoodsServiceImpl implements IGoodsService {
         simpleGoodsSkuDTO.setSkuSn(goodsSkuPo.getSkuSn());
         simpleGoodsSkuDTO.setOriginalPrice(goodsSkuPo.getOriginalPrice());
         return new ReturnObject<>(simpleGoodsSkuDTO);
+    }
+
+    @Override
+    public ReturnObject<GoodsSpuPoDTO> getSpuBySpuId(Long spuId) {
+        return null;
     }
 
     //    @Override

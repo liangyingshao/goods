@@ -121,15 +121,6 @@ falshsaleService:
 pagehelper:
   helper-dialect: mysql
 
-dubbo:
-  protocol:
-    name: dubbo
-    port: -1
-  registry:
-    address: spring-cloud://localhost
-  cloud:
-    subscribed-services: goods-service
-
 
 
 # 配置rocketmq

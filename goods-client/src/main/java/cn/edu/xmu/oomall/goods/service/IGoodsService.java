@@ -3,6 +3,7 @@ package cn.edu.xmu.oomall.goods.service;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.goods.model.*;
 
+import java.awt.datatransfer.Clipboard;
 import java.util.List;
 import java.util.Map;
 

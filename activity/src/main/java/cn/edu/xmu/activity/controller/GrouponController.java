@@ -111,7 +111,8 @@ public class GrouponController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "authorization", value ="用户token", paramType = "header", dataType = "String",  required = true),
             @ApiImplicitParam(name = "shopId", value ="商铺id", paramType = "path", dataType = "Integer",  required = true),
-            @ApiImplicitParam(name = "id", value ="团购活动id", paramType = "path", dataType = "Integer",  required = true)
+            @ApiImplicitParam(name = "id", value ="团购活动id", paramType = "path", dataType = "Integer",  required = true),
+            @ApiImplicitParam(name = "grouponVo", value ="团购活动", paramType = "body", dataType = "GrouponVo",  required = true)
     })
     @ApiResponses({
             @ApiResponse(code = 907, message = "团购活动状态禁止"),
