@@ -10,6 +10,20 @@ server:
     threads:
       max: 1000
 
+dubbo:
+  application:
+    name: activity-service
+    qos-enable: false
+    qos-accept-foreign-ip: false
+  registry:
+    address: nacos://127.0.0.1:8848
+  protocol:
+    name: dubbo
+    port: -1
+  consumer:
+    timeout: 4000
+    check: false
+
 spring:
   application:
     name: activity-service
@@ -115,20 +129,8 @@ dubbo:
     address: spring-cloud://localhost
   cloud:
     subscribed-services: goods-service
-#
-#dubbo:
-#  application:
-#    name: flashsale-service-dubbo
-#    qos-enable: false
-#    qos-accept-foreign-ip: false
-#  registry:
-#    address: nacos://127.0.0.1:8848
-#  protocol:
-#    name: dubbo
-#    port: 28088
-#  consumer:
-#    timeout: 4000
-#    check: false
+
+
 
 # 配置rocketmq
 rocketmq:

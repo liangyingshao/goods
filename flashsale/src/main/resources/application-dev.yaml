@@ -29,16 +29,16 @@ spring:
     password: 123456
     #config set requirepass 123456
 
-dubbo:
-  application:
-    name: flashsale-service-dubbo
-    qos-enable: false
-    qos-accept-foreign-ip: false
-  registry:
-    address: nacos://127.0.0.1:8848
-  protocol:
-    name: dubbo
-    port: 20880
-  consumer:
-    timeout: 4000
-    check: false
+#dubbo:
+#  application:
+#    name: flashsale-service-dubbo
+#    qos-enable: false
+#    qos-accept-foreign-ip: false
+#  registry:
+#    address: nacos://127.0.0.1:8848
+#  protocol:
+#    name: dubbo
+#    port: 20880
+#  consumer:
+#    timeout: 4000
+#    check: false

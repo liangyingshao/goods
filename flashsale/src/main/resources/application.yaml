@@ -106,20 +106,20 @@ falshsaleservice:
 #pagehelper分页插件配置
 pagehelper:
   helper-dialect: mysql
-#
-#dubbo:
-#  application:
-#    name: flashsale-service-dubbo
-#    qos-enable: false
-#    qos-accept-foreign-ip: false
-#  registry:
-#    address: nacos://127.0.0.1:8848
-#  protocol:
-#    name: dubbo
-#    port: 28088
-#  consumer:
-#    timeout: 4000
-#    check: false
+
+dubbo:
+  application:
+    name: flashsale-service-dubbo
+    qos-enable: false
+    qos-accept-foreign-ip: false
+  registry:
+    address: nacos://127.0.0.1:8848
+  protocol:
+    name: dubbo
+    port: -1
+  consumer:
+    timeout: 4000
+    check: false
 
 
 
