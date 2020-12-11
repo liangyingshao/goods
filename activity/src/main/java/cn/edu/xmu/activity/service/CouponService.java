@@ -135,9 +135,9 @@ public class CouponService {
      * @return ReturnObject<CouponNewRetVo>
      */
     @Transactional
-    public ReturnObject<List<CouponNewRetVo>> getCoupon(Long userId, Long id)
+    public ReturnObject<List<String>> getCoupon(Long userId, Long id)
     {
-        ReturnObject<List<CouponNewRetVo>> returnObject= couponDao.getCoupon(userId,id);
+        ReturnObject<List<String>> returnObject= couponDao.getCoupon(userId,id);
         return returnObject;
     }
 

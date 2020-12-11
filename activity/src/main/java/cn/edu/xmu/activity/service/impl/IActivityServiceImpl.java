@@ -28,7 +28,7 @@ public class IActivityServiceImpl implements IActivityService {
     @Override
     public ReturnObject<Boolean> judgeActivityIdValid(Long couponId, Long presaleId, Long grouponId) {
         Boolean valid=couponDao.judgeCouponValid(couponId)
-//                ||grouponDao.judgeGrouponValid(grouponId)||presaleDao.judgePresaleValid(presaleId)
+//                &&grouponDao.judgeGrouponValid(grouponId)&&presaleDao.judgePresaleValid(presaleId)
                 ;
 
         return new ReturnObject<>(valid);
