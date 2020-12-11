@@ -1,11 +1,12 @@
 package cn.edu.xmu.goods.service.impl;
 
 import cn.edu.xmu.goods.dao.GoodsDao;
-import cn.edu.xmu.goods.model.po.GoodsSkuPo;
 import cn.edu.xmu.goods.model.vo.GoodsSkuDetailRetVo;
-import cn.edu.xmu.goods.model.vo.GoodsSkuRetVo;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.goods.model.*;
+import cn.edu.xmu.oomall.goods.model.GoodsDetailDTO;
+import cn.edu.xmu.oomall.goods.model.GoodsFreightDTO;
+import cn.edu.xmu.oomall.goods.model.ShopDetailDTO;
 import cn.edu.xmu.oomall.goods.service.IActivityService;
 import cn.edu.xmu.oomall.goods.service.IGoodsService;
 //import com.alibaba.dubbo.config.annotation.Service;
@@ -15,7 +16,6 @@ import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -98,4 +98,18 @@ public class IGoodsServiceImpl implements IGoodsService {
         return goodsDao.getSimpleShopByShopId(shopId);
     }
 
+    @Override
+    public ReturnObject<ShopDetailDTO> getShopInfoBySkuId(Long skuId) {
+        return null;
+    }
+
+    @Override
+    public ReturnObject<GoodsDetailDTO> getGoodsBySkuId(Long skuId) {
+        return goodsDao.getGoodsBySkuId(skuId);
+    }
+
+    @Override
+    public ReturnObject<GoodsFreightDTO> getGoodsFreightDetailBySkuId(Long skuId) {
+        return null;
+    }
 }

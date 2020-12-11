@@ -55,4 +55,21 @@ public interface IGoodsService {
      */
     ReturnObject<SimpleShopDTO> getSimpleShopByShopId(Long shopId);
 
+    ReturnObject<ShopDetailDTO> getShopInfoBySkuId(Long skuId);
+
+    /**
+     * 根据skuId查找商品信息
+     * @param skuId
+     * @return GoodsDetailDTO
+     * @author Cai Xinlu
+     * @date 2020-12-09 17:03
+     */
+    ReturnObject<GoodsDetailDTO> getGoodsBySkuId(Long skuId);
+
+    /**
+     * 获得默认运费模板
+     * @param skuId
+     * @return GoodsFreightDTO
+     */
+    ReturnObject<GoodsFreightDTO> getGoodsFreightDetailBySkuId(Long skuId);
 }

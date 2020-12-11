@@ -9,10 +9,7 @@ import cn.edu.xmu.goods.model.vo.*;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
-import cn.edu.xmu.oomall.goods.model.GoodsInfoDTO;
-import cn.edu.xmu.oomall.goods.model.GoodsSkuPoDTO;
-import cn.edu.xmu.oomall.goods.model.SimpleShopDTO;
-import cn.edu.xmu.oomall.goods.model.SkuInfoDTO;
+import cn.edu.xmu.oomall.goods.model.*;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -628,5 +625,29 @@ public class GoodsDao {
         simpleShopDTO.setName(shopPo.getName());
         ReturnObject<SimpleShopDTO> returnObject = new ReturnObject<SimpleShopDTO>(simpleShopDTO);
         return returnObject;
+    }
+
+    public ReturnObject<GoodsDetailDTO> getGoodsBySkuId(Long skuId)
+    {
+        GoodsSkuPo skuPo=skuMapper.selectByPrimaryKey(skuId);
+
+        //SKU不存在
+        if(skuPo==null||GoodsSku.State.getTypeByCode(skuPo.getDisabled().intValue()).equals(GoodsSku.State.DELETED))
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+
+        GoodsDetailDTO goodsDetailDTO=new GoodsDetailDTO();
+        goodsDetailDTO.setInventory(skuPo.getInventory());
+        goodsDetailDTO.setName(skuPo.getName());
+
+        FloatPricePoExample floatExample=new FloatPricePoExample();
+        FloatPricePoExample.Criteria floatCriteria= floatExample.createCriteria();
+        floatCriteria.andBeginTimeLessThanOrEqualTo(LocalDateTime.now());
+        floatCriteria.andEndTimeGreaterThan(LocalDateTime.now());
+        floatCriteria.andGoodsSkuIdEqualTo(skuId);
+        floatCriteria.andInvalidByEqualTo(FloatPrice.Validation.VALID.getCode().longValue());
+        List<FloatPricePo> floatPo=floatMapper.selectByExample(floatExample);
+        goodsDetailDTO.setPrice((floatPo==null||floatPo.size()==0)?skuPo.getOriginalPrice():floatPo.get(0).getActivityPrice());
+
+        return new ReturnObject<>(goodsDetailDTO);
     }
 }
