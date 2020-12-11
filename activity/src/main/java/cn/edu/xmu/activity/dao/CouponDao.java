@@ -476,7 +476,7 @@ public class CouponDao implements InitializingBean
      * @param id
      * @return ReturnObject<CouponNewRetVo>
      */
-    public ReturnObject<List<CouponNewRetVo>> getCoupon(Long userId, Long id)
+    public ReturnObject<List<String>> getCoupon(Long userId, Long id)
     {
         int quantity;
         String key="ca_"+id;//redis里存的活动对应的key
@@ -572,102 +572,60 @@ public class CouponDao implements InitializingBean
 
         //可领券，设置券属性
         List<CouponPo>newPos=new ArrayList<>();
-        CouponPo newPo = new CouponPo();
-        newPo.setCustomerId(userId);
-        newPo.setActivityId(id);
-        newPo.setCouponSn(Common.genSeqNum());
-        newPo.setGmtCreate(nowTime);
-        newPo.setGmtModified(nowTime);
-        newPo.setName(activityPo.getName());
-        newPo.setState(Coupon.State.AVAILABLE.getCode().byteValue());
-        if (activityPo.getValidTerm() == 0)//与活动同时
-        {
-            newPo.setBeginTime(activityPo.getBeginTime());
-            newPo.setEndTime(activityPo.getEndTime());
-        } else//自领券起
-        {
-            newPo.setBeginTime(LocalDateTime.now());
-            newPo.setEndTime(LocalDateTime.now().plusDays(activityPo.getValidTerm()));
-        }
         for(int i=0;i<quantity;i++)
-            newPos.add(newPo);
-
-
-//        String json = JacksonUtil.toJson(newPos);
-//        Message message = MessageBuilder.withPayload(json).build();
-//        logger.info("sendLogMessage: message = " + message);
-//        rocketMQTemplate.asyncSend("coupon-topic", message, new SendCallback() {
-//            @Override
-//            public void onSuccess(SendResult sendResult) {
-//                System.out.println(sendResult.getSendStatus());
-//            }
-//
-//            @Override
-//            public void onException(Throwable e) {
-//                System.out.println(e.getMessage());
-//            }
-//        });
-
-
-        try {
-            //批量插入
-            if(couponMapper.insertSelectiveBatch(newPos)==0)
-                return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("coupon字段不合法：" + newPo.toString()));
-
-            //检验
-            CouponPoExample checkExample = new CouponPoExample();
-            CouponPoExample.Criteria checkCriteria = checkExample.createCriteria();
-            checkCriteria.andActivityIdEqualTo(newPo.getActivityId());
-            checkCriteria.andCustomerIdEqualTo(newPo.getCustomerId());
-            checkCriteria.andCouponSnEqualTo(newPo.getCouponSn());
-//                checkCriteria.andGmtCreateEqualTo(newPo.getGmtCreate());
-//                checkCriteria.andGmtModifiedEqualTo(newPo.getGmtModified());
-            checkCriteria.andNameEqualTo(newPo.getName());
-            checkCriteria.andStateEqualTo(Coupon.State.AVAILABLE.getCode().byteValue());
-            checkCriteria.andBeginTimeEqualTo(newPo.getBeginTime());
-            checkCriteria.andEndTimeEqualTo(newPo.getEndTime());
-            List<CouponPo> couponPos = couponMapper.selectByExample(checkExample);
-            //插入失败
-            if (couponPos.size() == 0)
-                return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("coupon字段不合法：" + newPo.toString()));
-            else {
-                //构造RetVos
-                //填写活动部分信息
-                CouponActivityByNewCouponRetVo activityRetVo = new CouponActivityByNewCouponRetVo();
-                CouponActivity activity = new CouponActivity(activityPo);
-                activityRetVo.set(activity);
-                //填写优惠券部分信息
-                List<Coupon> coupons=couponPos.stream().map(Coupon::new).collect(Collectors.toList());
-                List<CouponNewRetVo>retVos=coupons.stream().map(c->{
-                    CouponNewRetVo cret=new CouponNewRetVo();
-                    cret.set(c);
-                    cret.setActivity(activityRetVo);
-                    return cret;
-                }).collect(Collectors.toList());
-
-                //更新redis
-                if(type.equals(CouponActivity.Type.LIMIT_TOTAL_NUM))
-                {
-                    int rest= (int) redisTemplate.opsForHash().get(key,"quantity");
-                    redisTemplate.opsForHash().delete(key,"quantity");
-                    redisTemplate.opsForHash().put(key,"quantity",rest-1);
-                }
-
-                //更新bloom过滤器
-                setBloomFilterOfCoupon(id,userId);
-
-                //返回
-                return new ReturnObject<List<CouponNewRetVo>>(retVos);
+        {
+            CouponPo newPo = new CouponPo();
+            newPo.setCustomerId(userId);
+            newPo.setActivityId(id);
+            newPo.setCouponSn(Common.genSeqNum());
+            newPo.setGmtCreate(nowTime);
+            newPo.setGmtModified(nowTime);
+            newPo.setName(activityPo.getName());
+            newPo.setState(Coupon.State.AVAILABLE.getCode().byteValue());
+            if (activityPo.getValidTerm() == 0)//与活动同时
+            {
+                newPo.setBeginTime(activityPo.getBeginTime());
+                newPo.setEndTime(activityPo.getEndTime());
+            } else//自领券起
+            {
+                newPo.setBeginTime(LocalDateTime.now());
+                newPo.setEndTime(LocalDateTime.now().plusDays(activityPo.getValidTerm()));
             }
-        } catch (DataAccessException e) {
-            // 其他数据库错误
-            logger.debug("other sql exception : " + e.getMessage());
-            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
-        } catch (Exception e) {
-            // 其他Exception错误
-            logger.error("other exception : " + e.getMessage());
-            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+            newPos.add(newPo);
         }
+
+
+        String json = JacksonUtil.toJson(newPos);
+        Message message = MessageBuilder.withPayload(json).build();
+        logger.info("sendLogMessage: message = " + message);
+        rocketMQTemplate.asyncSend("coupon-topic", message, new SendCallback() {
+            @Override
+            public void onSuccess(SendResult sendResult) {
+                System.out.println(sendResult.getSendStatus());
+            }
+
+            @Override
+            public void onException(Throwable e) {
+                System.out.println(e.getMessage());
+            }
+        });
+
+        //构造RetVos
+        List<String> couponSns=newPos.stream().map(CouponPo::getCouponSn).collect(Collectors.toList());
+
+        //更新redis
+        if(type.equals(CouponActivity.Type.LIMIT_TOTAL_NUM))
+        {
+            int rest= (int) redisTemplate.opsForHash().get(key,"quantity");
+            redisTemplate.opsForHash().delete(key,"quantity");
+            redisTemplate.opsForHash().put(key,"quantity",rest-1);
+        }
+
+        //更新bloom过滤器
+        setBloomFilterOfCoupon(id,userId);
+
+        //返回
+        return new ReturnObject<List<String>>(couponSns);
     }
 
     /**

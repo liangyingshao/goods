@@ -125,7 +125,7 @@ class CouponDaoTest {
     @Test
     void getCoupon()
     {
-        ReturnObject<List<CouponNewRetVo>> returnObject= couponDao.getCoupon((long)1,(long)2);
+        ReturnObject<List<String>> returnObject= couponDao.getCoupon((long)1,(long)2);
         Assertions.assertEquals(returnObject.getCode(),ResponseCode.OK);
 
         returnObject= couponDao.getCoupon((long)1,(long)2);

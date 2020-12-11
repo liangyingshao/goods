@@ -272,7 +272,7 @@ public class ActivityController {
     @ResponseBody
     public Object getCoupon(@LoginUser @ApiIgnore @RequestParam(required = false) Long userId, @PathVariable Long id)
     {
-        ReturnObject<List<CouponNewRetVo>> returnObject=activityService.getCoupon(userId,id);
+        ReturnObject<List<String>> returnObject=activityService.getCoupon(userId,id);
         return returnObject;
     }
 
