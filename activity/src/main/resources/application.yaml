@@ -106,6 +106,15 @@ falshsaleService:
 #pagehelper分页插件配置
 pagehelper:
   helper-dialect: mysql
+
+dubbo:
+  protocol:
+    name: dubbo
+    port: -1
+  registry:
+    address: spring-cloud://localhost
+  cloud:
+    subscribed-services: goods-service
 #
 #dubbo:
 #  application:

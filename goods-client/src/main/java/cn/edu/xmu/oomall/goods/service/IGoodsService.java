@@ -72,4 +72,6 @@ public interface IGoodsService {
      * @return GoodsFreightDTO
      */
     ReturnObject<GoodsFreightDTO> getGoodsFreightDetailBySkuId(Long skuId);
+
+    ReturnObject<GoodsSpuPoDTO> getSpuBySpuId(Long id);
 }

@@ -1,7 +1,13 @@
 package cn.edu.xmu.goods.service.impl;
 
 import cn.edu.xmu.goods.dao.GoodsDao;
+import cn.edu.xmu.goods.dao.GoodsSpuDao;
+import cn.edu.xmu.goods.dao.ShopDao;
+import cn.edu.xmu.goods.model.po.GoodsSkuPo;
+import cn.edu.xmu.goods.model.po.GoodsSpuPo;
+import cn.edu.xmu.goods.model.po.ShopPo;
 import cn.edu.xmu.goods.model.vo.GoodsSkuDetailRetVo;
+import cn.edu.xmu.goods.model.vo.GoodsSkuRetVo;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.goods.model.*;
 import cn.edu.xmu.oomall.goods.model.GoodsDetailDTO;
@@ -16,6 +22,7 @@ import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +33,12 @@ import java.util.Map;
 public class IGoodsServiceImpl implements IGoodsService {
     @Autowired
     GoodsDao goodsDao;
+
+    @Autowired
+    GoodsSpuDao goodsSpuDao;
+
+    @Autowired
+    ShopDao shopDao;
 
     @DubboReference
     private IActivityService IActivityService;
@@ -93,9 +106,19 @@ public class IGoodsServiceImpl implements IGoodsService {
         return returnObject;
     }
 
+
+
     @Override
-    public ReturnObject<SimpleShopDTO> getSimpleShopByShopId(Long shopId) {
-        return goodsDao.getSimpleShopByShopId(shopId);
+    public ReturnObject<SimpleShopDTO> getSimpleShopByShopId(Long id) {
+        SimpleShopDTO simpleShopDTO = null;
+        ShopPo shopPo = shopDao.getShopById(id);
+        if(shopPo!=null)
+        {
+            simpleShopDTO = new SimpleShopDTO();
+            simpleShopDTO.setId(shopPo.getId());
+            simpleShopDTO.setName(shopPo.getName());
+        }
+        return new ReturnObject<>(simpleShopDTO);
     }
 
     @Override
