@@ -132,7 +132,7 @@ public class GoodsController {
             return returnObject;
         }
         if(departId!=shopId)
-            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         ReturnObject retObject = goodsService.uploadSkuImg(shopId,id,file);
         return Common.getNullRetObj(retObject, httpServletResponse);
     }
@@ -160,7 +160,7 @@ public class GoodsController {
     {
         logger.debug("deleteSku: id = "+ id+" shopId="+shopId);
         if(departId!=0&&departId!=shopId)
-            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         ReturnObject retObject=goodsService.deleteSku(shopId,id);
         return Common.decorateReturnObject(retObject);
     }
@@ -195,7 +195,7 @@ public class GoodsController {
             return returnObject;
         }
         if(departId!=0&&departId!=shopId)
-            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         GoodsSku sku=vo.createGoodsSku();
         sku.setId(id);
         ReturnObject retObject=goodsService.modifySku(shopId,sku);
@@ -237,7 +237,7 @@ public class GoodsController {
         if (null != returnObject) {
             return returnObject;
         }
-        if(departId!=shopId)return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        if(departId!=shopId)return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         FloatPrice floatPrice=vo.createFloatPrice();
         floatPrice.setGoodsSkuId(id);
         floatPrice.setValid(FloatPrice.Validation.VALID);
@@ -282,7 +282,7 @@ public class GoodsController {
         if (null != returnObject) {
             return returnObject;
         }
-        if(departId!=shopId)return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        if(departId!=shopId)return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         GoodsSku sku=vo.createGoodsSku();
         sku.setGoodsSpuId(id);
         sku.setDisabled(GoodsSku.State.ONSHELF);
@@ -1095,7 +1095,7 @@ public class GoodsController {
                               @Depart @ApiIgnore @RequestParam(required = false) Long departId)
     {
         ReturnObject<GoodsSkuRetVo> returnObject=goodsService.getShareSku(sid,id,userId);
-        return returnObject;
+        return Common.decorateReturnObject(returnObject);
     }
 
     /**

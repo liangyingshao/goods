@@ -140,6 +140,15 @@ public class IGoodsServiceImpl implements IGoodsService {
         return null;
     }
 
+    @Override
+    public List<SkuInfoDTO> getSelectSkuListBySkuIdList(List<Long> idList) {
+        List<SkuInfoDTO> list=new ArrayList<>();
+        idList.stream().forEach(x->{
+            list.add(getSelectSkuInfoBySkuId(x).getData());
+        });
+        return list;
+    }
+
     //    @Override
 //    public ReturnObject<ShopDetailDTO> getShopInfoBySkuId(Long skuId) {
 //        return null;

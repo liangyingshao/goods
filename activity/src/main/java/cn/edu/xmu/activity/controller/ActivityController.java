@@ -70,8 +70,8 @@ public class ActivityController {
             @RequestParam(required = false, defaultValue = "10") Integer pageSize)
     {
         
-        ReturnObject<PageInfo<SkuNameInfoDTO>> returnObject=activityService.getCouponSkuList(id,page,pageSize);
-        return returnObject;
+        ReturnObject<PageInfo<SkuInfoDTO>> returnObject=activityService.getCouponSkuList(id,page,pageSize);
+        return Common.decorateReturnObject(returnObject);
     }
 
     /**
@@ -108,7 +108,7 @@ public class ActivityController {
             return returnObject;
         }
         if(departId!=shopId)
-            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         List<CouponSku> couponSkus=new ArrayList<>();
         for(Long vo:body)
         {
@@ -151,7 +151,7 @@ public class ActivityController {
     {
         logger.debug("deleteCouponSpu: id = "+ id+" shopId="+shopId);
         if(departId!=shopId)
-            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         ReturnObject returnObject=activityService.deleteCouponSku(shopId,id);
         return Common.decorateReturnObject(returnObject);
     }
@@ -200,7 +200,7 @@ public class ActivityController {
                               @RequestParam(required = false, defaultValue = "10") Integer pageSize)
     {
         logger.debug("showCoupons:page="+page+" pageSize="+pageSize);
-        if(state!=null&&Coupon.State.getTypeByCode(state)==null)return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+        if(state!=null&&Coupon.State.getTypeByCode(state)==null)return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.FIELD_NOTVALID));
         ReturnObject returnObject=activityService.showCoupons(userId,state,page,pageSize);
         return returnObject;
     }
@@ -226,7 +226,7 @@ public class ActivityController {
     public Object useCoupon(@LoginUser @ApiIgnore @RequestParam(required = false) Long userId, @PathVariable Long id)
     {
         ReturnObject returnObject=activityService.useCoupon(userId,id);
-        return returnObject;
+        return Common.decorateReturnObject(returnObject);
     }
 
     //据说已废弃
@@ -250,7 +250,7 @@ public class ActivityController {
     public Object deleteCoupon(@LoginUser @ApiIgnore @RequestParam(required = false) Long userId, @PathVariable Long id)
     {
         ReturnObject returnObject=activityService.deleteCoupon(userId,id);
-        return returnObject;
+        return Common.decorateReturnObject(returnObject);
     }
 
     /**
@@ -273,7 +273,7 @@ public class ActivityController {
     public Object getCoupon(@LoginUser @ApiIgnore @RequestParam(required = false) Long userId, @PathVariable Long id)
     {
         ReturnObject<List<String>> returnObject=activityService.getCoupon(userId,id);
-        return returnObject;
+        return Common.decorateReturnObject(returnObject);
     }
 
     /**
@@ -302,7 +302,7 @@ public class ActivityController {
     {
         if(shopId!=departId)return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
         ReturnObject returnObject=activityService.returnCoupon(shopId,id);
-        return returnObject;
+        return Common.decorateReturnObject(returnObject);
     }
 
     /**

@@ -43,15 +43,15 @@ public class CouponService {
      * @return ReturnObject<PageInfo<CouponSku>>
      */
     @Transactional
-    public ReturnObject<PageInfo<SkuNameInfoDTO>> getCouponSkuList(Long id, Integer page, Integer pageSize) {
+    public ReturnObject<PageInfo<SkuInfoDTO>> getCouponSkuList(Long id, Integer page, Integer pageSize) {
         //获取Sku的id列表，根据SKUid列表调用远程服务获取每一个sku的name
 //        PageInfo<GoodsSkuCouponRetVo>couponSkus=activityDao.getCouponSkuList(id,page,pageSize);
         List<CouponSkuPo> list = couponDao.getCouponSkuList(id);
         List<Long> idList = new ArrayList<>(list.stream().map(CouponSkuPo::getSkuId).collect(Collectors.toList()));
-        List<SkuNameInfoDTO> skuNameList = iGoodsService.getSelectSkuNameListBySkuIdList(idList);
+        List<SkuInfoDTO> skuList = iGoodsService.getSelectSkuListBySkuIdList(idList);
         PageHelper.startPage(page,pageSize);
-        PageInfo<SkuNameInfoDTO> skuNameInfoDTOPageInfo = PageInfo.of(skuNameList);
-        return new ReturnObject<>(skuNameInfoDTOPageInfo);
+        PageInfo<SkuInfoDTO> skuInfoDTOPageInfo = PageInfo.of(skuList);
+        return new ReturnObject<>(skuInfoDTOPageInfo);
     }
 
     /**

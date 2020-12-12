@@ -60,6 +60,8 @@ public interface IGoodsService {
 
     ReturnObject<GoodsSpuPoDTO> getSpuBySpuId(Long spuId);
 
+    List<SkuInfoDTO> getSelectSkuListBySkuIdList(List<Long> idList);
+
 
 //    ReturnObject<ShopDetailDTO> getShopInfoBySkuId(Long skuId);
 //

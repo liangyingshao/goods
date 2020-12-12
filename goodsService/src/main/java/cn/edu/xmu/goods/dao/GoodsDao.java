@@ -42,9 +42,9 @@ public class GoodsDao {
     @Autowired
     private ShopPoMapper shopMapper;
 //上传图片相关变量
-    private String davUsername="oomall";
-    private String davPassword="admin";
-    private String baseUrl="http://192.168.148.131:8888/webdav/";
+    private String davUsername="night";
+    private String davPassword="tiesuolianhuan123";
+    private String baseUrl="http://172.16.4.146:8888/webdav/";
 
     public void initialize() throws Exception {
         //初始化sku
@@ -598,6 +598,7 @@ public class GoodsDao {
         GoodsSpuPo spuPo= spuMapper.selectByPrimaryKey(skuPo.getGoodsSpuId());
         GoodsInfoDTO goodsInfoDTO=new GoodsInfoDTO();
         goodsInfoDTO.setSkuName(skuPo.getName());
+        goodsInfoDTO.setSpuId(spuPo.getId());
         goodsInfoDTO.setSpuName(spuPo.getName());
         goodsInfoDTO.setAddTime(skuPo.getGmtCreate());
 
