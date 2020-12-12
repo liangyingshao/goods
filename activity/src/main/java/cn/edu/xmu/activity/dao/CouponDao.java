@@ -101,7 +101,7 @@ public class CouponDao implements InitializingBean
         Map.Entry<Long,Long> coupon=new AbstractMap.SimpleEntry<Long,Long>(activityId,userId);
         if(bloomFilter.includeByBloomFilter("coupon"+suffixName,coupon.toString()))
             return new ReturnObject(ResponseCode.COUPON_FINISH);
-        return null;
+        return new ReturnObject();
     }
 
     /**
@@ -507,6 +507,7 @@ public class CouponDao implements InitializingBean
         //先到bloom过滤器里查询
         ReturnObject returnObject=checkCouponBloomFilter(id,userId);
         if(returnObject.getCode().equals(ResponseCode.COUPON_FINISH))return returnObject;
+
 
         //查询优惠券发放情况
         //先找redis
