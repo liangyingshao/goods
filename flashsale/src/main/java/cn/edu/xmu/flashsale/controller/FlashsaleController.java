@@ -9,8 +9,10 @@ import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
+import cn.edu.xmu.oomall.other.service.ITimeService;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.*;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,8 +46,12 @@ public class FlashsaleController {
     @Autowired
     private FlashsaleItemService flashslaeItemService;
 
+    @DubboReference
+    private ITimeService iTimeService;
+
     @ApiOperation(value = "flashsale001:查询某一时段秒杀活动详情",  produces="application/json")
     @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
             @ApiImplicitParam(name="id", required = true, dataType="String", paramType="path")//时间段id
     })
     @ApiResponses({
@@ -53,6 +59,20 @@ public class FlashsaleController {
     })
     @GetMapping("/timesegments/{id}/flashsales")
     public Flux<FlashsaleItemRetVo> queryTopicsByTime(@PathVariable Long id) {
+        return flashslaeItemService.queryTopicsByTime(id);
+    }
+
+    @ApiOperation(value = "flashsale002:获取当前时段秒杀列表,响应式API，会多次返回",  produces="application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功")
+    })
+    @GetMapping("/flashsales/current")
+    public Flux<FlashsaleItemRetVo> getCurrentflash() {
+        Byte type = 1;
+        Long id = iTimeService.getCurrentSegmentId(type).getData();
         return flashslaeItemService.queryTopicsByTime(id);
     }
 

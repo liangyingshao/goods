@@ -42,9 +42,6 @@ public class FlashsaleItemService {
     @DubboReference
     private IGoodsService goodsService;
 
-    @DubboReference
-    private ITimeService iTimeService;
-
     @Autowired
     private FlashSaleItemDao flashSaleItemDao;
 
@@ -167,4 +164,5 @@ public class FlashsaleItemService {
             redisTemplate.expire(key, 48, TimeUnit.HOURS);
         }
     }
+
 }

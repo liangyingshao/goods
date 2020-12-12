@@ -60,6 +60,8 @@ public interface IGoodsService {
 
     ReturnObject<GoodsSpuPoDTO> getSpuBySpuId(Long spuId);
 
+    //根据float_price更新库存
+
 
 //    ReturnObject<ShopDetailDTO> getShopInfoBySkuId(Long skuId);
 //
