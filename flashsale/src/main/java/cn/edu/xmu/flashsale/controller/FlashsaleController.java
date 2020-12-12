@@ -9,8 +9,10 @@ import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
+import cn.edu.xmu.oomall.other.service.ITimeService;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.*;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,8 +46,12 @@ public class FlashsaleController {
     @Autowired
     private FlashsaleItemService flashslaeItemService;
 
+    @DubboReference
+    private ITimeService iTimeService;
+
     @ApiOperation(value = "flashsale001:查询某一时段秒杀活动详情",  produces="application/json")
     @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
             @ApiImplicitParam(name="id", required = true, dataType="String", paramType="path")//时间段id
     })
     @ApiResponses({
@@ -53,6 +59,20 @@ public class FlashsaleController {
     })
     @GetMapping("/timesegments/{id}/flashsales")
     public Flux<FlashsaleItemRetVo> queryTopicsByTime(@PathVariable Long id) {
+        return flashslaeItemService.queryTopicsByTime(id);
+    }
+
+    @ApiOperation(value = "flashsale002:获取当前时段秒杀列表,响应式API，会多次返回",  produces="application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功")
+    })
+    @GetMapping("/flashsales/current")
+    public Flux<FlashsaleItemRetVo> getCurrentflash() {
+        Byte type = 1;
+        Long id = iTimeService.getCurrentSegmentId(type).getData();
         return flashslaeItemService.queryTopicsByTime(id);
     }
 
@@ -67,13 +87,13 @@ public class FlashsaleController {
     })
     @PostMapping("/timesegments/{id}/flashsales")
     public Object createflash(@PathVariable Long id, @RequestParam(required = true) String flashDate) {
-        //falshDate不能小于当前日期，先获取当前日期转化为字符串，与flashDate相比较，flashDate不能小于当前字符串
-        LocalDate date = LocalDate.now(); // get the current date
-        if(date.toString().compareTo(flashDate) > 0)
+        //falshDate不能小于明天，先获取当前日期转化为字符串，与flashDate相比较，flashDate不能小于当前字符串
+        LocalDate date = LocalDate.now().plusDays(1); // get the tomorrow date
+        if(date.toString().compareTo(flashDate) > 0)//不允许增加明天之前的活动
         {
-            return new ReturnObject<>(ResponseCode.TIMESEG_CONFLICT);
+            return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
         }
-        //falshDate不小于当前日期
+        //falshDate不小于明天
         LocalDateTime flashDateParse = LocalDate.parse(flashDate,DateTimeFormatter.ISO_DATE).atStartOfDay();
         ReturnObject object = flashsaleService.createflash(id, flashDateParse);
         if(object.getData()!=null)
@@ -173,7 +193,7 @@ public class FlashsaleController {
     })
     @DeleteMapping("/flashsales/{fid}/flashitems/{id}")
     public Object deleteKUofTopic(@PathVariable Long fid, @PathVariable Long id) {
-        ReturnObject object = flashslaeItemService.deleteKUofTopic(fid, id);
+        ReturnObject object = flashslaeItemService.deleteSKUofTopic(fid, id);
         return Common.decorateReturnObject(object);
     }
 

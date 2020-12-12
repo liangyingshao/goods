@@ -6,4 +6,6 @@ package cn.edu.xmu.oomall.goods.service;
  * version: 1.0
  */
 public interface IFlashsaleService {
+
+    //根据itemId更新库存
 }

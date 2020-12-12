@@ -12,9 +12,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -91,8 +93,9 @@ public class FlashSaleDao {
             {
                 return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             }
-            else
+            else {
                 return new ReturnObject(ResponseCode.OK);
+            }
         }
         catch (DataAccessException e)
         {
@@ -138,4 +141,30 @@ public class FlashSaleDao {
         }
     }
 
+    public ReturnObject<List<FlashSalePo>> selectByFlashDate(LocalDateTime date) {
+        FlashSalePoExample example = new FlashSalePoExample();
+        FlashSalePoExample.Criteria criteria = example.createCriteria();
+        criteria.andFlashDateEqualTo(date);
+        return new ReturnObject<>(flashSalePoMapper.selectByExample(example));
+    }
+
+    public ReturnObject<FlashSalePo> selectByFlashsaleId(Long id) {
+        FlashSalePo po = flashSalePoMapper.selectByPrimaryKey(id);
+        if(po!=null) {
+            return new ReturnObject<>(po);
+        }
+        return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+    }
+
+    public ReturnObject<FlashSalePo> selectByFlashDateAndSegId(LocalDateTime time, Long id) {
+        FlashSalePoExample example = new FlashSalePoExample();
+        FlashSalePoExample.Criteria criteria = example.createCriteria();
+        criteria.andFlashDateEqualTo(time);
+        criteria.andTimeSegIdEqualTo(id);
+        List<FlashSalePo> pos = flashSalePoMapper.selectByExample(example);
+        if(pos==null) {
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        return new ReturnObject<>(pos.get(0));
+    }
 }

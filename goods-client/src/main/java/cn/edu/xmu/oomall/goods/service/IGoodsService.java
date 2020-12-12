@@ -62,6 +62,8 @@ public interface IGoodsService {
 
     List<SkuInfoDTO> getSelectSkuListBySkuIdList(List<Long> idList);
 
+    //根据float_price更新库存
+
 
 //    ReturnObject<ShopDetailDTO> getShopInfoBySkuId(Long skuId);
 //

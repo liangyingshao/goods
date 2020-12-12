@@ -5,6 +5,7 @@ import cn.edu.xmu.flashsale.dao.FlashSaleItemDao;
 import cn.edu.xmu.flashsale.model.bo.FlashSaleItem;
 import cn.edu.xmu.flashsale.model.po.FlashSaleItemPo;
 import cn.edu.xmu.flashsale.model.po.FlashSaleItemPoExample;
+import cn.edu.xmu.flashsale.model.po.FlashSalePo;
 import cn.edu.xmu.flashsale.model.vo.FlashsaleItemRetVo;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
@@ -20,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
@@ -29,6 +31,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
@@ -39,15 +42,18 @@ public class FlashsaleItemService {
     @DubboReference
     private IGoodsService goodsService;
 
-    @DubboReference
-    private ITimeService iTimeService;
-
     @Autowired
     private FlashSaleItemDao flashSaleItemDao;
+
+    @Autowired
+    private FlashSaleDao flashSaleDao;
 
     //    @Autowired
     @Resource
     private ReactiveRedisTemplate<String, Serializable> reactiveRedisTemplate;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     //响应式返回
     public Flux<FlashsaleItemRetVo> queryTopicsByTime(Long id) {
@@ -61,6 +67,15 @@ public class FlashsaleItemService {
     }
 
     public ReturnObject<FlashsaleItemRetVo> addSKUofTopic(Long id, Long skuId, Long price, Integer quantity) {
+        //不允许增加今天和明天的秒杀商品
+        ReturnObject<FlashSalePo> flashSalePoReturnObject = flashSaleDao.selectByFlashsaleId(id);
+        if(flashSalePoReturnObject.getCode()!=ResponseCode.OK)
+            return new ReturnObject<>(flashSalePoReturnObject.getCode());
+        else {
+            if(flashSalePoReturnObject.getData().getFlashDate().isBefore(LocalDateTime.now().plusDays(1))) {
+                return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+            }
+        }
         //获得sku信息
         ReturnObject<SkuInfoDTO> returnObject = goodsService.getSelectSkuInfoBySkuId(skuId);
         logger.error("goods Service返回给flashsale："+returnObject.getData().toString());
@@ -82,8 +97,23 @@ public class FlashsaleItemService {
         return new ReturnObject<>(retVo);
     }
 
-    public ReturnObject deleteKUofTopic(Long fid, Long id) {
-        return flashSaleItemDao.deleteKUofTopic(fid, id);
+    public ReturnObject deleteSKUofTopic(Long fid, Long id) {
+        ReturnObject<FlashSalePo> flashSalePoReturnObject = flashSaleDao.selectByFlashsaleId(fid);
+        String key = "FlashSaleItem:" + flashSalePoReturnObject.getData().getFlashDate().toString() + flashSalePoReturnObject.getData().getTimeSegId().toString();
+        FlashSaleItemPo itemPo;
+        if(flashSalePoReturnObject.getCode()!=ResponseCode.OK)
+            return new ReturnObject<>(flashSalePoReturnObject.getCode());
+        ReturnObject<FlashSaleItemPo> itemRetObj = flashSaleItemDao.getByPrimaryKey(id);
+        if(itemRetObj.getCode()!=ResponseCode.OK) {
+            return itemRetObj;
+        } else {
+            itemPo = itemRetObj.getData();
+        }
+        ReturnObject retObj = flashSaleItemDao.deleteSKUofTopic(fid, id);
+        if(retObj.getCode()==ResponseCode.OK && flashSalePoReturnObject.getData().getFlashDate().isBefore(LocalDateTime.now().plusDays(1))) {
+            redisTemplate.boundSetOps(key).remove(itemPo);
+        }
+        return retObj;
     }
 
     public ReturnObject<PageInfo<VoObject>> getSKUofTopic(Long id, Integer page, Integer pageSize) {
@@ -106,18 +136,33 @@ public class FlashsaleItemService {
     }
 
     public void loadRedis() {
-
+        //准备好秒杀id
+        List<FlashSalePo> flashSalePosToday = flashSaleDao.selectByFlashDate(LocalDateTime.now()).getData();
+        List<FlashSalePo> flashSalePosTom = flashSaleDao.selectByFlashDate(LocalDateTime.now().plusDays(1)).getData();
+        //准备好时段id
         Byte type = 1;
         //List<Long> list = iTimeService.listSelectAllTimeSegmentId(type).getData();
         List<Long> list = new ArrayList<>();
         list.add(1L);
         list.add(2L);
-        for (Long id : list) {
-            FlashSaleItemPoExample example = new FlashSaleItemPoExample();
-            FlashSaleItemPoExample.Criteria criteria = example.createCriteria();
-            //根据时段id查出该时段所有的item
-            //根据时段id+今天的date构造key
-            //存进redis
+        //将今天的item按照flashsale-segment存进redis
+        for (FlashSalePo po:flashSalePosToday) {
+            List<FlashSaleItemPo> itemPos = flashSaleItemDao.selectByFlashsaleId(po.getId()).getData();
+            String key = "FlashSaleItem:" + po.getFlashDate().toString() + po.getTimeSegId().toString();
+            for (FlashSaleItemPo itemPo : itemPos) {
+                redisTemplate.boundSetOps(key).add(itemPo);
+            }
+            redisTemplate.expire(key, 24, TimeUnit.HOURS);
+        }
+        //将明天的item存进redis
+        for (FlashSalePo po:flashSalePosTom) {
+            List<FlashSaleItemPo> itemPos = flashSaleItemDao.selectByFlashsaleId(po.getId()).getData();
+            String key = "FlashSaleItem:" + po.getFlashDate().toString() + po.getTimeSegId().toString();
+            for (FlashSaleItemPo itemPo : itemPos) {
+                redisTemplate.boundSetOps(key).add(itemPo);
+            }
+            redisTemplate.expire(key, 48, TimeUnit.HOURS);
         }
     }
+
 }

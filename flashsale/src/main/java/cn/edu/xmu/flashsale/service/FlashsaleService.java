@@ -1,19 +1,23 @@
 package cn.edu.xmu.flashsale.service;
 import cn.edu.xmu.flashsale.dao.FlashSaleDao;
+import cn.edu.xmu.flashsale.dao.FlashSaleItemDao;
+import cn.edu.xmu.flashsale.model.po.FlashSaleItemPo;
+import cn.edu.xmu.flashsale.model.po.FlashSalePo;
 import cn.edu.xmu.flashsale.model.vo.FlashsaleNewRetVo;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.other.model.TimeDTO;
 import cn.edu.xmu.oomall.other.service.ITimeService;
-import lombok.extern.flogger.Flogger;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -26,6 +30,12 @@ public class FlashsaleService {
 
     @Autowired
     private FlashSaleDao flashsaleDao;
+
+    @Autowired
+    private FlashSaleItemDao flashSaleItemDao;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     public ReturnObject<FlashsaleNewRetVo> createflash(Long id, LocalDateTime flashDate) {
         ReturnObject<FlashsaleNewRetVo> returnObject = new ReturnObject<>();
@@ -43,6 +53,12 @@ public class FlashsaleService {
                 return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             }
             //时段存在
+            //时段id+falshDate是否已经存在
+            ReturnObject<FlashSalePo> flashSalePoReturnObject = flashsaleDao.selectByFlashDateAndSegId(flashDate, id);
+            if(flashSalePoReturnObject.getData()!=null) {
+                return new ReturnObject<>(ResponseCode.TIMESEG_CONFLICT);
+            }
+            //时段不冲突
             returnObject = flashsaleDao.createflash(id, flashDate);
             FlashsaleNewRetVo retVo = returnObject.getData();
             retVo.setTimeDTO(timeDTOReturnObject.getData());
@@ -55,7 +71,20 @@ public class FlashsaleService {
     }
 
     public ReturnObject deleteflashsale(Long id) {
-        return flashsaleDao.deleteflashsale(id);
+        ReturnObject<FlashSalePo> flashSalePoReturnObject = flashsaleDao.selectByFlashsaleId(id);
+        if(flashSalePoReturnObject.getCode()!= ResponseCode.OK) {
+            return flashSalePoReturnObject;
+        }
+        FlashSalePo flashSalePo = flashSalePoReturnObject.getData();
+        String key = "FlashSaleItem:" + flashSalePo.getFlashDate().toString() + flashSalePo.getTimeSegId().toString();
+        List<FlashSaleItemPo> flashSaleItemPos = flashSaleItemDao.selectByFlashsaleId(id).getData();
+        ReturnObject retObj =  flashsaleDao.deleteflashsale(id);
+        if(retObj.getCode()==ResponseCode.OK && flashSalePoReturnObject.getData().getFlashDate().isBefore(LocalDateTime.now().plusDays(1))) {
+            for (FlashSaleItemPo itemPo : flashSaleItemPos) {
+                redisTemplate.boundSetOps(key).remove(itemPo);
+            }
+        }
+        return retObj;
     }
 
     public ReturnObject updateflashsale(Long id, LocalDateTime flashDate) {
