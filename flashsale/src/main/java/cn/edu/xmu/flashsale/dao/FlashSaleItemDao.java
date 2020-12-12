@@ -54,7 +54,7 @@ public class FlashSaleItemDao {
         }
     }
 
-    public ReturnObject deleteKUofTopic(Long fid, Long id) {
+    public ReturnObject deleteSKUofTopic(Long fid, Long id) {
         try
         {
             int ret = flashSaleItemPoMapper.deleteByPrimaryKey(id);
@@ -97,6 +97,37 @@ public class FlashSaleItemDao {
             logger.error("selectAllPassComment: DataAccessException:" + e.getMessage());
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
         } catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
+    }
+
+    public ReturnObject<List<FlashSaleItemPo>> selectByFlashsaleId(Long id) {
+        FlashSaleItemPoExample example = new FlashSaleItemPoExample();
+        FlashSaleItemPoExample.Criteria criteria = example.createCriteria();
+        criteria.andSaleIdEqualTo(id);
+        return new ReturnObject<>(flashSaleItemPoMapper.selectByExample(example));
+    }
+
+    public ReturnObject<FlashSaleItemPo> getByPrimaryKey(Long id) {
+        try
+        {
+            FlashSaleItemPo ret = flashSaleItemPoMapper.selectByPrimaryKey(id);
+            if(ret == null)
+            {
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            }
+            else
+                return new ReturnObject(ret);
+        }
+        catch (DataAccessException e)
+        {
+            // 其他数据库错误
+            logger.debug("other sql exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        }
+        catch (Exception e) {
             // 其他Exception错误
             logger.error("other exception : " + e.getMessage());
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
