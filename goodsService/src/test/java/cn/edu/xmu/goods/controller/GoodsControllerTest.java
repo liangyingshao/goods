@@ -200,7 +200,7 @@ class GoodsControllerTest {
     void modifySKU() throws Exception{
         String requireJson="{\n    \"name\": \"name\",\n    \"originalPrice\": \"100\",\n    \"configuration\": \"configuration\",\n    \"weight\": \"100\",\n    \"inventory\": \"9999\",\n    \"detail\": \"detail\"\n}";
         String token = creatTestToken(1L, 0L, 100);
-        byte[] response =webClient.put().uri("/goods/shops/0/skus/273")
+        byte[] response =webClient.put().uri("/goods/shops/0/skus/683")
                 .header("authorization",token)
                 .bodyValue(requireJson)
                 .exchange()
@@ -211,6 +211,15 @@ class GoodsControllerTest {
                 .getResponseBodyContent();
         String expectedResponse="{\"errno\":0,\"errmsg\":\"成功\"}";
 
+        response =webClient.put().uri("/goods/shops/0/skus/273")
+                .header("authorization",token)
+                .bodyValue(requireJson)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(901)
+                .returnResult()
+                .getResponseBodyContent();
 
         response =webClient.put().uri("/goods/shops/1/skus/273")
                 .header("authorization",token)
@@ -238,7 +247,7 @@ class GoodsControllerTest {
     @Test
     void add_floating_price() throws Exception
     {
-        LocalDateTime beginTime= LocalDateTime.of(2020,12,12,20,0,0);
+        LocalDateTime beginTime= LocalDateTime.of(2020,12,20,20,0,0);
         LocalDateTime endTime=LocalDateTime.of(2020,12,30,10,0,0);
         String requireJson="{\n    \"activityPrice\": \"100\",\n    \"beginTime\": \""+beginTime.toString()+"\",\n    \"endTime\": \""+endTime.toString()+"\",\n    \"quantity\": \"100\"\n}";
         String token = creatTestToken(1L, 0L, 100);
@@ -249,6 +258,9 @@ class GoodsControllerTest {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
+                .jsonPath("$.data.activityPrice").isEqualTo(100)
+                .jsonPath("$.data.createdBy.id").isEqualTo(1)
+                .jsonPath("$.data.modifiedBy.id").isEqualTo(1)
                 .returnResult()
                 .getResponseBodyContent();
         
@@ -299,7 +311,7 @@ class GoodsControllerTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.errno").isEqualTo(601)
+                .jsonPath("$.errno").isEqualTo(610)
                 .returnResult()
                 .getResponseBodyContent();
         expectedResponse="{\"errno\":610,\"errmsg\":\"开始时间大于结束时间\"}";
@@ -338,8 +350,9 @@ class GoodsControllerTest {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.data").isArray()
-                .jsonPath("$.data[?(@.sn==newSkuSn)].inventory").isEqualTo(100)
+                .jsonPath("$.data").isMap()
+                .jsonPath("$.data.skuSn").isEqualTo("newSkuSn")
+                .jsonPath("$.data.inventory").isEqualTo(100)
                 .returnResult()
                 .getResponseBodyContent();
         String expectedResponse

@@ -268,7 +268,7 @@ public class GoodsDao {
         criteria.andGoodsSpuIdEqualTo(selectSkuPo.getGoodsSpuId());
         List<GoodsSkuPo>skuPos=skuMapper.selectByExample(skuExample);
         for(GoodsSkuPo po:skuPos)
-            if(po.getName().equals(sku.getName()))return new ReturnObject<>(ResponseCode.SKUSN_SAME, String.format("SKU名重复：" + selectSkuPo.getName()));
+            if(po.getName().equals(sku.getName())&&!po.getId().equals(sku.getId()))return new ReturnObject<>(ResponseCode.SKUSN_SAME, String.format("SKU名重复：" + selectSkuPo.getName()));
 
         //尝试修改
         GoodsSkuPo skuPo=sku.getGoodsSkuPo();
