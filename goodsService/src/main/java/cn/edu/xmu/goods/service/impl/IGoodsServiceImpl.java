@@ -140,7 +140,7 @@ public class IGoodsServiceImpl implements IGoodsService {
         return null;
     }
 
-    @Override
+    //@Override
     public List<SkuInfoDTO> getSelectSkuListBySkuIdList(List<Long> idList) {
         List<SkuInfoDTO> list=new ArrayList<>();
         idList.stream().forEach(x->{

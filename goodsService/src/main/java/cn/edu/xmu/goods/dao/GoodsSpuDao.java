@@ -391,7 +391,7 @@ public class GoodsSpuDao {
                 GoodsSkuPoExample.Criteria criteria = skuExample.createCriteria();
                 criteria.andIdEqualTo(skuPo.getId());
                 criteria.andGoodsSpuIdEqualTo(spu.getId());
-                skuPo.setState((byte)6);
+                skuPo.setDisabled((byte)6);
                 int ret=goodsSkuMapper.updateByExample(skuPo,skuExample);
                 if (ret == 0) {
                     //修改失败

@@ -40,7 +40,7 @@ class GoodsControllerTest {
 
     public GoodsControllerTest() {
         this.webClient = WebTestClient.bindToServer()
-                .baseUrl("http://localhost:8848")
+                .baseUrl("http://localhost:8090")
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/json;charset=UTF-8")
                 .build();
     }
@@ -77,9 +77,9 @@ class GoodsControllerTest {
                 .jsonPath("$.data").isMap()
                 .jsonPath("$.data.list").isArray()
                 .jsonPath("$.data.total").isEqualTo(1)
-                .jsonPath("$.data.list[@.id=273].name").isEqualTo("+")
-                .jsonPath("$.pageNum").isEqualTo(1)
-                .jsonPath("$.pageSize").isEqualTo(1)
+                .jsonPath("$.data.list[?(@.id==273)].name").isEqualTo("+")
+                .jsonPath("$.data.pageNum").isEqualTo(1)
+                .jsonPath("$.data.pageSize").isEqualTo(1)
                 .returnResult()
                 .getResponseBodyContent();
         
@@ -93,9 +93,9 @@ class GoodsControllerTest {
                 .jsonPath("$.data").isMap()
                 .jsonPath("$.data.list").isArray()
                 .jsonPath("$.data.total").isEqualTo(5)
-                .jsonPath("$.data.list[0].id").isEqualTo(273)
-                .jsonPath("$.pageNum").isEqualTo(1)
-                .jsonPath("$.pageSize").isEqualTo(5)
+                .jsonPath("$.data.list[?(@.id==273)].name").isEqualTo("+")
+                .jsonPath("$.data.pageNum").isEqualTo(1)
+                .jsonPath("$.data.pageSize").isEqualTo(5)
                 .returnResult()
                 .getResponseBodyContent();
         
@@ -109,9 +109,9 @@ class GoodsControllerTest {
                 .jsonPath("$.data").isMap()
                 .jsonPath("$.data.list").isArray()
                 .jsonPath("$.data.total").isEqualTo(5)
-                .jsonPath("$.data.list[0].id").isEqualTo(273)
-                .jsonPath("$.pageNum").isEqualTo(2)
-                .jsonPath("$.pageSize").isEqualTo(5)
+                .jsonPath("$.data.list[?(@.id==278)].name").isEqualTo("+")
+                .jsonPath("$.data.pageNum").isEqualTo(2)
+                .jsonPath("$.data.pageSize").isEqualTo(5)
                 .returnResult()
                 .getResponseBodyContent();
         
@@ -125,9 +125,9 @@ class GoodsControllerTest {
                 .jsonPath("$.data").isMap()
                 .jsonPath("$.data.list").isArray()
                 .jsonPath("$.data.total").isEqualTo(10)
-                .jsonPath("$.data.list[2.id=273].name").isEqualTo("+")
-                .jsonPath("$.pageNum").isEqualTo(1)
-                .jsonPath("$.pageSize").isNumber()
+                .jsonPath("$.data.list[?(@.id==273)].name").isEqualTo("+")
+                .jsonPath("$.data.pageNum").isEqualTo(1)
+                .jsonPath("$.data.pageSize").isNumber()
                 .returnResult()
                 .getResponseBodyContent();
         
@@ -238,7 +238,7 @@ class GoodsControllerTest {
     @Test
     void add_floating_price() throws Exception
     {
-        LocalDateTime beginTime= LocalDateTime.of(2020,12,12,10,0,0);
+        LocalDateTime beginTime= LocalDateTime.of(2020,12,12,20,0,0);
         LocalDateTime endTime=LocalDateTime.of(2020,12,30,10,0,0);
         String requireJson="{\n    \"activityPrice\": \"100\",\n    \"beginTime\": \""+beginTime.toString()+"\",\n    \"endTime\": \""+endTime.toString()+"\",\n    \"quantity\": \"100\"\n}";
         String token = creatTestToken(1L, 0L, 100);
@@ -339,7 +339,7 @@ class GoodsControllerTest {
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
                 .jsonPath("$.data").isArray()
-                .jsonPath("$.data[@.sn=newSkuSn].inventory").isEqualTo(100)
+                .jsonPath("$.data[?(@.sn==newSkuSn)].inventory").isEqualTo(100)
                 .returnResult()
                 .getResponseBodyContent();
         String expectedResponse

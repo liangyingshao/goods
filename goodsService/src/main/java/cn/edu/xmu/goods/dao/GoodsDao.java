@@ -157,7 +157,9 @@ public class GoodsDao {
             else sku.setPrice(floatPos.get(0).getActivityPrice());
         }
         List<GoodsSkuRetVo> ret = skus.stream().map(GoodsSkuRetVo::new).collect(Collectors.toList());
-        return new PageInfo<>(ret);
+        PageInfo<GoodsSkuRetVo> returns=new PageInfo(ret);
+        returns.setPageNum(page);
+        return returns;
     }
 
     /**
@@ -344,7 +346,7 @@ public class GoodsDao {
 
         //尝试插入
         FloatPricePo floatPricePo=floatPrice.getFloatPricePo();
-        floatPricePo.setGmtCreated(LocalDateTime.now());
+        floatPricePo.setGmtCreate(LocalDateTime.now());
         floatPricePo.setGmtModified(LocalDateTime.now());
         try{
             int ret = floatMapper.insertSelective(floatPricePo);
