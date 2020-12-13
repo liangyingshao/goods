@@ -403,7 +403,7 @@ public class GoodsController {
      * @author 24320182203254 秦楚彦
      * Created at 2020/12/01 22：00
      */
-    @ApiOperation(value="店家商品上架",produces="application/json")
+    @ApiOperation(value="修改商品SPU",produces="application/json")
     @ApiImplicitParams({
             @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
             @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "shopId", value = "商铺id", required = true),
@@ -476,12 +476,11 @@ public class GoodsController {
         if(shopId!=departId)
             return  Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE), httpServletResponse);
         ReturnObject retObject = goodsService.putGoodsOnSale(shopId,id);
-        if(retObject.getData()!=null){
+        if (retObject.getData() != null) {
             return Common.getRetObject(retObject);
-        }else{
-            return  Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
+        } else {
+            return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }
-
     }
 
     /**
@@ -514,12 +513,11 @@ public class GoodsController {
         if(departId!=shopId)
             return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         ReturnObject retObject = goodsService.putOffGoodsOnSale(shopId,id);
-        if(retObject.getData()!=null){
+        if (retObject.getData() != null) {
             return Common.getRetObject(retObject);
-        }else{
-            return  Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
+        } else {
+            return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }
-
     }
 
     /**

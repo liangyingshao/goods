@@ -207,10 +207,10 @@ public class GoodsDao {
         int ret = skuMapper.updateByPrimaryKeySelective(newSkuPo);
         if (ret == 0) {
             logger.debug("uploadSkuImg: update fail. sku id: " + sku.getId());
-            returnObject = new ReturnObject(ResponseCode.FIELD_NOTVALID);
+            returnObject = new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
         } else {
             logger.debug("uploadSkuImg: update sku success : " + sku);
-            returnObject = new ReturnObject();
+            returnObject = new ReturnObject<>();
         }
         return returnObject;
     }
@@ -236,7 +236,7 @@ public class GoodsDao {
                 logger.debug("logicalDelete:update fail.sku id="+id);
                 return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             }
-            else return new ReturnObject();
+            else return new ReturnObject<>();
         }
         else return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
     }
@@ -260,7 +260,7 @@ public class GoodsDao {
         criteria1.andShopIdEqualTo(shopId);
         criteria1.andIdEqualTo(selectSkuPo.getGoodsSpuId());
         List<GoodsSpuPo> spuPos=spuMapper.selectByExample(spuPoExample);
-        if(spuPos.size()==0)return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        if(spuPos.size()==0)return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
 
         //同SPU下SKU不重名
         GoodsSkuPoExample skuExample=new GoodsSkuPoExample();
@@ -323,7 +323,7 @@ public class GoodsDao {
 
         //库存充足
         if(selectSkuPo.getInventory()*9/10<floatPrice.getQuantity())
-            return new ReturnObject(ResponseCode.SKU_NOTENOUGH,String.format("库存不足："+floatPrice.getGoodsSkuId()));
+            return new ReturnObject<>(ResponseCode.SKU_NOTENOUGH,String.format("库存不足："+floatPrice.getGoodsSkuId()));
 
         //shopId能和skuId匹配
         GoodsSpuPoExample spuPoExample=new GoodsSpuPoExample();
@@ -332,7 +332,7 @@ public class GoodsDao {
         criteria1.andIdEqualTo(selectSkuPo.getGoodsSpuId());
         List<GoodsSpuPo> spuPos=spuMapper.selectByExample(spuPoExample);
         if(spuPos.size()==0)
-            return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE,String.format("skuId不存在："+floatPrice.getGoodsSkuId()));
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,String.format("skuId不存在："+floatPrice.getGoodsSkuId()));
 
         //时间不冲突
         FloatPricePoExample nowExample=new FloatPricePoExample();
@@ -421,7 +421,7 @@ public class GoodsDao {
 
         //shopId和SPU匹配
         if(spuPo.getShopId()!=shopId)
-            return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE,String.format("spuId不存在："+sku.getGoodsSpuId()));
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,String.format("spuId不存在："+sku.getGoodsSpuId()));
         //SKU.configuration不重复
         //数据库里都是null，暂时换成name判断
         GoodsSkuPoExample skuExample=new GoodsSkuPoExample();
@@ -491,7 +491,7 @@ public class GoodsDao {
         GoodsSpuPo spuPo=spuMapper.selectByPrimaryKey(skuPo.getGoodsSpuId());
         if (spuPo.getShopId() != shopId) return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
 
-        return new ReturnObject();
+        return new ReturnObject<>();
     }
 
 
@@ -687,14 +687,14 @@ public class GoodsDao {
         //SKU存在
         GoodsSkuPo skuPo=skuMapper.selectByPrimaryKey(id);
         GoodsSku.State state=GoodsSku.State.getTypeByCode(skuPo.getDisabled().intValue());
-        if(skuPo==null||state.equals(GoodsSku.State.DELETED))return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+        if(skuPo==null||state.equals(GoodsSku.State.DELETED))return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
 
         //shopId能对上号
         GoodsSpuPo spuPo= spuMapper.selectByPrimaryKey(skuPo.getGoodsSpuId());
-        if(!spuPo.getShopId().equals(shopId))return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        if(!spuPo.getShopId().equals(shopId))return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
 
         //SKU非已上架
-        if(state.equals(GoodsSku.State.ONSHELF))return new ReturnObject(ResponseCode.STATE_NOCHANGE);
+        if(state.equals(GoodsSku.State.ONSHELF))return new ReturnObject<>(ResponseCode.STATE_NOCHANGE);
 
         skuPo.setDisabled(GoodsSku.State.ONSHELF.getCode().byteValue());
         try{
@@ -704,7 +704,7 @@ public class GoodsDao {
                 logger.debug("putGoodsOnSale fail:skuPo="+skuPo);
                 return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("sku字段不合法：" + skuPo.toString()));
             }
-            else  return new ReturnObject();
+            else  return new ReturnObject<>();
         }
         catch (DataAccessException e)
         {
@@ -729,14 +729,14 @@ public class GoodsDao {
         //SKU存在
         GoodsSkuPo skuPo=skuMapper.selectByPrimaryKey(id);
         GoodsSku.State state=GoodsSku.State.getTypeByCode(skuPo.getDisabled().intValue());
-        if(skuPo==null||state.equals(GoodsSku.State.DELETED))return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+        if(skuPo==null||state.equals(GoodsSku.State.DELETED))return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
 
         //shopId能对上号
         GoodsSpuPo spuPo= spuMapper.selectByPrimaryKey(skuPo.getGoodsSpuId());
-        if(!spuPo.getShopId().equals(shopId))return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        if(!spuPo.getShopId().equals(shopId))return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
 
         //SKU非已下架
-        if(state.equals(GoodsSku.State.OFFSHELF))return new ReturnObject(ResponseCode.STATE_NOCHANGE);
+        if(state.equals(GoodsSku.State.OFFSHELF))return new ReturnObject<>(ResponseCode.STATE_NOCHANGE);
 
         skuPo.setDisabled(GoodsSku.State.OFFSHELF.getCode().byteValue());
         try{
@@ -746,7 +746,7 @@ public class GoodsDao {
                 logger.debug("putGoodsOnSale fail:skuPo="+skuPo);
                 return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("sku字段不合法：" + skuPo.toString()));
             }
-            else  return new ReturnObject();
+            else  return new ReturnObject<>();
         }
         catch (DataAccessException e)
         {

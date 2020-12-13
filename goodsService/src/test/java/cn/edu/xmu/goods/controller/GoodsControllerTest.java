@@ -439,4 +439,104 @@ class GoodsControllerTest {
         expectedResponse="{\"code\":\"RESOURCE_ID_OUTSCOPE\",\"errmsg\":\"操作的资源id不是自己的对象\",\"data\":null}";
         
     }
+
+    @Test
+    void putGoodsOnSale() {
+        String token = creatTestToken(0L, 0L, 100);
+        byte[] response  = webClient.put().uri("/goods/shops/0/skus/683/onshelves")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
+                .returnResult()
+                .getResponseBodyContent();
+
+        response  = webClient.put().uri("/goods/shops/0/skus/683/onshelves")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.STATE_NOCHANGE.getCode())
+                .returnResult()
+                .getResponseBodyContent();
+
+        response  = webClient.put().uri("/goods/shops/1/skus/683/onshelves")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_OUTSCOPE.getCode())
+                .returnResult()
+                .getResponseBodyContent();
+
+        response  = webClient.put().uri("/goods/shops/0/skus/1/onshelves")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                //.jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_NOTEXIST.getCode())
+                .returnResult()
+                .getResponseBodyContent();
+
+        token = creatTestToken(0L, 1L, 100);
+        response  = webClient.put().uri("/goods/shops/1/skus/683/onshelves")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_OUTSCOPE.getCode())
+                .returnResult()
+                .getResponseBodyContent();
+    }
+
+    @Test
+    void putOffGoodsOnSale() {
+        String token = creatTestToken(0L, 0L, 100);
+        byte[] response  = webClient.put().uri("/goods/shops/0/skus/683/offshelves")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
+                .returnResult()
+                .getResponseBodyContent();
+
+        response  = webClient.put().uri("/goods/shops/0/skus/683/offshelves")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.STATE_NOCHANGE.getCode())
+                .returnResult()
+                .getResponseBodyContent();
+
+        response  = webClient.put().uri("/goods/shops/1/skus/683/offshelves")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_OUTSCOPE.getCode())
+                .returnResult()
+                .getResponseBodyContent();
+
+        response  = webClient.put().uri("/goods/shops/0/skus/1/offshelves")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                //.jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_NOTEXIST.getCode())
+                .returnResult()
+                .getResponseBodyContent();
+
+        token = creatTestToken(0L, 1L, 100);
+        response  = webClient.put().uri("/goods/shops/1/skus/683/offshelves")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_OUTSCOPE.getCode())
+                .returnResult()
+                .getResponseBodyContent();
+    }
 }
