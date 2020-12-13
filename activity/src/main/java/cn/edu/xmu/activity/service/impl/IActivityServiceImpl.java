@@ -35,6 +35,19 @@ public class IActivityServiceImpl implements IActivityService {
     }
 
     @Override
+    public ReturnObject useCoupon(Long userId, Long id)
+    {
+        ReturnObject returnObject= couponDao.useCoupon(userId,id);
+        return returnObject;
+    }
+    @Override
+    public ReturnObject returnCoupon(Long shopId, Long id)
+    {
+        ReturnObject returnObject= couponDao.returnCoupon(shopId,id);
+        return returnObject;
+    }
+
+    @Override
     public ReturnObject<Boolean> judgeCouponActivityIdValid(Long couponActivityId) {
         return null;
     }

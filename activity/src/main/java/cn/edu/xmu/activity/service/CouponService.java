@@ -101,6 +101,7 @@ public class CouponService {
         return new ReturnObject<PageInfo<CouponRetVo>>(returnObject);
     }
 
+    //变内部接口了
     /**
      * 买家使用自己某优惠券
      * @param userId
@@ -141,6 +142,7 @@ public class CouponService {
         return returnObject;
     }
 
+    //变内部接口了
     /**
      * 优惠券退回
      *

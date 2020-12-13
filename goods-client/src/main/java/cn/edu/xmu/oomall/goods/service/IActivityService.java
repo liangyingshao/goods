@@ -31,4 +31,21 @@ public interface IActivityService {
      * @date 2020-12-09 17:04
      */
     ReturnObject<Boolean> judgeCouponActivityIdValid(Long couponActivityId);
+
+    /**
+     * 买家使用自己某优惠券
+     * @param userId
+     * @param id
+     * @return ReturnObject
+     */
+    ReturnObject useCoupon(Long userId, Long id);
+
+    /**
+     * 优惠券退回
+     *
+     * @param shopId
+     * @param id
+     * @return ReturnObject
+     */
+    ReturnObject returnCoupon(Long shopId, Long id);
 }
