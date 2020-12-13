@@ -4,10 +4,8 @@ import cn.edu.xmu.goods.dao.GoodsDao;
 import cn.edu.xmu.goods.dao.GoodsSpuDao;
 import cn.edu.xmu.goods.dao.ShopDao;
 import cn.edu.xmu.goods.model.po.GoodsSkuPo;
-import cn.edu.xmu.goods.model.po.GoodsSpuPo;
 import cn.edu.xmu.goods.model.po.ShopPo;
 import cn.edu.xmu.goods.model.vo.GoodsSkuDetailRetVo;
-import cn.edu.xmu.goods.model.vo.GoodsSkuRetVo;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.goods.model.*;
 //import cn.edu.xmu.oomall.goods.model.GoodsDetailDTO;
@@ -22,7 +20,7 @@ import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -124,6 +122,7 @@ public class IGoodsServiceImpl implements IGoodsService {
     @Override
     public ReturnObject<SimpleGoodsSkuDTO> getSimpleSkuBySkuId(Long skuId) {
         GoodsSkuPo goodsSkuPo = goodsDao.getGoodsSkuById(skuId).getData();
+        Long price = goodsDao.getPriceBySkuId(skuId).getData();
         SimpleGoodsSkuDTO simpleGoodsSkuDTO = new SimpleGoodsSkuDTO();
         simpleGoodsSkuDTO.setId(goodsSkuPo.getId());
         simpleGoodsSkuDTO.setName(goodsSkuPo.getName());
@@ -132,6 +131,7 @@ public class IGoodsServiceImpl implements IGoodsService {
         simpleGoodsSkuDTO.setInventory(goodsSkuPo.getInventory());
         simpleGoodsSkuDTO.setSkuSn(goodsSkuPo.getSkuSn());
         simpleGoodsSkuDTO.setOriginalPrice(goodsSkuPo.getOriginalPrice());
+        simpleGoodsSkuDTO.setPrice(price);
         return new ReturnObject<>(simpleGoodsSkuDTO);
     }
 
@@ -149,18 +149,31 @@ public class IGoodsServiceImpl implements IGoodsService {
         return list;
     }
 
-    //    @Override
-//    public ReturnObject<ShopDetailDTO> getShopInfoBySkuId(Long skuId) {
-//        return null;
-//    }
-//
-//    @Override
-//    public ReturnObject<GoodsDetailDTO> getGoodsBySkuId(Long skuId) {
-//        return goodsDao.getGoodsBySkuId(skuId);
-//    }
-//
-//    @Override
-//    public ReturnObject<GoodsFreightDTO> getGoodsFreightDetailBySkuId(Long skuId) {
-//        return null;
+    @Override
+    public ReturnObject<ShopDetailDTO> getShopInfoBySkuId(Long skuId) {
+        return null;
+    }
 
+    @Override
+    public ReturnObject<GoodsDetailDTO> getGoodsBySkuId(Long skuId) {
+        return goodsDao.getGoodsBySkuId(skuId);
+    }
+
+    @Override
+    public ReturnObject<GoodsFreightDTO> getGoodsFreightDetailBySkuId(Long skuId) {
+        return null;
+    }
+
+    @Override
+    public ReturnObject<ShopDetailDTO> getShopInfoByShopId(Long shopId) {
+        ShopDetailDTO shopDetailDTO = null;
+        ShopPo shopPo = shopDao.getShopById(shopId).getData();
+        shopDetailDTO.setShopId(shopPo.getId());
+        shopDetailDTO.setName(shopPo.getName());
+        shopDetailDTO.setState(shopPo.getState());
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        shopDetailDTO.setGmtCreate(dtf.format(shopPo.getGmtCreate()));
+        shopDetailDTO.setGmtModified(dtf.format(shopPo.getGmtModified()));
+        return new ReturnObject<>(shopDetailDTO);
+    }
 }

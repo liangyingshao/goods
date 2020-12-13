@@ -3,20 +3,25 @@ package cn.edu.xmu.activity.controller;
 import cn.edu.xmu.activity.ActivityServiceApplication;
 import cn.edu.xmu.activity.mapper.GrouponActivityPoMapper;
 import cn.edu.xmu.activity.model.bo.ActivityStatus;
+import cn.edu.xmu.activity.model.bo.Groupon;
 import cn.edu.xmu.activity.model.po.GrouponActivityPo;
 import cn.edu.xmu.activity.model.vo.GrouponVo;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.JwtHelper;
+import cn.edu.xmu.ooad.util.ResponseCode;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.util.Assert;
 
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -38,6 +43,8 @@ class GrouponControllerTest {
 
     @Autowired
     private GrouponActivityPoMapper grouponActivityPoMapper;
+
+    private WebTestClient webClient;
 
     private final String creatTestToken(Long userId, Long departId, int expireTime) {
         String token = new JwtHelper().createToken(userId, departId, expireTime);
@@ -140,5 +147,92 @@ class GrouponControllerTest {
         //查看是否真的发生修改
         GrouponActivityPo newPo = grouponActivityPoMapper.selectByPrimaryKey(2L);
         Assert.state(newPo.getState()== ActivityStatus.OFF_SHELVES.getCode().byteValue(), "状态未修改");
+    }
+
+    @Test
+    public void customerQueryGroupons1() throws Exception{
+        String token = creatTestToken(1L, 0L, 100);
+        String responseString=this.mvc.perform(MockMvcRequestBuilders.get("/goods/groupons")
+                .header("authorization",token))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json;charset=UTF-8"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.errno").value(ResponseCode.OK.getCode()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.errmsg").value("成功"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.total").value(2))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.page").value(1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.pageSize").value(2))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.list[0].name").value("b"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.list[1].name").value("e"))
+                .andReturn().getResponse().getContentAsString();
+    }
+
+    /**
+     * description: 管理员查询groupons 无条件
+     * version: 1.0
+     * date: 2020/12/13 14:08
+     * author: 杨铭
+     *
+     * @param
+     * @return void
+     */
+    @Test
+    public void adminQueryGroupons1() throws Exception{
+        String token = creatTestToken(1L, 0L, 100);
+        String responseString=this.mvc.perform(MockMvcRequestBuilders.get("/goods/shops/0/groupons")
+                .header("authorization",token))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json;charset=UTF-8"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.errno").value(ResponseCode.OK.getCode()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.errmsg").value("成功"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.total").value(9))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.page").value(1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.pageSize").value(9))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.list[0].name").value("a"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.list[1].name").value("b"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.list[2].name").value("c"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.list[3].name").value("d"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.list[4].name").value("e"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.list[5].name").value("f"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.list[6].name").value("g"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.list[7].name").value("h"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.list[8].name").value("i"))
+                .andReturn().getResponse().getContentAsString();
+    }
+
+    @Test
+    public void adminQueryGroupons2() throws Exception{
+        String token = creatTestToken(1L, 0L, 100);
+        String responseString=this.mvc.perform(MockMvcRequestBuilders.get("/goods/shops/0/groupons")
+                .header("authorization",token)
+                .queryParam("beginTime", "2020-12-02 01:25:25")
+                .queryParam("endTime", "2021-02-20 01:24:31"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json;charset=UTF-8"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.errno").value(ResponseCode.OK.getCode()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.errmsg").value("成功"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.total").value(2))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.page").value(1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.list[0].name").value("b"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.list[1].name").value("d"))
+                .andReturn().getResponse().getContentAsString();
+
+    }
+
+
+    @Test
+    public void customerQueryGroupons2() throws Exception{
+        String token = creatTestToken(1L, 0L, 100);
+        String responseString = new String(Objects.requireNonNull(webClient
+                .get()
+                .uri("/goods/groupons?page=1&pagesize=10")
+                .header("authorization", token)
+                .exchange()
+                .expectHeader()
+                .contentType("application/json;charset=UTF-8")
+                .expectBody()
+                .returnResult()
+                .getResponseBodyContent()));
+        String expectedResponse="{\"errno\": 0, \"errmsg\": \"成功\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
     }
 }

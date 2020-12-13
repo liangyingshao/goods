@@ -1,5 +1,6 @@
 package cn.edu.xmu.goods.controller;
 
+import cn.edu.xmu.goods.model.bo.Shop;
 import cn.edu.xmu.goods.model.vo.ShopStateVo;
 import cn.edu.xmu.goods.service.ShopService;
 import cn.edu.xmu.ooad.annotation.Audit;
@@ -69,7 +70,7 @@ public class ShopController {
 
 
     /**
-     * description: addShop 未完成，需要权限模块提供的dubbo接口
+     * description: 申请店铺
      * version: 1.0
      * date: 2020/12/3 8:41
      * author: 杨铭
@@ -143,7 +144,7 @@ public class ShopController {
     @ResponseBody
     @GetMapping("/shops/state")
     public Object getshopState() {
-        ShopStateVo.ShopStatus[] states= ShopStateVo.ShopStatus.class.getEnumConstants();
+        Shop.ShopStatus[] states= Shop.ShopStatus.class.getEnumConstants();
         List<ShopStateVo> stateVos=new ArrayList<ShopStateVo>();
         for(int i=0;i<states.length;i++){
             stateVos.add(new ShopStateVo(states[i]));
