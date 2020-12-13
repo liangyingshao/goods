@@ -2,13 +2,21 @@ package cn.edu.xmu.goods.service;
 
 import cn.edu.xmu.goods.dao.GoodsSpuDao;
 import cn.edu.xmu.goods.model.bo.GoodsSpu;
+import cn.edu.xmu.goods.model.vo.GoodsSkuVo;
+import cn.edu.xmu.goods.model.vo.GoodsSpuVo;
 import cn.edu.xmu.ooad.util.ReturnObject;
+import cn.edu.xmu.oomall.goods.service.IGoodsService;
+import cn.edu.xmu.oomall.order.model.SimpleFreightModelDTO;
+import cn.edu.xmu.oomall.order.service.IOrderService;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.logging.SimpleFormatter;
 
 /**
  * 商品SPU服务类
@@ -22,7 +30,8 @@ public class SpuService {
     @Autowired
     GoodsSpuDao spuDao;
 
-
+    @DubboReference
+    private IOrderService iOrderService;
 
     private Logger logger = LoggerFactory.getLogger(SpuService.class);
 
@@ -32,9 +41,12 @@ public class SpuService {
      * @return  GoodsSpuVo
      * @author 24320182203254 秦楚彦
      * Created at 2020/11/30 08：41
+     * Modified at 2020/12/13
      */
     public ReturnObject<Object> showSpu(Long id) {
-        ReturnObject<Object> returnObject= spuDao.showSpu(id);
+        Long freightId=spuDao.getFreightIdBySpuId(id);
+        ReturnObject<SimpleFreightModelDTO> retFeightModel=iOrderService.getSimpleFreightById(freightId);
+        ReturnObject<Object> returnObject= spuDao.showSpu(id,retFeightModel.getData());
         return returnObject;
     }
 

@@ -102,11 +102,7 @@
 #  initialization: true
 #  #分布式锁失效时间（秒）
 #  lockerExpireTime: 30
-#  #dav信息配置
-#  dav:
-#    username: oomall
-#    password: admin
-#    baseUrl: http://192.168.148.131:8888/webdav/
+
 #
 #  user:
 #    # user的权限字在Redis中失效秒数
@@ -218,6 +214,16 @@ mybatis:
     #输出产生的SQL
     #log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     map-underscore-to-camel-case: true
+
+  #dav信息配置
+#  dav:
+#    username: oomall
+#    password: admin
+#    baseUrl: http://192.168.148.131:8888/webdav/
+  dav:
+    username: night
+    password: tiesuolianhuan123
+    baseUrl: http://172.16.4.146:8888/webdav/
 
 #privilegeservice:
 #  #是否对数据库中的未初始化的数据初始化

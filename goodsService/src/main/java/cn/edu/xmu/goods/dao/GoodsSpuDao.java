@@ -10,6 +10,7 @@ import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ImgHelper;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
+import cn.edu.xmu.oomall.order.model.SimpleFreightModelDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,7 +102,7 @@ public class GoodsSpuDao {
      * @author 24320182203254 秦楚彦
      */
 
-    public ReturnObject<Object> showSpu(Long id) {
+    public ReturnObject<Object> showSpu(Long id, SimpleFreightModelDTO freightModelDTO) {
 
         GoodsSpuPo spuPo= goodsSpuMapper.selectByPrimaryKey(id);
         if(spuPo==null)
@@ -128,6 +129,8 @@ public class GoodsSpuDao {
         GoodsSpu spu=new GoodsSpu(spuPo);
         GoodsSpuVo spuVo= new GoodsSpuVo(spu);
         spuVo.setSkuList(ret);
+        if(freightModelDTO!=null)
+        spuVo.setFreight(freightModelDTO);
         return new ReturnObject<>(spuVo);
 
     }
@@ -511,5 +514,17 @@ public class GoodsSpuDao {
 
     }
 
-
+    /**
+     * 获取spu对应的运费模板id
+     * @param id
+     * @return  freightModelId
+     * @author 24320182203254 秦楚彦
+     * Created at 2020/12/13 17：51
+     */
+    public Long getFreightIdBySpuId(Long id) {
+        GoodsSpuPo po=goodsSpuMapper.selectByPrimaryKey(id);
+        if (po == null)
+            return null;
+        return po.getFreightId();
+    }
 }

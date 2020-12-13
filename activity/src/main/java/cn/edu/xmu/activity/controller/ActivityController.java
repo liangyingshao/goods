@@ -335,7 +335,7 @@ public class ActivityController {
         ReturnObject<Object> couponActivity = activityService.showCouponActivity(shopId,id);
         logger.debug("showCouponActivity: couponActivity="+couponActivity.getData()+" code="+couponActivity.getCode());
         if (!couponActivity.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST)) {
-            return couponActivity;
+            return Common.decorateReturnObject(couponActivity);
         } else {
             returnObject = Common.getNullRetObj(new ReturnObject<>(couponActivity.getCode(), couponActivity.getErrmsg()), httpServletResponse);
         }
@@ -379,14 +379,15 @@ public class ActivityController {
             return returnObject;
         }
         CouponActivity activity=vo.createActivity();
-        //设置activity状态，待修改
-        activity.setState(CouponActivity.DatabaseState.ONLINE);
+        //设置activity状态为【已下线】
+        activity.setState(CouponActivity.DatabaseState.OFFLINE);
         activity.setShopId(shopId);
         activity.setGmtCreate(LocalDateTime.now());
+        activity.setCreatedBy(userId);
         ReturnObject retObject = activityService.addCouponActivity(activity);
         if (retObject.getData() != null) {
             httpServletResponse.setStatus(HttpStatus.CREATED.value());
-            return retObject;
+            return Common.decorateReturnObject(retObject);
         } else {
             return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }
@@ -434,6 +435,7 @@ public class ActivityController {
         activity.setState(CouponActivity.DatabaseState.OFFLINE);
         activity.setId(id);
         activity.setShopId(shopId);
+        activity.setModiBy(userId);
         activity.setGmtCreate(LocalDateTime.now());
         ReturnObject retObject = activityService.modifyCouponActivity(activity);
         if (retObject.getData() != null) {

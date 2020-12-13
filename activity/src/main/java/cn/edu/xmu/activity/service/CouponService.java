@@ -35,6 +35,9 @@ public class CouponService {
     @DubboReference
     private IGoodsService iGoodsService;
 
+//    @DubboReference
+//    private IPrivilegeService iPrivilegeService;
+
     /**
      * 查看优惠活动中的商品
      * @param id
@@ -165,7 +168,17 @@ public class CouponService {
      */
     @Transactional
     public ReturnObject<Object> showCouponActivity(Long shopId, Long id) {
-        ReturnObject returnObject= couponDao.showCouponActivity(shopId,id);
+        ReturnObject<SimpleShopDTO> simpleShopDTOReturnObject=iGoodsService.getSimpleShopByShopId(shopId);
+        //获取创建者修改者ID
+        CouponActivity bo=couponDao.getCouponActivity(id);
+        String createByName="";
+        String modiByName="";
+//        if(bo!=null)
+//        {
+//            createByName=iPrivilegeService.getUserName(bo.getCreatedBy());
+//            modiByName=iPrivilegeService.getUserName(bo.getModiBy());
+//        }
+        ReturnObject returnObject= couponDao.showCouponActivity(simpleShopDTOReturnObject.getData(),id,createByName,modiByName);
         return returnObject;
     }
 
@@ -177,7 +190,9 @@ public class CouponService {
     public ReturnObject addCouponActivity(CouponActivity activity) {
         Long shopId = activity.getShopId();
         ReturnObject<SimpleShopDTO> simpleShopDTOReturnObject=iGoodsService.getSimpleShopByShopId(shopId);
-        ReturnObject<CouponActivityVo> returnObject= couponDao.addCouponActivity(activity,simpleShopDTOReturnObject.getData());
+        String createByName="";
+//      createByName=iPrivilegeService.getUserName(activity.getCreatedBy());
+        ReturnObject<CouponActivityVo> returnObject= couponDao.addCouponActivity(activity,simpleShopDTOReturnObject.getData(),createByName);
         return returnObject;
     }
 
