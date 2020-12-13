@@ -284,7 +284,7 @@ public class GrouponController {
     @ResponseBody
     @GetMapping("/groupons")
     public Object customerQueryGroupons(
-            @RequestParam(required = false) int timeline,
+            @RequestParam(required = false) Integer timeline,
             @RequestParam(required = false) Long spu_id,
             @RequestParam(required = false) Long shopId,
             @RequestParam(required = false, defaultValue = "1") Integer page,
@@ -310,7 +310,7 @@ public class GrouponController {
      * date: 2020/12/11 11:06
      * author: 杨铭
      *
-     * @param shopId 店铺id
+     * @param id 店铺id
      * @param state 团购状态：1：未上线，2：已上线，3：已删除
      * @param spuid spuid
      * @param beginTime 起始时间
@@ -331,20 +331,20 @@ public class GrouponController {
     @ResponseBody
     @GetMapping("/shops/{id}/groupons")
     public Object adminQueryGroupons(
-            @PathVariable Long shopId,
+            @PathVariable Long id,
             @RequestParam(required = false) Integer state,
             @RequestParam(required = false) Long spuid,
             @RequestParam(required = false) String beginTime,
             @RequestParam(required = false) String endTime,
-            @RequestParam(required = false, defaultValue = "1") int page,
-            @RequestParam(required = false, defaultValue = "10") int pagesize
+            @RequestParam(required = false, defaultValue = "1") Integer page,
+            @RequestParam(required = false, defaultValue = "10") Integer pagesize
     ){
 
         Object object = null;
         if(page <= 0 || pagesize <= 0) {
             object = Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
         } else {
-            ReturnObject<PageInfo<VoObject>> returnObject = grouponService.queryGroupons(shopId, spuid, state, null, beginTime, endTime, page, pagesize, true);
+            ReturnObject<PageInfo<VoObject>> returnObject = grouponService.queryGroupons(id, spuid, state, null, beginTime, endTime, page, pagesize, true);
             object = Common.getPageRetObject(returnObject);
         }
 

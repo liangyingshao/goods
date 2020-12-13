@@ -41,6 +41,8 @@ public class GoodsDao {
     private GoodsCategoryPoMapper categoryMapper;
     @Autowired
     private ShopPoMapper shopMapper;
+    @Autowired
+    private FloatPricePoMapper floatPricePoMapper;
 //上传图片相关变量
     private String davUsername="night";
     private String davPassword="tiesuolianhuan123";
@@ -106,10 +108,7 @@ public class GoodsDao {
             categoryMapper.updateByPrimaryKeySelective(newPo);
         }
     }
-    public ReturnObject<ShopPo> modifyShop(Long id, String name)
-    {
-        return new ReturnObject<>(ResponseCode.OK);
-    }
+
 
     /**
      * 查询SKU
@@ -760,4 +759,41 @@ public class GoodsDao {
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
         }
     }
+
+    public ReturnObject<Long> getPriceBySkuId(Long skuId) {
+
+        //1.skuId是否存在
+        GoodsSkuPo sku = null;
+        try {
+            sku = skuMapper.selectByPrimaryKey(skuId);
+        } catch (Exception e) {
+            StringBuilder message = new StringBuilder().append("getPriceBySkuId: ").append(e.getMessage());
+            logger.error(message.toString());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+        }
+        if(sku==null)
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+
+        //2. 查浮动表
+        FloatPricePoExample example = new FloatPricePoExample();
+        FloatPricePoExample.Criteria criteria = example.createCriteria();
+        criteria.andGoodsSkuIdEqualTo(skuId);
+
+        List<FloatPricePo> floatPricePo = null;
+        try {
+            floatPricePo = floatPricePoMapper.selectByExample(example);
+        } catch (Exception e) {
+            StringBuilder message = new StringBuilder().append("getPriceBySkuId: ").append(e.getMessage());
+            logger.error(message.toString());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+        }
+
+        //3. 浮动表中无数据，则返回sku原价
+        if(floatPricePo != null) {
+            return new ReturnObject<>(floatPricePo.get(0).getActivityPrice());
+        }else {
+            return new ReturnObject<>(sku.getOriginalPrice());
+        }
+    }
+
 }

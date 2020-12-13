@@ -735,12 +735,8 @@ public class GoodsController {
                                  @Depart @ApiIgnore @RequestParam(required = false) Long departId) {
         logger.debug("logical delete SPU by shopId:" + shopId+ " spuId:" + id);
 
-        GoodsSpu spu=new GoodsSpu();
-        spu.setShopId(shopId);
-        spu.setId(id);
-        spu.setGmtModified(LocalDateTime.now());
 
-        ReturnObject retObject = spuService.deleteGoodsSpu(spu);
+        ReturnObject retObject = spuService.deleteGoodsSpu(shopId,id);
         if(retObject.getData()!=null){
             return Common.getRetObject(retObject);
         }else{

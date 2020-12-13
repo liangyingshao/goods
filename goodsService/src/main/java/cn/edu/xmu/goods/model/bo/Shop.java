@@ -1,22 +1,29 @@
-package cn.edu.xmu.activity.model.bo;
+package cn.edu.xmu.goods.model.bo;
 
+import cn.edu.xmu.goods.model.po.ShopPo;
+import cn.edu.xmu.goods.model.vo.ShopRetVo;
 import cn.edu.xmu.goods.model.vo.ShopStateVo;
+import cn.edu.xmu.ooad.model.VoObject;
 import lombok.Data;
 
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * description: Shop
- * date: 2020/12/10 15:45
+ * date: 2020/12/13 1:05
  * author: 杨铭
  * version: 1.0
  */
 @Data
-public class Shop {
-
+public class Shop implements VoObject {
     Long id;
     String name;
+    Integer state;
+    String gmtCreate;
+    String gmtModified;
+
 
     public enum ShopStatus {
         //商-店铺：0：未审核，1：未上线，2：上线，3：关闭，4：审核未通过
@@ -49,5 +56,32 @@ public class Shop {
         public String getDescription() {
             return description;
         }
+    }
+
+
+    public Shop(ShopPo shopPo){
+        this.id = shopPo.getId();
+        this.name = shopPo.getName();
+        this.state = shopPo.getState().intValue();
+        DateTimeFormatter dft = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        this.gmtCreate = dft.format(shopPo.getGmtCreate());
+        this.gmtModified = dft.format(shopPo.getGmtModified());
+    }
+
+
+    @Override
+    public Object createVo() {
+        ShopRetVo shopRetVo = new ShopRetVo();
+        shopRetVo.setId(this.id);
+        shopRetVo.setName(this.name);
+        shopRetVo.setState(this.state);
+        shopRetVo.setGmtCreate(this.gmtCreate);
+        shopRetVo.setGmtModified(this.gmtModified);
+        return shopRetVo;
+    }
+
+    @Override
+    public Object createSimpleVo() {
+        return null;
     }
 }

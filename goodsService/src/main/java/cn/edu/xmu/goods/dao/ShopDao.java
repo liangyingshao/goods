@@ -1,7 +1,10 @@
 package cn.edu.xmu.goods.dao;
 
 import cn.edu.xmu.goods.mapper.ShopPoMapper;
+import cn.edu.xmu.goods.model.bo.GoodsSpu;
+import cn.edu.xmu.goods.model.bo.Shop;
 import cn.edu.xmu.goods.model.po.ShopPo;
+import cn.edu.xmu.goods.model.vo.ShopRetVo;
 import cn.edu.xmu.goods.model.vo.ShopStateVo;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
@@ -11,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 /**
  * description: ShopDao
@@ -23,6 +28,12 @@ public class ShopDao {
 
     @Autowired
     ShopPoMapper shopPoMapper;
+
+    @Autowired
+    GoodsSpuDao goodsSpuDao;
+
+    @Autowired
+    GoodsDao goodsDao;
 
     private static final Logger logger = LoggerFactory.getLogger(ShopDao.class);
 
@@ -69,17 +80,27 @@ public class ShopDao {
         //新增店铺
         ShopPo shopPo = new ShopPo();
         shopPo.setName(name);
-        shopPo.setState(ShopStateVo.ShopStatus.NOT_AUDIT.getCode().byteValue());
+        shopPo.setState(Shop.ShopStatus.NOT_AUDIT.getCode().byteValue());
 
         try {
             shopPoMapper.insertSelective(shopPo);
         } catch (Exception e) {
-            StringBuilder message = new StringBuilder().append("addShop: ").append(e.getMessage());
+            StringBuilder message = new StringBuilder().append("addShop:insert ").append(e.getMessage());
             logger.error(message.toString());
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
         }
-        //TODO:返回值现在这样不正确
-        return new ReturnObject<>(ResponseCode.OK);
+
+        //读出新的shopPo
+        ShopPo newPo = null;
+        try {
+            newPo = shopPoMapper.selectByPrimaryKey(shopPo.getId());
+        } catch (Exception e) {
+            StringBuilder message = new StringBuilder().append("addShop: select ").append(e.getMessage());
+            logger.error(message.toString());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+        }
+        Shop shop = new Shop(newPo);
+        return new ReturnObject<>(shop);
     }
 
     /**
@@ -94,10 +115,15 @@ public class ShopDao {
     public ReturnObject<VoObject> deleteShop(Long shopId) {
 
         ShopPo shopPo = new ShopPo();
-        shopPo.setState(ShopStateVo.ShopStatus.CLOSED.getCode().byteValue());
+        shopPo.setState(Shop.ShopStatus.CLOSED.getCode().byteValue());
         shopPo.setId(shopId);
         try {
             shopPoMapper.updateByPrimaryKeySelective(shopPo);
+            //级联删除
+            List<Long> idlist = goodsSpuDao.getAllSpuIdByShopId(shopId).getData();
+            for(Long i : idlist) {
+                goodsSpuDao.deleteGoodsSpu(shopId,i);
+            }
         } catch (Exception e) {
             StringBuilder message = new StringBuilder().append("deleteShop: ").append(e.getMessage());
             logger.error(message.toString());
@@ -120,7 +146,7 @@ public class ShopDao {
         //修改状态
         ShopPo shopPo = new ShopPo();
         shopPo.setId(shopId);
-        shopPo.setState(ShopStateVo.ShopStatus.ONLINE.getCode().byteValue());
+        shopPo.setState(Shop.ShopStatus.ONLINE.getCode().byteValue());
         try {
             shopPoMapper.updateByPrimaryKeySelective(shopPo);
         } catch (Exception e) {
@@ -144,9 +170,14 @@ public class ShopDao {
         //修改状态
         ShopPo shopPo = new ShopPo();
         shopPo.setId(shopId);
-        shopPo.setState(ShopStateVo.ShopStatus.OFFLINE.getCode().byteValue());
+        shopPo.setState(Shop.ShopStatus.OFFLINE.getCode().byteValue());
         try {
             shopPoMapper.updateByPrimaryKeySelective(shopPo);
+            //级联下架sku
+            List<Long> idlist = goodsDao.getAllSkuIdByShopId(shopId).getData();
+            for(Long i : idlist){
+                goodsDao.putOffGoodsOnSale(shopId,i);
+            }
         } catch (Exception e) {
             StringBuilder message = new StringBuilder().append("offshelfShop: ").append(e.getMessage());
             logger.error(message.toString());
@@ -169,9 +200,9 @@ public class ShopDao {
         ShopPo shopPo = new ShopPo();
         shopPo.setId(shopId);
         if(conclusion)
-            shopPo.setState(ShopStateVo.ShopStatus.ONLINE.getCode().byteValue());
+            shopPo.setState(Shop.ShopStatus.ONLINE.getCode().byteValue());
         else
-            shopPo.setState(ShopStateVo.ShopStatus.AUDIT_FAIL.getCode().byteValue());
+            shopPo.setState(Shop.ShopStatus.AUDIT_FAIL.getCode().byteValue());
 
         try {
             shopPoMapper.updateByPrimaryKeySelective(shopPo);

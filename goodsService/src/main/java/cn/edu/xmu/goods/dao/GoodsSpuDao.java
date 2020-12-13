@@ -356,18 +356,19 @@ public class GoodsSpuDao {
 
     /**
      * 逻辑删除商品SPU
-     * @param spu SPUbo
+     * @param shopId 店铺id
+     * @param id spuId
      * @return  ReturnObject<Object> 修改结果
      * @author 24320182203254 秦楚彦
      * Created at 2020/12/02 22：32
      */
-    public ReturnObject<Object> deleteGoodsSpu(GoodsSpu spu) {
+    public ReturnObject<Object> deleteGoodsSpu(Long shopId,Long id) {
         ReturnObject<Object> returnObject = null;
         try {
             //获得该SPU信息
-            GoodsSpuPo spuPo=goodsSpuMapper.selectByPrimaryKey(spu.getId());
+            GoodsSpuPo spuPo=goodsSpuMapper.selectByPrimaryKey(id);
             //该SPU不存在或shopId不对应
-            if(spuPo==null||!spuPo.getShopId().equals(spu.getShopId()))
+            if(spuPo==null||!spuPo.getShopId().equals(shopId))
                 return returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             //该SPU已被逻辑删除, disable==(Byte) 1 or state==DELETED
             if(spuPo.getDisabled().equals((byte)1))//||spuPo.getState().equals(GoodsSpu.SpuState.DELETED.getCode().byteValue()))
@@ -381,7 +382,7 @@ public class GoodsSpuDao {
             //若SPU无SKU，物理删除SPU
             if(skuPos==null)
             {
-                goodsSpuMapper.deleteByPrimaryKey(spu.getId());
+                goodsSpuMapper.deleteByPrimaryKey(id);
                 return new ReturnObject<>(ResponseCode.OK);
             }
             //若SPU下有SKU，将SKU的state设为6：已删除
@@ -390,7 +391,7 @@ public class GoodsSpuDao {
                 GoodsSkuPoExample skuExample = new GoodsSkuPoExample();
                 GoodsSkuPoExample.Criteria criteria = skuExample.createCriteria();
                 criteria.andIdEqualTo(skuPo.getId());
-                criteria.andGoodsSpuIdEqualTo(spu.getId());
+                criteria.andGoodsSpuIdEqualTo(id);
                 skuPo.setDisabled((byte)6);
                 int ret=goodsSkuMapper.updateByExample(skuPo,skuExample);
                 if (ret == 0) {
@@ -400,7 +401,7 @@ public class GoodsSpuDao {
                 }
             }
             //将SPU物理删除
-            goodsSpuMapper.deleteByPrimaryKey(spu.getId());
+            goodsSpuMapper.deleteByPrimaryKey(id);
             return new ReturnObject<>(ResponseCode.OK);
         }
         catch (DataAccessException e) {
@@ -488,5 +489,27 @@ public class GoodsSpuDao {
 
         return new ReturnObject<>(goodsSpuPo);
     }
+
+    ReturnObject<List<Long>> getAllSpuIdByShopId(Long shopId) {
+        GoodsSpuPoExample example = new GoodsSpuPoExample();
+        GoodsSpuPoExample.Criteria criteria = example.createCriteria();
+        criteria.andShopIdEqualTo(shopId);
+        List<GoodsSpuPo> polist = null;
+        try {
+            polist = goodsSpuMapper.selectByExample(example);
+        } catch (Exception e) {
+            logger.debug("other sql exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        }
+        List<Long> idList = null;
+        if(polist!=null) {
+            for(GoodsSpuPo p : polist){
+                idList.add(p.getId());
+            }
+        }
+        return new ReturnObject<>(idList);
+
+    }
+
 
 }

@@ -13,6 +13,7 @@ import cn.edu.xmu.oomall.goods.model.SimpleShopDTO;
 import cn.edu.xmu.oomall.goods.service.IGoodsService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.parser.Part;
 import org.springframework.stereotype.Service;
@@ -32,7 +33,7 @@ public class PresaleService {
     @Autowired
     PresaleDao presaleDao;
 
-    @Autowired
+    @DubboReference
     IGoodsService iGoodsService;
 
     public ReturnObject<PageInfo<VoObject>> QueryPresales(Long shopId, Long skuId, Integer state, Integer timeline, Integer page, Integer pagesize, boolean isadmin) {
@@ -73,7 +74,7 @@ public class PresaleService {
             return new ReturnObject(ResponseCode.FIELD_NOTVALID);//TODO 考虑错误码是否合适
 
         //4. 此sku是否正在参加其他预售
-        if(presaleDao.checkInPresale(id).getData())
+        if(presaleDao.checkInPresale(id,presaleVo.getBeginTime(),presaleVo.getEndTime()).getData())
             return new ReturnObject(ResponseCode.FIELD_NOTVALID);//TODO 考虑错误码是否合适
 
         //5. 插入数据库

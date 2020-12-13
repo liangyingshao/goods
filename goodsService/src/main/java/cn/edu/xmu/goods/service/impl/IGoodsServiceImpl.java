@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -149,18 +150,31 @@ public class IGoodsServiceImpl implements IGoodsService {
         return list;
     }
 
-    //    @Override
-//    public ReturnObject<ShopDetailDTO> getShopInfoBySkuId(Long skuId) {
-//        return null;
-//    }
-//
-//    @Override
-//    public ReturnObject<GoodsDetailDTO> getGoodsBySkuId(Long skuId) {
-//        return goodsDao.getGoodsBySkuId(skuId);
-//    }
-//
-//    @Override
-//    public ReturnObject<GoodsFreightDTO> getGoodsFreightDetailBySkuId(Long skuId) {
-//        return null;
+    @Override
+    public ReturnObject<ShopDetailDTO> getShopInfoBySkuId(Long skuId) {
+        return null;
+    }
 
+    @Override
+    public ReturnObject<GoodsDetailDTO> getGoodsBySkuId(Long skuId) {
+        return goodsDao.getGoodsBySkuId(skuId);
+    }
+
+    @Override
+    public ReturnObject<GoodsFreightDTO> getGoodsFreightDetailBySkuId(Long skuId) {
+        return null;
+    }
+
+    @Override
+    public ReturnObject<ShopDetailDTO> getShopInfoByShopId(Long shopId) {
+        ShopDetailDTO shopDetailDTO = null;
+        ShopPo shopPo = shopDao.getShopById(shopId).getData();
+        shopDetailDTO.setShopId(shopPo.getId());
+        shopDetailDTO.setName(shopPo.getName());
+        shopDetailDTO.setState(shopPo.getState());
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        shopDetailDTO.setGmtCreate(dtf.format(shopPo.getGmtCreate()));
+        shopDetailDTO.setGmtModified(dtf.format(shopPo.getGmtModified()));
+        return new ReturnObject<>(shopDetailDTO);
+    }
 }

@@ -16,6 +16,7 @@ import cn.edu.xmu.oomall.goods.model.SimpleShopDTO;
 import cn.edu.xmu.oomall.goods.service.IGoodsService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +39,7 @@ public class PresaleDao {
     @Autowired
     PresaleActivityPoMapper presaleActivityPoMapper;
 
-    @Autowired
+    @DubboReference
     IGoodsService iGoodsService;
 
     private static final Logger logger = LoggerFactory.getLogger(PresaleDao.class);
@@ -106,13 +107,14 @@ public class PresaleDao {
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
         }
 
+        //TODO 返回需要查浮动库存表
         //9.返回
         return new ReturnObject<>(results);
 
 
 
     }
-    public ReturnObject<Boolean> checkInPresale(Long id){
+    public ReturnObject<Boolean> checkInPresale(Long id,String beginTime,String endTime){
         PresaleActivityPoExample example = new PresaleActivityPoExample();
         PresaleActivityPoExample.Criteria criteria = example.createCriteria();
         criteria.andGoodsSkuIdEqualTo(id);
@@ -124,9 +126,16 @@ public class PresaleDao {
             logger.error(message.toString());
         }
 
-        if(list.isEmpty())
-            return new ReturnObject<>(false);
-        return new ReturnObject<>(true);
+        //数据库中的活动开始时间晚于endTime，或结束时间早于beginTime，才返回false
+        if(!list.isEmpty())
+        {
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            for(PresaleActivityPo p : list){
+                if(!(p.getBeginTime().isAfter(LocalDateTime.parse(endTime,dtf))||p.getEndTime().isBefore(LocalDateTime.parse(beginTime,dtf))))
+                    return new ReturnObject<>(true);
+            }
+        }
+        return new ReturnObject<>(false);
     }
 
 

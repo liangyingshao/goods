@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 /**
  * description: SimpleGoodsSkuDTO
  * date: 2020/12/11 11:53
@@ -13,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SimpleGoodsSkuDTO {
+public class SimpleGoodsSkuDTO implements Serializable {
     Long id;
     String name;
     String skuSn;
