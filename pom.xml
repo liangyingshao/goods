@@ -23,6 +23,7 @@
         <module>other-client</module>
         <module>activity</module>
         <module>oomall-test</module>
+        <module>oomall-gateway</module>
     </modules>
     <name>goods module</name>
     <description>the goods module system</description>

@@ -162,9 +162,10 @@ public class FlashSaleDao {
         criteria.andFlashDateEqualTo(time);
         criteria.andTimeSegIdEqualTo(id);
         List<FlashSalePo> pos = flashSalePoMapper.selectByExample(example);
-        if(pos==null) {
+        if(pos.size()==0) {
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
+
         return new ReturnObject<>(pos.get(0));
     }
 }

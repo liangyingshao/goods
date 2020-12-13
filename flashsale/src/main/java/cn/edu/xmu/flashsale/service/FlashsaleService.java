@@ -17,6 +17,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -43,21 +44,30 @@ public class FlashsaleService {
         {
             Byte timeType = 1;//0代表广告，1代表秒杀
             //调用other的微服务得到id对应的时段的具体数据
-            ReturnObject<TimeDTO> timeDTOReturnObject = timeService.getTimeSegmentId(timeType,id);
-            logger.error("timeDTOReturnObject: " + timeDTOReturnObject.toString());
-//            ReturnObject<TimeDTO> timeDTOReturnObject = new ReturnObject<>(new TimeDTO());
+//            ReturnObject<TimeDTO> timeDTOReturnObject = timeService.getTimeSegmentId(timeType,id);
+//            logger.error("timeDTOReturnObject: " + timeDTOReturnObject.toString());
+            TimeDTO dto = new TimeDTO();
+            dto.setId(1L);
+            dto.setBeginTime(LocalTime.now());
+            dto.setEndTime(LocalTime.now().plusHours(2L));
+            Byte type = 1;
+            dto.setType(type);
+            ReturnObject<TimeDTO> timeDTOReturnObject = new ReturnObject<>(dto);
             //检查时段id是否存在
             if(timeDTOReturnObject.getData() == null)
             {
                 //若不存在返回资源不存在错误
                 return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             }
+
             //时段存在
             //时段id+falshDate是否已经存在
             ReturnObject<FlashSalePo> flashSalePoReturnObject = flashsaleDao.selectByFlashDateAndSegId(flashDate, id);
+
             if(flashSalePoReturnObject.getData()!=null) {
                 return new ReturnObject<>(ResponseCode.TIMESEG_CONFLICT);
             }
+
             //时段不冲突
             returnObject = flashsaleDao.createflash(id, flashDate);
             FlashsaleNewRetVo retVo = returnObject.getData();

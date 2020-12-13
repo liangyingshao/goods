@@ -3,6 +3,7 @@ package cn.edu.xmu.flashsale.controller;
 import cn.edu.xmu.flashsale.model.vo.FlashsaleItemRetVo;
 import cn.edu.xmu.flashsale.model.vo.FlashsaleItemVo;
 import cn.edu.xmu.flashsale.model.vo.FlashsaleModifVo;
+import cn.edu.xmu.flashsale.model.vo.FlashsaleNewRetVo;
 import cn.edu.xmu.flashsale.service.FlashsaleItemService;
 import cn.edu.xmu.flashsale.service.FlashsaleService;
 import cn.edu.xmu.ooad.model.VoObject;
@@ -62,7 +63,7 @@ public class FlashsaleController {
         return flashslaeItemService.queryTopicsByTime(id);
     }
 
-    @ApiOperation(value = "flashsale002:获取当前时段秒杀列表,响应式API，会多次返回",  produces="application/json")
+    @ApiOperation(value = "flashsale003:获取当前时段秒杀列表,响应式API，会多次返回",  produces="application/json")
     @ApiImplicitParams({
             @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header")
     })
@@ -86,16 +87,22 @@ public class FlashsaleController {
             @ApiResponse(code = 0, message = "成功")
     })
     @PostMapping("/timesegments/{id}/flashsales")
-    public Object createflash(@PathVariable Long id, @RequestParam(required = true) String flashDate) {
-        //falshDate不能小于明天，先获取当前日期转化为字符串，与flashDate相比较，flashDate不能小于当前字符串
-        LocalDate date = LocalDate.now().plusDays(1); // get the tomorrow date
-        if(date.toString().compareTo(flashDate) > 0)//不允许增加明天之前的活动
+    public Object createflash(@RequestBody FlashsaleNewRetVo vo, BindingResult bindingResult)
+    {
+        Object binObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if(null != binObject)
         {
-            return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+            return binObject;
         }
-        //falshDate不小于明天
-        LocalDateTime flashDateParse = LocalDate.parse(flashDate,DateTimeFormatter.ISO_DATE).atStartOfDay();
-        ReturnObject object = flashsaleService.createflash(id, flashDateParse);
+        //falshDate不能小于明天，先获取当前日期转化为字符串，与flashDate相比较，flashDate不能小于当前字符串
+//        LocalDate date = LocalDate.now().plusDays(1); // get the tomorrow date
+//        if(date.toString().compareTo(flashDate) > 0)//不允许增加明天之前的活动
+//        {
+//            return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+//        }
+//        //falshDate不小于明天
+//        LocalDateTime flashDateParse = LocalDate.parse(flashDate,DateTimeFormatter.ISO_DATE).atStartOfDay();
+        ReturnObject object = flashsaleService.createflash(vo.getId(), vo.getFlashDate());
         if(object.getData()!=null)
         {
             return Common.decorateReturnObject(object);

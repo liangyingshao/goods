@@ -48,8 +48,8 @@ public class FlashsaleItemService {
     @Autowired
     private FlashSaleDao flashSaleDao;
 
-    //    @Autowired
-    @Resource
+    @Autowired
+//    @Resource
     private ReactiveRedisTemplate<String, Serializable> reactiveRedisTemplate;
 
     @Autowired
