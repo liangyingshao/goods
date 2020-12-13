@@ -121,17 +121,8 @@ public class IGoodsServiceImpl implements IGoodsService {
 
     @Override
     public ReturnObject<SimpleGoodsSkuDTO> getSimpleSkuBySkuId(Long skuId) {
-        GoodsSkuPo goodsSkuPo = goodsDao.getGoodsSkuById(skuId).getData();
-        Long price = goodsDao.getPriceBySkuId(skuId).getData();
-        SimpleGoodsSkuDTO simpleGoodsSkuDTO = new SimpleGoodsSkuDTO();
-        simpleGoodsSkuDTO.setId(goodsSkuPo.getId());
-        simpleGoodsSkuDTO.setName(goodsSkuPo.getName());
-        simpleGoodsSkuDTO.setImageUrl(goodsSkuPo.getImageUrl());
-        simpleGoodsSkuDTO.setDisabled(goodsSkuPo.getDisabled());
-        simpleGoodsSkuDTO.setInventory(goodsSkuPo.getInventory());
-        simpleGoodsSkuDTO.setSkuSn(goodsSkuPo.getSkuSn());
-        simpleGoodsSkuDTO.setOriginalPrice(goodsSkuPo.getOriginalPrice());
-        simpleGoodsSkuDTO.setPrice(price);
+        SimpleGoodsSkuDTO simpleGoodsSkuDTO=goodsDao.getSimpleSkuBySkuId(skuId);
+        simpleGoodsSkuDTO.setPrice(goodsDao.getPriceBySkuId(skuId).getData());
         return new ReturnObject<>(simpleGoodsSkuDTO);
     }
 

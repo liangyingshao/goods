@@ -6,14 +6,12 @@ import cn.edu.xmu.goods.model.bo.GoodsSku;
 import cn.edu.xmu.goods.model.bo.GoodsSpu;
 import cn.edu.xmu.goods.model.po.*;
 import cn.edu.xmu.goods.model.vo.*;
-import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.goods.model.*;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
-import net.bytebuddy.asm.Advice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -798,5 +796,18 @@ public class GoodsDao {
 //瞎写的
     public ReturnObject modifyShop(Long id, String name) {
         return new ReturnObject();
+    }
+
+    public SimpleGoodsSkuDTO getSimpleSkuBySkuId(Long skuId) {
+        GoodsSkuPo skuPo=skuMapper.selectByPrimaryKey(skuId);
+        SimpleGoodsSkuDTO simpleGoodsSkuDTO=new SimpleGoodsSkuDTO();
+        simpleGoodsSkuDTO.setDisabled(skuPo.getDisabled());
+        simpleGoodsSkuDTO.setId(skuPo.getId());
+        simpleGoodsSkuDTO.setImageUrl(skuPo.getImageUrl());
+        simpleGoodsSkuDTO.setInventory(skuPo.getInventory());
+        simpleGoodsSkuDTO.setName(skuPo.getName());
+        simpleGoodsSkuDTO.setOriginalPrice(skuPo.getOriginalPrice());
+        simpleGoodsSkuDTO.setSkuSn(skuPo.getSkuSn());
+        return simpleGoodsSkuDTO;
     }
 }
