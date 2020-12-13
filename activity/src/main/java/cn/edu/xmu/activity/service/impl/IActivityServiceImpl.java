@@ -31,6 +31,11 @@ public class IActivityServiceImpl implements IActivityService {
     }
 
     @Override
+    public ReturnObject<Boolean> judgeActivityIdValid(Long couponId, Long presaleId, Long grouponId) {
+        return null;
+    }
+
+    @Override
     public ReturnObject<Boolean> judgeCouponIdValid(Long couponId) {
 
         Boolean valid=couponDao.judgeCouponValid(couponId)
@@ -41,24 +46,30 @@ public class IActivityServiceImpl implements IActivityService {
     }
     @Override
     public ReturnObject<PresaleDTO> judgePresaleIdValid(Long presaleId) {//第一次下订单校验presaleId,需要校验时间
-        Boolean valid=presaleDao.judgePresaleValid(presaleId)
+        //Boolean valid=presaleDao.judgePresaleValid(presaleId)
 //                &&grouponDao.judgeGrouponValid(grouponId)&&presaleDao.judgePresaleValid(presaleId)
                 ;
-        return new ReturnObject<>(valid);
+        return null
+                //new ReturnObject<>(valid)
+                ;
     }
     @Override
     public ReturnObject<Boolean> paymentPresaleIdValid(Long presaleId) {//付尾款校验，需要校验时间
-        Boolean valid=couponDao.paymentPresaleValid(presaleId)
+        //Boolean valid=couponDao.paymentPresaleValid(presaleId)
 //                &&grouponDao.judgeGrouponValid(grouponId)&&presaleDao.judgePresaleValid(presaleId)
                 ;
-        return new ReturnObject<>(valid);
+        return null
+                //new ReturnObject<>(valid)
+                ;
     }
     @Override
-    public ReturnObject<Boolean> judgeGrouponIddValid(Long grouponId) {
-        Boolean valid=couponDao.judgeGrouponValid(grouponId)
+    public ReturnObject<Boolean> judgeGrouponIdValid(Long grouponId) {
+     //   Boolean valid=couponDao.judgeGrouponValid(grouponId)
 //                &&grouponDao.judgeGrouponValid(grouponId)&&presaleDao.judgePresaleValid(presaleId)
                 ;
-        return new ReturnObject<>(valid);
+        return null
+                //new ReturnObject<>(valid)
+                ;
     }
 
 

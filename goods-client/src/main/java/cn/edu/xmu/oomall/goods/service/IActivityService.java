@@ -2,6 +2,7 @@ package cn.edu.xmu.oomall.goods.service;
 
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.goods.model.CouponInfoDTO;
+import cn.edu.xmu.oomall.goods.model.PresaleDTO;
 
 import java.util.List;
 
@@ -23,6 +24,13 @@ public interface IActivityService {
      */
     ReturnObject<Boolean> judgeActivityIdValid(Long couponId, Long presaleId, Long grouponId);
 
+    ReturnObject<Boolean> judgeCouponIdValid(Long couponId);
+
+    ReturnObject<PresaleDTO> judgePresaleIdValid(Long presaleId);
+
+    ReturnObject<Boolean> paymentPresaleIdValid(Long presaleId);
+
+    ReturnObject<Boolean> judgeGrouponIdValid(Long grouponId);
     /**
      * 判断Id是否有效
      * @param couponActivityId
