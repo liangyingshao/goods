@@ -676,4 +676,88 @@ public class GoodsDao {
         }
         return new ReturnObject<>(goodsSkuPo);
     }
+
+    /**
+     * 店家商品上架
+     * @param shopId
+     * @param id
+     * @return ReturnObject
+     */
+    public ReturnObject putGoodsOnSale(Long shopId, Long id) {
+        //SKU存在
+        GoodsSkuPo skuPo=skuMapper.selectByPrimaryKey(id);
+        GoodsSku.State state=GoodsSku.State.getTypeByCode(skuPo.getDisabled().intValue());
+        if(skuPo==null||state.equals(GoodsSku.State.DELETED))return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+
+        //shopId能对上号
+        GoodsSpuPo spuPo= spuMapper.selectByPrimaryKey(skuPo.getGoodsSpuId());
+        if(!spuPo.getShopId().equals(shopId))return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
+
+        //SKU非已上架
+        if(state.equals(GoodsSku.State.ONSHELF))return new ReturnObject(ResponseCode.STATE_NOCHANGE);
+
+        skuPo.setDisabled(GoodsSku.State.ONSHELF.getCode().byteValue());
+        try{
+            int ret=skuMapper.updateByPrimaryKeySelective(skuPo);
+            if(ret==0)
+            {
+                logger.debug("putGoodsOnSale fail:skuPo="+skuPo);
+                return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("sku字段不合法：" + skuPo.toString()));
+            }
+            else  return new ReturnObject();
+        }
+        catch (DataAccessException e)
+        {
+            // 其他数据库错误
+            logger.debug("other sql exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
+    }
+
+    /**
+     * 店家商品下架
+     * @param shopId
+     * @param id
+     * @return
+     */
+    public ReturnObject putOffGoodsOnSale(Long shopId, Long id) {
+        //SKU存在
+        GoodsSkuPo skuPo=skuMapper.selectByPrimaryKey(id);
+        GoodsSku.State state=GoodsSku.State.getTypeByCode(skuPo.getDisabled().intValue());
+        if(skuPo==null||state.equals(GoodsSku.State.DELETED))return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+
+        //shopId能对上号
+        GoodsSpuPo spuPo= spuMapper.selectByPrimaryKey(skuPo.getGoodsSpuId());
+        if(!spuPo.getShopId().equals(shopId))return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
+
+        //SKU非已下架
+        if(state.equals(GoodsSku.State.OFFSHELF))return new ReturnObject(ResponseCode.STATE_NOCHANGE);
+
+        skuPo.setDisabled(GoodsSku.State.OFFSHELF.getCode().byteValue());
+        try{
+            int ret=skuMapper.updateByPrimaryKeySelective(skuPo);
+            if(ret==0)
+            {
+                logger.debug("putGoodsOnSale fail:skuPo="+skuPo);
+                return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("sku字段不合法：" + skuPo.toString()));
+            }
+            else  return new ReturnObject();
+        }
+        catch (DataAccessException e)
+        {
+            // 其他数据库错误
+            logger.debug("other sql exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
+    }
 }

@@ -51,35 +51,35 @@ public class SpuService {
         return returnObject;
     }
 
-    /**
-     * 商品SPU上架
-     * @param spu
-     * @return  ReturnObject
-     * @author 24320182203254 秦楚彦
-     * Created at 2020/12/01 16：48
-     */
-    @Transactional
-    public ReturnObject putGoodsOnSale(GoodsSpu spu) {
-        ReturnObject<Object> returnObject;
-        //spu.setState(GoodsSpu.SpuState.ONSHELF);
-        returnObject=spuDao.changeState(spu);
-        return returnObject;
-    }
+//    /**
+//     * 商品SPU上架
+//     * @param spu
+//     * @return  ReturnObject
+//     * @author 24320182203254 秦楚彦
+//     * Created at 2020/12/01 16：48
+//     */
+//    @Transactional
+//    public ReturnObject putGoodsOnSale(GoodsSpu spu) {
+//        ReturnObject<Object> returnObject;
+//        //spu.setState(GoodsSpu.SpuState.ONSHELF);
+//        returnObject=spuDao.changeState(spu);
+//        return returnObject;
+//    }
 
-    /**
-     * 商品SPU下架
-     * @param spu
-     * @return  ReturnObject
-     * @author 24320182203254 秦楚彦
-     * Created at 2020/12/01 17：07
-     */
-    @Transactional
-    public ReturnObject putOffGoodsOnSale(GoodsSpu spu) {
-        ReturnObject<Object> returnObject;
-        //spu.setState(GoodsSpu.SpuState.OFFSHELF);
-        returnObject=spuDao.changeState(spu);
-        return returnObject;
-    }
+//    /**
+//     * 商品SPU下架
+//     * @param spu
+//     * @return  ReturnObject
+//     * @author 24320182203254 秦楚彦
+//     * Created at 2020/12/01 17：07
+//     */
+//    @Transactional
+//    public ReturnObject putOffGoodsOnSale(GoodsSpu spu) {
+//        ReturnObject<Object> returnObject;
+//        //spu.setState(GoodsSpu.SpuState.OFFSHELF);
+//        returnObject=spuDao.changeState(spu);
+//        return returnObject;
+//    }
 
     /**
      * 修改商品SPU
