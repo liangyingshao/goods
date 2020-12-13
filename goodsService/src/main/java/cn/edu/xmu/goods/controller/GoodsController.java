@@ -324,7 +324,7 @@ public class GoodsController {
      */
     @ApiOperation(value="查看一条商品SPU的详细信息（无需登录）",produces="application/json")
     @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "id", value = "商品SPUid", required = true)
+            @ApiImplicitParam(paramType = "path", dataType = "Long", name = "id", value = "商品SPUid", required = true)
 
     })
     @ApiResponses({
@@ -336,13 +336,7 @@ public class GoodsController {
         Object returnObject=null;
         ReturnObject<Object> spu = spuService.showSpu(id);
         logger.debug("findSpuById: spu="+spu.getData()+" code="+spu.getCode());
-        if (!spu.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST)) {
-            return spu;
-        } else {
-            returnObject = Common.getNullRetObj(new ReturnObject<>(spu.getCode(), spu.getErrmsg()), httpServletResponse);
-        }
-
-        return returnObject;
+        return Common.decorateReturnObject(spu);
     }
 
     /**
@@ -391,7 +385,6 @@ public class GoodsController {
         } else {
             return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }
-
     }
 
     /**
@@ -433,9 +426,9 @@ public class GoodsController {
         spu.setShopId(shopId);
         spu.setId(id);
         spu.setGmtModified(LocalDateTime.now());
-        //校验是否为该商铺管理员
-        if(shopId!=departId)
-            return  Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE), httpServletResponse);
+//        //校验是否为该商铺管理员
+//        if(shopId!=departId)
+//            return  Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE), httpServletResponse);
 
         ReturnObject retObject = spuService.modifyGoodsSpu(spu);
         if(retObject.getData()!=null){

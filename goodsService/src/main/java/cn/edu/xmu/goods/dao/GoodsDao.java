@@ -795,5 +795,8 @@ public class GoodsDao {
             return new ReturnObject<>(sku.getOriginalPrice());
         }
     }
-
+//瞎写的
+    public ReturnObject modifyShop(Long id, String name) {
+        return new ReturnObject();
+    }
 }

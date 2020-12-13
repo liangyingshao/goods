@@ -1,6 +1,7 @@
 package cn.edu.xmu.goods.model.vo;
 
 import cn.edu.xmu.goods.model.bo.GoodsSpu;
+import cn.edu.xmu.oomall.order.model.SimpleFreightModelDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -30,7 +31,7 @@ public class GoodsSpuVo {
     private SimpleCategoryVo category;
 
     @ApiModelProperty(name = "运费模板")
-    private FreightVo freight;
+    private SimpleFreightModelDTO freight;
 
     @ApiModelProperty(name = "店铺")
     private SimpleShopVo shop;
