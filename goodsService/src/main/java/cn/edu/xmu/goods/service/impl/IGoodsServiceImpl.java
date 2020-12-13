@@ -4,10 +4,8 @@ import cn.edu.xmu.goods.dao.GoodsDao;
 import cn.edu.xmu.goods.dao.GoodsSpuDao;
 import cn.edu.xmu.goods.dao.ShopDao;
 import cn.edu.xmu.goods.model.po.GoodsSkuPo;
-import cn.edu.xmu.goods.model.po.GoodsSpuPo;
 import cn.edu.xmu.goods.model.po.ShopPo;
 import cn.edu.xmu.goods.model.vo.GoodsSkuDetailRetVo;
-import cn.edu.xmu.goods.model.vo.GoodsSkuRetVo;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.goods.model.*;
 //import cn.edu.xmu.oomall.goods.model.GoodsDetailDTO;
@@ -22,7 +20,6 @@ import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -125,6 +122,7 @@ public class IGoodsServiceImpl implements IGoodsService {
     @Override
     public ReturnObject<SimpleGoodsSkuDTO> getSimpleSkuBySkuId(Long skuId) {
         GoodsSkuPo goodsSkuPo = goodsDao.getGoodsSkuById(skuId).getData();
+        Long price = goodsDao.getPriceBySkuId(skuId).getData();
         SimpleGoodsSkuDTO simpleGoodsSkuDTO = new SimpleGoodsSkuDTO();
         simpleGoodsSkuDTO.setId(goodsSkuPo.getId());
         simpleGoodsSkuDTO.setName(goodsSkuPo.getName());
@@ -133,6 +131,7 @@ public class IGoodsServiceImpl implements IGoodsService {
         simpleGoodsSkuDTO.setInventory(goodsSkuPo.getInventory());
         simpleGoodsSkuDTO.setSkuSn(goodsSkuPo.getSkuSn());
         simpleGoodsSkuDTO.setOriginalPrice(goodsSkuPo.getOriginalPrice());
+        simpleGoodsSkuDTO.setPrice(price);
         return new ReturnObject<>(simpleGoodsSkuDTO);
     }
 

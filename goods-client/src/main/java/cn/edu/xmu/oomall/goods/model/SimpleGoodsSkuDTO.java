@@ -22,6 +22,6 @@ public class SimpleGoodsSkuDTO implements Serializable {
     String imageUrl;
     Integer inventory;
     Long originalPrice;
-    //Long Price;
+    Long price;
     Byte disabled;
 }
