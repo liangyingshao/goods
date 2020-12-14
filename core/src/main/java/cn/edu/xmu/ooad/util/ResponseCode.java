@@ -92,7 +92,7 @@ public enum ResponseCode {
     COUPON_END(911,"优惠卷活动终止"),
     BRAND_NAME_SAME(990,"品牌名称已存在"),
     CATEGORY_NAME_SAME(991, "类目名称已存在"),
-
+    TOMORROW_FLASHSALE_INVALID(930,"不允许增加明天的秒杀"),
     STATE_NOCHANGE(920,"状态未改变"),
     CATEALTER_INVALID(921,"对SPU类别操作无效"),
     BRANDALTER_INVALID(922,"对SPU品牌操作无效"),
