@@ -219,20 +219,4 @@ class GrouponControllerTest {
     }
 
 
-    @Test
-    public void customerQueryGroupons2() throws Exception{
-        String token = creatTestToken(1L, 0L, 100);
-        String responseString = new String(Objects.requireNonNull(webClient
-                .get()
-                .uri("/goods/groupons?page=1&pagesize=10")
-                .header("authorization", token)
-                .exchange()
-                .expectHeader()
-                .contentType("application/json;charset=UTF-8")
-                .expectBody()
-                .returnResult()
-                .getResponseBodyContent()));
-        String expectedResponse="{\"errno\": 0, \"errmsg\": \"成功\"}";
-        JSONAssert.assertEquals(expectedResponse,responseString,true);
-    }
 }
