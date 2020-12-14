@@ -88,4 +88,6 @@ public interface IGoodsService {
      */
     ReturnObject<GoodsFreightDTO> getGoodsFreightDetailBySkuId(Long skuId);
 
+
+
 }

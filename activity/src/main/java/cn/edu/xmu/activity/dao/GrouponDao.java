@@ -356,4 +356,21 @@ public class GrouponDao {
         PageInfo<VoObject> GrouponPage = PageInfo.of(BoList);
         return new ReturnObject<>(GrouponPage);
     }
+
+
+    public ReturnObject<Boolean> judgeGrouponIdValid(Long grouponId) {
+
+        GrouponActivityPo po = null;
+        try {
+            po = grouponActivityPoMapper.selectByPrimaryKey(grouponId);
+        } catch (Exception e) {
+            StringBuilder message = new StringBuilder().append("judgeGrouponValid: ").append(e.getMessage());
+            logger.error(message.toString());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+        }
+        if(po==null)
+            return new ReturnObject<>(false);
+
+        return new ReturnObject<>(true);
+    }
 }

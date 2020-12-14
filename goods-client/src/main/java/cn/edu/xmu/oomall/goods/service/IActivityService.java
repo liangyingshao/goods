@@ -40,6 +40,8 @@ public interface IActivityService {
      */
     ReturnObject<Boolean> judgeCouponActivityIdValid(Long couponActivityId);
 
+
+
     /**
      * 买家使用自己某优惠券
      * @param userId

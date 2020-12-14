@@ -1,11 +1,9 @@
 package cn.edu.xmu.oomall.order.service;
-
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
-import cn.edu.xmu.oomall.order.model.SimpleFreightModelDTO;
+import cn.edu.xmu.oomall.order.model.*;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Caixin
@@ -13,17 +11,10 @@ import java.util.Map;
  */
 public interface IOrderService {
 
-    /**
-     * 通过订单id查找用户id
-     * @param orderId
-     * @return Long
-     * @author Cai Xinlu
-     * @date 2020-12-05 21:38
-     */
+    ReturnObject<Object> putGrouponOffshelves(Long grouponId);
 
-    /**
-     * 根据userId查询该用户的订单详情表，并根据skuId的list筛选orderItemId，返回orderItemId的List
-     */
+    ReturnObject<Object> putPresaleOffshevles(Long presaleId);
+
     ReturnObject<List<Long>> listUserSelectOrderItemIdBySkuList(Long userId, List<Long> skuId);
 
     /**
@@ -45,4 +36,15 @@ public interface IOrderService {
     ReturnObject<ResponseCode> splitOrders(Long orderId);
 
     ReturnObject<SimpleFreightModelDTO> getSimpleFreightById(Long freightId);
+
+    /**
+     * 根据userId查询该用户的订单详情表，并根据skuId的list筛选orderItemId，返回orderItemId的List
+     * description: 团购活动结束，商品模块调用此接口，订单用于退团购优惠金额
+     * @param strategy 团购规则
+     * @param GrouponId 团购id
+     * @return
+     */
+    ReturnObject<Object> grouponEnd(String strategy,Long GrouponId);
+
+
 }
