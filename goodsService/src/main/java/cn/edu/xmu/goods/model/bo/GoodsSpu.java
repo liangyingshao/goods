@@ -100,7 +100,6 @@ public class GoodsSpu {
         this.goodsSn=po.getGoodsSn();
         this.detail=po.getDetail();
         this.imageUrl=po.getImageUrl();
-
         this.gmtCreated=po.getGmtCreate();
         this.gmtModified=po.getGmtModified();
         this.disable=(po.getDisabled().intValue()==0)?false:true;

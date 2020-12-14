@@ -58,4 +58,14 @@ public interface IActivityService {
      * @return ReturnObject
      */
     ReturnObject returnCoupon(Long shopId, Long id);
+
+    ReturnObject modifyPresaleInventory(Long activityId,Integer quantity);
+
+    /**
+     * 根据activityId获得优惠活动Json字符串
+     * @param activityId
+     * @return RetrunObject<String>
+     */
+    ReturnObject<List<String>> getActivityRule(Long couponId,List<Long> activityId);
+
 }

@@ -66,6 +66,8 @@ public class IGoodsServiceImpl implements IGoodsService {
     public ReturnObject<SkuInfoDTO> getSelectSkuInfoBySkuId(Long skuId)
     {
         SkuInfoDTO skuInfoDTO=goodsDao.getSelectSkuInfoBySkuId(skuId);
+        if(skuInfoDTO!=null)
+            skuInfoDTO.setPrice(goodsDao.getPriceBySkuId(skuId).getData());
         return new ReturnObject<>(skuInfoDTO);
     }
 
@@ -81,6 +83,7 @@ public class IGoodsServiceImpl implements IGoodsService {
     {
         GoodsInfoDTO goodsInfoDTO=goodsDao.getSelectGoodsInfoBySkuId(skuId);
         if(goodsInfoDTO!=null) {
+            goodsInfoDTO.setPrice(goodsDao.getPriceBySkuId(skuId).getData());
             List<CouponInfoDTO> couponInfoDTOs = IActivityService.getCouponInfoBySkuId(skuId);
             goodsInfoDTO.setCouponActivity(couponInfoDTOs);
         }
@@ -172,12 +175,36 @@ public class IGoodsServiceImpl implements IGoodsService {
 
     @Override
     public ReturnObject<GoodsDetailDTO> getGoodsBySkuId(Long skuId) {
+        GoodsDetailDTO goodsDetailDTO=goodsDao.getGoodsBySkuId(skuId).getData();
+        goodsDetailDTO.setPrice(goodsDao.getPriceBySkuId(skuId).getData());
         return goodsDao.getGoodsBySkuId(skuId);
     }
 
     @Override
     public ReturnObject<GoodsFreightDTO> getGoodsFreightDetailBySkuId(Long skuId) {
         return null;
+    }
+
+    @Override
+    public ReturnObject<GoodsDetailDTO> getGoodsBySkuId(Long skuId, Byte type, Long activityId, Integer quantity) {
+        ReturnObject<GoodsDetailDTO> returnObject=goodsDao.getGoodsBySkuId(skuId);
+        if(returnObject.getCode().equals(ResponseCode.OK)) {
+            switch (type) {
+                case (2)://预售
+                {
+                    returnObject= IActivityService.modifyPresaleInventory(activityId, quantity);
+                    break;
+                }
+                case (0)://秒杀/普通
+
+                case (1)://团购
+                case (3)://优惠券
+                break;
+            }
+            if(returnObject.getCode().equals(ResponseCode.OK))
+                returnObject=goodsDao.modifyInventory(skuId,quantity);
+        }
+        return returnObject;
     }
 
     @Override

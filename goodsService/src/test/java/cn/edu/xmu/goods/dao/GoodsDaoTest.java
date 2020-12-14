@@ -216,7 +216,7 @@ class GoodsDaoTest {
     void getSelectSkuInfoBySkuId()
     {
         SkuInfoDTO skuInfoDTO=goodsDao.getSelectSkuInfoBySkuId((long)273);
-        assertEquals(skuInfoDTO.getSkuId(),(long)273);
+        assertEquals(skuInfoDTO.getId(),(long)273);
 
         skuInfoDTO=goodsDao.getSelectSkuInfoBySkuId((long)0);
         assertEquals(skuInfoDTO,null);

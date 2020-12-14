@@ -81,6 +81,23 @@ public class IActivityServiceImpl implements IActivityService {
         return returnObject;
     }
 
+    @Override
+    public ReturnObject modifyPresaleInventory(Long activityId,Integer quantity) {
+        ReturnObject returnObject=presaleDao.modifyPresaleInventory(activityId,quantity);
+        return returnObject;
+    }
+
+//    @Override
+//    public ReturnObject<Boolean> judgeCouponActivityIdValid(Long couponActivityId) {
+//        Boolean valid=couponDao.judgeCouponActivityIdValid(couponActivityId);
+//        return new ReturnObject<Boolean>(valid);
+//    }
+
+    @Override
+    public ReturnObject<List<String>> getActivityRule(Long couponId,List<Long> activityId){
+        List<String> couponActivityRules=couponDao.getActivityRules(couponId,activityId);
+        return new ReturnObject<>(couponActivityRules);
+    }
 
 
 }

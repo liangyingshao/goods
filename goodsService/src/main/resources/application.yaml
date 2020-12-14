@@ -143,12 +143,13 @@ dubbo:
     qos-accept-foreign-ip: false
   # 配置注册中心
   registry:
-    address: nacos://127.0.0.1:8848
+    address: nacos://172.20.10.4:8848
     #192.168.137.1:8848
   # 设置协议-协议由提供方指定消费方被动接受
   protocol:
     name: dubbo
     port: -1 # -1 表示端口自增 from 20880
+    host: 172.20.10.3
     # 设置超时时间
   consumer:
     timeout: 4000
@@ -163,7 +164,8 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: 127.0.0.1:8848
+        ip: 172.20.10.3
+        server-addr: 172.20.10.4:8848
         #192.168.137.1:8848
   profiles:
     active: dev
@@ -224,6 +226,20 @@ mybatis:
     username: night
     password: tiesuolianhuan123
     baseUrl: http://172.16.4.146:8888/webdav/
+
+# 配置rocketmq
+rocketmq:
+  # 指定namesrv地址
+  name-server: 127.0.0.1:9876
+  producer:
+    #生产者group名称
+    group: producer_group
+    #一次发送多少数量消息
+    max-message-size: 4096
+    #发送消息超时时间,默认3000
+    send-message-timeout: 3000
+    #发送消息失败重试次数，默认2
+    retry-times-when-send-async-failed: 2
 
 #privilegeservice:
 #  #是否对数据库中的未初始化的数据初始化

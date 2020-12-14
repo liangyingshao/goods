@@ -1,6 +1,5 @@
 package cn.edu.xmu.activity.model.bo;
 
-import cn.edu.xmu.goods.model.vo.ShopStateVo;
 import lombok.Data;
 
 import java.util.HashMap;
