@@ -52,10 +52,17 @@ public interface IActivityService {
 
     /**
      * 优惠券退回
-     *
      * @param shopId
      * @param id
      * @return ReturnObject
      */
     ReturnObject returnCoupon(Long shopId, Long id);
+
+    /**
+     * 根据activityId获得优惠活动Json字符串
+     * @param activityId
+     * @return RetrunObject<String>
+     */
+    ReturnObject<List<String>> getActivityRule(Long couponId,List<Long> activityId);
+
 }

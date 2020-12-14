@@ -716,7 +716,7 @@ public class CouponDao implements InitializingBean
         modiBy.setId(activityPo.getModiBy());
         modiBy.setUsername(modiByName);
         couponActivityVo.setModifiedBy(modiBy);
-        return new ReturnObject<CouponActivityVo>(couponActivityVo);
+        return new ReturnObject<>(couponActivityVo);
 
     }
 
@@ -725,7 +725,7 @@ public class CouponDao implements InitializingBean
      * @param activity
      * @return ReturnObject
      */
-    public ReturnObject<CouponActivityVo> addCouponActivity(CouponActivity activity,SimpleShopDTO simpleShop) {
+    public ReturnObject<CouponActivityVo> addCouponActivity(CouponActivity activity,SimpleShopDTO simpleShop,String createByName) {
         CouponActivityPo activityPo=activity.createActivityPo();
         ReturnObject<CouponActivityVo> returnObject=null;
         try{
@@ -1176,5 +1176,46 @@ public class CouponDao implements InitializingBean
         if(activityPo==null||!activityPo.getState().equals(1))return false;
         LocalDateTime now=LocalDateTime.now();
         if(activityPo.getBeginTime().isBefore(now)&&activityPo.getEndTime().isAfter(now))return true;
+        else return false;
+    }
+
+    /**
+     * 获取可用优惠活动规则列表
+     * @param couponId
+     * @param activityIds
+     * @return  List<String>
+     */
+    public List<String> getActivityRules(Long couponId, List<Long> activityIds) {
+        //活动规则列表 优惠券对应活动po 优惠券对应活动规则
+        List<String>activityRules=null;
+        CouponActivityPo couponActivityPo=new CouponActivityPo();
+        String couponRule=null;
+
+        //判断优惠券是否有效并获取规则
+        if(judgeCouponValid(couponId)){
+            CouponPo couponPo=couponMapper.selectByPrimaryKey(couponId);
+            couponActivityPo=activityMapper.selectByPrimaryKey(couponPo.getActivityId());
+            couponRule=couponActivityPo.getStrategy();
+        }
+        //获取有效活动规则列表
+        for(Long activityId:activityIds){
+            //判断优惠活动是否有效
+            if(judgeCouponActivityIdValid(activityId)){//有效活动
+                CouponActivityPo activityPo=activityMapper.selectByPrimaryKey(activityId);
+                //若为不发券优惠活动，直接加入
+                if(activityPo.getQuantity().equals(0)){
+                    activityRules.add(activityPo.getStrategy());
+                }
+                else if(activityPo.getId().equals(couponActivityPo.getId())){//若为发券优惠活动，判断该活动是否与优惠券对应
+                    activityRules.add(couponRule);
+                }
+                else{//若为发券优惠活动，且与优惠券对应不上
+                    activityRules.add(null);
+                }
+            }
+            else activityRules.add(null);//无效活动
+        }
+        return activityRules;
+
     }
 }
