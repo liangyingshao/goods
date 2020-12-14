@@ -618,8 +618,10 @@ public class CouponDao implements InitializingBean
         if(type.equals(CouponActivity.Type.LIMIT_TOTAL_NUM))
         {
             int rest= (int) redisTemplate.opsForHash().get(key,"quantity");
+            Long seconds = redisTemplate.opsForValue().getOperations().getExpire(key);
             redisTemplate.opsForHash().delete(key,"quantity");
             redisTemplate.opsForHash().put(key,"quantity",rest-1);
+            redisTemplate.expire(key,Duration.ofSeconds(seconds).toHours(), TimeUnit.HOURS);
         }
 
         //更新bloom过滤器

@@ -1,5 +1,6 @@
 package cn.edu.xmu.activity.dao;
 
+import cn.edu.xmu.activity.mapper.MyPresaleActivityPoMapper;
 import cn.edu.xmu.activity.mapper.PresaleActivityPoMapper;
 import cn.edu.xmu.activity.model.bo.ActivityStatus;
 import cn.edu.xmu.activity.model.bo.Presale;
@@ -8,6 +9,7 @@ import cn.edu.xmu.activity.model.po.PresaleActivityPo;
 import cn.edu.xmu.activity.model.po.PresaleActivityPoExample;
 import cn.edu.xmu.activity.model.vo.PresaleVo;
 import cn.edu.xmu.ooad.model.VoObject;
+import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.goods.model.GoodsSpuPoDTO;
@@ -18,16 +20,25 @@ import cn.edu.xmu.oomall.goods.service.IGoodsService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.dubbo.config.annotation.DubboReference;
+import org.apache.rocketmq.client.producer.SendCallback;
+import org.apache.rocketmq.client.producer.SendResult;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Repository;
 
+import javax.annotation.Resource;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * description: PresaleDap
@@ -39,10 +50,16 @@ import java.util.List;
 public class PresaleDao {
 
     @Autowired
-    PresaleActivityPoMapper presaleActivityPoMapper;
+    MyPresaleActivityPoMapper presaleActivityPoMapper;
 
     @DubboReference
     IGoodsService iGoodsService;
+
+    @Resource
+    private RocketMQTemplate rocketMQTemplate;
+
+    @Autowired
+    RedisTemplate redisTemplate;
 
     private static final Logger logger = LoggerFactory.getLogger(PresaleDao.class);
 
@@ -394,29 +411,70 @@ public class PresaleDao {
 
 
     public ReturnObject modifyPresaleInventory(Long activityId, Integer quantity) {
-        PresaleActivityPo presaleActivityPo= presaleActivityPoMapper.selectByPrimaryKey(activityId);
-        if(presaleActivityPo==null)return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        String key="pa_"+activityId;
+        PresaleActivityPo presaleActivityPo=new PresaleActivityPo();
+        //没在redis里找到
+        if(!redisTemplate.opsForHash().hasKey(key,"quantity")) {
+            //presale存在
+            presaleActivityPo = presaleActivityPoMapper.selectByPrimaryKey(activityId);
+            if (presaleActivityPo == null) return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
 
-        presaleActivityPo.setQuantity(presaleActivityPo.getQuantity()-quantity);
-        try{
-            int ret=presaleActivityPoMapper.updateByPrimaryKeySelective(presaleActivityPo);
-            if(ret==0)
-            {
-                logger.error("modifyPresaleInventory: presalePo="+presaleActivityPo);
-                return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+            //库存足够
+            Integer inventory=presaleActivityPo.getQuantity();
+            if (inventory < quantity) return new ReturnObject<>(ResponseCode.SKU_NOTENOUGH);
+
+            //添加到redis
+            redisTemplate.opsForHash().put(key,"quantity",inventory-quantity);
+            redisTemplate.expire(key, Duration.between(LocalDateTime.now(),presaleActivityPo.getEndTime()).toHours(), TimeUnit.HOURS);
+        }
+        //已经存到redis里
+        else{
+            Integer inventory= (Integer) redisTemplate.opsForHash().get(key,"quantity");
+
+            //库存足够
+            if(quantity>inventory)
+                return new ReturnObject<>(ResponseCode.SKU_NOTENOUGH);
+
+            //设置presaleId
+            presaleActivityPo.setId(activityId);
+
+            //更新redis
+            Long seconds = redisTemplate.opsForValue().getOperations().getExpire(key);
+            redisTemplate.opsForHash().delete(key,"quantity");
+            redisTemplate.opsForHash().put(key,"quantity",inventory-quantity);
+            redisTemplate.expire(key,Duration.ofSeconds(seconds).toHours(), TimeUnit.HOURS);
+        }
+
+        //设置修改量
+        presaleActivityPo.setQuantity(quantity);
+
+        //修改库存
+        String json = JacksonUtil.toJson(presaleActivityPo);
+        Message message = MessageBuilder.withPayload(json).build();
+        logger.info("sendLogMessage: message = " + message);
+        rocketMQTemplate.asyncSend("presale-topic", message, new SendCallback() {
+            @Override
+            public void onSuccess(SendResult sendResult) {
+                System.out.println(sendResult.getSendStatus());
             }
-            else return new ReturnObject<>();
+
+            @Override
+            public void onException(Throwable e) {
+                System.out.println(e.getMessage());
+            }
+        });
+
+        return new ReturnObject<>();
+    }
+
+    public void updateQuantityByPrimaryKeySelective(PresaleActivityPo presaleActivityPo)
+    {
+        try{
+            presaleActivityPoMapper.updateQuantityByPrimaryKeySelective(presaleActivityPo);
         }
-        catch (DataAccessException e)
+        catch (Exception e)
         {
-            // 其他数据库错误
-            logger.debug("other sql exception : " + e.getMessage());
-            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
-        }
-        catch (Exception e) {
-            // 其他Exception错误
-            logger.error("other exception : " + e.getMessage());
-            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+            logger.error("严重错误：" + e.getMessage());
         }
     }
 }
