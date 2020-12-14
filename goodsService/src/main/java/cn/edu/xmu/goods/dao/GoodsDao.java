@@ -142,17 +142,17 @@ public class GoodsDao {
         }
         else skuPos=skuMapper.selectByExample(skuExample);
         List<GoodsSku>skus=skuPos.stream().map(GoodsSku::new).collect(Collectors.toList());
-        for(GoodsSku sku:skus)
-        {
-            FloatPricePoExample floatExample=new FloatPricePoExample();
-            FloatPricePoExample.Criteria floatCriteria=floatExample.createCriteria();
-            floatCriteria.andGoodsSkuIdEqualTo(sku.getId());
-            floatCriteria.andBeginTimeLessThanOrEqualTo(LocalDateTime.now());
-            floatCriteria.andEndTimeGreaterThanOrEqualTo(LocalDateTime.now());
-            List<FloatPricePo> floatPos=floatMapper.selectByExample(floatExample);
-            if(floatPos==null||floatPos.size()==0||floatPos.get(0).getQuantity().equals(0))sku.setPrice(sku.getOriginalPrice());
-            else sku.setPrice(floatPos.get(0).getActivityPrice());
-        }
+//        for(GoodsSku sku:skus)
+//        {
+//            FloatPricePoExample floatExample=new FloatPricePoExample();
+//            FloatPricePoExample.Criteria floatCriteria=floatExample.createCriteria();
+//            floatCriteria.andGoodsSkuIdEqualTo(sku.getId());
+//            floatCriteria.andBeginTimeLessThanOrEqualTo(LocalDateTime.now());
+//            floatCriteria.andEndTimeGreaterThanOrEqualTo(LocalDateTime.now());
+//            List<FloatPricePo> floatPos=floatMapper.selectByExample(floatExample);
+//            if(floatPos==null||floatPos.size()==0||floatPos.get(0).getQuantity().equals(0))sku.setPrice(sku.getOriginalPrice());
+//            else sku.setPrice(floatPos.get(0).getActivityPrice());
+//        }
         List<GoodsSkuRetVo> ret = skus.stream().map(GoodsSkuRetVo::new).collect(Collectors.toList());
         PageInfo<GoodsSkuRetVo> returns=new PageInfo(ret);
         returns.setPageNum(page);
@@ -559,22 +559,22 @@ public class GoodsDao {
         if(skuPo==null)return null;
 
         SkuInfoDTO skuInfoDTO=new SkuInfoDTO();
-        skuInfoDTO.setDisable(GoodsSku.State.getTypeByCode(skuPo.getDisabled().intValue()).equals(GoodsSku.State.DELETED)?false:true);
+        skuInfoDTO.setDisable(skuPo.getDisabled());
         skuInfoDTO.setImageUrl(skuPo.getImageUrl());
         skuInfoDTO.setInventory(skuPo.getInventory());
         skuInfoDTO.setName(skuPo.getName());
         skuInfoDTO.setOriginalPrice(skuPo.getOriginalPrice());
-        skuInfoDTO.setSkuId(skuId);
+        skuInfoDTO.setSkuId(skuPo.getId());
         skuInfoDTO.setSkuSn(skuPo.getSkuSn());
 
-        FloatPricePoExample floatExample=new FloatPricePoExample();
-        FloatPricePoExample.Criteria floatCriteria= floatExample.createCriteria();
-        floatCriteria.andBeginTimeLessThanOrEqualTo(LocalDateTime.now());
-        floatCriteria.andEndTimeGreaterThan(LocalDateTime.now());
-        floatCriteria.andGoodsSkuIdEqualTo(skuId);
-        floatCriteria.andInvalidByEqualTo(FloatPrice.Validation.VALID.getCode().longValue());
-        List<FloatPricePo> floatPos=floatMapper.selectByExample(floatExample);
-        skuInfoDTO.setPrice((floatPos==null||floatPos.size()==0||floatPos.get(0).getQuantity().equals(0))?skuPo.getOriginalPrice():floatPos.get(0).getActivityPrice());
+//        FloatPricePoExample floatExample=new FloatPricePoExample();
+//        FloatPricePoExample.Criteria floatCriteria= floatExample.createCriteria();
+//        floatCriteria.andBeginTimeLessThanOrEqualTo(LocalDateTime.now());
+//        floatCriteria.andEndTimeGreaterThan(LocalDateTime.now());
+//        floatCriteria.andGoodsSkuIdEqualTo(skuId);
+//        floatCriteria.andInvalidByEqualTo(FloatPrice.Validation.VALID.getCode().longValue());
+//        List<FloatPricePo> floatPos=floatMapper.selectByExample(floatExample);
+//        skuInfoDTO.setPrice((floatPos==null||floatPos.size()==0||floatPos.get(0).getQuantity().equals(0))?skuPo.getOriginalPrice():floatPos.get(0).getActivityPrice());
 
         return skuInfoDTO;
     }
@@ -601,14 +601,14 @@ public class GoodsDao {
         goodsInfoDTO.setSpuName(spuPo.getName());
         goodsInfoDTO.setAddTime(skuPo.getGmtCreate());
 
-        FloatPricePoExample floatExample=new FloatPricePoExample();
-        FloatPricePoExample.Criteria floatCriteria= floatExample.createCriteria();
-        floatCriteria.andBeginTimeLessThanOrEqualTo(LocalDateTime.now());
-        floatCriteria.andEndTimeGreaterThan(LocalDateTime.now());
-        floatCriteria.andGoodsSkuIdEqualTo(skuId);
-        floatCriteria.andInvalidByEqualTo(FloatPrice.Validation.VALID.getCode().longValue());
-        List<FloatPricePo> floatPos=floatMapper.selectByExample(floatExample);
-        goodsInfoDTO.setPrice((floatPos==null||floatPos.size()==0||floatPos.get(0).getQuantity().equals(0))?skuPo.getOriginalPrice():floatPos.get(0).getActivityPrice());
+//        FloatPricePoExample floatExample=new FloatPricePoExample();
+//        FloatPricePoExample.Criteria floatCriteria= floatExample.createCriteria();
+//        floatCriteria.andBeginTimeLessThanOrEqualTo(LocalDateTime.now());
+//        floatCriteria.andEndTimeGreaterThan(LocalDateTime.now());
+//        floatCriteria.andGoodsSkuIdEqualTo(skuId);
+//        floatCriteria.andInvalidByEqualTo(FloatPrice.Validation.VALID.getCode().longValue());
+//        List<FloatPricePo> floatPos=floatMapper.selectByExample(floatExample);
+//        goodsInfoDTO.setPrice((floatPos==null||floatPos.size()==0||floatPos.get(0).getQuantity().equals(0))?skuPo.getOriginalPrice():floatPos.get(0).getActivityPrice());
 
         return goodsInfoDTO;
     }
@@ -641,14 +641,14 @@ public class GoodsDao {
         goodsDetailDTO.setInventory(skuPo.getInventory());
         goodsDetailDTO.setName(skuPo.getName());
 
-        FloatPricePoExample floatExample=new FloatPricePoExample();
-        FloatPricePoExample.Criteria floatCriteria= floatExample.createCriteria();
-        floatCriteria.andBeginTimeLessThanOrEqualTo(LocalDateTime.now());
-        floatCriteria.andEndTimeGreaterThan(LocalDateTime.now());
-        floatCriteria.andGoodsSkuIdEqualTo(skuId);
-        floatCriteria.andInvalidByEqualTo(FloatPrice.Validation.VALID.getCode().longValue());
-        List<FloatPricePo> floatPos=floatMapper.selectByExample(floatExample);
-        goodsDetailDTO.setPrice((floatPos==null||floatPos.size()==0||floatPos.get(0).getQuantity().equals(0))?skuPo.getOriginalPrice():floatPos.get(0).getActivityPrice());
+//        FloatPricePoExample floatExample=new FloatPricePoExample();
+//        FloatPricePoExample.Criteria floatCriteria= floatExample.createCriteria();
+//        floatCriteria.andBeginTimeLessThanOrEqualTo(LocalDateTime.now());
+//        floatCriteria.andEndTimeGreaterThan(LocalDateTime.now());
+//        floatCriteria.andGoodsSkuIdEqualTo(skuId);
+//        floatCriteria.andInvalidByEqualTo(FloatPrice.Validation.VALID.getCode().longValue());
+//        List<FloatPricePo> floatPos=floatMapper.selectByExample(floatExample);
+//        goodsDetailDTO.setPrice((floatPos==null||floatPos.size()==0||floatPos.get(0).getQuantity().equals(0))?skuPo.getOriginalPrice():floatPos.get(0).getActivityPrice());
 
         return new ReturnObject<>(goodsDetailDTO);
     }
@@ -776,6 +776,10 @@ public class GoodsDao {
         FloatPricePoExample example = new FloatPricePoExample();
         FloatPricePoExample.Criteria criteria = example.createCriteria();
         criteria.andGoodsSkuIdEqualTo(skuId);
+        criteria.andBeginTimeLessThanOrEqualTo(LocalDateTime.now());
+        criteria.andEndTimeGreaterThan(LocalDateTime.now());
+        criteria.andGoodsSkuIdEqualTo(skuId);
+        criteria.andInvalidByEqualTo(FloatPrice.Validation.VALID.getCode().longValue());
 
         List<FloatPricePo> floatPricePo = null;
         try {
@@ -809,5 +813,79 @@ public class GoodsDao {
         simpleGoodsSkuDTO.setOriginalPrice(skuPo.getOriginalPrice());
         simpleGoodsSkuDTO.setSkuSn(skuPo.getSkuSn());
         return simpleGoodsSkuDTO;
+    }
+
+    public ReturnObject modifyInventory(Long skuId, Integer quantity) {
+        //SKU存在
+        GoodsSkuPo skuPo=skuMapper.selectByPrimaryKey(skuId);
+        if(skuPo==null)return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+
+        //修改SKU库存
+        skuPo.setInventory(skuPo.getInventory()-quantity);
+        try {
+            int ret=skuMapper.updateByPrimaryKeySelective(skuPo);
+            if(ret==0)
+            {
+                logger.debug("modifyInventory fail:skuPo="+skuPo);
+                return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("sku字段不合法：" + skuPo.toString()));
+            }
+        }
+        catch (DataAccessException e)
+        {
+            // 其他数据库错误
+            logger.debug("other sql exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
+
+        //SKU修改成功，查查有没有floatPrice要改
+        FloatPricePoExample example = new FloatPricePoExample();
+        FloatPricePoExample.Criteria criteria = example.createCriteria();
+        criteria.andGoodsSkuIdEqualTo(skuId);
+        criteria.andBeginTimeLessThanOrEqualTo(LocalDateTime.now());
+        criteria.andEndTimeGreaterThan(LocalDateTime.now());
+        criteria.andGoodsSkuIdEqualTo(skuId);
+        criteria.andInvalidByEqualTo(FloatPrice.Validation.VALID.getCode().longValue());
+
+        List<FloatPricePo> floatPricePos = new ArrayList<>();
+        try {
+            floatPricePos = floatPricePoMapper.selectByExample(example);
+        } catch (Exception e) {
+            StringBuilder message = new StringBuilder().append("getPriceBySkuId: ").append(e.getMessage());
+            logger.error(message.toString());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+        }
+
+        //有floatPrice
+        if(floatPricePos!=null&&floatPricePos.size()>0)
+        {
+            FloatPricePo floatPricePo=floatPricePos.get(0);
+            floatPricePo.setQuantity(floatPricePo.getQuantity()-quantity);
+            try{
+                int ret=floatPricePoMapper.updateByPrimaryKeySelective(floatPricePo);
+                if(ret==0)
+                {
+                    logger.debug("modifyInventory fail:floatPricePo="+floatPricePo);
+                    return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("sku字段不合法：" + skuPo.toString()));
+                }
+                else  return new ReturnObject<>();
+            }
+            catch (DataAccessException e)
+            {
+                // 其他数据库错误
+                logger.debug("other sql exception : " + e.getMessage());
+                return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+            }
+            catch (Exception e) {
+                // 其他Exception错误
+                logger.error("other exception : " + e.getMessage());
+                return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+            }
+        }
+        else return new ReturnObject<>();
     }
 }

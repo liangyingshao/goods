@@ -52,11 +52,14 @@ public interface IActivityService {
 
     /**
      * 优惠券退回
+     *
      * @param shopId
      * @param id
      * @return ReturnObject
      */
     ReturnObject returnCoupon(Long shopId, Long id);
+
+    ReturnObject modifyPresaleInventory(Long activityId,Integer quantity);
 
     /**
      * 根据activityId获得优惠活动Json字符串

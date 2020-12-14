@@ -89,5 +89,14 @@ public interface IGoodsService {
     ReturnObject<GoodsFreightDTO> getGoodsFreightDetailBySkuId(Long skuId);
 
 
-
+    /**
+     * 根据skuId查找商品信息
+     * 0普通活动或者可能是秒杀  1团购  2预售 3优惠券
+     * quantity可正可负
+     * @param skuId
+     * @return GoodsDetailDTO
+     * @author Cai Xinlu
+     * @date 2020-12-09 17:03
+     */
+    ReturnObject<GoodsDetailDTO> getGoodsBySkuId(Long skuId, Byte type, Long activityId, Integer quantity);
 }

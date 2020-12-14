@@ -21,6 +21,7 @@ import org.apache.dubbo.config.annotation.DubboReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -389,5 +390,33 @@ public class PresaleDao {
         }
         else
             return new ReturnObject<>(false);
+    }
+
+
+    public ReturnObject modifyPresaleInventory(Long activityId, Integer quantity) {
+        PresaleActivityPo presaleActivityPo= presaleActivityPoMapper.selectByPrimaryKey(activityId);
+        if(presaleActivityPo==null)return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+
+        presaleActivityPo.setQuantity(presaleActivityPo.getQuantity()-quantity);
+        try{
+            int ret=presaleActivityPoMapper.updateByPrimaryKeySelective(presaleActivityPo);
+            if(ret==0)
+            {
+                logger.error("modifyPresaleInventory: presalePo="+presaleActivityPo);
+                return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+            }
+            else return new ReturnObject<>();
+        }
+        catch (DataAccessException e)
+        {
+            // 其他数据库错误
+            logger.debug("other sql exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
     }
 }

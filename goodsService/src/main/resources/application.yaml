@@ -130,6 +130,7 @@ management:
 
 server:
   port: 8090
+  address: 172.20.10.6
   tomcat:
     threads:
       max: 1000
@@ -143,12 +144,13 @@ dubbo:
     qos-accept-foreign-ip: false
   # 配置注册中心
   registry:
-    address: nacos://127.0.0.1:8848
+    address: nacos://172.20.10.3:8848
     #192.168.137.1:8848
   # 设置协议-协议由提供方指定消费方被动接受
   protocol:
     name: dubbo
     port: -1 # -1 表示端口自增 from 20880
+    host: 172.20.10.6
     # 设置超时时间
   consumer:
     timeout: 4000
@@ -163,7 +165,7 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: 127.0.0.1:8848
+        server-addr: 172.20.10.3:8848
         #192.168.137.1:8848
   profiles:
     active: dev
