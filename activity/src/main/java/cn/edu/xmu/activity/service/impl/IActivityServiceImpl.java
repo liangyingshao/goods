@@ -81,5 +81,11 @@ public class IActivityServiceImpl implements IActivityService {
         return returnObject;
     }
 
+    @Override
+    public ReturnObject modifyPresaleInventory(Long activityId,Integer quantity) {
+        ReturnObject returnObject=presaleDao.modifyPresaleInventory(activityId,quantity);
+        return returnObject;
+    }
+
 
 }

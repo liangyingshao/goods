@@ -58,4 +58,6 @@ public interface IActivityService {
      * @return ReturnObject
      */
     ReturnObject returnCoupon(Long shopId, Long id);
+
+    ReturnObject modifyPresaleInventory(Long activityId,Integer quantity);
 }

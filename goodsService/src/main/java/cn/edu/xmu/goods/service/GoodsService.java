@@ -59,6 +59,8 @@ public class GoodsService {
     public ReturnObject<PageInfo<GoodsSkuRetVo>> getSkuList(Long shopId, String skuSn, Long spuId, String spuSn, Integer page, Integer pageSize)
     {
         PageInfo<GoodsSkuRetVo> skuRetVos=goodsDao.getSkuList(shopId,skuSn,spuId,spuSn,page,pageSize);
+        if(skuRetVos!=null&&skuRetVos.getList().size()>0)
+            skuRetVos.getList().stream().forEach(x->x.setPrice(goodsDao.getPriceBySkuId(x.getId()).getData()));
         return new ReturnObject<>(skuRetVos);
     }
 

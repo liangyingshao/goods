@@ -54,7 +54,7 @@ class GoodsControllerTest {
     public void modifyshop1() throws Exception{
 
         String token = creatTestToken(1L, 0L, 100);
-        byte[] response = webClient.put().uri("/goods/shops/1").header("authorization",token)
+        byte[] response = webClient.put().uri("/shops/1").header("authorization",token)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -69,7 +69,7 @@ class GoodsControllerTest {
 
     @Test
     void getSkuList() throws Exception{
-        byte[] response =webClient.get().uri("/goods/skus?spuId=273&spuSn=drh-d0001&page=1&pageSize=5")
+        byte[] response =webClient.get().uri("/skus?spuId=273&spuSn=drh-d0001&page=1&pageSize=5")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -85,7 +85,7 @@ class GoodsControllerTest {
         
         String expectedResponse="{\"errno\":0,\"data\":{\"total\":1,\"list\":[{\"id\":273,\"skuSn\":null,\"name\":\"+\",\"originalPrice\":980000,\"imageUrl\":\"http://47.52.88.176/file/images/201612/file_586206d4c7d2f.jpg\",\"inventory\":1,\"disabled\":4,\"price\":980000}],\"pageNum\":1,\"pageSize\":1,\"size\":1,\"startRow\":0,\"endRow\":0,\"pages\":1,\"prePage\":0,\"nextPage\":0,\"isFirstPage\":true,\"isLastPage\":true,\"hasPreviousPage\":false,\"hasNextPage\":false,\"navigatePages\":8,\"navigatepageNums\":[1],\"navigateFirstPage\":1,\"navigateLastPage\":1},\"errmsg\":\"成功\"}";
 
-        response =webClient.get().uri("/goods/skus?page=1&pageSize=5")
+        response =webClient.get().uri("/skus?page=1&pageSize=5")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -101,7 +101,7 @@ class GoodsControllerTest {
         
         expectedResponse="{\"errno\":0,\"data\":{\"total\":5,\"list\":[{\"id\":273,\"skuSn\":null,\"name\":\"+\",\"originalPrice\":980000,\"imageUrl\":\"http://47.52.88.176/file/images/201612/file_586206d4c7d2f.jpg\",\"inventory\":1,\"disabled\":4,\"price\":980000},{\"id\":274,\"skuSn\":null,\"name\":\"+\",\"originalPrice\":850,\"imageUrl\":\"http://47.52.88.176/file/images/201612/file_5861cd259e57a.jpg\",\"inventory\":99,\"disabled\":4,\"price\":850},{\"id\":275,\"skuSn\":null,\"name\":\"+\",\"originalPrice\":4028,\"imageUrl\":\"http://47.52.88.176/file/images/201612/file_5861d65fa056a.jpg\",\"inventory\":10,\"disabled\":4,\"price\":4028},{\"id\":276,\"skuSn\":null,\"name\":\"+\",\"originalPrice\":6225,\"imageUrl\":\"http://47.52.88.176/file/images/201612/file_5861da5e7ec6a.jpg\",\"inventory\":10,\"disabled\":4,\"price\":6225},{\"id\":277,\"skuSn\":null,\"name\":\"+\",\"originalPrice\":16200,\"imageUrl\":\"http://47.52.88.176/file/images/201612/file_5861c5848ffc4.jpg\",\"inventory\":10,\"disabled\":4,\"price\":16200}],\"pageNum\":1,\"pageSize\":5,\"size\":5,\"startRow\":0,\"endRow\":4,\"pages\":1,\"prePage\":0,\"nextPage\":0,\"isFirstPage\":true,\"isLastPage\":true,\"hasPreviousPage\":false,\"hasNextPage\":false,\"navigatePages\":8,\"navigatepageNums\":[1],\"navigateFirstPage\":1,\"navigateLastPage\":1},\"errmsg\":\"成功\"}";
 
-        response =webClient.get().uri("/goods/skus?page=2&pageSize=5")
+        response =webClient.get().uri("/skus?page=2&pageSize=5")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -117,7 +117,7 @@ class GoodsControllerTest {
         
         expectedResponse="{\"errno\":0,\"data\":{\"total\":5,\"list\":[{\"id\":278,\"skuSn\":null,\"name\":\"+\",\"originalPrice\":1199,\"imageUrl\":\"http://47.52.88.176/file/images/201610/file_580cfb485e1df.jpg\",\"inventory\":46100,\"disabled\":4,\"price\":1199},{\"id\":279,\"skuSn\":null,\"name\":\"+\",\"originalPrice\":1199,\"imageUrl\":\"http://47.52.88.176/file/images/201610/file_580cfc4323959.jpg\",\"inventory\":500,\"disabled\":4,\"price\":1199},{\"id\":280,\"skuSn\":null,\"name\":\"+\",\"originalPrice\":2399,\"imageUrl\":\"http://47.52.88.176/file/images/201611/file_583af4aec812c.jpg\",\"inventory\":1834,\"disabled\":4,\"price\":2399},{\"id\":281,\"skuSn\":null,\"name\":\"+\",\"originalPrice\":1380000,\"imageUrl\":\"http://47.52.88.176/file/images/201610/file_57fae8f7240c6.jpg\",\"inventory\":1,\"disabled\":4,\"price\":1380000},{\"id\":282,\"skuSn\":null,\"name\":\"+\",\"originalPrice\":120000,\"imageUrl\":\"http://47.52.88.176/file/images/201612/file_586214158db43.jpg\",\"inventory\":1,\"disabled\":4,\"price\":120000}],\"pageNum\":1,\"pageSize\":5,\"size\":5,\"startRow\":0,\"endRow\":4,\"pages\":1,\"prePage\":0,\"nextPage\":0,\"isFirstPage\":true,\"isLastPage\":true,\"hasPreviousPage\":false,\"hasNextPage\":false,\"navigatePages\":8,\"navigatepageNums\":[1],\"navigateFirstPage\":1,\"navigateLastPage\":1},\"errmsg\":\"成功\"}";
 
-        response =webClient.get().uri("/goods/skus")
+        response =webClient.get().uri("/skus")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -136,7 +136,9 @@ class GoodsControllerTest {
 
     @Test
     void getSku() throws Exception{
-        byte[] response =webClient.get().uri("/goods/skus/273")
+        String token = creatTestToken(1L, 0L, 100);
+        byte[] response =webClient.get().uri("/skus/273")
+
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -147,7 +149,7 @@ class GoodsControllerTest {
         
 //        String expectedResponse="{\"errno\":0,\"data\":{\"id\":273,\"goodsSpuId\":273,\"name\":\"+\",\"skuSn\":null,\"imageUrl\":\"http://47.52.88.176/file/images/201612/file_586206d4c7d2f.jpg\",\"inventory\":1,\"originalPrice\":980000,\"configuration\":null,\"weight\":10,\"detail\":null,\"disabled\":4,\"gmtCreated\":\"2020-11-28T17:42:17\",\"gmtModified\":\"2020-11-28T17:42:17\",\"goodsSkuPo\":{\"id\":273,\"goodsSpuId\":null,\"skuSn\":null,\"name\":\"+\",\"originalPrice\":980000,\"configuration\":null,\"weight\":10,\"imageUrl\":null,\"inventory\":1,\"detail\":null,\"disabled\":null,\"gmtCreate\":null,\"gmtModified\":null}},\"errmsg\":\"成功\"}";
 
-        response =webClient.get().uri("/goods/skus/1")
+        response =webClient.get().uri("/skus/1")
                 .exchange()
                 .expectStatus().is4xxClientError().expectBody()
                 .returnResult()
@@ -158,7 +160,7 @@ class GoodsControllerTest {
     @Test
     void deleteSku() throws Exception{
         String token = creatTestToken(1L, 0L, 100);
-        byte[] response =webClient.delete().uri("/goods/shops/1/skus/273").header("authorization",token)
+        byte[] response =webClient.delete().uri("/shops/1/skus/273").header("authorization",token)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -168,7 +170,7 @@ class GoodsControllerTest {
         String expectedResponse = "{\"errno\":505,\"errmsg\":\"操作的资源id不是自己的对象\"}";
 
 
-        response =webClient.delete().uri("/goods/shops/0/skus/273").header("authorization",token)
+        response =webClient.delete().uri("/shops/0/skus/273").header("authorization",token)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -177,7 +179,7 @@ class GoodsControllerTest {
                 .getResponseBodyContent();
         expectedResponse="{\"errno\":0,\"errmsg\":\"成功\"}";
 
-        response =webClient.delete().uri("/goods/shops/0/skus/273").header("authorization",token)
+        response =webClient.delete().uri("/shops/0/skus/273").header("authorization",token)
                 .exchange()
                 .expectStatus().is4xxClientError().expectBody()
                 .jsonPath("$.errno").isEqualTo(504)
@@ -186,7 +188,7 @@ class GoodsControllerTest {
         expectedResponse="{\"errno\":504,\"errmsg\":\"操作的资源id不存在\"}";
 
 
-        response =webClient.delete().uri("/goods/shops/0/skus/1").header("authorization",token)
+        response =webClient.delete().uri("/shops/0/skus/1").header("authorization",token)
                 .exchange()
                 .expectStatus().is4xxClientError().expectBody()
                 .jsonPath("$.errno").isEqualTo(504)
@@ -200,7 +202,7 @@ class GoodsControllerTest {
     void modifySKU() throws Exception{
         String requireJson="{\n    \"name\": \"name\",\n    \"originalPrice\": \"100\",\n    \"configuration\": \"configuration\",\n    \"weight\": \"100\",\n    \"inventory\": \"9999\",\n    \"detail\": \"detail\"\n}";
         String token = creatTestToken(1L, 0L, 100);
-        byte[] response =webClient.put().uri("/goods/shops/0/skus/683")
+        byte[] response =webClient.put().uri("/shops/0/skus/683")
                 .header("authorization",token)
                 .bodyValue(requireJson)
                 .exchange()
@@ -211,7 +213,7 @@ class GoodsControllerTest {
                 .getResponseBodyContent();
         String expectedResponse="{\"errno\":0,\"errmsg\":\"成功\"}";
 
-        response =webClient.put().uri("/goods/shops/0/skus/273")
+        response =webClient.put().uri("/shops/0/skus/273")
                 .header("authorization",token)
                 .bodyValue(requireJson)
                 .exchange()
@@ -221,7 +223,7 @@ class GoodsControllerTest {
                 .returnResult()
                 .getResponseBodyContent();
 
-        response =webClient.put().uri("/goods/shops/1/skus/273")
+        response =webClient.put().uri("/shops/1/skus/273")
                 .header("authorization",token)
                 .bodyValue(requireJson)
                 .exchange()
@@ -232,7 +234,7 @@ class GoodsControllerTest {
                 .getResponseBodyContent();
         expectedResponse="{\"errno\":505,\"errmsg\":\"操作的资源id不是自己的对象\"}";
 
-        response =webClient.put().uri("/goods/shops/0/skus/1")
+        response =webClient.put().uri("/shops/0/skus/1")
                 .header("authorization",token)
                 .bodyValue(requireJson)
                 .exchange()
@@ -251,7 +253,7 @@ class GoodsControllerTest {
         LocalDateTime endTime=LocalDateTime.of(2020,12,30,10,0,0);
         String requireJson="{\n    \"activityPrice\": \"100\",\n    \"beginTime\": \""+beginTime.toString()+"\",\n    \"endTime\": \""+endTime.toString()+"\",\n    \"quantity\": \"100\"\n}";
         String token = creatTestToken(1L, 0L, 100);
-        byte[] response =webClient.post().uri("/goods/shops/0/skus/278/floatPrices")
+        byte[] response =webClient.post().uri("/shops/0/skus/278/floatPrices")
                 .header("authorization",token)
                 .bodyValue(requireJson)
                 .exchange()
@@ -266,7 +268,7 @@ class GoodsControllerTest {
         
         String expectedResponse ="{\"errno\":0,\"data\":{\"id\":21,\"activityPrice\":100,\"quantity\":100,\"beginTime\":\"2020-12-12T10:00:00\",\"endTime\":\"2020-12-30T10:00:00\",\"createdBy\":{\"id\":1,\"username\":\"createUser\"},\"modifiedBy\":{\"id\":1,\"username\":\"testUser\"}},\"errmsg\":\"成功\"}";
 
-        response =webClient.post().uri("/goods/shops/0/skus/273/floatPrices")
+        response =webClient.post().uri("/shops/0/skus/273/floatPrices")
                 .header("authorization",token)
                 .bodyValue(requireJson)
                 .exchange()
@@ -278,7 +280,7 @@ class GoodsControllerTest {
         expectedResponse="{\"errno\":900,\"errmsg\":\"库存不足：273\"}";
 
 
-        response =webClient.post().uri("/goods/shops/1/skus/278/floatPrices")
+        response =webClient.post().uri("/shops/1/skus/278/floatPrices")
                 .header("authorization",token)
                 .bodyValue(requireJson)
                 .exchange()
@@ -293,7 +295,7 @@ class GoodsControllerTest {
 
         LocalDateTime beginTime1=LocalDateTime.of(2019,12,12,10,0,0);
         requireJson="{\n    \"activityPrice\": \"100\",\n    \"beginTime\": \""+beginTime1.toString()+"\",\n    \"endTime\": \""+endTime.toString()+"\",\n    \"quantity\": \"100\"\n}";
-        response =webClient.post().uri("/goods/shops/0/skus/278/floatPrices")
+        response =webClient.post().uri("/shops/0/skus/278/floatPrices")
                 .header("authorization",token)
                 .bodyValue(requireJson)
                 .exchange()
@@ -305,7 +307,7 @@ class GoodsControllerTest {
 
         LocalDateTime endTime1=LocalDateTime.of(2020,12,11,20,0,0);
         requireJson="{\n    \"activityPrice\": \"100\",\n    \"beginTime\": \""+beginTime.toString()+"\",\n    \"endTime\": \""+endTime1.toString()+"\",\n    \"quantity\": \"100\"\n}";
-        response =webClient.post().uri("/goods/shops/0/skus/278/floatPrices")
+        response =webClient.post().uri("/shops/0/skus/278/floatPrices")
                 .header("authorization",token)
                 .bodyValue(requireJson)
                 .exchange()
@@ -318,7 +320,7 @@ class GoodsControllerTest {
 
 
         requireJson="{\n    \"activityPrice\": \"100\",\n    \"beginTime\": \""+beginTime.toString()+"\",\n    \"endTime\": \""+endTime.toString()+"\",\n    \"quantity\": \"-100\"\n}";
-        response =webClient.post().uri("/goods/shops/0/skus/278/floatPrices")
+        response =webClient.post().uri("/shops/0/skus/278/floatPrices")
                 .header("authorization",token)
                 .bodyValue(requireJson)
                 .exchange()
@@ -343,7 +345,7 @@ class GoodsControllerTest {
                 "  \"detail\": \"detail\"\n" +
                 "}";
         String token = creatTestToken(1L, 0L, 100);
-        byte[] response =webClient.post().uri("/goods/shops/0/spus/273")
+        byte[] response =webClient.post().uri("/shops/0/spus/273")
                 .header("authorization",token)
                 .bodyValue(requireJson)
                 .exchange()
@@ -359,7 +361,7 @@ class GoodsControllerTest {
                 //="{\"errno\":0,\"data\":{\"id\":696,\"name\":\"name\",\"skuSn\":\"newSkuSn\",\"imageUrl\":\"http://47.52.88.176/file/images/201612/file_586227f3cd5c9.jpg\",\"inventory\":100,\"originalPrice\":100,\"price\":100,\"disabled\":0},\"errmsg\":\"成功\"}"
         ;
 
-        response =webClient.post().uri("/goods/shops/0/spus/273")
+        response =webClient.post().uri("/shops/0/spus/273")
                 .header("authorization",token)
                 .bodyValue(requireJson)
                 .exchange()
@@ -371,7 +373,7 @@ class GoodsControllerTest {
         expectedResponse="{\"errno\":901,\"errmsg\":\"SKU规格重复：name\"}";
 
 
-        response =webClient.post().uri("/goods/shops/1/spus/273")
+        response =webClient.post().uri("/shops/1/spus/273")
                 .header("authorization",token)
                 .bodyValue(requireJson)
                 .exchange()
@@ -387,7 +389,7 @@ class GoodsControllerTest {
     @Test
     void getgoodskustate() throws Exception
     {
-        byte[] response  = webClient.get().uri("/goods/skus/states")
+        byte[] response  = webClient.get().uri("/skus/states")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -405,7 +407,7 @@ class GoodsControllerTest {
     void getShareSku() throws Exception
     {
         String token = creatTestToken(0L, 0L, 100);
-        byte[] response  = webClient.get().uri("/goods/share/0/skus/273")
+        byte[] response  = webClient.get().uri("/share/0/skus/273")
                 .header("authorization",token)
                 .exchange()
                 .expectStatus().isOk()
@@ -417,7 +419,7 @@ class GoodsControllerTest {
         
 
         token = creatTestToken(1L, 0L, 100);
-        response  = webClient.get().uri("/goods/share/0/skus/273")
+        response  = webClient.get().uri("/share/0/skus/273")
                 .header("authorization",token)
                 .exchange()
                 .expectStatus().isOk()
@@ -428,7 +430,7 @@ class GoodsControllerTest {
         expectedResponse="{\"code\":\"RESOURCE_ID_OUTSCOPE\",\"errmsg\":\"操作的资源id不是自己的对象\",\"data\":null}";
         
 
-        response  = webClient.get().uri("/goods/share/0/skus/274")
+        response  = webClient.get().uri("/share/0/skus/274")
                 .header("authorization",token)
                 .exchange()
                 .expectStatus().isOk()
@@ -443,7 +445,7 @@ class GoodsControllerTest {
     @Test
     void putGoodsOnSale() {
         String token = creatTestToken(0L, 0L, 100);
-        byte[] response  = webClient.put().uri("/goods/shops/0/skus/683/onshelves")
+        byte[] response  = webClient.put().uri("/shops/0/skus/683/onshelves")
                 .header("authorization",token)
                 .exchange()
                 .expectStatus().isOk()
@@ -452,7 +454,7 @@ class GoodsControllerTest {
                 .returnResult()
                 .getResponseBodyContent();
 
-        response  = webClient.put().uri("/goods/shops/0/skus/683/onshelves")
+        response  = webClient.put().uri("/shops/0/skus/683/onshelves")
                 .header("authorization",token)
                 .exchange()
                 .expectStatus().isOk()
@@ -461,7 +463,7 @@ class GoodsControllerTest {
                 .returnResult()
                 .getResponseBodyContent();
 
-        response  = webClient.put().uri("/goods/shops/1/skus/683/onshelves")
+        response  = webClient.put().uri("/shops/1/skus/683/onshelves")
                 .header("authorization",token)
                 .exchange()
                 .expectStatus().isOk()
@@ -470,17 +472,17 @@ class GoodsControllerTest {
                 .returnResult()
                 .getResponseBodyContent();
 
-        response  = webClient.put().uri("/goods/shops/0/skus/1/onshelves")
+        response  = webClient.put().uri("/shops/0/skus/1/onshelves")
                 .header("authorization",token)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                //.jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_NOTEXIST.getCode())
+                .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_NOTEXIST.getCode())
                 .returnResult()
                 .getResponseBodyContent();
 
         token = creatTestToken(0L, 1L, 100);
-        response  = webClient.put().uri("/goods/shops/1/skus/683/onshelves")
+        response  = webClient.put().uri("/shops/1/skus/683/onshelves")
                 .header("authorization",token)
                 .exchange()
                 .expectStatus().isOk()
@@ -493,7 +495,7 @@ class GoodsControllerTest {
     @Test
     void putOffGoodsOnSale() {
         String token = creatTestToken(0L, 0L, 100);
-        byte[] response  = webClient.put().uri("/goods/shops/0/skus/683/offshelves")
+        byte[] response  = webClient.put().uri("/shops/0/skus/683/offshelves")
                 .header("authorization",token)
                 .exchange()
                 .expectStatus().isOk()
@@ -502,7 +504,7 @@ class GoodsControllerTest {
                 .returnResult()
                 .getResponseBodyContent();
 
-        response  = webClient.put().uri("/goods/shops/0/skus/683/offshelves")
+        response  = webClient.put().uri("/shops/0/skus/683/offshelves")
                 .header("authorization",token)
                 .exchange()
                 .expectStatus().isOk()
@@ -511,7 +513,7 @@ class GoodsControllerTest {
                 .returnResult()
                 .getResponseBodyContent();
 
-        response  = webClient.put().uri("/goods/shops/1/skus/683/offshelves")
+        response  = webClient.put().uri("/shops/1/skus/683/offshelves")
                 .header("authorization",token)
                 .exchange()
                 .expectStatus().isOk()
@@ -520,17 +522,17 @@ class GoodsControllerTest {
                 .returnResult()
                 .getResponseBodyContent();
 
-        response  = webClient.put().uri("/goods/shops/0/skus/1/offshelves")
+        response  = webClient.put().uri("/shops/0/skus/1/offshelves")
                 .header("authorization",token)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                //.jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_NOTEXIST.getCode())
+                .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_NOTEXIST.getCode())
                 .returnResult()
                 .getResponseBodyContent();
 
         token = creatTestToken(0L, 1L, 100);
-        response  = webClient.put().uri("/goods/shops/1/skus/683/offshelves")
+        response  = webClient.put().uri("/shops/1/skus/683/offshelves")
                 .header("authorization",token)
                 .exchange()
                 .expectStatus().isOk()

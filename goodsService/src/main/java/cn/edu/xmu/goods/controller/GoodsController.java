@@ -8,8 +8,10 @@ import cn.edu.xmu.ooad.annotation.Depart;
 import cn.edu.xmu.ooad.annotation.LoginUser;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.*;
+import cn.edu.xmu.oomall.other.service.IFootprintService;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.*;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +55,9 @@ public class GoodsController {
     @Autowired
     private GoodsCategoryService goodsCategoryService;
 
+    @DubboReference
+    private IFootprintService IFootprintService;
+
 
     /**
      *查询SKU
@@ -89,14 +94,21 @@ public class GoodsController {
      * @return Object
      */
     @ApiOperation(value="获得sku的详细信息")
-    @ApiImplicitParam(paramType = "path",dataType = "Long",name="id",value = "sku id",required = true)
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "path",dataType = "Long",name="id",value = "sku id",required = true)
+    })
+
     @ApiResponse(code=0,message = "成功")
+    @Audit
     @GetMapping("/skus/{id}")
     @ResponseBody
-    public Object getSku(@PathVariable Long id)
+    public Object getSku(@PathVariable Long id,@RequestParam(required = false) Long userId)
     {
         logger.debug("getSku:id="+id);
         ReturnObject returnObject=goodsService.getSku(id);
+        if(userId!=null&&returnObject.getCode().equals(ResponseCode.OK)){
+            returnObject= IFootprintService.postFootprint(userId, id);
+        }
         return Common.decorateReturnObject(returnObject);
     }
 
