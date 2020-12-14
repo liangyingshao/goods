@@ -11,6 +11,7 @@ import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.goods.model.GoodsSpuPoDTO;
+import cn.edu.xmu.oomall.goods.model.PresaleDTO;
 import cn.edu.xmu.oomall.goods.model.SimpleGoodsSkuDTO;
 import cn.edu.xmu.oomall.goods.model.SimpleShopDTO;
 import cn.edu.xmu.oomall.goods.service.IGoodsService;
@@ -95,6 +96,7 @@ public class PresaleDao {
         //7.如果不是管理员，仅显示有效的活动
         if(!isadmin) {
             criteria.andStateEqualTo(ActivityStatus.ON_SHELVES.getCode().byteValue());
+            criteria.andEndTimeGreaterThan(LocalDateTime.now());
         }
 
         //8.查询数据库
@@ -338,5 +340,54 @@ public class PresaleDao {
         //6.返回
         return new ReturnObject<>(ResponseCode.OK);
 
+    }
+
+
+    public ReturnObject<PresaleDTO> judgePresaleValid(Long presaleId) {
+        //1.查找是否有此presale
+        PresaleActivityPo po = null;
+        try {
+            po = presaleActivityPoMapper.selectByPrimaryKey(presaleId);
+        } catch (Exception e) {
+            StringBuilder message = new StringBuilder().append("judgePresaleValid: ").append(e.getMessage());
+            logger.error(message.toString());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+        }
+        //2.新建DTO
+        PresaleDTO presaleDTO = new PresaleDTO();
+
+        //3.无此id则返回false，有则校验时间
+        if(po!=null && po.getBeginTime().isBefore(LocalDateTime.now())&&
+                po.getPayTime().isAfter(LocalDateTime.now())){
+            presaleDTO.setIsValid(true);
+            presaleDTO.setAdvancePayPrice(po.getAdvancePayPrice());
+            presaleDTO.setRestPayPrice(po.getRestPayPrice());
+        }
+        else
+            presaleDTO.setIsValid(false);
+
+        return new ReturnObject<>(presaleDTO);
+
+
+    }
+
+    public ReturnObject<Boolean> paymentPresaleIdValid(Long presaleId) {
+
+        //1.查找是否有此presale
+        PresaleActivityPo po = null;
+        try {
+            po = presaleActivityPoMapper.selectByPrimaryKey(presaleId);
+        } catch (Exception e) {
+            StringBuilder message = new StringBuilder().append("judgePresaleValid: ").append(e.getMessage());
+            logger.error(message.toString());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+        }
+        //2.无此id则返回false，有则校验时间
+        if(po!=null && po.getPayTime().isBefore(LocalDateTime.now())&&
+                po.getEndTime().isAfter(LocalDateTime.now())){
+            return new ReturnObject<>(true);
+        }
+        else
+            return new ReturnObject<>(false);
     }
 }

@@ -84,9 +84,6 @@ public class GrouponService {
     }
 
     public ReturnObject<PageInfo<VoObject>> queryGroupons(Long shopId, Long spu_id, Integer state, Integer timeline, String beginTime, String endTime, Integer page, Integer pagesize, boolean isadmin) {
-
         return grouponDao.queryGroupons(shopId, spu_id, state, timeline, beginTime, endTime, page, pagesize, isadmin);
-
-
     }
 }
