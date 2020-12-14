@@ -343,56 +343,56 @@ public class ActivityController {
         return returnObject;
     }
 
-// TODO   /**
-//     * couponActivity 001 业务: 管理员新建己方优惠活动
-//     * @param shopId 商铺ID
-//     * @param vo 新增SPU视图
-//     * @param userId 当前用户ID
-//     * @return  ReturnObject
-//     * @author 24320182203254 秦楚彦
-//     * Created at 2020/12/04 22：19
-//     */
-//    @ApiOperation(value="管理员新建己方优惠活动",produces="application/json")
-//    @ApiImplicitParams({
-//            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
-//            @ApiImplicitParam(paramType = "path", dataType = "Long", name = "shopId", value = "商铺id", required = true),
-//            @ApiImplicitParam(paramType = "body", dataType = "", name = "body", value = "优惠活动详细信息", required = true)
-//    })
-//    @ApiResponses({
-//            @ApiResponse(code = 0, message = "成功"),
-//
-//    })
-//    @Audit // 需要认证
-//    @PostMapping("shops/{shopId}/couponactivities")
-//    @ResponseBody
-//    public Object addCouponActivity(@Validated @RequestBody CouponActivityCreateVo vo,BindingResult bindingResult,
-//                                    @PathVariable Long shopId,
-//                                    @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
-//                                    @Depart @ApiIgnore @RequestParam(required = false) Long departId
-//
-//    ) {
-//        logger.debug("insert couponActivity by shopId:" + shopId);
-//        //校验前端数据
-//        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
-//        if (null != returnObject) {
-//            logger.debug("validate fail");
-//            return returnObject;
-//        }
-//        CouponActivity activity=vo.createActivity();
-//        //设置activity状态为【已下线】
-//        activity.setState(CouponActivity.DatabaseState.OFFLINE);
-//        activity.setShopId(shopId);
-//        activity.setGmtCreate(LocalDateTime.now());
-//        activity.setCreatedBy(userId);
-//        ReturnObject retObject = activityService.addCouponActivity(activity);
-//        if (retObject.getData() != null) {
-//            httpServletResponse.setStatus(HttpStatus.CREATED.value());
-//            return Common.decorateReturnObject(retObject);
-//        } else {
-//            return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
-//        }
-//
-//    }
+    /**
+     * couponActivity 001 业务: 管理员新建己方优惠活动
+     * @param shopId 商铺ID
+     * @param vo 新增SPU视图
+     * @param userId 当前用户ID
+     * @return  ReturnObject
+     * @author 24320182203254 秦楚彦
+     * Created at 2020/12/04 22：19
+     */
+    @ApiOperation(value="管理员新建己方优惠活动",produces="application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+            @ApiImplicitParam(paramType = "path", dataType = "Long", name = "shopId", value = "商铺id", required = true),
+            @ApiImplicitParam(paramType = "body", dataType = "", name = "body", value = "优惠活动详细信息", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+
+    })
+    @Audit // 需要认证
+    @PostMapping("shops/{shopId}/couponactivities")
+    @ResponseBody
+    public Object addCouponActivity(@Validated @RequestBody CouponActivityCreateVo vo,BindingResult bindingResult,
+                                    @PathVariable Long shopId,
+                                    @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
+                                    @Depart @ApiIgnore @RequestParam(required = false) Long departId
+
+    ) {
+        logger.debug("insert couponActivity by shopId:" + shopId);
+        //校验前端数据
+        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (null != returnObject) {
+            logger.debug("validate fail");
+            return returnObject;
+        }
+        CouponActivity activity=vo.createActivity();
+        //设置activity状态为【已下线】
+        activity.setState(CouponActivity.DatabaseState.OFFLINE);
+        activity.setShopId(shopId);
+        activity.setGmtCreate(LocalDateTime.now());
+        activity.setCreatedBy(userId);
+        ReturnObject retObject = activityService.addCouponActivity(activity);
+        if (retObject.getData() != null) {
+            httpServletResponse.setStatus(HttpStatus.CREATED.value());
+            return Common.decorateReturnObject(retObject);
+        } else {
+            return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
+        }
+
+    }
 
     /**
      * couponActivity 006 业务: 管理员修改己方某优惠活动属性

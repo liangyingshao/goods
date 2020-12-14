@@ -187,14 +187,14 @@ public class CouponService {
      * @param activity
      * @return ReturnObject
      */
-// TODO   public ReturnObject addCouponActivity(CouponActivity activity) {
-//        Long shopId = activity.getShopId();
-//        ReturnObject<SimpleShopDTO> simpleShopDTOReturnObject=iGoodsService.getSimpleShopByShopId(shopId);
-//        String createByName="";
+    public ReturnObject addCouponActivity(CouponActivity activity) {
+        Long shopId = activity.getShopId();
+        ReturnObject<SimpleShopDTO> simpleShopDTOReturnObject=iGoodsService.getSimpleShopByShopId(shopId);
+        String createByName="";
 //      createByName=iPrivilegeService.getUserName(activity.getCreatedBy());
-//        ReturnObject<CouponActivityVo> returnObject= couponDao.addCouponActivity(activity,simpleShopDTOReturnObject.getData(),createByName);
-//        return returnObject;
-//    }
+        ReturnObject<CouponActivityVo> returnObject= couponDao.addCouponActivity(activity,simpleShopDTOReturnObject.getData(),createByName);
+        return returnObject;
+    }
 
     /**
      * 管理员修改己方优惠活动

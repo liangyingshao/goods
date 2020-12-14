@@ -25,7 +25,8 @@ import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * description: GrouponControllerTest
@@ -73,17 +74,10 @@ class GrouponControllerTest {
                 .contentType("application/json;charset=UTF-8")
                 .content(Json))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.errno").value("0"))
-                .andExpect(jsonPath("$.data.goodsSpu.id").value("10"))
-                .andExpect(jsonPath("$.data.goodsSpu.name").value("testgoods"))
-                .andExpect(jsonPath("$.data.goodsSpu.goodsSn").value("abc"))
-                .andExpect(jsonPath("$.data.goodsSpu.imageUrl").value("http://47.52.88.176/file/images/201612/file_586206d4c7d2f.jpg"))
-                .andExpect(jsonPath("$.data.goodsSpu.disable").value("0"))
-                .andExpect(jsonPath("$.data.shop.id").value("1"))
-                .andExpect(jsonPath("$.data.shop.name").value("test"))
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
-        String expectedResponse= "{\"errno\":0,\"data\":{\"id\":14,\"name\":null,\"goodsSpu\":{\"id\":10,\"name\":\"testgoods\",\"goodsSn\":\"abc\",\"imageUrl\":\"http://47.52.88.176/file/images/201612/file_586206d4c7d2f.jpg\",\"gmtCreate\":\"2020-12-14T10:46:32\",\"gmtModified\":\"2020-12-25T20:44:55\",\"disable\":0},\"shop\":{\"id\":1,\"name\":\"test\"}},\"errmsg\":\"成功\"}";
+        String expectedResponse="{\"errno\":0,\"data\":{\"id\":32,\"name\":null,\"goodsSpuPo\":{\"id\":1,\"name\":\"testspu\",\"brandId\":103,\"categoryId\":1,\"freightId\":null,\"shopId\":null,\"goodsSn\":\"hhh\",\"detail\":null,\"imageUrl\":null,\"state\":null,\"spec\":null,\"disabled\":null,\"gmtCreate\":\"2020-12-06T19:22:02\",\"gmtModified\":null},\"shop\":{\"id\":2,\"name\":\"\\\"testshop\\\"\"}},\"errmsg\":\"成功\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
     }
 
 
@@ -104,7 +98,7 @@ class GrouponControllerTest {
         grouponVo.setStrategy(strategy);
         String Json = JacksonUtil.toJson(grouponVo);
 
-        String responseString=this.mvc.perform(put("/goods/shops/1/groupons/100")
+        String responseString=this.mvc.perform(put("/goods/shops/1/groupons/2")
                 .header("authorization",token)
                 .contentType("application/json;charset=UTF-8")
                 .content(Json))
@@ -115,10 +109,10 @@ class GrouponControllerTest {
         JSONAssert.assertEquals(expectedResponse,responseString,true);
 
         //检测数据库是否真的发生修改
-        GrouponActivityPo newPo = grouponActivityPoMapper.selectByPrimaryKey(100L);
-        Assert.state(!newPo.getStrategy().equals(oldPo.getStrategy()), "strategy未修改！");//is true 则断
-        Assert.state(newPo.getBeginTime() != oldPo.getBeginTime(), "beginTime未修改！");
-        Assert.state(newPo.getEndTime() != oldPo.getEndTime(), "endTime未修改！");
+        GrouponActivityPo newPo = grouponActivityPoMapper.selectByPrimaryKey(2L);
+        Assert.state(newPo.getStrategy().equals(oldPo.getStrategy()), "strategy未修改！");//is true 则断
+        Assert.state(newPo.getBeginTime() == oldPo.getBeginTime(), "beginTime未修改！");
+        Assert.state(newPo.getEndTime() == oldPo.getEndTime(), "endTime未修改！");
     }
 
     @Test
@@ -126,7 +120,7 @@ class GrouponControllerTest {
 
         String token = creatTestToken(1L, 0L, 100);
 
-        String responseString=this.mvc.perform(put("/goods/shops/1/groupons/102/onshelves")
+        String responseString=this.mvc.perform(put("/goods/shops/1/groupons/2/onshelves")
                 .header("authorization",token))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
@@ -134,7 +128,7 @@ class GrouponControllerTest {
         String expectedResponse="{\"errno\": 0, \"errmsg\": \"成功\"}";
         JSONAssert.assertEquals(expectedResponse,responseString,true);
         //查看是否真的发生修改
-        GrouponActivityPo newPo = grouponActivityPoMapper.selectByPrimaryKey(102L);
+        GrouponActivityPo newPo = grouponActivityPoMapper.selectByPrimaryKey(2L);
         Assert.state(newPo.getState()== ActivityStatus.ON_SHELVES.getCode().byteValue(), "状态未修改！");
     }
 
@@ -143,7 +137,7 @@ class GrouponControllerTest {
 
         String token = creatTestToken(1L, 0L, 100);
 
-        String responseString=this.mvc.perform(put("/goods/shops/1/groupons/101/offshelves")
+        String responseString=this.mvc.perform(put("/goods/shops/1/groupons/2/offshelves")
                 .header("authorization",token))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
@@ -151,7 +145,7 @@ class GrouponControllerTest {
         String expectedResponse="{\"errno\": 0, \"errmsg\": \"成功\"}";
         JSONAssert.assertEquals(expectedResponse,responseString,true);
         //查看是否真的发生修改
-        GrouponActivityPo newPo = grouponActivityPoMapper.selectByPrimaryKey(101L);
+        GrouponActivityPo newPo = grouponActivityPoMapper.selectByPrimaryKey(2L);
         Assert.state(newPo.getState()== ActivityStatus.OFF_SHELVES.getCode().byteValue(), "状态未修改");
     }
 
@@ -224,19 +218,21 @@ class GrouponControllerTest {
 
     }
 
-    @Test
-    public void cancelGrouponofSPU() throws Exception{
-        String token = creatTestToken(1L, 0L, 100);
 
-        String responseString=this.mvc.perform(delete("/goods/shops/1/groupons/103")
-                .header("authorization",token))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json;charset=UTF-8"))
-                .andReturn().getResponse().getContentAsString();
+    @Test
+    public void customerQueryGroupons2() throws Exception{
+        String token = creatTestToken(1L, 0L, 100);
+        String responseString = new String(Objects.requireNonNull(webClient
+                .get()
+                .uri("/goods/groupons?page=1&pagesize=10")
+                .header("authorization", token)
+                .exchange()
+                .expectHeader()
+                .contentType("application/json;charset=UTF-8")
+                .expectBody()
+                .returnResult()
+                .getResponseBodyContent()));
         String expectedResponse="{\"errno\": 0, \"errmsg\": \"成功\"}";
         JSONAssert.assertEquals(expectedResponse,responseString,true);
-        //查看是否真的发生修改
-        GrouponActivityPo newPo = grouponActivityPoMapper.selectByPrimaryKey(103L);
-        Assert.state(newPo.getState()== ActivityStatus.DELETED.getCode().byteValue(), "状态未修改");
     }
 }

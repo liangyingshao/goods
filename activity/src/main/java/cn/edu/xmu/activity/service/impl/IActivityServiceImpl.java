@@ -99,5 +99,4 @@ public class IActivityServiceImpl implements IActivityService {
         return new ReturnObject<>(couponActivityRules);
     }
 
-
 }

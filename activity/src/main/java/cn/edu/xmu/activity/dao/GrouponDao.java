@@ -189,7 +189,6 @@ public class GrouponDao {
         if(oldPo.getState()!=ActivityStatus.OFF_SHELVES.getCode().byteValue())
             return new ReturnObject<>(ResponseCode.GROUPON_STATENOTALLOW);
 
-        //TODO 如果有修改时间，查看该spu在该段时间是否已经有团购活动
         //4.修改数据库
         GrouponActivityPo grouponActivityPo = new GrouponActivityPo();
         grouponActivityPo.setId(id);
