@@ -501,6 +501,7 @@ class GoodsControllerTest {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
+                .jsonPath("$.data").isMap()
                 .returnResult()
                 .getResponseBodyContent();
 
