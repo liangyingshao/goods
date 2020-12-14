@@ -1,6 +1,8 @@
 package cn.edu.xmu.activity.model.vo;
 
-import cn.edu.xmu.oomall.goods.model.GoodsSpuPoDTO;
+import cn.edu.xmu.goods.model.bo.GoodsSpu;
+import cn.edu.xmu.goods.model.vo.GoodsSpuVo;
+import cn.edu.xmu.goods.model.vo.SimpleSpuVo;
 import cn.edu.xmu.oomall.goods.model.SimpleShopDTO;
 import lombok.Data;
 
@@ -14,6 +16,6 @@ import lombok.Data;
 public class NewGrouponRetVo {
     Long id;
     String name;
-    GoodsSpuPoDTO goodsSpuPoDTO;
-    SimpleShopDTO simpleShopDTO;
+    SimpleSpuVo goodsSpu;
+    SimpleShopDTO shop;
 }

@@ -1,11 +1,10 @@
 package cn.edu.xmu.activity.service;
 
 import cn.edu.xmu.activity.dao.GrouponDao;
-import cn.edu.xmu.activity.model.bo.ActivityStatus;
 import cn.edu.xmu.activity.model.bo.NewGroupon;
 import cn.edu.xmu.activity.model.po.GrouponActivityPo;
-import cn.edu.xmu.activity.model.po.GrouponActivityPoExample;
 import cn.edu.xmu.activity.model.vo.GrouponVo;
+import cn.edu.xmu.goods.model.vo.SimpleSpuVo;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
@@ -15,12 +14,7 @@ import cn.edu.xmu.oomall.goods.service.IGoodsService;
 import com.github.pagehelper.PageInfo;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.annotation.Reference;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 /**
  * description: GrouponService
@@ -61,12 +55,15 @@ public class GrouponService {
         //4. 此spu是否正在参加其他团购
         if(grouponDao.checkInGroupon(id,grouponVo.getBeginTime(),grouponVo.getEndTime()).getData())
             return new ReturnObject(ResponseCode.FIELD_NOTVALID);//TODO 考虑错误码是否合适
-        
+
+        //TODO spu和shop是否是上线状态
+
         //5. 为spu创建团购活动
         GrouponActivityPo grouponActivityPo = grouponDao.createGrouponofSPU(shopId, id, grouponVo).getData();
         
         //6. 封装返回值
-        NewGroupon newGrouponActivity = new NewGroupon(grouponActivityPo,goodsSpuPoDTO,simpleShopDTO);
+        SimpleSpuVo simpleSpuVo = new SimpleSpuVo(goodsSpuPoDTO);
+        NewGroupon newGrouponActivity = new NewGroupon(grouponActivityPo,simpleSpuVo,simpleShopDTO);
         return new ReturnObject<>(newGrouponActivity);
     }
 

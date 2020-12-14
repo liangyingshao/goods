@@ -755,7 +755,7 @@ public class CouponDao implements InitializingBean
                     //设置创建者、修改者
                     CreatedBy createdBy=new CreatedBy();
                     createdBy.setId(activity.getCreatedBy());
-                    createdBy.setUsername(createByName);
+                    //TODO createdBy.setUsername(createByName);
                     retVo.setCreatedBy(createdBy);
                     ModifiedBy modiBy=new ModifiedBy();
                     modiBy.setId(null);
@@ -1175,6 +1175,8 @@ public class CouponDao implements InitializingBean
         //若活动状态不为已下线
         if(activityPo==null||!activityPo.getState().equals(1))return false;
         LocalDateTime now=LocalDateTime.now();
-        if(activityPo.getBeginTime().isBefore(now)&&activityPo.getEndTime().isAfter(now))return true;
+        if(activityPo.getBeginTime().isBefore(now)&&activityPo.getEndTime().isAfter(now))
+            return true;
+        return false;
     }
 }

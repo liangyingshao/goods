@@ -3,9 +3,12 @@ package cn.edu.xmu.goods.service.impl;
 import cn.edu.xmu.goods.dao.GoodsDao;
 import cn.edu.xmu.goods.dao.GoodsSpuDao;
 import cn.edu.xmu.goods.dao.ShopDao;
+import cn.edu.xmu.goods.model.bo.Shop;
 import cn.edu.xmu.goods.model.po.GoodsSkuPo;
+import cn.edu.xmu.goods.model.po.GoodsSpuPo;
 import cn.edu.xmu.goods.model.po.ShopPo;
 import cn.edu.xmu.goods.model.vo.GoodsSkuDetailRetVo;
+import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.goods.model.*;
 //import cn.edu.xmu.oomall.goods.model.GoodsDetailDTO;
@@ -110,7 +113,7 @@ public class IGoodsServiceImpl implements IGoodsService {
     public ReturnObject<SimpleShopDTO> getSimpleShopByShopId(Long id) {
         SimpleShopDTO simpleShopDTO = null;
         ShopPo shopPo = shopDao.getShopById(id).getData();
-        if(shopPo!=null)
+        if(shopPo!=null && shopPo.getState()!= Shop.ShopStatus.CLOSED.getCode().byteValue())
         {
             simpleShopDTO = new SimpleShopDTO();
             simpleShopDTO.setId(shopPo.getId());
@@ -126,9 +129,31 @@ public class IGoodsServiceImpl implements IGoodsService {
         return new ReturnObject<>(simpleGoodsSkuDTO);
     }
 
+
+
     @Override
     public ReturnObject<GoodsSpuPoDTO> getSpuBySpuId(Long spuId) {
-        return null;
+        GoodsSpuPo goodsSpuPo = goodsSpuDao.getSpuBySpuId(spuId).getData();
+        GoodsSpuPoDTO goodsSpuPoDTO = null;
+        if(goodsSpuPo!=null)
+        {
+            goodsSpuPoDTO = new GoodsSpuPoDTO();
+            goodsSpuPoDTO.setId(goodsSpuPo.getId());
+            goodsSpuPoDTO.setGmtModified(goodsSpuPo.getGmtModified());
+            goodsSpuPoDTO.setGmtCreate(goodsSpuPo.getGmtCreate());
+            goodsSpuPoDTO.setDisabled(goodsSpuPo.getDisabled());
+            goodsSpuPoDTO.setSpec(goodsSpuPo.getSpec());
+            goodsSpuPoDTO.setImageUrl(goodsSpuPo.getImageUrl());
+            goodsSpuPoDTO.setDetail(goodsSpuPo.getDetail());
+            goodsSpuPoDTO.setGoodsSn(goodsSpuPo.getGoodsSn());
+            goodsSpuPoDTO.setShopId(goodsSpuPo.getShopId());
+            goodsSpuPoDTO.setFreightId(goodsSpuPo.getFreightId());
+            goodsSpuPoDTO.setCategoryId(goodsSpuPo.getCategoryId());
+            goodsSpuPoDTO.setBrandId(goodsSpuPo.getBrandId());
+            goodsSpuPoDTO.setName(goodsSpuPo.getName());
+        }
+
+        return new ReturnObject<>(goodsSpuPoDTO);
     }
 
     //@Override
@@ -142,7 +167,7 @@ public class IGoodsServiceImpl implements IGoodsService {
 
     @Override
     public ReturnObject<ShopDetailDTO> getShopInfoBySkuId(Long skuId) {
-        return null;
+        return getShopInfoByShopId(goodsDao.getShopIdBySkuId(skuId).getData());
     }
 
     @Override
@@ -157,7 +182,7 @@ public class IGoodsServiceImpl implements IGoodsService {
 
     @Override
     public ReturnObject<ShopDetailDTO> getShopInfoByShopId(Long shopId) {
-        ShopDetailDTO shopDetailDTO = null;
+        ShopDetailDTO shopDetailDTO = new ShopDetailDTO();
         ShopPo shopPo = shopDao.getShopById(shopId).getData();
         shopDetailDTO.setShopId(shopPo.getId());
         shopDetailDTO.setName(shopPo.getName());

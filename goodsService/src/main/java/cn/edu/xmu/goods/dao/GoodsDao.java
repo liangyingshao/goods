@@ -810,4 +810,6 @@ public class GoodsDao {
         simpleGoodsSkuDTO.setSkuSn(skuPo.getSkuSn());
         return simpleGoodsSkuDTO;
     }
+
+
 }
