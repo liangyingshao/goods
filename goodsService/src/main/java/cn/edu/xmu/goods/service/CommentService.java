@@ -6,7 +6,12 @@ import cn.edu.xmu.goods.model.vo.CommentRetVo;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
+import cn.edu.xmu.privilegeservice.client.IUserService;
 import com.github.pagehelper.PageInfo;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.dubbo.config.annotation.DubboReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,10 +19,16 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Map;
 
 @Service
+@Slf4j
 public class CommentService {
 
+    private static final Logger logger = LoggerFactory.getLogger(CommentService.class);
+
     @Autowired
-    CommentDao commentDao;
+    private CommentDao commentDao;
+
+    @DubboReference
+    private IUserService iUserService;
 
     @Transactional
     public ReturnObject<CommentRetVo> addSkuComment(Comment comment) {
@@ -55,6 +66,9 @@ public class CommentService {
 //        Long userId=0L;
 //        Long type=0L;
 //        Long SKU_Id=0L;
+        String name = iUserService.getUserName(comment.getCustomerId());
+        logger.error("!!!!!!"+name);
+        comment.setContent(name);
         return commentDao.addSkuComment(comment);
     }
 
