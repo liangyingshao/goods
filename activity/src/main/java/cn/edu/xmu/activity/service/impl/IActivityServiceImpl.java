@@ -5,6 +5,7 @@ import cn.edu.xmu.activity.dao.GrouponDao;
 import cn.edu.xmu.activity.dao.PresaleDao;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.goods.model.CouponInfoDTO;
+import cn.edu.xmu.oomall.goods.model.GoodsDetailDTO;
 import cn.edu.xmu.oomall.goods.model.PresaleDTO;
 import cn.edu.xmu.oomall.goods.service.IActivityService;
 import org.apache.dubbo.config.annotation.DubboService;
@@ -44,10 +45,7 @@ public class IActivityServiceImpl implements IActivityService {
     @Override
     public ReturnObject<Boolean> judgeCouponIdValid(Long couponId) {
 
-        Boolean valid=couponDao.judgeCouponValid(couponId)
-//                &&grouponDao.judgeGrouponValid(grouponId)&&presaleDao.judgePresaleValid(presaleId)
-                ;
-
+        Boolean valid=couponDao.judgeCouponValid(couponId);
         return new ReturnObject<>(valid);
     }
 
@@ -82,8 +80,8 @@ public class IActivityServiceImpl implements IActivityService {
     }
 
     @Override
-    public ReturnObject modifyPresaleInventory(Long activityId,Integer quantity) {
-        ReturnObject returnObject=presaleDao.modifyPresaleInventory(activityId,quantity);
+    public ReturnObject<GoodsDetailDTO> modifyPresaleInventory(Long activityId, Integer quantity) {
+        ReturnObject<GoodsDetailDTO> returnObject=presaleDao.modifyPresaleInventory(activityId,quantity);
         return returnObject;
     }
 

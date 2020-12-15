@@ -1160,7 +1160,15 @@ public class CouponDao implements InitializingBean
     public Boolean judgeCouponValid(Long couponId) {
         CouponPo couponPo=couponMapper.selectByPrimaryKey(couponId);
         if(couponPo!=null&&Coupon.State.getTypeByCode(couponPo.getState().intValue()).equals(Coupon.State.AVAILABLE))
-            return true;
+        {
+            if(couponPo.getEndTime().isAfter(LocalDateTime.now()))
+                return true;
+            else
+            {
+                couponPo.setState(Coupon.State.DISABLED.getCode().byteValue());
+                couponMapper.updateByPrimaryKeySelective(couponPo);
+            }
+        }
         return false;
     }
 

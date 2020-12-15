@@ -2,6 +2,7 @@ package cn.edu.xmu.oomall.goods.service;
 
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.goods.model.CouponInfoDTO;
+import cn.edu.xmu.oomall.goods.model.GoodsDetailDTO;
 import cn.edu.xmu.oomall.goods.model.PresaleDTO;
 
 import java.util.List;
@@ -59,7 +60,7 @@ public interface IActivityService {
      */
     ReturnObject returnCoupon(Long shopId, Long id);
 
-    ReturnObject modifyPresaleInventory(Long activityId,Integer quantity);
+    ReturnObject<GoodsDetailDTO> modifyPresaleInventory(Long activityId, Integer quantity);
 
     /**
      * 根据activityId获得优惠活动Json字符串

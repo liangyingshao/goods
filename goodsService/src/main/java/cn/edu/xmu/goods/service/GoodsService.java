@@ -73,7 +73,10 @@ public class GoodsService {
     public ReturnObject<GoodsSkuDetailRetVo> getSku(Long id)
     {
         GoodsSkuDetailRetVo retVo=goodsDao.getSku(id);
-        if(retVo==null)return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        if(retVo==null)
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+
+        retVo.setShareable(IShareService.skuSharable(id).getData());
         return new ReturnObject<>(retVo);
     }
 

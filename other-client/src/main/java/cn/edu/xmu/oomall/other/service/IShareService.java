@@ -33,4 +33,11 @@ public interface IShareService {
      * @return
      */
     ReturnObject<Boolean> shareUserSkuMatch(Long sid,Long skuId,Long userId);
+
+    /**
+     * 判断SKU是否可分享
+     * @param skuId
+     * @return
+     */
+    ReturnObject<Boolean> skuSharable(Long skuId);
 }

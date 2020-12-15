@@ -38,7 +38,7 @@ public class GoodsDao {
 
     private static final Logger logger = LoggerFactory.getLogger(GoodsDao.class);
     @Autowired
-    private MyGoodsSkuPoMapper skuMapper;
+    private GoodsSkuPoMapper skuMapper;
     @Autowired
     private GoodsSpuPoMapper spuMapper;
     @Autowired
@@ -301,6 +301,7 @@ public class GoodsDao {
         String key="sku_"+sku.getId();
         redisTemplate.opsForHash().delete(key,"quantity");
         redisTemplate.opsForHash().put(key,"quantity",sku.getInventory());
+        redisTemplate.opsForHash().put(key,"price",sku.getOriginalPrice());
         //尝试修改
         GoodsSkuPo skuPo=sku.getGoodsSkuPo();
         skuPo.setGmtModified(LocalDateTime.now());
@@ -466,6 +467,7 @@ public class GoodsDao {
         String key="sku_"+sku.getId();
         redisTemplate.opsForHash().delete(key,"quantity");
         redisTemplate.opsForHash().put(key,"quantity",sku.getInventory());
+        redisTemplate.opsForHash().put(key,"price",sku.getOriginalPrice());
         GoodsSkuPo skuPo=sku.getNewGoodsSkuPo();
         skuPo.setGmtCreate(LocalDateTime.now());
         skuPo.setGmtModified(LocalDateTime.now());
@@ -677,7 +679,6 @@ public class GoodsDao {
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
 
         GoodsDetailDTO goodsDetailDTO=new GoodsDetailDTO();
-        goodsDetailDTO.setInventory(skuPo.getInventory());
         goodsDetailDTO.setName(skuPo.getName());
 
 //        FloatPricePoExample floatExample=new FloatPricePoExample();
@@ -830,7 +831,7 @@ public class GoodsDao {
         }
 
         //3. 浮动表中无数据，则返回sku原价
-        if(floatPricePo != null && floatPricePo.size()>0) {
+        if(!(floatPricePo==null||floatPricePo.size()==0||floatPricePo.get(0).getQuantity().equals(0))) {
             return new ReturnObject<>(floatPricePo.get(0).getActivityPrice());
         }else {
             return new ReturnObject<>(sku.getOriginalPrice());
@@ -854,7 +855,59 @@ public class GoodsDao {
         return simpleGoodsSkuDTO;
     }
 
-    public ReturnObject modifyInventory(Long skuId, Integer quantity) {
+    public ReturnObject<GoodsDetailDTO> modifyInventory(Long skuId, Integer quantity) {
+        GoodsDetailDTO dto=new GoodsDetailDTO();
+        //看看floatprice要不要改
+        FloatPricePoExample example = new FloatPricePoExample();
+        FloatPricePoExample.Criteria criteria = example.createCriteria();
+        criteria.andGoodsSkuIdEqualTo(skuId);
+        criteria.andBeginTimeLessThanOrEqualTo(LocalDateTime.now());
+        criteria.andEndTimeGreaterThan(LocalDateTime.now());
+        criteria.andGoodsSkuIdEqualTo(skuId);
+        criteria.andInvalidByEqualTo(FloatPrice.Validation.VALID.getCode().longValue());
+
+        List<FloatPricePo> floatPricePos = new ArrayList<>();
+        try {
+            floatPricePos = floatPricePoMapper.selectByExample(example);
+        } catch (Exception e) {
+            StringBuilder message1 = new StringBuilder().append("getPriceBySkuId: ").append(e.getMessage());
+            logger.error(message1.toString());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+        }
+
+        //有floatPrice
+        if(floatPricePos!=null&&floatPricePos.size()>0)
+        {
+            FloatPricePo floatPricePo=floatPricePos.get(0);
+            if(floatPricePo.getQuantity()-quantity<0)
+                return new ReturnObject<>(ResponseCode.SKU_NOTENOUGH);
+            dto.setInventory(floatPricePo.getQuantity());
+            dto.setPrice(floatPricePo.getActivityPrice());
+            floatPricePo.setQuantity(floatPricePo.getQuantity()-quantity);
+
+            try{
+                int ret=floatPricePoMapper.updateByPrimaryKeySelective(floatPricePo);
+                if(ret==0)
+                {
+                    logger.debug("modifyInventory fail:floatPricePo="+floatPricePo);
+                    return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("sku不合法：" + skuId));
+                }
+                else  return new ReturnObject<>();
+            }
+            catch (DataAccessException e)
+            {
+                // 其他数据库错误
+                logger.debug("other sql exception : " + e.getMessage());
+                return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+            }
+            catch (Exception e) {
+                // 其他Exception错误
+                logger.error("other exception : " + e.getMessage());
+                return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+            }
+        }
+
+
         String key="sku_"+skuId;
         GoodsSkuPo skuPo=new GoodsSkuPo();
         Integer inventory;
@@ -884,11 +937,18 @@ public class GoodsDao {
 
             //添加SKU库存
             redisTemplate.opsForHash().put(key,"quantity",inventory-quantity);
+            redisTemplate.opsForHash().put(key,"price",skuPo.getOriginalPrice());
         }
 
+        //设置dto
+        if(dto.getInventory()==null||dto.getInventory()<=0)
+        {
+            dto.setInventory(inventory);
+            dto.setPrice((Long) redisTemplate.opsForHash().get(key,"price"));
+        }
 
         //修改SKU库存
-        skuPo.setInventory(quantity);
+        skuPo.setInventory(inventory-quantity);
         String json = JacksonUtil.toJson(skuPo);
         Message message = MessageBuilder.withPayload(json).build();
         logger.info("sendLogMessage: message = " + message);
@@ -904,56 +964,13 @@ public class GoodsDao {
             }
         });
 
-        //看看floatprice要不要改
-        FloatPricePoExample example = new FloatPricePoExample();
-        FloatPricePoExample.Criteria criteria = example.createCriteria();
-        criteria.andGoodsSkuIdEqualTo(skuId);
-        criteria.andBeginTimeLessThanOrEqualTo(LocalDateTime.now());
-        criteria.andEndTimeGreaterThan(LocalDateTime.now());
-        criteria.andGoodsSkuIdEqualTo(skuId);
-        criteria.andInvalidByEqualTo(FloatPrice.Validation.VALID.getCode().longValue());
 
-        List<FloatPricePo> floatPricePos = new ArrayList<>();
-        try {
-            floatPricePos = floatPricePoMapper.selectByExample(example);
-        } catch (Exception e) {
-            StringBuilder message1 = new StringBuilder().append("getPriceBySkuId: ").append(e.getMessage());
-            logger.error(message1.toString());
-            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
-        }
-
-        //有floatPrice
-        if(floatPricePos!=null&&floatPricePos.size()>0)
-        {
-            FloatPricePo floatPricePo=floatPricePos.get(0);
-            floatPricePo.setQuantity((floatPricePo.getQuantity()-quantity>0)?(floatPricePo.getQuantity()-quantity):0);
-            try{
-                int ret=floatPricePoMapper.updateByPrimaryKeySelective(floatPricePo);
-                if(ret==0)
-                {
-                    logger.debug("modifyInventory fail:floatPricePo="+floatPricePo);
-                    return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("sku字段不合法：" + skuPo.toString()));
-                }
-                else  return new ReturnObject<>();
-            }
-            catch (DataAccessException e)
-            {
-                // 其他数据库错误
-                logger.debug("other sql exception : " + e.getMessage());
-                return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
-            }
-            catch (Exception e) {
-                // 其他Exception错误
-                logger.error("other exception : " + e.getMessage());
-                return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
-            }
-        }
-        else return new ReturnObject<>();
+        return new ReturnObject<>(dto);
     }
 
-    public void updateQuantityByPrimaryKeySelective(GoodsSkuPo skuPo) {
+    public void updateByPrimaryKeySelective(GoodsSkuPo skuPo) {
         try{
-            skuMapper.updateQuantityByPrimaryKeySelective(skuPo);
+            skuMapper.updateByPrimaryKeySelective(skuPo);
         }
         catch (Exception e)
         {
