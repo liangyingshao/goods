@@ -262,7 +262,11 @@ public class PresaleDao {
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
         }
 
-        //5.返回
+        //5.从redis中删除
+        if(delelePresaleInventoryFromRedis(id).getCode()!=ResponseCode.OK)
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+
+        //6.返回
         return new ReturnObject<>(ResponseCode.OK);
     }
 
@@ -355,7 +359,11 @@ public class PresaleDao {
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
         }
 
-        //6.返回
+        //6.从redis中删除
+        if(delelePresaleInventoryFromRedis(id).getCode()!=ResponseCode.OK)
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+
+        //7.返回
         return new ReturnObject<>(ResponseCode.OK);
 
     }
@@ -419,6 +427,11 @@ public class PresaleDao {
             presaleActivityPo = presaleActivityPoMapper.selectByPrimaryKey(activityId);
             if (presaleActivityPo == null) return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
 
+            //判断presale活动是否有效
+            if(presaleActivityPo.getState()!=ActivityStatus.ON_SHELVES.getCode().byteValue() ||
+            presaleActivityPo.getEndTime().isBefore(LocalDateTime.now()))
+                return new ReturnObject<>(ResponseCode.PRESALE_STATENOTALLOW);
+
             //库存足够
             Integer inventory=presaleActivityPo.getQuantity();
             if (inventory < quantity) return new ReturnObject<>(ResponseCode.SKU_NOTENOUGH);
@@ -465,6 +478,15 @@ public class PresaleDao {
         });
 
         return new ReturnObject<>();
+    }
+
+    public ReturnObject delelePresaleInventoryFromRedis(Long presaleId){
+        String key="pa_"+ presaleId;
+        //如果存在
+        if(redisTemplate.opsForHash().hasKey(key,"quantity")) {
+            redisTemplate.opsForHash().delete(key,"quantity");
+        }
+        return new ReturnObject<>(ResponseCode.OK);
     }
 
     public void updateQuantityByPrimaryKeySelective(PresaleActivityPo presaleActivityPo)
