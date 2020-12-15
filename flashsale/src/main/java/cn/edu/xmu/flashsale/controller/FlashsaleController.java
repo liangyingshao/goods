@@ -45,7 +45,7 @@ public class FlashsaleController {
     private HttpServletResponse httpServletResponse;
 
     @Autowired
-    private FlashsaleItemService flashslaeItemService;
+    private FlashsaleItemService flashsaleItemService;
 
     @DubboReference
     private ITimeService iTimeService;
@@ -60,7 +60,7 @@ public class FlashsaleController {
     })
     @GetMapping("/timesegments/{id}/flashsales")
     public Flux<FlashsaleItemRetVo> queryTopicsByTime(@PathVariable Long id) {
-        return flashslaeItemService.queryTopicsByTime(id);
+        return flashsaleItemService.queryTopicsByTime(id);
     }
 
     @ApiOperation(value = "flashsale003:获取当前时段秒杀列表,响应式API，会多次返回",  produces="application/json")
@@ -74,7 +74,7 @@ public class FlashsaleController {
     public Flux<FlashsaleItemRetVo> getCurrentflash() {
         Byte type = 1;
         Long id = iTimeService.getCurrentSegmentId(type).getData();
-        return flashslaeItemService.queryTopicsByTime(id);
+        return flashsaleItemService.queryTopicsByTime(id);
     }
 
     @ApiOperation(value = "flashsale002:平台管理员在某个时段下新建秒杀",  produces="application/json")
@@ -87,7 +87,7 @@ public class FlashsaleController {
             @ApiResponse(code = 0, message = "成功")
     })
     @PostMapping("/timesegments/{id}/flashsales")
-    public Object createflash(@RequestBody FlashsaleNewRetVo vo, BindingResult bindingResult)
+    public Object createflash(@Validated @RequestBody FlashsaleNewRetVo vo, BindingResult bindingResult)
     {
         Object binObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if(null != binObject)
@@ -106,13 +106,14 @@ public class FlashsaleController {
 //        //falshDate不小于明天
 //        LocalDateTime flashDateParse = LocalDate.parse(flashDate,DateTimeFormatter.ISO_DATE).atStartOfDay();
         ReturnObject object = flashsaleService.createflash(vo.getId(), vo.getFlashDate());
-        logger.error(object.getCode().toString());
         if(object.getData()!=null)
         {
+            logger.error("sdfgh："+object.getCode().toString());
             return Common.decorateReturnObject(object);
         }
         else
         {
+            logger.error("jvchj："+object.getCode().toString());
             return Common.getNullRetObj(new ReturnObject<>(object.getCode(), object.getErrmsg()), httpServletResponse);
         }
     }
@@ -127,7 +128,10 @@ public class FlashsaleController {
     })
     @DeleteMapping("/flashsales/{id}")
     public Object deleteflashsale(@PathVariable Long id) {
-        ReturnObject object = flashsaleService.deleteflashsale(id);
+//        ReturnObject object = flashsaleService.deleteflashsale(id);
+//        return Common.decorateReturnObject(object);
+        Byte state = 2;
+        ReturnObject object = flashsaleService.flashsaleOn(id, state);//0：已下线，1：已上线，2：已删除
         return Common.decorateReturnObject(object);
     }
 
@@ -168,7 +172,7 @@ public class FlashsaleController {
         {
             return object;
         }
-        ReturnObject returnObject = flashslaeItemService.addSKUofTopic(id, vo.getSkuId(), vo.getPrice(), vo.getQuantity());
+        ReturnObject returnObject = flashsaleItemService.addSKUofTopic(id, vo.getSkuId(), vo.getPrice(), vo.getQuantity());
         if(returnObject.getData()!=null) {
             return Common.decorateReturnObject(returnObject);
         } else {
@@ -189,7 +193,7 @@ public class FlashsaleController {
     @GetMapping("/flashsales/{id}/flashitems")
     public Object getSKUofTopic(@PathVariable Long id, @RequestParam(required = false, defaultValue = "1") Integer page, @RequestParam(required = false, defaultValue = "10") Integer pageSize)
     {
-        ReturnObject<PageInfo<VoObject>> returnObject = flashslaeItemService.getSKUofTopic(id, page, pageSize);
+        ReturnObject<PageInfo<VoObject>> returnObject = flashsaleItemService.getSKUofTopic(id, page, pageSize);
         return Common.getPageRetObject(returnObject);
     }
 
@@ -204,8 +208,39 @@ public class FlashsaleController {
     })
     @DeleteMapping("/flashsales/{fid}/flashitems/{id}")
     public Object deleteKUofTopic(@PathVariable Long fid, @PathVariable Long id) {
-        ReturnObject object = flashslaeItemService.deleteSKUofTopic(fid, id);
+        ReturnObject object = flashsaleItemService.deleteSKUofTopic(fid, id);
         return Common.decorateReturnObject(object);
     }
 
+    @ApiOperation(value = "flashsale009:管理员上线秒杀活动",produces = "application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value = "Token", required = true, dataType = "String", paramType = "header"),
+            @ApiImplicitParam(name = "did", required = true, dataType = "Long", paramType = "path"),//店铺id
+            @ApiImplicitParam(name = "id", required = true, dataType = "Long", paramType = "path")//秒杀id
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功")
+    })
+    @PutMapping("/shops/{did}/flashsales/{id}/onshelves")
+    public Object flashsaleOn(@PathVariable Long did, @PathVariable Long id) {
+        Byte state = 1;
+        ReturnObject object = flashsaleService.flashsaleOn(id, state);//0：已下线，1：已上线，2：已删除
+        return Common.decorateReturnObject(object);
+    }
+
+    @ApiOperation(value = "flashsale0010:管理员下线秒杀活动",produces = "application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value = "Token", required = true, dataType = "String", paramType = "header"),
+            @ApiImplicitParam(name = "did", required = true, dataType = "Long", paramType = "path"),//店铺id
+            @ApiImplicitParam(name = "id", required = true, dataType = "Long", paramType = "path")//秒杀id
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功")
+    })
+    @PutMapping("/shops/{did}/flashsales/{id}/offshelves")
+    public Object flashsaleOff(@PathVariable Long did, @PathVariable Long id) {
+        Byte state = 0;
+        ReturnObject object = flashsaleService.flashsaleOn(id, state);//0：已下线，1：已上线，2：已删除
+        return Common.decorateReturnObject(object);
+    }
 }
