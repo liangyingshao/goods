@@ -874,6 +874,12 @@ public class CouponDao implements InitializingBean
                     }
 
                 }
+                //若redis中有该活动，则删除
+                String key="ca_"+id;
+                if(redisTemplate.opsForHash().hasKey(key,"quantity")||redisTemplate.opsForHash().hasKey(key,"quantityType")){
+                    redisTemplate.opsForHash().delete(key,"quantity");
+                    redisTemplate.opsForHash().delete(key,"quantityType");
+                }
             }
         }
         catch (DataAccessException e) {
@@ -1028,24 +1034,24 @@ public class CouponDao implements InitializingBean
     }
 
     /**
-     * 将明天要上线的优惠活动详情load到redis
+     * 将今天上线的优惠活动详情load到redis
      */
     public void loadingTomorrowActivities(){
 
         CouponActivityPoExample activityExample=new CouponActivityPoExample();
         CouponActivityPoExample.Criteria criteria=activityExample.createCriteria();
-        criteria.andStateEqualTo((byte)0);//必须为可执行活动
+        criteria.andStateEqualTo((byte)1);//必须[已上线]活动
         //明天上线的活动
         LocalDateTime searchTime= LocalDateTime.now();
-        searchTime=searchTime.plusDays(2);
+        searchTime=searchTime.plusDays(1);
         searchTime=searchTime.minusHours(searchTime.getHour());
         searchTime=searchTime.minusMinutes(searchTime.getMinute());
         searchTime=searchTime.minusSeconds(searchTime.getSecond());
         searchTime=searchTime.minusNanos(searchTime.getNano());
         LocalDateTime searchTimeMax=searchTime;//时间段上限
         LocalDateTime searchTimeMin=searchTime.minusDays(1);//时间段下限
-        criteria.andBeginTimeGreaterThanOrEqualTo(searchTimeMin);//beginTime>=明日零点
-        criteria.andBeginTimeLessThan(searchTimeMax);//beginTime<后日零点
+        criteria.andBeginTimeGreaterThanOrEqualTo(searchTimeMin);//beginTime>=今日零点
+        criteria.andBeginTimeLessThan(searchTimeMax);//beginTime<明日零点
 
         List<CouponActivityPo> activityPos=null;
         try{
