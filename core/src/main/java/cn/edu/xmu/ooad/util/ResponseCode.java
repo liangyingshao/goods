@@ -92,12 +92,14 @@ public enum ResponseCode {
     COUPON_END(911,"优惠卷活动终止"),
     BRAND_NAME_SAME(990,"品牌名称已存在"),
     CATEGORY_NAME_SAME(991, "类目名称已存在"),
-    TOMORROW_FLASHSALE_INVALID(930,"不允许增加明天的秒杀"),
     STATE_NOCHANGE(920,"状态未改变"),
     CATEALTER_INVALID(921,"对SPU类别操作无效"),
     BRANDALTER_INVALID(922,"对SPU品牌操作无效"),
     ACTIVITYALTER_INVALID(923,"对活动的无效操作"),
     ACTIVITY_NOTFOUND(924,"无符合条件的优惠活动"),
+    TOMORROW_FLASHSALE_INVALID(930,"不允许增加明天的秒杀"),
+    DELETE_OFFLINE_NOTALLOW(931, "不允许删除已下线状态的活动"),
+    DELETE_CHANGAE_NOTALLOW(932, "不允许修改已删除活动的状态"),
     COMMENT_AUDITED(940,"评论已审核"),
     COMMENT_EXISTED(941,"该订单条目已评论");
     private int code;
