@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import javax.validation.constraints.Future;
 import java.time.LocalDateTime;
 
 @Data
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 public class FlashsaleNewRetVo {
     private Long id;
     @DateTimeFormat
+    @Future
     private LocalDateTime flashDate;
     private TimeDTO timeDTO;
     private LocalDateTime gmtCreate;

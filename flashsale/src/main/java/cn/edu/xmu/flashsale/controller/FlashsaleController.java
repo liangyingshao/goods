@@ -94,7 +94,10 @@ public class FlashsaleController {
         {
             return binObject;
         }
-        //falshDate不能小于明天，先获取当前日期转化为字符串，与flashDate相比较，flashDate不能小于当前字符串
+        //falshDate不能小于等于明天
+        if(!vo.getFlashDate().isAfter(LocalDateTime.now().plusDays(1))) {
+            return new ReturnObject<>(ResponseCode.TOMORROW_FLASHSALE_INVALID);
+        }
 //        LocalDate date = LocalDate.now().plusDays(1); // get the tomorrow date
 //        if(date.toString().compareTo(flashDate) > 0)//不允许增加明天之前的活动
 //        {
@@ -103,6 +106,7 @@ public class FlashsaleController {
 //        //falshDate不小于明天
 //        LocalDateTime flashDateParse = LocalDate.parse(flashDate,DateTimeFormatter.ISO_DATE).atStartOfDay();
         ReturnObject object = flashsaleService.createflash(vo.getId(), vo.getFlashDate());
+        logger.error(object.getCode().toString());
         if(object.getData()!=null)
         {
             return Common.decorateReturnObject(object);

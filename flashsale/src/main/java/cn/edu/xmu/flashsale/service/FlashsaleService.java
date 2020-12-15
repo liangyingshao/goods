@@ -70,9 +70,14 @@ public class FlashsaleService {
 
             //时段不冲突
             returnObject = flashsaleDao.createflash(id, flashDate);
+
             FlashsaleNewRetVo retVo = returnObject.getData();
+            logger.error(retVo.toString());
             retVo.setTimeDTO(timeDTOReturnObject.getData());
-            return new ReturnObject<>(retVo);
+            logger.error(retVo.toString());
+            ReturnObject<FlashsaleNewRetVo> retVoReturnObject = new ReturnObject<>(retVo);
+            logger.error(retVoReturnObject.getCode().toString());
+            return retVoReturnObject;
         }
         catch (Exception e) {
 
