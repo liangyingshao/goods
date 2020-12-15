@@ -133,4 +133,25 @@ public class FlashSaleItemDao {
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
         }
     }
+
+    public ReturnObject deleteBySaleId(Long id) {
+        try {
+            FlashSaleItemPoExample example = new FlashSaleItemPoExample();
+            FlashSaleItemPoExample.Criteria criteria = example.createCriteria();
+            criteria.andSaleIdEqualTo(id);
+            flashSaleItemPoMapper.deleteByExample(example);
+            return new ReturnObject(ResponseCode.OK);//因为是级联删除，所以id不一定会有对应的item，即使删除0行也正确
+        }
+        catch (DataAccessException e)
+        {
+            // 其他数据库错误
+            logger.debug("other sql exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
+    }
 }
