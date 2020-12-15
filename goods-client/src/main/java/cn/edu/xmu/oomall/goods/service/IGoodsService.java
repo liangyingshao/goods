@@ -99,4 +99,10 @@ public interface IGoodsService {
      * @date 2020-12-09 17:03
      */
     ReturnObject<GoodsDetailDTO> getGoodsBySkuId(Long skuId, Byte type, Long activityId, Integer quantity);
+
+
+    /**
+     * 根据spuId查询skuId的list
+     */
+    ReturnObject<List<Long>> getSkuIdsBySpuId(Long spuId);
 }

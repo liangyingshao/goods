@@ -32,7 +32,7 @@ public class CouponService {
     @Autowired
     private CouponDao couponDao;
 
-    @DubboReference
+    @DubboReference(check = false)
     private IGoodsService iGoodsService;
 
 //    @DubboReference

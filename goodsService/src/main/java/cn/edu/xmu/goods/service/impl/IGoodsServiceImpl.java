@@ -98,10 +98,13 @@ public class IGoodsServiceImpl implements IGoodsService {
         for (int i=0;i<idList.size();i++)
         {
             GoodsSkuDetailRetVo goodsSkuRetVo = goodsDao.getSku(idList.get(i));
-            SkuNameInfoDTO skuNameInfoDTO = new SkuNameInfoDTO();
-            skuNameInfoDTO.setId(skuNameInfoDTO.getId());
-            skuNameInfoDTO.setName(goodsSkuRetVo.getName());
-            nameList.add(skuNameInfoDTO);
+            //判空指针
+            if(goodsSkuRetVo!=null){
+                SkuNameInfoDTO skuNameInfoDTO = new SkuNameInfoDTO();
+                skuNameInfoDTO.setId(skuNameInfoDTO.getId());
+                skuNameInfoDTO.setName(goodsSkuRetVo.getName());
+                nameList.add(skuNameInfoDTO);
+            }
         }
         return nameList;
     }
@@ -139,7 +142,7 @@ public class IGoodsServiceImpl implements IGoodsService {
         return null;
     }
 
-    //@Override
+    @Override
     public List<SkuInfoDTO> getSelectSkuListBySkuIdList(List<Long> idList) {
         List<SkuInfoDTO> list=new ArrayList<>();
         idList.stream().forEach(x->{
@@ -156,8 +159,11 @@ public class IGoodsServiceImpl implements IGoodsService {
     @Override
     public ReturnObject<GoodsDetailDTO> getGoodsBySkuId(Long skuId) {
         GoodsDetailDTO goodsDetailDTO=goodsDao.getGoodsBySkuId(skuId).getData();
-        goodsDetailDTO.setPrice(goodsDao.getPriceBySkuId(skuId).getData());
-        return goodsDao.getGoodsBySkuId(skuId);
+        //判空指针
+        if(goodsDetailDTO!=null)
+        {goodsDetailDTO.setPrice(goodsDao.getPriceBySkuId(skuId).getData());
+        return goodsDao.getGoodsBySkuId(skuId);}
+        else return new ReturnObject<GoodsDetailDTO>(ResponseCode.RESOURCE_ID_NOTEXIST);
     }
 
     @Override
@@ -210,4 +216,11 @@ public class IGoodsServiceImpl implements IGoodsService {
         shopDetailDTO.setGmtModified(dtf.format(shopPo.getGmtModified()));
         return new ReturnObject<>(shopDetailDTO);
     }
+
+    @Override
+    public ReturnObject<List<Long>> getSkuIdsBySpuId(Long spuId){
+//        List<Long> skuIdList=goodsDao.getSkuIdsBySpuId(spuId);
+        return new ReturnObject<List<Long>>();
+    }
+
 }
