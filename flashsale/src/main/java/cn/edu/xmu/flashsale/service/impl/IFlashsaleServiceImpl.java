@@ -5,7 +5,6 @@ import cn.edu.xmu.flashsale.dao.FlashSaleItemDao;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.goods.service.IFlashsaleService;
-import com.sun.mail.iap.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.beans.factory.annotation.Autowired;

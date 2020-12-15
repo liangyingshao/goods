@@ -13,5 +13,5 @@ public interface IFlashsaleService {
      * 删除时间段对应的所有flashsale
      * id：时间段id
      */
-    public ReturnObject deleteSegmentFlashsale(Long id);
+    ReturnObject deleteSegmentFlashsale(Long id);
 }
