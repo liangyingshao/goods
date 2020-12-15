@@ -482,7 +482,7 @@ public class PresaleDao {
             }
         });
 
-        return new ReturnObject<>();
+        return new ReturnObject<>(dto);
     }
 
 
