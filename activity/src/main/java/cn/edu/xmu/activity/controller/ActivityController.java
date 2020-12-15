@@ -30,7 +30,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Api(value = "活动服务", tags = "activity")
 @RestController /*Restful的Controller对象*/
@@ -102,12 +104,12 @@ public class ActivityController {
                                   @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
                                   @Depart @ApiIgnore @RequestParam(required = false) Long departId)
     {
-        logger.debug("createCouponSku: id = "+ id+" shopId="+shopId+" vos="+body);
+        logger.debug("createCouponSku: id = "+ id+" shopId="+shopId+" vos="+ Arrays.toString(body));
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != returnObject) {
             return returnObject;
         }
-        if(departId!=shopId)
+        if(!Objects.equals(departId, shopId))
             return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         List<CouponSku> couponSkus=new ArrayList<>();
         for(Long vo:body)
@@ -150,7 +152,7 @@ public class ActivityController {
                                   @Depart @ApiIgnore @RequestParam(required = false) Long departId)
     {
         logger.debug("deleteCouponSpu: id = "+ id+" shopId="+shopId);
-        if(departId!=shopId)
+        if(!Objects.equals(departId, shopId))
             return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         ReturnObject returnObject=activityService.deleteCouponSku(shopId,id);
         return Common.decorateReturnObject(returnObject);
@@ -301,7 +303,7 @@ public class ActivityController {
                                @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
                                @Depart @ApiIgnore @RequestParam(required = false) Long departId)
     {
-        if(shopId!=departId)return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        if(!Objects.equals(shopId, departId))return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
         ReturnObject returnObject=activityService.returnCoupon(shopId,id);
         return Common.decorateReturnObject(returnObject);
     }

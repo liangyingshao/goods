@@ -1,5 +1,6 @@
 package cn.edu.xmu.oomall.goods.service;
 
+import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.goods.model.CouponInfoDTO;
 import cn.edu.xmu.oomall.goods.model.GoodsDetailDTO;
@@ -49,7 +50,7 @@ public interface IActivityService {
      * @param id
      * @return ReturnObject
      */
-    ReturnObject useCoupon(Long userId, Long id);
+    ReturnObject<ResponseCode> useCoupon(Long userId, Long id);
 
     /**
      * 优惠券退回
@@ -58,7 +59,7 @@ public interface IActivityService {
      * @param id
      * @return ReturnObject
      */
-    ReturnObject returnCoupon(Long shopId, Long id);
+    ReturnObject<ResponseCode> returnCoupon(Long shopId, Long id);
 
     ReturnObject<GoodsDetailDTO> modifyPresaleInventory(Long activityId, Integer quantity);
 

@@ -26,8 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
-
+import java.util.Objects;
 
 
 @Api(value = "商品服务", tags = "goods")
@@ -143,7 +142,7 @@ public class GoodsController {
         if (null != returnObject) {
             return returnObject;
         }
-        if(departId!=shopId)
+        if(!Objects.equals(departId, shopId))
             return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         ReturnObject retObject = goodsService.uploadSkuImg(shopId,id,file);
         return Common.getNullRetObj(retObject, httpServletResponse);
@@ -249,7 +248,7 @@ public class GoodsController {
         if (null != returnObject) {
             return returnObject;
         }
-        if(departId!=shopId)return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
+        if(!Objects.equals(departId, shopId))return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         FloatPrice floatPrice=vo.createFloatPrice();
         floatPrice.setGoodsSkuId(id);
         floatPrice.setValid(FloatPrice.Validation.VALID);
@@ -294,7 +293,7 @@ public class GoodsController {
         if (null != returnObject) {
             return returnObject;
         }
-        if(departId!=shopId)return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
+        if(!Objects.equals(departId, shopId))return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         GoodsSku sku=vo.createGoodsSku();
         sku.setGoodsSpuId(id);
         sku.setDisabled(GoodsSku.State.ONSHELF);
@@ -321,8 +320,7 @@ public class GoodsController {
 
         GoodsSku.State[] states=GoodsSku.State.class.getEnumConstants();
         List<GoodsSkuStateRetVo> stateVos=new ArrayList<GoodsSkuStateRetVo>();
-        for(int i=0;i<states.length;i++)
-            stateVos.add(new GoodsSkuStateRetVo(states[i]));
+        for (GoodsSku.State state : states) stateVos.add(new GoodsSkuStateRetVo(state));
         return ResponseUtil.ok(new ReturnObject<List>(stateVos).getData());
     }
 
