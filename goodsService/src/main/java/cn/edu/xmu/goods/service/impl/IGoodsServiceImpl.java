@@ -152,12 +152,14 @@ public class IGoodsServiceImpl implements IGoodsService {
 
     @Override
     public ReturnObject<ShopDetailDTO> getShopInfoBySkuId(Long skuId) {
-        return null;
+        ReturnObject<ShopDetailDTO>returnObject=goodsDao.getShopInfoBySkuId(skuId);
+        return returnObject;
     }
 
     @Override
     public ReturnObject<GoodsFreightDTO> getGoodsFreightDetailBySkuId(Long skuId) {
-        return null;
+        ReturnObject<GoodsFreightDTO> returnObject=goodsDao.getGoodsFreightDetailBySkuId(skuId);
+        return returnObject;
     }
 
     /**
