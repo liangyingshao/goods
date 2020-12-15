@@ -3,6 +3,7 @@ package cn.edu.xmu.goods.service;
 import cn.edu.xmu.goods.dao.GoodsDao;
 import cn.edu.xmu.goods.model.bo.FloatPrice;
 import cn.edu.xmu.goods.model.bo.GoodsSku;
+import cn.edu.xmu.goods.model.bo.GoodsSpu;
 import cn.edu.xmu.goods.model.po.GoodsSkuPo;
 import cn.edu.xmu.goods.model.vo.FloatPriceRetVo;
 import cn.edu.xmu.goods.model.vo.GoodsSkuDetailRetVo;
@@ -58,6 +59,8 @@ public class GoodsService {
     public ReturnObject<PageInfo<GoodsSkuRetVo>> getSkuList(Long shopId, String skuSn, Long spuId, String spuSn, Integer page, Integer pageSize)
     {
         PageInfo<GoodsSkuRetVo> skuRetVos=goodsDao.getSkuList(shopId,skuSn,spuId,spuSn,page,pageSize);
+        if(skuRetVos!=null&&skuRetVos.getList().size()>0)
+            skuRetVos.getList().stream().forEach(x->x.setPrice(goodsDao.getPriceBySkuId(x.getId()).getData()));
         return new ReturnObject<>(skuRetVos);
     }
 
@@ -186,6 +189,30 @@ public class GoodsService {
     {
         ReturnObject<GoodsSkuRetVo> returnObject=new ReturnObject<>(IShareService.shareUserSkuMatch(sid,id,userId).getCode());
         if(returnObject.getCode().equals(ResponseCode.OK)) returnObject=goodsDao.getShareSku(id);
+        return returnObject;
+    }
+
+    /**
+     * 店家商品上架
+     * @param shopId
+     * @param id
+     * @return
+     */
+    @Transactional
+    public ReturnObject putGoodsOnSale(Long shopId, Long id) {
+        ReturnObject returnObject=goodsDao.putGoodsOnSale(shopId,id);
+        return returnObject;
+    }
+
+    /**
+     * 店家商品下架
+     * @param shopId
+     * @param id
+     * @return
+     */
+    public ReturnObject putOffGoodsOnSale(Long shopId,Long id)
+    {
+        ReturnObject returnObject=goodsDao.putOffGoodsOnSale(shopId,id);
         return returnObject;
     }
 }

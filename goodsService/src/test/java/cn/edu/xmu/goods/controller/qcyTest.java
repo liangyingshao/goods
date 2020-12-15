@@ -11,6 +11,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
@@ -19,11 +20,18 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.time.LocalDateTime;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.transaction.annotation.Transactional;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * description: SPU相关api测试类
@@ -34,14 +42,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = GoodsServiceApplication.class)
 @AutoConfigureMockMvc
 //@Transactional
+//@Slf4j
 public class qcyTest {
     @Autowired
     MockMvc mvc;
 
+//    public qcyTest(WebTestClient webClient) {
+//        this.webClient = WebTestClient.bindToServer()
+//                .baseUrl("http://localhost:8090")
+//                .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/json;charset=UTF-8")
+//                .build();
+//    }
+
     /**
      * description: 创建测试用token
-     * date: 2020/12/01 8:37
-     * author: 秦楚彦 24320182203254
      */
     private final String creatTestToken(Long userId, Long departId, int expireTime) {
         String token = new JwtHelper().createToken(userId, departId, expireTime);
@@ -70,10 +84,11 @@ public class qcyTest {
      */
     @Test
     public void addSpuTest() throws JSONException {
-        GoodsSpuCreateVo vo = new GoodsSpuCreateVo();
-        vo.setName("ipadair4");
-        vo.setDescription("最新一代air系列产品");
         String token = creatTestToken(1L,1L,100);
+        GoodsSpuCreateVo vo = new GoodsSpuCreateVo();
+        vo.setName("ipadair3");
+        vo.setDescription("最新一代air系列产品");
+
         vo.setSpec("{\"id\":1,\"name\":\"ipadspec\", \"specItems\":{\"id\":1, \"name\":\"color\"},{\"id\":2, \"name\":\"memory\"}}");
         String spuJson = JacksonUtil.toJson(vo);
         String responseString=null;

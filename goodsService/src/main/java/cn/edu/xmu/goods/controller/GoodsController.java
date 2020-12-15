@@ -8,8 +8,10 @@ import cn.edu.xmu.ooad.annotation.Depart;
 import cn.edu.xmu.ooad.annotation.LoginUser;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.*;
+import cn.edu.xmu.oomall.other.service.IFootprintService;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.*;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +55,9 @@ public class GoodsController {
     @Autowired
     private GoodsCategoryService goodsCategoryService;
 
+    @DubboReference
+    private IFootprintService IFootprintService;
+
 
     /**
      *查询SKU
@@ -89,14 +94,21 @@ public class GoodsController {
      * @return Object
      */
     @ApiOperation(value="获得sku的详细信息")
-    @ApiImplicitParam(paramType = "path",dataType = "Long",name="id",value = "sku id",required = true)
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "path",dataType = "Long",name="id",value = "sku id",required = true)
+    })
+
     @ApiResponse(code=0,message = "成功")
+    @Audit
     @GetMapping("/skus/{id}")
     @ResponseBody
-    public Object getSku(@PathVariable Long id)
+    public Object getSku(@PathVariable Long id,@RequestParam(required = false) Long userId)
     {
         logger.debug("getSku:id="+id);
         ReturnObject returnObject=goodsService.getSku(id);
+        if(userId!=null&&returnObject.getCode().equals(ResponseCode.OK)){
+            returnObject= IFootprintService.postFootprint(userId, id);
+        }
         return Common.decorateReturnObject(returnObject);
     }
 
@@ -324,7 +336,7 @@ public class GoodsController {
      */
     @ApiOperation(value="查看一条商品SPU的详细信息（无需登录）",produces="application/json")
     @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "id", value = "商品SPUid", required = true)
+            @ApiImplicitParam(paramType = "path", dataType = "Long", name = "id", value = "商品SPUid", required = true)
 
     })
     @ApiResponses({
@@ -336,13 +348,7 @@ public class GoodsController {
         Object returnObject=null;
         ReturnObject<Object> spu = spuService.showSpu(id);
         logger.debug("findSpuById: spu="+spu.getData()+" code="+spu.getCode());
-        if (!spu.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST)) {
-            return spu;
-        } else {
-            returnObject = Common.getNullRetObj(new ReturnObject<>(spu.getCode(), spu.getErrmsg()), httpServletResponse);
-        }
-
-        return returnObject;
+        return Common.decorateReturnObject(spu);
     }
 
     /**
@@ -391,7 +397,6 @@ public class GoodsController {
         } else {
             return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }
-
     }
 
     /**
@@ -403,7 +408,7 @@ public class GoodsController {
      * @author 24320182203254 秦楚彦
      * Created at 2020/12/01 22：00
      */
-    @ApiOperation(value="店家商品上架",produces="application/json")
+    @ApiOperation(value="修改商品SPU",produces="application/json")
     @ApiImplicitParams({
             @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
             @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "shopId", value = "商铺id", required = true),
@@ -433,9 +438,9 @@ public class GoodsController {
         spu.setShopId(shopId);
         spu.setId(id);
         spu.setGmtModified(LocalDateTime.now());
-        //校验是否为该商铺管理员
-        if(shopId!=departId)
-            return  Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE), httpServletResponse);
+//        //校验是否为该商铺管理员
+//        if(shopId!=departId)
+//            return  Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE), httpServletResponse);
 
         ReturnObject retObject = spuService.modifyGoodsSpu(spu);
         if(retObject.getData()!=null){
@@ -447,91 +452,77 @@ public class GoodsController {
     }
 
     /**
-     * spu008 业务: 上架商品SPU
-     * @param id 商品SPUID
-     * @param shopId 店铺ID
-     * @param userId 当前用户ID
-     * @return  Object
-     * @author 24320182203254 秦楚彦
-     * Created at 2020/12/01 15：36
+     * spu008 店家商品上架
+     * @param shopId
+     * @param id
+     * @param userId
+     * @param departId
+     * @return Object
      */
     @ApiOperation(value="店家商品上架",produces="application/json")
     @ApiImplicitParams({
             @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
             @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "shopId", value = "商铺id", required = true),
-            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "id", value = "SpuId", required = true)
+            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "id", value = "SkuId", required = true)
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
 
     })
     @Audit // 需要认证
-    @PutMapping("shops/{shopId}/spus/{id}/onshelves")
+    @PutMapping("shops/{shopId}/skus/{id}/onshelves")
     @ResponseBody
     public Object putGoodsOnSale(@PathVariable Long shopId,@PathVariable Long id,
                                  @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
                                  @Depart @ApiIgnore @RequestParam(required = false) Long departId) {
-        logger.debug("put SPU onsale by shopId:" + shopId+ " spuId:" + id);
-
-
-        GoodsSpu spu=new GoodsSpu();
-        spu.setShopId(shopId);
-        spu.setId(id);
-        spu.setGmtModified(LocalDateTime.now());
+        logger.debug("put SKU onsale by shopId:" + shopId+ " skuId:" + id);
 
         //校验是否为该商铺管理员
         if(shopId!=departId)
             return  Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE), httpServletResponse);
-        ReturnObject retObject = spuService.putGoodsOnSale(spu);
-        if(retObject.getData()!=null){
+        ReturnObject retObject = goodsService.putGoodsOnSale(shopId,id);
+        if (retObject.getData() != null) {
             return Common.getRetObject(retObject);
-        }else{
-            return  Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
+        } else {
+            return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }
-
     }
 
     /**
-     * spu009 业务: 下架商品SPU
-     * @param id 商品SPUID
-     * @param shopId 店铺ID
-     * @param userId 当前用户ID
-     * @return  Object
-     * @author 24320182203254 秦楚彦
-     * Created at 2020/12/01 15：36
+     * 店家商品下架
+     * @param shopId
+     * @param id
+     * @param userId
+     * @param departId
+     * @return Object
      */
     @ApiOperation(value="店家商品下架",produces="application/json")
     @ApiImplicitParams({
             @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
             @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "shopId", value = "商铺id", required = true),
-            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "id", value = "SpuId", required = true)
+            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "id", value = "SkuId", required = true)
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
 
     })
     @Audit // 需要认证
-    @PutMapping("shops/{shopId}/spus/{id}/offshelves")
+    @PutMapping("shops/{shopId}/skus/{id}/offshelves")
     @ResponseBody
     public Object putOffGoodsOnSale(@PathVariable Long shopId,@PathVariable Long id,
                                     @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
                                     @Depart @ApiIgnore @RequestParam(required = false) Long departId) {
-        logger.debug("put SPU offsale by shopId:" + shopId+ " spuId:" + id);
+        logger.debug("put SKU offsale by shopId:" + shopId+ " skuId:" + id);
 
-        GoodsSpu spu=new GoodsSpu();
-        spu.setShopId(shopId);
-        spu.setId(id);
-        spu.setGmtModified(LocalDateTime.now());
-        ReturnObject retObject = spuService.putOffGoodsOnSale(spu);
         //校验是否为该商铺管理员
-        if(shopId!=departId)
-            return  Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
-        if(retObject.getData()!=null){
+        if(departId!=shopId)
+            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
+        ReturnObject retObject = goodsService.putOffGoodsOnSale(shopId,id);
+        if (retObject.getData() != null) {
             return Common.getRetObject(retObject);
-        }else{
-            return  Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
+        } else {
+            return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }
-
     }
 
     /**
@@ -747,12 +738,8 @@ public class GoodsController {
                                  @Depart @ApiIgnore @RequestParam(required = false) Long departId) {
         logger.debug("logical delete SPU by shopId:" + shopId+ " spuId:" + id);
 
-        GoodsSpu spu=new GoodsSpu();
-        spu.setShopId(shopId);
-        spu.setId(id);
-        spu.setGmtModified(LocalDateTime.now());
 
-        ReturnObject retObject = spuService.deleteGoodsSpu(spu);
+        ReturnObject retObject = spuService.deleteGoodsSpu(shopId,id);
         if(retObject.getData()!=null){
             return Common.getRetObject(retObject);
         }else{

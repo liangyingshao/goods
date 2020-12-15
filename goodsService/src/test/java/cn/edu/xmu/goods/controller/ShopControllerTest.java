@@ -3,6 +3,7 @@ package cn.edu.xmu.goods.controller;
 import cn.edu.xmu.goods.GoodsServiceApplication;
 import cn.edu.xmu.goods.mapper.GoodsSkuPoMapper;
 import cn.edu.xmu.goods.mapper.ShopPoMapper;
+import cn.edu.xmu.goods.model.bo.Shop;
 import cn.edu.xmu.goods.model.po.ShopPo;
 import cn.edu.xmu.goods.model.vo.ShopStateVo;
 import cn.edu.xmu.ooad.util.JacksonUtil;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.util.Assert;
 
@@ -35,6 +37,8 @@ public class ShopControllerTest {
 
     @Autowired
     private MockMvc mvc;
+
+    private WebTestClient webClient;
 
     @Autowired
     private ShopPoMapper shopPoMapper;
@@ -68,13 +72,32 @@ public class ShopControllerTest {
         String name ="testshop";
         String Json = JacksonUtil.toJson(name);
         String token = creatTestToken(1L, 0L, 100);
-        String responseString=this.mvc.perform(post("/goods/shops").header("authorization",token).contentType("application/json;charset=UTF-8").content(Json))
+        byte[] responseString = webClient.post().uri("/goods/shops").header("authorization",token)
+                .bodyValue(Json)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType("application/json;charset=UTF-8")
+                .expectBody()
+                .jsonPath("$.name").isEqualTo("testshop")
+                .jsonPath("$.state").isEqualTo(Shop.ShopStatus.NOT_AUDIT)
+                .returnResult().getResponseBodyContent();
+    }
+
+    @Test
+    public void addShop2() throws Exception {
+
+        String name ="testshop";
+        String Json = JacksonUtil.toJson(name);
+        String token = creatTestToken(1L, 0L, 100);
+        String responseString = this.mvc.perform(post("/goods/shops").header("authorization",token).contentType("application/json;charset=UTF-8").content(Json))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
-        String expectedResponse="{\"errno\": 0, \"errmsg\": \"成功\"}";
-        JSONAssert.assertEquals(expectedResponse,responseString,true);
+
+        String expectedResponse = "{\"errno\": 0, \"errmsg\": \"成功\"}";
+        JSONAssert.assertEquals(expectedResponse, responseString, true);
     }
+
 
 
     @Test
@@ -95,8 +118,8 @@ public class ShopControllerTest {
         //检查是否真的修改了数据库
         ShopPo newShopPo = shopPoMapper.selectByPrimaryKey(1L);
         logger.debug("new:"+newShopPo.getState().toString());
-        logger.debug("old:"+ ShopStateVo.ShopStatus.ONLINE.getCode().toString());
-        Assert.state((newShopPo.getState().toString().equals(ShopStateVo.ShopStatus.ONLINE.getCode().toString())), "店铺状态未修改");//true则报错
+        logger.debug("old:"+ Shop.ShopStatus.ONLINE.getCode().toString());
+        Assert.state((newShopPo.getState().toString().equals(Shop.ShopStatus.ONLINE.getCode().toString())), "店铺状态未修改");//true则报错
 
     }
 
@@ -143,7 +166,7 @@ public class ShopControllerTest {
 
         //检查是否真的修改了数据库
         ShopPo newShopPo = shopPoMapper.selectByPrimaryKey(1L);
-        Assert.state((newShopPo.getState() == ShopStateVo.ShopStatus.ONLINE.getCode().byteValue()), "店铺状态未修改");//false则报错
+        Assert.state((newShopPo.getState() == Shop.ShopStatus.ONLINE.getCode().byteValue()), "店铺状态未修改");//false则报错
 
     }
 
@@ -163,7 +186,7 @@ public class ShopControllerTest {
 
         //检查是否真的修改了数据库
         ShopPo newShopPo = shopPoMapper.selectByPrimaryKey(1L);
-        Assert.state((newShopPo.getState() == ShopStateVo.ShopStatus.OFFLINE.getCode().byteValue()), "店铺状态未修改");//false则报错
+        Assert.state((newShopPo.getState() == Shop.ShopStatus.OFFLINE.getCode().byteValue()), "店铺状态未修改");//false则报错
 
     }
 
@@ -183,7 +206,7 @@ public class ShopControllerTest {
 
         //检查是否真的修改了数据库
         ShopPo newShopPo = shopPoMapper.selectByPrimaryKey(1L);
-        Assert.state((newShopPo.getState() == ShopStateVo.ShopStatus.CLOSED.getCode().byteValue()), "店铺状态未修改");//false则报错
+        Assert.state((newShopPo.getState() == Shop.ShopStatus.CLOSED.getCode().byteValue()), "店铺状态未修改");//false则报错
 
     }
 

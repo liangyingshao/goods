@@ -39,12 +39,11 @@ public class PresaleController {
 
 
     /**
-     * description: getPresaleState
+     * description: Presale001 getPresaleState
      * version: 1.0
      * date: 2020/12/11 11:16
      * author: 杨铭
      *
-     * @param
      * @return java.lang.Object
      */
     @ApiOperation(value="获得预售活动的所有状态")
@@ -64,7 +63,7 @@ public class PresaleController {
     }
 
 
-    @ApiOperation("顾客查询所有预售活动")
+    @ApiOperation("顾客查询所有有效预售活动")
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })

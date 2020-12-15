@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 /**
  * 简单店铺VO
  * @author 24320182203254 秦楚彦
@@ -14,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SimpleShopDTO {
+public class SimpleShopDTO implements Serializable {
     @ApiModelProperty(name = "店铺id", value = "id")
     private Long id;
 

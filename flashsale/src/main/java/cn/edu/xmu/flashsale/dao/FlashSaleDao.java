@@ -1,10 +1,8 @@
 package cn.edu.xmu.flashsale.dao;
 
 import cn.edu.xmu.flashsale.mapper.FlashSalePoMapper;
-import cn.edu.xmu.flashsale.model.po.FlashSaleItemPoExample;
 import cn.edu.xmu.flashsale.model.po.FlashSalePo;
 import cn.edu.xmu.flashsale.model.po.FlashSalePoExample;
-import cn.edu.xmu.flashsale.model.vo.FlashsaleItemRetVo;
 import cn.edu.xmu.flashsale.model.vo.FlashsaleNewRetVo;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
@@ -12,11 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -28,6 +24,9 @@ public class FlashSaleDao {
 
     @Autowired
     private FlashSalePoMapper flashSalePoMapper;
+
+    @Autowired
+    private FlashSaleItemDao flashSaleItemDao;
 
     public ReturnObject<FlashsaleNewRetVo> createflash(Long id, LocalDateTime flashDate) {
         //查询数据库中是否有对应日期时段的记录存在
@@ -162,9 +161,35 @@ public class FlashSaleDao {
         criteria.andFlashDateEqualTo(time);
         criteria.andTimeSegIdEqualTo(id);
         List<FlashSalePo> pos = flashSalePoMapper.selectByExample(example);
-        if(pos==null) {
+        if(pos.size()==0) {
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
+
         return new ReturnObject<>(pos.get(0));
+    }
+
+    public ReturnObject deleteSegmentFlashsale(Long id) {
+        try {
+            FlashSalePoExample example = new FlashSalePoExample();
+            FlashSalePoExample.Criteria criteria = example.createCriteria();
+            criteria.andTimeSegIdEqualTo(id);
+            List<FlashSalePo> list = flashSalePoMapper.selectByExample(example);
+            for (FlashSalePo po : list) {
+                flashSaleItemDao.deleteBySaleId(po.getId());
+            }
+            int ret = flashSalePoMapper.deleteByExample(example);
+            return new ReturnObject(ResponseCode.OK);//因为是级联删除，所以id不一定会有对应的flashsale，即使删除0行也正确
+        }
+        catch (DataAccessException e)
+        {
+            // 其他数据库错误
+            logger.debug("other sql exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
     }
 }

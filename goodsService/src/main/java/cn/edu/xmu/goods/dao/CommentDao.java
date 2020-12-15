@@ -44,7 +44,7 @@ public class CommentDao {
         commentPo.setType(comment.getType());
         commentPo.setContent(comment.getContent());
         commentPo.setState((byte) Comment.State.TOAUDIT.getCode());
-        commentPo.setGmtCreated(LocalDateTime.now());
+        commentPo.setGmtCreate(LocalDateTime.now());
 //        logger.debug("success insert Comment: " + commentPo.getId());
         try{
             //是不是该查一下orderItemId是否已经有评论了

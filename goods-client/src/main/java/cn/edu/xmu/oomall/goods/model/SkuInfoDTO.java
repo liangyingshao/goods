@@ -10,12 +10,12 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SkuInfoDTO implements Serializable {
-    private Long skuId;//这里的变量名好像该改成id
+    private Long id;
     private String name;
     private String skuSn;
     private String imageUrl;
     private Integer inventory;
     private Long originalPrice;
     private Long price;
-    private Boolean disable;
+    private Byte disable;
 }

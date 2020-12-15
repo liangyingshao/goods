@@ -13,6 +13,7 @@ import cn.edu.xmu.oomall.goods.model.GoodsSpuPoDTO;
 import cn.edu.xmu.oomall.goods.model.SimpleShopDTO;
 import cn.edu.xmu.oomall.goods.service.IGoodsService;
 import com.github.pagehelper.PageInfo;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.annotation.Reference;
 import org.springframework.stereotype.Service;
@@ -34,8 +35,7 @@ public class GrouponService {
     @Autowired
     GrouponDao grouponDao;
 
-    @Reference
-    @Autowired
+    @DubboReference
     IGoodsService iGoodsService;
     
     public ReturnObject modifyGrouponofSPU(Long shopId, Long id, GrouponVo grouponVo) {
@@ -59,7 +59,7 @@ public class GrouponService {
             return new ReturnObject(ResponseCode.FIELD_NOTVALID);//TODO 考虑错误码是否合适
 
         //4. 此spu是否正在参加其他团购
-        if(grouponDao.checkInGroupon(id).getData())
+        if(grouponDao.checkInGroupon(id,grouponVo.getBeginTime(),grouponVo.getEndTime()).getData())
             return new ReturnObject(ResponseCode.FIELD_NOTVALID);//TODO 考虑错误码是否合适
         
         //5. 为spu创建团购活动
@@ -84,9 +84,6 @@ public class GrouponService {
     }
 
     public ReturnObject<PageInfo<VoObject>> queryGroupons(Long shopId, Long spu_id, Integer state, Integer timeline, String beginTime, String endTime, Integer page, Integer pagesize, boolean isadmin) {
-
         return grouponDao.queryGroupons(shopId, spu_id, state, timeline, beginTime, endTime, page, pagesize, isadmin);
-
-
     }
 }

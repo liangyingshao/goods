@@ -688,32 +688,36 @@ public class CouponDao implements InitializingBean
 
     /**
      * 店家查询己方某优惠券活动详情
-     * @param shopId
+     * @param simpleShopDTO
      * @param id
+     * @param createByName
+     * @param modiByName
      * @return ReturnObject
      */
-    public ReturnObject showCouponActivity(Long shopId, Long id) {
+    public ReturnObject<CouponActivityVo> showCouponActivity(SimpleShopDTO simpleShopDTO, Long id,String createByName,String modiByName) {
 
-//        CouponActivityPo activityPo= activityMapper.selectByPrimaryKey(id);
-//        if(activityPo==null)
-//            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
-//        if(!activityPo.getShopId().equals(shopId))
-//            return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
-//
-//        //查找该优惠活动所属商店
-//        ShopPo shopPo=shopMapper.selectByPrimaryKey(shopId);
-//        //查找创建活动管理员（待添加）
-//        //CreatedBy
-//        //查找修改活动管理员（待添加）
-//        //ModifiedBy
-//        CouponActivity couponActivity=new CouponActivity(activityPo);
-//        CouponActivityVo couponActivityVo=new CouponActivityVo(couponActivity);
-//        SimpleShopVo simpleShopVo=new SimpleShopVo(shopPo);
-//        couponActivityVo.setShopVo(simpleShopVo);
-//        //couponActivityVo.setCreatedBy();
-//        //couponActivityVo.setModifiedBy();
-//        return new ReturnObject<>(couponActivityVo);
-        return new ReturnObject();
+        CouponActivityPo activityPo= activityMapper.selectByPrimaryKey(id);
+        if(activityPo==null)
+            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+        if(!activityPo.getShopId().equals(simpleShopDTO.getId()))
+            return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
+
+
+        CouponActivity couponActivity=new CouponActivity(activityPo);
+        CouponActivityVo couponActivityVo=new CouponActivityVo(couponActivity);
+        //设置该优惠活动所属商店
+        couponActivityVo.setShopVo(simpleShopDTO);
+        //设置创建者、修改者
+        CreatedBy createdBy=new CreatedBy();
+        createdBy.setId(activityPo.getCreatedBy());
+        createdBy.setUsername(createByName);
+        couponActivityVo.setCreatedBy(createdBy);
+        ModifiedBy modiBy=new ModifiedBy();
+        modiBy.setId(activityPo.getModiBy());
+        modiBy.setUsername(modiByName);
+        couponActivityVo.setModifiedBy(modiBy);
+        return new ReturnObject<CouponActivityVo>(couponActivityVo);
+
     }
 
     /**
@@ -746,10 +750,18 @@ public class CouponDao implements InitializingBean
                     CouponActivity retActivity =new CouponActivity(checkPos.get(0));
                     CouponActivityVo retVo=new CouponActivityVo(retActivity);
                     //设置优惠活动所属商店
+                    if(simpleShop!=null)
                     retVo.setShopVo(simpleShop);
                     //设置创建者、修改者
-                    //couponActivityVo.setCreatedBy();
-                    //couponActivityVo.setModifiedBy();
+                    CreatedBy createdBy=new CreatedBy();
+                    createdBy.setId(activity.getCreatedBy());
+                    createdBy.setUsername(createByName);
+                    retVo.setCreatedBy(createdBy);
+                    ModifiedBy modiBy=new ModifiedBy();
+                    modiBy.setId(null);
+                    modiBy.setUsername(null);
+                    retVo.setModifiedBy(modiBy);
+
                     return new ReturnObject<>(retVo);
 
                 }
@@ -1149,5 +1161,20 @@ public class CouponDao implements InitializingBean
         if(couponPo!=null&&Coupon.State.getTypeByCode(couponPo.getState().intValue()).equals(Coupon.State.AVAILABLE))
             return true;
         return false;
+    }
+
+    public CouponActivity getCouponActivity(Long activityId){
+        CouponActivityPo activityPo=activityMapper.selectByPrimaryKey(activityId);
+        if(activityPo==null)return null;
+        else return new CouponActivity(activityPo);
+    }
+
+    public Boolean judgeCouponActivityIdValid(Long couponActivityId) {
+        CouponActivityPo activityPo=activityMapper.selectByPrimaryKey(couponActivityId);
+
+        //若活动状态不为已下线
+        if(activityPo==null||!activityPo.getState().equals(1))return false;
+        LocalDateTime now=LocalDateTime.now();
+        if(activityPo.getBeginTime().isBefore(now)&&activityPo.getEndTime().isAfter(now))return true;
     }
 }

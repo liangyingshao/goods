@@ -245,7 +245,7 @@ public class GrouponDao {
         return new ReturnObject<>(ResponseCode.OK);
     }
 
-    public ReturnObject<Boolean> checkInGroupon(Long id) {
+    public ReturnObject<Boolean> checkInGroupon(Long id,String beginTime,String endTime) {
         GrouponActivityPoExample example = new GrouponActivityPoExample();
         GrouponActivityPoExample.Criteria criteria = example.createCriteria();
         criteria.andGoodsSpuIdEqualTo(id);
@@ -257,9 +257,17 @@ public class GrouponDao {
             logger.error(message.toString());
         }
 
-        if(list.isEmpty())
-            return new ReturnObject<>(false);
-        return new ReturnObject<>(true);
+        //数据库中的活动开始时间晚于endTime，或结束时间早于beginTime，才返回false
+        if(!list.isEmpty())
+        {
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            for(GrouponActivityPo p : list){
+                if(!(p.getBeginTime().isAfter(LocalDateTime.parse(endTime,dtf))||p.getEndTime().isBefore(LocalDateTime.parse(beginTime,dtf))))
+                    return new ReturnObject<>(true);
+            }
+        }
+        return new ReturnObject<>(false);
+
     }
 
 
@@ -286,42 +294,45 @@ public class GrouponDao {
                 return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
         }
         //5.按timeline查询
-        switch (timeline){
-            case 0:
-                criteria.andBeginTimeGreaterThan(LocalDateTime.now());
-                break;
-            case 1:
-                LocalDateTime searchTime= LocalDateTime.now();
-                searchTime=searchTime.plusDays(2);
-                searchTime=searchTime.minusHours(searchTime.getHour());
-                searchTime=searchTime.minusMinutes(searchTime.getMinute());
-                searchTime=searchTime.minusSeconds(searchTime.getSecond());
-                searchTime=searchTime.minusNanos(searchTime.getNano());
-                LocalDateTime searchTimeMax=searchTime;//时间段上限
-                LocalDateTime searchTimeMin=searchTime.minusDays(1);//时间段下限
-                criteria.andBeginTimeGreaterThanOrEqualTo(searchTimeMin);//beginTime>=明日零点
-                criteria.andBeginTimeLessThan(searchTimeMax);//beginTime<后日零点
-                break;
-            case 2:
-                criteria.andBeginTimeLessThanOrEqualTo(LocalDateTime.now());
-                criteria.andEndTimeGreaterThanOrEqualTo(LocalDateTime.now());
-                break;
-            case 3:
-                criteria.andEndTimeLessThan(LocalDateTime.now());
+        if(timeline!=null)
+        {
+            switch (timeline){
+                case 0:
+                    criteria.andBeginTimeGreaterThan(LocalDateTime.now());
+                    break;
+                case 1:
+                    LocalDateTime searchTime= LocalDateTime.now();
+                    searchTime=searchTime.plusDays(2);
+                    searchTime=searchTime.minusHours(searchTime.getHour());
+                    searchTime=searchTime.minusMinutes(searchTime.getMinute());
+                    searchTime=searchTime.minusSeconds(searchTime.getSecond());
+                    searchTime=searchTime.minusNanos(searchTime.getNano());
+                    LocalDateTime searchTimeMax=searchTime;//时间段上限
+                    LocalDateTime searchTimeMin=searchTime.minusDays(1);//时间段下限
+                    criteria.andBeginTimeGreaterThanOrEqualTo(searchTimeMin);//beginTime>=明日零点
+                    criteria.andBeginTimeLessThan(searchTimeMax);//beginTime<后日零点
+                    break;
+                case 2:
+                    criteria.andBeginTimeLessThanOrEqualTo(LocalDateTime.now());
+                    criteria.andEndTimeGreaterThanOrEqualTo(LocalDateTime.now());
+                    break;
+                case 3:
+                    criteria.andEndTimeLessThan(LocalDateTime.now());
 
+            }
         }
 
         //6.按时间段查询
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime ldt = LocalDateTime.parse(beginTime,dtf);
-        if(!beginTime.isEmpty())
+        if(beginTime!=null)
             criteria.andBeginTimeGreaterThanOrEqualTo(LocalDateTime.parse(beginTime,dtf));
-        if(!endTime.isEmpty())
+        if(endTime!=null)
             criteria.andEndTimeLessThanOrEqualTo(LocalDateTime.parse(endTime,dtf));
 
         //7.如果不是管理员，仅显示有效的活动
         if(!isadmin) {
             criteria.andStateEqualTo(ActivityStatus.ON_SHELVES.getCode().byteValue());
+            criteria.andEndTimeGreaterThan(LocalDateTime.now());
         }
 
         //8.查询数据库
@@ -344,5 +355,22 @@ public class GrouponDao {
         }
         PageInfo<VoObject> GrouponPage = PageInfo.of(BoList);
         return new ReturnObject<>(GrouponPage);
+    }
+
+
+    public ReturnObject<Boolean> judgeGrouponIdValid(Long grouponId) {
+
+        GrouponActivityPo po = null;
+        try {
+            po = grouponActivityPoMapper.selectByPrimaryKey(grouponId);
+        } catch (Exception e) {
+            StringBuilder message = new StringBuilder().append("judgeGrouponValid: ").append(e.getMessage());
+            logger.error(message.toString());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+        }
+        if(po==null)
+            return new ReturnObject<>(false);
+
+        return new ReturnObject<>(true);
     }
 }

@@ -29,7 +29,7 @@ public class Comment implements VoObject {
         this.type = po.getType();
         this.content = po.getContent();
         this.state = po.getState();
-        this.gmtCreate = po.getGmtCreated();
+        this.gmtCreate = po.getGmtCreate();
         this.gmtModified = po.getGmtModified();
     }
 
