@@ -403,7 +403,7 @@ public class ActivityController {
      * @author 24320182203254 秦楚彦
      * Created at 2020/12/05 22：19
      */
-    @ApiOperation(value="管理员新建己方优惠活动",produces="application/json")
+    @ApiOperation(value="管理员修改己方优惠活动",produces="application/json")
     @ApiImplicitParams({
             @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
             @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "shopId", value = "商铺id", required = true),
@@ -431,7 +431,7 @@ public class ActivityController {
             return returnObject;
         }
         CouponActivity activity=vo.createActivity();
-        //设置activity状态，待修改
+        //设置activity状态
         activity.setState(CouponActivity.DatabaseState.OFFLINE);
         activity.setId(id);
         activity.setShopId(shopId);
@@ -455,7 +455,7 @@ public class ActivityController {
      * @author 24320182203254 秦楚彦
      * Created at 2020/12/05 22：19
      */
-    @ApiOperation(value="管理员新建己方优惠活动",produces="application/json")
+    @ApiOperation(value="管理员下线己方优惠活动",produces="application/json")
     @ApiImplicitParams({
             @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
             @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "shopId", value = "商铺id", required = true),
@@ -474,12 +474,7 @@ public class ActivityController {
 
     ) {
 
-//        //设置activity状态，待修改
-//        activity.setState(CouponActivity.DatabaseState.CANCELED);
-//        activity.setId(id);
-//        activity.setShopId(shopId);
-//        activity.setGmtCreate(LocalDateTime.now());
-        ReturnObject retObject = activityService.offlineCouponActivity(shopId,id);
+        ReturnObject retObject = activityService.offlineCouponActivity(shopId,id,userId);
         if (retObject.getData() != null) {
             httpServletResponse.setStatus(HttpStatus.OK.value());
             return retObject;
@@ -512,7 +507,7 @@ public class ActivityController {
     @ResponseBody
     public Object showOnlineCouponActivities(
                                              @RequestParam(required = false) Long shopId,
-                                             @RequestParam(required = false, defaultValue = "2") Integer timeline,
+                                             @RequestParam(required = false, defaultValue = "2") Integer timeline,//默认为【进行中】
                                              @RequestParam(required = false, defaultValue = "1") Integer page,
                                              @RequestParam(required = false, defaultValue = "10") Integer pageSize)
     {
