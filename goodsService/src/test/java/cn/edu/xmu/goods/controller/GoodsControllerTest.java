@@ -45,7 +45,7 @@ class GoodsControllerTest {
                 .build();
     }
 
-    private final String creatTestToken(Long userId, Long departId, int expireTime) {
+    private String creatTestToken(Long userId, Long departId, int expireTime) {
         String token = new JwtHelper().createToken(userId, departId, expireTime);
         return token;
     }

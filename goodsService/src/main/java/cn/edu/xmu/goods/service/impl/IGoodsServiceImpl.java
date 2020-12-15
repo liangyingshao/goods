@@ -6,12 +6,14 @@ import cn.edu.xmu.goods.dao.ShopDao;
 import cn.edu.xmu.goods.model.po.GoodsSkuPo;
 import cn.edu.xmu.goods.model.po.ShopPo;
 import cn.edu.xmu.goods.model.vo.GoodsSkuDetailRetVo;
+import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.goods.model.*;
 //import cn.edu.xmu.oomall.goods.model.GoodsDetailDTO;
 //import cn.edu.xmu.oomall.goods.model.GoodsFreightDTO;
 //import cn.edu.xmu.oomall.goods.model.ShopDetailDTO;
 import cn.edu.xmu.oomall.goods.service.IActivityService;
+import cn.edu.xmu.oomall.goods.service.IFlashsaleService;
 import cn.edu.xmu.oomall.goods.service.IGoodsService;
 //import com.alibaba.dubbo.config.annotation.Service;
 import org.apache.dubbo.config.annotation.DubboReference;
@@ -40,6 +42,9 @@ public class IGoodsServiceImpl implements IGoodsService {
 
     @DubboReference
     private IActivityService IActivityService;
+
+    @DubboReference
+    private IFlashsaleService iFlashsaleService;
 
     @Override
     public ReturnObject<List<Long>> getAllSkuIdByShopId(Long shopId) {
@@ -90,20 +95,22 @@ public class IGoodsServiceImpl implements IGoodsService {
     @Override
     public List<SkuNameInfoDTO> getSelectSkuNameListBySkuIdList(List<Long> idList) {
         List<SkuNameInfoDTO> nameList = new ArrayList<>();
-        for (int i=0;i<idList.size();i++)
-        {
-            GoodsSkuDetailRetVo goodsSkuRetVo = goodsDao.getSku(idList.get(i));
-            SkuNameInfoDTO skuNameInfoDTO = new SkuNameInfoDTO();
-            skuNameInfoDTO.setId(skuNameInfoDTO.getId());
-            skuNameInfoDTO.setName(goodsSkuRetVo.getName());
-            nameList.add(skuNameInfoDTO);
+        for (Long aLong : idList) {
+            GoodsSkuDetailRetVo goodsSkuRetVo = goodsDao.getSku(aLong);
+            //判空指针
+            if (goodsSkuRetVo != null) {
+                SkuNameInfoDTO skuNameInfoDTO = new SkuNameInfoDTO();
+                skuNameInfoDTO.setId(skuNameInfoDTO.getId());
+                skuNameInfoDTO.setName(goodsSkuRetVo.getName());
+                nameList.add(skuNameInfoDTO);
+            }
         }
         return nameList;
     }
 
     @Override
-    public ReturnObject checkSkuUsableBySkuShop(Long skuId, Long shopId) {
-        ReturnObject returnObject=goodsDao.checkSkuUsableBySkuShop(skuId,shopId);
+    public ReturnObject<ResponseCode> checkSkuUsableBySkuShop(Long skuId, Long shopId) {
+        ReturnObject<ResponseCode> returnObject=goodsDao.checkSkuUsableBySkuShop(skuId,shopId);
         return returnObject;
     }
 
@@ -134,10 +141,10 @@ public class IGoodsServiceImpl implements IGoodsService {
         return null;
     }
 
-    //@Override
+    @Override
     public List<SkuInfoDTO> getSelectSkuListBySkuIdList(List<Long> idList) {
         List<SkuInfoDTO> list=new ArrayList<>();
-        idList.stream().forEach(x->{
+        idList.forEach(x->{
             list.add(getSelectSkuInfoBySkuId(x).getData());
         });
         return list;
@@ -145,39 +152,76 @@ public class IGoodsServiceImpl implements IGoodsService {
 
     @Override
     public ReturnObject<ShopDetailDTO> getShopInfoBySkuId(Long skuId) {
-        return null;
-    }
-
-    @Override
-    public ReturnObject<GoodsDetailDTO> getGoodsBySkuId(Long skuId) {
-        GoodsDetailDTO goodsDetailDTO=goodsDao.getGoodsBySkuId(skuId).getData();
-        goodsDetailDTO.setPrice(goodsDao.getPriceBySkuId(skuId).getData());
-        return goodsDao.getGoodsBySkuId(skuId);
+        ReturnObject<ShopDetailDTO>returnObject=goodsDao.getShopInfoBySkuId(skuId);
+        return returnObject;
     }
 
     @Override
     public ReturnObject<GoodsFreightDTO> getGoodsFreightDetailBySkuId(Long skuId) {
-        return null;
+        ReturnObject<GoodsFreightDTO> returnObject=goodsDao.getGoodsFreightDetailBySkuId(skuId);
+        return returnObject;
     }
 
+    /**
+     * 根据skuId查找商品信息
+     * 下订单或退换货订单
+     * 0普通活动或者可能是秒杀  1团购  2预售 3优惠券
+     * quantity可正可负
+     * @param skuId
+     * @param type
+     * @param activityId
+     * @param quantity
+     * @return ReturnObject<GoodsDetailDTO>
+     */
     @Override
     public ReturnObject<GoodsDetailDTO> getGoodsBySkuId(Long skuId, Byte type, Long activityId, Integer quantity) {
         ReturnObject<GoodsDetailDTO> returnObject=goodsDao.getGoodsBySkuId(skuId);
-        if(returnObject.getCode().equals(ResponseCode.OK)) {
-            switch (type) {
-                case (2)://预售
+        ReturnObject<GoodsDetailDTO>ret=new ReturnObject<>();
+        switch (type) {
+            case (2)://预售
+            {
+                ret= IActivityService.modifyPresaleInventory(activityId, quantity);
+                //如果预售不存在返回不存在的错误码
+                //如果预售状态不对返回不存在的错误码
+                //如果库存不够设置返回库存不够的错误码
+                //如果库存足够，就扣库存，并返回扣库存之前的库存和定金
+                if(ret.getCode().equals(ResponseCode.OK)&&ret.getData().getInventory()>=quantity)
                 {
-                    returnObject= IActivityService.modifyPresaleInventory(activityId, quantity);
-                    break;
+                    returnObject.getData().setPrice(ret.getData().getPrice());
+                    returnObject.getData().setInventory(ret.getData().getInventory());
+                    ret=goodsDao.modifyInventory(skuId,quantity);
                 }
-                case (0)://秒杀/普通
-
-                case (1)://团购
-                case (3)://优惠券
                 break;
             }
-            if(returnObject.getCode().equals(ResponseCode.OK))
-                returnObject=goodsDao.modifyInventory(skuId,quantity);
+            case (0)://秒杀/普通
+            {
+                ret= IActivityService.modifyPresaleInventory(activityId, quantity);
+                //如果秒杀不存在返回RESOURCE_ID_NOTEXIST，跳到下个环节
+                //如果库存不够返回库存不够的错误码
+                //如果库存足够，就扣库存，并返回扣库存之前的库存和定金
+                if(ret.getCode().equals(ResponseCode.OK)&&ret.getData().getInventory()>=quantity)//秒杀
+                {
+                    returnObject.getData().setPrice(ret.getData().getPrice());
+                    returnObject.getData().setInventory(ret.getData().getInventory());
+                    ret=goodsDao.modifyInventory(skuId,quantity);
+                }
+                else if(ret.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST))//普通
+                {
+                    ret=goodsDao.modifyInventory(skuId,quantity);
+                    returnObject.getData().setPrice(ret.getData().getPrice());
+                    returnObject.getData().setInventory(ret.getData().getInventory());
+                }
+                break;
+            }
+            case (1)://团购
+            case (3)://优惠券
+            {
+                ret=goodsDao.modifyInventory(skuId,quantity);
+                returnObject.getData().setPrice(ret.getData().getPrice());
+                returnObject.getData().setInventory(ret.getData().getInventory());
+                break;
+            }
+            default:return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
         }
         return returnObject;
     }
@@ -194,4 +238,10 @@ public class IGoodsServiceImpl implements IGoodsService {
         shopDetailDTO.setGmtModified(dtf.format(shopPo.getGmtModified()));
         return new ReturnObject<>(shopDetailDTO);
     }
+
+    @Override
+    public ReturnObject<List<Long>> getSkuIdsBySpuId(Long spuId){
+        return goodsDao.getSkuIdsBySpuId(spuId);
+    }
+
 }

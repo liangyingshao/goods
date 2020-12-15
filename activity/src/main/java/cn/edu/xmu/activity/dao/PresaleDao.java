@@ -1,24 +1,15 @@
 package cn.edu.xmu.activity.dao;
 
-import cn.edu.xmu.activity.mapper.MyPresaleActivityPoMapper;
 import cn.edu.xmu.activity.mapper.PresaleActivityPoMapper;
 import cn.edu.xmu.activity.model.bo.ActivityStatus;
-import cn.edu.xmu.activity.model.bo.Presale;
-import cn.edu.xmu.activity.model.po.GrouponActivityPo;
 import cn.edu.xmu.activity.model.po.PresaleActivityPo;
 import cn.edu.xmu.activity.model.po.PresaleActivityPoExample;
 import cn.edu.xmu.activity.model.vo.PresaleVo;
-import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
-import cn.edu.xmu.oomall.goods.model.GoodsSpuPoDTO;
-import cn.edu.xmu.oomall.goods.model.PresaleDTO;
-import cn.edu.xmu.oomall.goods.model.SimpleGoodsSkuDTO;
-import cn.edu.xmu.oomall.goods.model.SimpleShopDTO;
+import cn.edu.xmu.oomall.goods.model.*;
 import cn.edu.xmu.oomall.goods.service.IGoodsService;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
@@ -26,7 +17,6 @@ import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
@@ -36,7 +26,6 @@ import javax.annotation.Resource;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -50,7 +39,7 @@ import java.util.concurrent.TimeUnit;
 public class PresaleDao {
 
     @Autowired
-    MyPresaleActivityPoMapper presaleActivityPoMapper;
+    PresaleActivityPoMapper presaleActivityPoMapper;
 
     @DubboReference
     IGoodsService iGoodsService;
@@ -262,7 +251,13 @@ public class PresaleDao {
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
         }
 
-        //5.返回
+        //5.从redis中删除
+        if(delelePresaleInventoryFromRedis(id).getCode()!=ResponseCode.OK)
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+        if(delelePresalePriceFromRedis(id).getCode()!=ResponseCode.OK)
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+
+        //6.返回
         return new ReturnObject<>(ResponseCode.OK);
     }
 
@@ -355,7 +350,13 @@ public class PresaleDao {
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
         }
 
-        //6.返回
+        //6.从redis中删除
+        if(delelePresaleInventoryFromRedis(id).getCode()!=ResponseCode.OK)
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+        if(delelePresalePriceFromRedis(id).getCode()!=ResponseCode.OK)
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+
+        //7.返回
         return new ReturnObject<>(ResponseCode.OK);
 
     }
@@ -410,31 +411,44 @@ public class PresaleDao {
     }
 
 
-    public ReturnObject modifyPresaleInventory(Long activityId, Integer quantity) {
+    public ReturnObject<GoodsDetailDTO> modifyPresaleInventory(Long activityId, Integer quantity) {
         String key="pa_"+activityId;
         PresaleActivityPo presaleActivityPo=new PresaleActivityPo();
+        Integer inventory;
+        Long price;
+        GoodsDetailDTO dto=new GoodsDetailDTO();
         //没在redis里找到
         if(!redisTemplate.opsForHash().hasKey(key,"quantity")) {
             //presale存在
             presaleActivityPo = presaleActivityPoMapper.selectByPrimaryKey(activityId);
             if (presaleActivityPo == null) return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
 
+            //判断presale活动是否有效
+            if(presaleActivityPo.getState()!=ActivityStatus.ON_SHELVES.getCode().byteValue() ||
+            presaleActivityPo.getEndTime().isBefore(LocalDateTime.now()))
+                return new ReturnObject<>(ResponseCode.PRESALE_STATENOTALLOW);
+
             //库存足够
-            Integer inventory=presaleActivityPo.getQuantity();
+            inventory=presaleActivityPo.getQuantity();
             if (inventory < quantity) return new ReturnObject<>(ResponseCode.SKU_NOTENOUGH);
 
+            //设置定金
+            price=presaleActivityPo.getAdvancePayPrice();
             //添加到redis
             redisTemplate.opsForHash().put(key,"quantity",inventory-quantity);
+            redisTemplate.opsForHash().put(key,"price",price);
             redisTemplate.expire(key, Duration.between(LocalDateTime.now(),presaleActivityPo.getEndTime()).toHours(), TimeUnit.HOURS);
         }
         //已经存到redis里
         else{
-            Integer inventory= (Integer) redisTemplate.opsForHash().get(key,"quantity");
+            inventory= (Integer) redisTemplate.opsForHash().get(key,"quantity");
 
             //库存足够
             if(quantity>inventory)
                 return new ReturnObject<>(ResponseCode.SKU_NOTENOUGH);
 
+            //设置定金
+            price=(Long)redisTemplate.opsForHash().get(key,"price");
             //设置presaleId
             presaleActivityPo.setId(activityId);
 
@@ -445,8 +459,12 @@ public class PresaleDao {
             redisTemplate.expire(key,Duration.ofSeconds(seconds).toHours(), TimeUnit.HOURS);
         }
 
+        //设置dto
+        dto.setInventory(inventory);
+        dto.setPrice(price);
+
         //设置修改量
-        presaleActivityPo.setQuantity(quantity);
+        presaleActivityPo.setQuantity(inventory-quantity);
 
         //修改库存
         String json = JacksonUtil.toJson(presaleActivityPo);
@@ -464,13 +482,32 @@ public class PresaleDao {
             }
         });
 
-        return new ReturnObject<>();
+        return new ReturnObject<>(dto);
     }
 
-    public void updateQuantityByPrimaryKeySelective(PresaleActivityPo presaleActivityPo)
+
+    public ReturnObject delelePresaleInventoryFromRedis(Long presaleId){
+        String key="pa_"+ presaleId;
+        //如果存在
+        if(redisTemplate.opsForHash().hasKey(key,"quantity")) {
+            redisTemplate.opsForHash().delete(key,"quantity");
+        }
+        return new ReturnObject<>(ResponseCode.OK);
+    }
+
+    public ReturnObject delelePresalePriceFromRedis(Long presaleId){
+        String key="pa_"+ presaleId;
+        //如果存在
+        if(redisTemplate.opsForHash().hasKey(key,"price")) {
+            redisTemplate.opsForHash().delete(key,"price");
+        }
+        return new ReturnObject<>(ResponseCode.OK);
+    }
+
+    public void updateByPrimaryKeySelective(PresaleActivityPo presaleActivityPo)
     {
         try{
-            presaleActivityPoMapper.updateQuantityByPrimaryKeySelective(presaleActivityPo);
+            presaleActivityPoMapper.updateByPrimaryKeySelective(presaleActivityPo);
         }
         catch (Exception e)
         {

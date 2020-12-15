@@ -28,7 +28,7 @@ public class PresaleConsumerListener implements RocketMQListener<String>, Rocket
     public void onMessage(String message) {
         PresaleActivityPo presaleActivityPo= JacksonUtil.toObj(message, PresaleActivityPo.class);
         logger.debug("onMessage: got message presaleActivityPo =" + presaleActivityPo);
-        presaleDao.updateQuantityByPrimaryKeySelective(presaleActivityPo);
+        presaleDao.updateByPrimaryKeySelective(presaleActivityPo);
     }
 
     @Override

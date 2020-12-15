@@ -3,8 +3,10 @@ package cn.edu.xmu.activity.service.impl;
 import cn.edu.xmu.activity.dao.CouponDao;
 import cn.edu.xmu.activity.dao.GrouponDao;
 import cn.edu.xmu.activity.dao.PresaleDao;
+import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.goods.model.CouponInfoDTO;
+import cn.edu.xmu.oomall.goods.model.GoodsDetailDTO;
 import cn.edu.xmu.oomall.goods.model.PresaleDTO;
 import cn.edu.xmu.oomall.goods.service.IActivityService;
 import org.apache.dubbo.config.annotation.DubboService;
@@ -44,10 +46,7 @@ public class IActivityServiceImpl implements IActivityService {
     @Override
     public ReturnObject<Boolean> judgeCouponIdValid(Long couponId) {
 
-        Boolean valid=couponDao.judgeCouponValid(couponId)
-//                &&grouponDao.judgeGrouponValid(grouponId)&&presaleDao.judgePresaleValid(presaleId)
-                ;
-
+        Boolean valid=couponDao.judgeCouponValid(couponId);
         return new ReturnObject<>(valid);
     }
 
@@ -69,21 +68,21 @@ public class IActivityServiceImpl implements IActivityService {
 
 
     @Override
-    public ReturnObject useCoupon(Long userId, Long id)
+    public ReturnObject<ResponseCode> useCoupon(Long userId, Long id)
     {
-        ReturnObject returnObject= couponDao.useCoupon(userId,id);
+        ReturnObject<ResponseCode> returnObject= couponDao.useCoupon(userId,id);
         return returnObject;
     }
     @Override
-    public ReturnObject returnCoupon(Long shopId, Long id)
+    public ReturnObject<ResponseCode> returnCoupon(Long shopId, Long id)
     {
-        ReturnObject returnObject= couponDao.returnCoupon(shopId,id);
+        ReturnObject<ResponseCode> returnObject= couponDao.returnCoupon(shopId,id);
         return returnObject;
     }
 
     @Override
-    public ReturnObject modifyPresaleInventory(Long activityId,Integer quantity) {
-        ReturnObject returnObject=presaleDao.modifyPresaleInventory(activityId,quantity);
+    public ReturnObject<GoodsDetailDTO> modifyPresaleInventory(Long activityId, Integer quantity) {
+        ReturnObject<GoodsDetailDTO> returnObject=presaleDao.modifyPresaleInventory(activityId,quantity);
         return returnObject;
     }
 

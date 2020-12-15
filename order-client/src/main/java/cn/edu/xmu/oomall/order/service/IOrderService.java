@@ -11,13 +11,19 @@ import java.util.List;
  */
 public interface IOrderService {
 
+    /**
+     * 由商品模块调用 下线团购时，通知订单模块将团购订单转为普通订单
+     */
     ReturnObject<Object> putGrouponOffshelves(Long grouponId);
 
+    /**
+     * 由商品模块调用 下线预售时，通知订单模块对预售订单进行操作
+     */
     ReturnObject<Object> putPresaleOffshevles(Long presaleId);
 
     ReturnObject<List<Long>> listUserSelectOrderItemIdBySkuList(Long userId, List<Long> skuId);
 
-    /**
+    /* 由商品模块调用
      * 根据shopId查询该商铺的所有订单详情表，并根据skuId的list筛选orderItemId，返回orderItemId的List
      */
     ReturnObject<List<Long>> listAdminSelectOrderItemIdBySkuList(Long shopId, List<Long> skuId);
@@ -28,21 +34,17 @@ public interface IOrderService {
 
     ReturnObject<ResponseCode> getAdminHandleExchange(Long userId, Long shopId, Long orderItemId, Integer quantity, Long aftersaleId);
 
-    /**
-     * 支付完拆单
-     * @param orderId
-     * @return
+    /*由商品模块调用 支付完拆单
      */
     ReturnObject<ResponseCode> splitOrders(Long orderId);
 
+    /**
+     * 由商品模块调用，根据运费模板id返回简单运费模板
+     */
     ReturnObject<SimpleFreightModelDTO> getSimpleFreightById(Long freightId);
 
     /**
-     * 根据userId查询该用户的订单详情表，并根据skuId的list筛选orderItemId，返回orderItemId的List
-     * description: 团购活动结束，商品模块调用此接口，订单用于退团购优惠金额
-     * @param strategy 团购规则
-     * @param GrouponId 团购id
-     * @return
+     * 由商品模块调用：团购活动结束，商品模块调用此接口，订单用于退团购优惠金额
      */
     ReturnObject<Object> grouponEnd(String strategy,Long GrouponId);
 

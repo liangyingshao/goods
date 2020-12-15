@@ -30,7 +30,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Api(value = "活动服务", tags = "activity")
 @RestController /*Restful的Controller对象*/
@@ -102,12 +104,12 @@ public class ActivityController {
                                   @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
                                   @Depart @ApiIgnore @RequestParam(required = false) Long departId)
     {
-        logger.debug("createCouponSku: id = "+ id+" shopId="+shopId+" vos="+body);
+        logger.debug("createCouponSku: id = "+ id+" shopId="+shopId+" vos="+ Arrays.toString(body));
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != returnObject) {
             return returnObject;
         }
-        if(departId!=shopId)
+        if(!Objects.equals(departId, shopId))
             return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         List<CouponSku> couponSkus=new ArrayList<>();
         for(Long vo:body)
@@ -150,7 +152,7 @@ public class ActivityController {
                                   @Depart @ApiIgnore @RequestParam(required = false) Long departId)
     {
         logger.debug("deleteCouponSpu: id = "+ id+" shopId="+shopId);
-        if(departId!=shopId)
+        if(!Objects.equals(departId, shopId))
             return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         ReturnObject returnObject=activityService.deleteCouponSku(shopId,id);
         return Common.decorateReturnObject(returnObject);
@@ -301,7 +303,7 @@ public class ActivityController {
                                @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
                                @Depart @ApiIgnore @RequestParam(required = false) Long departId)
     {
-        if(shopId!=departId)return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        if(!Objects.equals(shopId, departId))return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
         ReturnObject returnObject=activityService.returnCoupon(shopId,id);
         return Common.decorateReturnObject(returnObject);
     }
@@ -403,7 +405,7 @@ public class ActivityController {
      * @author 24320182203254 秦楚彦
      * Created at 2020/12/05 22：19
      */
-    @ApiOperation(value="管理员新建己方优惠活动",produces="application/json")
+    @ApiOperation(value="管理员修改己方优惠活动",produces="application/json")
     @ApiImplicitParams({
             @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
             @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "shopId", value = "商铺id", required = true),
@@ -431,7 +433,7 @@ public class ActivityController {
             return returnObject;
         }
         CouponActivity activity=vo.createActivity();
-        //设置activity状态，待修改
+        //设置activity状态
         activity.setState(CouponActivity.DatabaseState.OFFLINE);
         activity.setId(id);
         activity.setShopId(shopId);
@@ -455,7 +457,7 @@ public class ActivityController {
      * @author 24320182203254 秦楚彦
      * Created at 2020/12/05 22：19
      */
-    @ApiOperation(value="管理员新建己方优惠活动",produces="application/json")
+    @ApiOperation(value="管理员下线己方优惠活动",produces="application/json")
     @ApiImplicitParams({
             @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
             @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "shopId", value = "商铺id", required = true),
@@ -474,12 +476,7 @@ public class ActivityController {
 
     ) {
 
-//        //设置activity状态，待修改
-//        activity.setState(CouponActivity.DatabaseState.CANCELED);
-//        activity.setId(id);
-//        activity.setShopId(shopId);
-//        activity.setGmtCreate(LocalDateTime.now());
-        ReturnObject retObject = activityService.offlineCouponActivity(shopId,id);
+        ReturnObject retObject = activityService.offlineCouponActivity(shopId,id,userId);
         if (retObject.getData() != null) {
             httpServletResponse.setStatus(HttpStatus.OK.value());
             return retObject;
@@ -512,7 +509,7 @@ public class ActivityController {
     @ResponseBody
     public Object showOnlineCouponActivities(
                                              @RequestParam(required = false) Long shopId,
-                                             @RequestParam(required = false, defaultValue = "2") Integer timeline,
+                                             @RequestParam(required = false, defaultValue = "2") Integer timeline,//默认为【进行中】
                                              @RequestParam(required = false, defaultValue = "1") Integer page,
                                              @RequestParam(required = false, defaultValue = "10") Integer pageSize)
     {

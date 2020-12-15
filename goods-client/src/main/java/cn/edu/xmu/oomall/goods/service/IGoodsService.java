@@ -73,15 +73,6 @@ public interface IGoodsService {
     ReturnObject<ShopDetailDTO> getShopInfoBySkuId(Long skuId);
 
     /**
-     * 根据skuId查找商品信息
-     * @param skuId
-     * @return GoodsDetailDTO
-     * @author Cai Xinlu
-     * @date 2020-12-09 17:03
-     */
-    ReturnObject<GoodsDetailDTO> getGoodsBySkuId(Long skuId);
-
-    /**
      * 获得默认运费模板
      * @param skuId
      * @return GoodsFreightDTO
@@ -99,4 +90,10 @@ public interface IGoodsService {
      * @date 2020-12-09 17:03
      */
     ReturnObject<GoodsDetailDTO> getGoodsBySkuId(Long skuId, Byte type, Long activityId, Integer quantity);
+
+
+    /**
+     * 根据spuId查询skuId的list
+     */
+    ReturnObject<List<Long>> getSkuIdsBySpuId(Long spuId);
 }

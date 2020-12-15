@@ -25,7 +25,7 @@ public class SkuConsumerListener  implements RocketMQListener<String>, RocketMQP
     public void onMessage(String message) {
         GoodsSkuPo skuPo= JacksonUtil.toObj(message, GoodsSkuPo.class);
         logger.debug("onMessage: got message skuPo =" + skuPo);
-        goodsDao.updateQuantityByPrimaryKeySelective(skuPo);
+        goodsDao.updateByPrimaryKeySelective(skuPo);
     }
 
     @Override

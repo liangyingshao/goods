@@ -19,11 +19,11 @@ public class GoodsSkuDetailRetVo{
 
     private String imageUrl;
 
-    private Integer inventory;
-
     private Long originalPrice;
 
     private Long price;
+
+    private Integer inventory;
 
     private String configuration;
 
@@ -34,6 +34,10 @@ public class GoodsSkuDetailRetVo{
     private LocalDateTime gmtModified;
 
     private GoodsSpuVo spu;
+
+    private Byte disable;
+
+    private Boolean shareable;
 
     public void set(GoodsSku obj)
     {
@@ -49,5 +53,6 @@ public class GoodsSkuDetailRetVo{
         weight = obj.getWeight();
         gmtCreated = obj.getGmtCreated();
         gmtModified = obj.getGmtModified();
+        disable=obj.getDisabled().getCode().byteValue();
     }
 }

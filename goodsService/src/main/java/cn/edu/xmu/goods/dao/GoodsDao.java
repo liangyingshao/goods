@@ -4,6 +4,7 @@ import cn.edu.xmu.goods.mapper.*;
 import cn.edu.xmu.goods.model.bo.FloatPrice;
 import cn.edu.xmu.goods.model.bo.GoodsSku;
 import cn.edu.xmu.goods.model.bo.GoodsSpu;
+import cn.edu.xmu.goods.model.bo.Shop;
 import cn.edu.xmu.goods.model.po.*;
 import cn.edu.xmu.goods.model.vo.*;
 import cn.edu.xmu.ooad.util.JacksonUtil;
@@ -38,7 +39,7 @@ public class GoodsDao {
 
     private static final Logger logger = LoggerFactory.getLogger(GoodsDao.class);
     @Autowired
-    private MyGoodsSkuPoMapper skuMapper;
+    private GoodsSkuPoMapper skuMapper;
     @Autowired
     private GoodsSpuPoMapper spuMapper;
     @Autowired
@@ -58,9 +59,9 @@ public class GoodsDao {
     @Autowired
     RedisTemplate redisTemplate;
 //上传图片相关变量
-    private String davUsername="night";
-    private String davPassword="tiesuolianhuan123";
-    private String baseUrl="http://172.16.4.146:8888/webdav/";
+    private final String davUsername="night";
+    private final String davPassword="tiesuolianhuan123";
+    private final String baseUrl="http://172.16.4.146:8888/webdav/";
 
     public void initialize() throws Exception {
         //初始化sku
@@ -147,7 +148,7 @@ public class GoodsDao {
         {
             GoodsSpuPoExample spuExample=new GoodsSpuPoExample();
             GoodsSpuPoExample.Criteria spuCriteria= spuExample.createCriteria();
-            if(!spuSn.isBlank())spuCriteria.andGoodsSnEqualTo(spuSn);
+            if(spuSn!=null&&!spuSn.isBlank())spuCriteria.andGoodsSnEqualTo(spuSn);
             if(shopId!=null)spuCriteria.andShopIdEqualTo(shopId);
             List<GoodsSpuPo> spuPos=spuMapper.selectByExample(spuExample);
             for (GoodsSpuPo spuPo:spuPos)
@@ -170,7 +171,7 @@ public class GoodsDao {
 //            else sku.setPrice(floatPos.get(0).getActivityPrice());
 //        }
         List<GoodsSkuRetVo> ret = skus.stream().map(GoodsSkuRetVo::new).collect(Collectors.toList());
-        PageInfo<GoodsSkuRetVo> returns=new PageInfo(ret);
+        PageInfo<GoodsSkuRetVo> returns=new PageInfo<GoodsSkuRetVo>(ret);
         returns.setPageNum(page);
         return returns;
     }
@@ -208,9 +209,9 @@ public class GoodsDao {
      * @param sku
      * @return ReturnObject
      */
-    public ReturnObject uploadSkuImg(GoodsSku sku)
+    public ReturnObject<ResponseCode> uploadSkuImg(GoodsSku sku)
     {
-        ReturnObject returnObject;
+        ReturnObject<ResponseCode> returnObject;
         GoodsSkuPo skuPo=skuMapper.selectByPrimaryKey(sku.getId());
         if(skuPo==null|| GoodsSku.State.getTypeByCode(skuPo.getDisabled().intValue())== GoodsSku.State.DELETED)return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         GoodsSkuPo newSkuPo = new GoodsSkuPo();
@@ -234,24 +235,39 @@ public class GoodsDao {
      * @param id
      * @return ReturnObject
      */
-    public ReturnObject logicalDelete(Long shopId, Long id)
+    public ReturnObject<ResponseCode> logicalDelete(Long shopId, Long id)
     {
         GoodsSkuPo skuPo=skuMapper.selectByPrimaryKey(id);
         if(skuPo==null|| GoodsSku.State.getTypeByCode(skuPo.getDisabled().intValue())== GoodsSku.State.DELETED)return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         GoodsSpuPo spuPo=spuMapper.selectByPrimaryKey(skuPo.getGoodsSpuId());
-        if(spuPo.getShopId()==shopId)
+        if(spuPo.getShopId().equals(shopId))
         {
             skuPo.setDisabled(GoodsSku.State.DELETED.getCode().byteValue());
             skuPo.setGmtModified(LocalDateTime.now());
             String key="sku_"+id;
-            redisTemplate.opsForHash().delete(key,"quantity");
+            if(redisTemplate.opsForHash().hasKey(key,"quantity"))
+            {
+                redisTemplate.opsForHash().delete(key,"quantity");
+                redisTemplate.opsForHash().delete(key,"price");
+            }
             int ret=skuMapper.updateByPrimaryKey(skuPo);
             if(ret==0)
             {
                 logger.debug("logicalDelete:update fail.sku id="+id);
                 return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             }
-            else return new ReturnObject<>();
+            else {
+                FloatPricePo floatPo=new FloatPricePo();
+                floatPo.setGoodsSkuId(skuPo.getId());
+                floatPo.setValid(FloatPrice.Validation.INVALID.getCode().byteValue());
+                ret=floatPricePoMapper.updateByPrimaryKeySelective(floatPo);
+                if(ret==0)
+                {
+                    logger.debug("logicalDelete:update fail.floatPrice skuId="+id);
+                    return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+                }
+                else return new ReturnObject<>();
+            }
         }
         else return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
     }
@@ -262,7 +278,7 @@ public class GoodsDao {
      * @param sku
      * @return ReturnObject
      */
-    public ReturnObject modifySku(Long shopId, GoodsSku sku)
+    public ReturnObject<ResponseCode> modifySku(Long shopId, GoodsSku sku)
     {
         //SKU存在
         GoodsSkuPo selectSkuPo=skuMapper.selectByPrimaryKey(sku.getId());
@@ -289,7 +305,9 @@ public class GoodsDao {
         //更新redis
         String key="sku_"+sku.getId();
         redisTemplate.opsForHash().delete(key,"quantity");
+        redisTemplate.opsForHash().delete(key,"price");
         redisTemplate.opsForHash().put(key,"quantity",sku.getInventory());
+        redisTemplate.opsForHash().put(key,"price",sku.getOriginalPrice());
         //尝试修改
         GoodsSkuPo skuPo=sku.getGoodsSkuPo();
         skuPo.setGmtModified(LocalDateTime.now());
@@ -312,7 +330,7 @@ public class GoodsDao {
             if (Objects.requireNonNull(e.getMessage()).contains("goods_sku.goods_sku_name_uindex"))
             {
                 logger.debug("modifySku: have same sku name = " + skuPo.getName());
-                return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("SKU名重复：" + skuPo.getName()));
+                return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, "SKU名重复：" + skuPo.getName());
             }
             else {
                 // 其他数据库错误
@@ -343,7 +361,7 @@ public class GoodsDao {
 
         //库存充足
         if(selectSkuPo.getInventory()*9/10<floatPrice.getQuantity())
-            return new ReturnObject<>(ResponseCode.SKU_NOTENOUGH,String.format("库存不足："+floatPrice.getGoodsSkuId()));
+            return new ReturnObject<>(ResponseCode.SKU_NOTENOUGH, "库存不足：" + floatPrice.getGoodsSkuId());
 
         //shopId能和skuId匹配
         GoodsSpuPoExample spuPoExample=new GoodsSpuPoExample();
@@ -352,7 +370,7 @@ public class GoodsDao {
         criteria1.andIdEqualTo(selectSkuPo.getGoodsSpuId());
         List<GoodsSpuPo> spuPos=spuMapper.selectByExample(spuPoExample);
         if(spuPos.size()==0)
-            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,String.format("skuId不存在："+floatPrice.getGoodsSkuId()));
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, "skuId不存在：" + floatPrice.getGoodsSkuId());
 
         //时间不冲突
         FloatPricePoExample nowExample=new FloatPricePoExample();
@@ -362,7 +380,7 @@ public class GoodsDao {
         nowCriteria.andEndTimeGreaterThanOrEqualTo(floatPrice.getBeginTime());
         List<FloatPricePo> nowFloatPos=floatMapper.selectByExample(nowExample);
         if(nowFloatPos.size()>0)
-            return new ReturnObject<>(ResponseCode.SKUPRICE_CONFLICT, String.format("floatPrice时间冲突：已有"+nowFloatPos.toString() +"待加"+ floatPrice.toString()));
+            return new ReturnObject<>(ResponseCode.SKUPRICE_CONFLICT, "floatPrice时间冲突：已有" + nowFloatPos.toString() + "待加" + floatPrice.toString());
 
         //尝试插入
         FloatPricePo floatPricePo=floatPrice.getFloatPricePo();
@@ -374,7 +392,7 @@ public class GoodsDao {
             {
                 //修改失败
                 logger.debug("addFloatPrice: insert floatPrice fail : " + floatPricePo.toString());
-                return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("floatPrice字段不合法：" + floatPricePo.toString()));
+                return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, "floatPrice字段不合法：" + floatPricePo.toString());
             }
             else {
                 //修改成功
@@ -389,7 +407,7 @@ public class GoodsDao {
                 criteria.andQuantityEqualTo(floatPrice.getQuantity());
                 List<FloatPricePo> checkFloatPo=floatMapper.selectByExample(floatExample);
                 if(checkFloatPo.size()==0)
-                    return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("floatPrice字段不合法：" + floatPricePo.toString()));
+                    return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, "floatPrice字段不合法：" + floatPricePo.toString());
                 else {//构造FloatPriceRetVo
                     FloatPriceRetVo retVo=new FloatPriceRetVo();
                     retVo.set(new FloatPrice(checkFloatPo.get(0)));
@@ -440,8 +458,8 @@ public class GoodsDao {
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
 
         //shopId和SPU匹配
-        if(spuPo.getShopId()!=shopId)
-            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,String.format("spuId不存在："+sku.getGoodsSpuId()));
+        if(!Objects.equals(spuPo.getShopId(), shopId))
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, "spuId不存在：" + sku.getGoodsSpuId());
         //SKU.configuration不重复
         //数据库里都是null，暂时换成name判断
         GoodsSkuPoExample skuExample=new GoodsSkuPoExample();
@@ -455,6 +473,7 @@ public class GoodsDao {
         String key="sku_"+sku.getId();
         redisTemplate.opsForHash().delete(key,"quantity");
         redisTemplate.opsForHash().put(key,"quantity",sku.getInventory());
+        redisTemplate.opsForHash().put(key,"price",sku.getOriginalPrice());
         GoodsSkuPo skuPo=sku.getNewGoodsSkuPo();
         skuPo.setGmtCreate(LocalDateTime.now());
         skuPo.setGmtModified(LocalDateTime.now());
@@ -464,7 +483,7 @@ public class GoodsDao {
             if(ret==0)
             {
                 logger.debug("createSku fail:spuId="+sku.getGoodsSpuId()+"skuPo="+skuPo);
-                return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("sku字段不合法：" + skuPo.toString()));
+                return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, "sku字段不合法：" + skuPo.toString());
             }
             else {
                 //修改成功
@@ -505,7 +524,7 @@ public class GoodsDao {
         }
     }
 
-    public ReturnObject checkSkuUsableBySkuShop(Long skuId, Long shopId) {
+    public ReturnObject<ResponseCode> checkSkuUsableBySkuShop(Long skuId, Long shopId) {
         //SKU存在
         GoodsSkuPo skuPo = skuMapper.selectByPrimaryKey(skuId);
         if (skuPo == null || GoodsSku.State.getTypeByCode(skuPo.getDisabled().intValue()).equals(GoodsSku.State.DELETED))
@@ -513,7 +532,7 @@ public class GoodsDao {
 
         //SKU对应的SPU和shopId匹配
         GoodsSpuPo spuPo=spuMapper.selectByPrimaryKey(skuPo.getGoodsSpuId());
-        if (spuPo.getShopId() != shopId) return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        if (!Objects.equals(spuPo.getShopId(), shopId)) return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
 
         return new ReturnObject<>();
     }
@@ -575,7 +594,8 @@ public class GoodsDao {
 
     public ReturnObject<Boolean> getVaildSkuId(Long skuId)
     {
-        return new ReturnObject<>((skuMapper.selectByPrimaryKey(skuId)!=null));
+        GoodsSkuPo skuPo=skuMapper.selectByPrimaryKey(skuId);
+        return new ReturnObject<>((skuPo!=null&&!GoodsSku.State.getTypeByCode(skuPo.getDisabled().intValue()).equals(GoodsSku.State.DELETED)));
     }
 
     public SkuInfoDTO getSelectSkuInfoBySkuId(Long skuId)
@@ -665,7 +685,6 @@ public class GoodsDao {
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
 
         GoodsDetailDTO goodsDetailDTO=new GoodsDetailDTO();
-        goodsDetailDTO.setInventory(skuPo.getInventory());
         goodsDetailDTO.setName(skuPo.getName());
 
 //        FloatPricePoExample floatExample=new FloatPricePoExample();
@@ -707,12 +726,12 @@ public class GoodsDao {
      * @param id
      * @return ReturnObject
      */
-    public ReturnObject putGoodsOnSale(Long shopId, Long id) {
+    public ReturnObject<ResponseCode> putGoodsOnSale(Long shopId, Long id) {
         //SKU存在
         GoodsSkuPo skuPo=skuMapper.selectByPrimaryKey(id);
-        GoodsSku.State state=GoodsSku.State.getTypeByCode(skuPo.getDisabled().intValue());
-        if(skuPo==null||state.equals(GoodsSku.State.DELETED))return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        if(skuPo==null||GoodsSku.State.getTypeByCode(skuPo.getDisabled().intValue()).equals(GoodsSku.State.DELETED))return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
 
+        GoodsSku.State state=GoodsSku.State.getTypeByCode(skuPo.getDisabled().intValue());
         //shopId能对上号
         GoodsSpuPo spuPo= spuMapper.selectByPrimaryKey(skuPo.getGoodsSpuId());
         if(!spuPo.getShopId().equals(shopId))return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
@@ -726,7 +745,7 @@ public class GoodsDao {
             if(ret==0)
             {
                 logger.debug("putGoodsOnSale fail:skuPo="+skuPo);
-                return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("sku字段不合法：" + skuPo.toString()));
+                return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, "sku字段不合法：" + skuPo.toString());
             }
             else  return new ReturnObject<>();
         }
@@ -749,12 +768,12 @@ public class GoodsDao {
      * @param id
      * @return
      */
-    public ReturnObject putOffGoodsOnSale(Long shopId, Long id) {
+    public ReturnObject<ResponseCode> putOffGoodsOnSale(Long shopId, Long id) {
         //SKU存在
         GoodsSkuPo skuPo=skuMapper.selectByPrimaryKey(id);
-        GoodsSku.State state=GoodsSku.State.getTypeByCode(skuPo.getDisabled().intValue());
-        if(skuPo==null||state.equals(GoodsSku.State.DELETED))return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        if(skuPo==null||GoodsSku.State.getTypeByCode(skuPo.getDisabled().intValue()).equals(GoodsSku.State.DELETED))return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
 
+        GoodsSku.State state=GoodsSku.State.getTypeByCode(skuPo.getDisabled().intValue());
         //shopId能对上号
         GoodsSpuPo spuPo= spuMapper.selectByPrimaryKey(skuPo.getGoodsSpuId());
         if(!spuPo.getShopId().equals(shopId))return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
@@ -818,15 +837,15 @@ public class GoodsDao {
         }
 
         //3. 浮动表中无数据，则返回sku原价
-        if(floatPricePo != null) {
+        if(!(floatPricePo==null||floatPricePo.size()==0||floatPricePo.get(0).getQuantity().equals(0))) {
             return new ReturnObject<>(floatPricePo.get(0).getActivityPrice());
         }else {
             return new ReturnObject<>(sku.getOriginalPrice());
         }
     }
 //瞎写的
-    public ReturnObject modifyShop(Long id, String name) {
-        return new ReturnObject();
+    public ReturnObject<ResponseCode> modifyShop(Long id, String name) {
+        return new ReturnObject<>();
     }
 
     public SimpleGoodsSkuDTO getSimpleSkuBySkuId(Long skuId) {
@@ -842,7 +861,59 @@ public class GoodsDao {
         return simpleGoodsSkuDTO;
     }
 
-    public ReturnObject modifyInventory(Long skuId, Integer quantity) {
+    public ReturnObject<GoodsDetailDTO> modifyInventory(Long skuId, Integer quantity) {
+        GoodsDetailDTO dto=new GoodsDetailDTO();
+        //看看floatprice要不要改
+        FloatPricePoExample example = new FloatPricePoExample();
+        FloatPricePoExample.Criteria criteria = example.createCriteria();
+        criteria.andGoodsSkuIdEqualTo(skuId);
+        criteria.andBeginTimeLessThanOrEqualTo(LocalDateTime.now());
+        criteria.andEndTimeGreaterThan(LocalDateTime.now());
+        criteria.andGoodsSkuIdEqualTo(skuId);
+        criteria.andInvalidByEqualTo(FloatPrice.Validation.VALID.getCode().longValue());
+
+        List<FloatPricePo> floatPricePos = new ArrayList<>();
+        try {
+            floatPricePos = floatPricePoMapper.selectByExample(example);
+        } catch (Exception e) {
+            StringBuilder message1 = new StringBuilder().append("getPriceBySkuId: ").append(e.getMessage());
+            logger.error(message1.toString());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+        }
+
+        //有floatPrice
+        if(floatPricePos!=null&&floatPricePos.size()>0)
+        {
+            FloatPricePo floatPricePo=floatPricePos.get(0);
+            if(floatPricePo.getQuantity()-quantity<0)
+                return new ReturnObject<>(ResponseCode.SKU_NOTENOUGH);
+            dto.setInventory(floatPricePo.getQuantity());
+            dto.setPrice(floatPricePo.getActivityPrice());
+            floatPricePo.setQuantity(floatPricePo.getQuantity()-quantity);
+
+            try{
+                int ret=floatPricePoMapper.updateByPrimaryKeySelective(floatPricePo);
+                if(ret==0)
+                {
+                    logger.debug("modifyInventory fail:floatPricePo="+floatPricePo);
+                    return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("sku不合法：" + skuId));
+                }
+                else  return new ReturnObject<>();
+            }
+            catch (DataAccessException e)
+            {
+                // 其他数据库错误
+                logger.debug("other sql exception : " + e.getMessage());
+                return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+            }
+            catch (Exception e) {
+                // 其他Exception错误
+                logger.error("other exception : " + e.getMessage());
+                return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+            }
+        }
+
+
         String key="sku_"+skuId;
         GoodsSkuPo skuPo=new GoodsSkuPo();
         Integer inventory;
@@ -872,11 +943,18 @@ public class GoodsDao {
 
             //添加SKU库存
             redisTemplate.opsForHash().put(key,"quantity",inventory-quantity);
+            redisTemplate.opsForHash().put(key,"price",skuPo.getOriginalPrice());
         }
 
+        //设置dto
+        if(dto.getInventory()==null||dto.getInventory()<=0)
+        {
+            dto.setInventory(inventory);
+            dto.setPrice((Long) redisTemplate.opsForHash().get(key,"price"));
+        }
 
         //修改SKU库存
-        skuPo.setInventory(quantity);
+        skuPo.setInventory(inventory-quantity);
         String json = JacksonUtil.toJson(skuPo);
         Message message = MessageBuilder.withPayload(json).build();
         logger.info("sendLogMessage: message = " + message);
@@ -892,60 +970,63 @@ public class GoodsDao {
             }
         });
 
-        //看看floatprice要不要改
-        FloatPricePoExample example = new FloatPricePoExample();
-        FloatPricePoExample.Criteria criteria = example.createCriteria();
-        criteria.andGoodsSkuIdEqualTo(skuId);
-        criteria.andBeginTimeLessThanOrEqualTo(LocalDateTime.now());
-        criteria.andEndTimeGreaterThan(LocalDateTime.now());
-        criteria.andGoodsSkuIdEqualTo(skuId);
-        criteria.andInvalidByEqualTo(FloatPrice.Validation.VALID.getCode().longValue());
 
-        List<FloatPricePo> floatPricePos = new ArrayList<>();
-        try {
-            floatPricePos = floatPricePoMapper.selectByExample(example);
-        } catch (Exception e) {
-            StringBuilder message1 = new StringBuilder().append("getPriceBySkuId: ").append(e.getMessage());
-            logger.error(message1.toString());
-            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
-        }
-
-        //有floatPrice
-        if(floatPricePos!=null&&floatPricePos.size()>0)
-        {
-            FloatPricePo floatPricePo=floatPricePos.get(0);
-            floatPricePo.setQuantity((floatPricePo.getQuantity()-quantity>0)?(floatPricePo.getQuantity()-quantity):0);
-            try{
-                int ret=floatPricePoMapper.updateByPrimaryKeySelective(floatPricePo);
-                if(ret==0)
-                {
-                    logger.debug("modifyInventory fail:floatPricePo="+floatPricePo);
-                    return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("sku字段不合法：" + skuPo.toString()));
-                }
-                else  return new ReturnObject<>();
-            }
-            catch (DataAccessException e)
-            {
-                // 其他数据库错误
-                logger.debug("other sql exception : " + e.getMessage());
-                return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
-            }
-            catch (Exception e) {
-                // 其他Exception错误
-                logger.error("other exception : " + e.getMessage());
-                return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
-            }
-        }
-        else return new ReturnObject<>();
+        return new ReturnObject<>(dto);
     }
 
-    public void updateQuantityByPrimaryKeySelective(GoodsSkuPo skuPo) {
+    public void updateByPrimaryKeySelective(GoodsSkuPo skuPo) {
         try{
-            skuMapper.updateQuantityByPrimaryKeySelective(skuPo);
+            skuMapper.updateByPrimaryKeySelective(skuPo);
         }
         catch (Exception e)
         {
             logger.error("严重错误：" + e.getMessage());
         }
+    }
+
+    public ReturnObject<GoodsFreightDTO> getGoodsFreightDetailBySkuId(Long skuId) {
+        GoodsSkuPo skuPo=skuMapper.selectByPrimaryKey(skuId);
+        if(skuPo==null)return new ReturnObject<>(null);
+        GoodsSpuPo spuPo= spuMapper.selectByPrimaryKey(skuPo.getGoodsSpuId());
+        if(spuPo==null)return new ReturnObject<>(null);
+        GoodsFreightDTO dto=new GoodsFreightDTO();
+        dto.setFreightModelId(spuPo.getFreightId());
+        dto.setShopId(spuPo.getShopId());
+        dto.setWeight(skuPo.getWeight());
+        return new ReturnObject<>(dto);
+    }
+
+    public ReturnObject<ShopDetailDTO> getShopInfoBySkuId(Long skuId) {
+        GoodsSkuPo skuPo=skuMapper.selectByPrimaryKey(skuId);
+        if(skuPo==null)return new ReturnObject<>(null);
+        GoodsSpuPo spuPo= spuMapper.selectByPrimaryKey(skuPo.getGoodsSpuId());
+        if(spuPo==null)return new ReturnObject<>(null);
+        ShopPo shopPo=shopMapper.selectByPrimaryKey(spuPo.getShopId());
+        if(shopPo==null)return new ReturnObject<>(null);
+        ShopDetailDTO dto=new ShopDetailDTO();
+        dto.setGmtCreate(shopPo.getGmtCreate().toString());
+        dto.setGmtModified(shopPo.getGmtModified().toString());
+        dto.setName(shopPo.getName());
+        dto.setState(shopPo.getState());
+        return new ReturnObject<>(dto);
+    }
+
+//    public List<Long> getSkuIdsBySpuId(Long spuId) {
+//        GoodsSkuPoExample example = new GoodsSkuPoExample();
+//        GoodsSkuPoExample.Criteria criteria = example.createCriteria();
+//        criteria.andGoodsSpuIdEqualTo(spuId);
+//
+//    }
+
+    public ReturnObject<List<Long>> getSkuIdsBySpuId(Long spuId) {
+        List<Long>skuIds=new ArrayList<>();
+        GoodsSkuPoExample skuExample=new GoodsSkuPoExample();
+        GoodsSkuPoExample.Criteria skuCriteria=skuExample.createCriteria();
+        skuCriteria.andGoodsSpuIdEqualTo(spuId);
+        List<GoodsSkuPo> skuPos=skuMapper.selectByExample(skuExample);
+        //查得到spu下的sku
+        if(skuPos!=null&&skuPos.size()>0)
+            skuIds.addAll(skuPos.stream().map(GoodsSkuPo::getId).collect(Collectors.toList()));
+        return new ReturnObject<>(skuIds);
     }
 }

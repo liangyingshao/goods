@@ -28,18 +28,18 @@ import java.io.IOException;
 @Service
 public class GoodsService {
 
-    private Logger logger = LoggerFactory.getLogger(GoodsService.class);
+    private final Logger logger = LoggerFactory.getLogger(GoodsService.class);
     @Autowired
     GoodsDao goodsDao;
-    private String davUsername="oomall";
-    private String davPassword="admin";
-    private String baseUrl="http://192.168.148.131:8888/webdav/";
+    private final String davUsername="oomall";
+    private final String davPassword="admin";
+    private final String baseUrl="http://192.168.148.131:8888/webdav/";
 
     @DubboReference
     private IShareService IShareService;
 
     @Transactional
-    public ReturnObject modifyShop(Long id, String name) {
+    public ReturnObject<ResponseCode> modifyShop(Long id, String name) {
 
         return goodsDao.modifyShop(id,name);
 
@@ -60,7 +60,7 @@ public class GoodsService {
     {
         PageInfo<GoodsSkuRetVo> skuRetVos=goodsDao.getSkuList(shopId,skuSn,spuId,spuSn,page,pageSize);
         if(skuRetVos!=null&&skuRetVos.getList().size()>0)
-            skuRetVos.getList().stream().forEach(x->x.setPrice(goodsDao.getPriceBySkuId(x.getId()).getData()));
+            skuRetVos.getList().forEach(x->x.setPrice(goodsDao.getPriceBySkuId(x.getId()).getData()));
         return new ReturnObject<>(skuRetVos);
     }
 
@@ -73,7 +73,10 @@ public class GoodsService {
     public ReturnObject<GoodsSkuDetailRetVo> getSku(Long id)
     {
         GoodsSkuDetailRetVo retVo=goodsDao.getSku(id);
-        if(retVo==null)return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        if(retVo==null)
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+
+        retVo.setShareable(IShareService.skuSharable(id).getData());
         return new ReturnObject<>(retVo);
     }
 
@@ -132,7 +135,7 @@ public class GoodsService {
      * @return ReturnObject
      */
     @Transactional
-    public ReturnObject deleteSku(Long shopId, Long id)
+    public ReturnObject<ResponseCode> deleteSku(Long shopId, Long id)
     {
         return goodsDao.logicalDelete(shopId,id);
     }
@@ -144,7 +147,7 @@ public class GoodsService {
      * @return ReturnObject
      */
     @Transactional
-    public ReturnObject modifySku(Long shopId, GoodsSku bo)
+    public ReturnObject<ResponseCode> modifySku(Long shopId, GoodsSku bo)
     {
         return goodsDao.modifySku(shopId,bo);
     }
@@ -196,11 +199,11 @@ public class GoodsService {
      * 店家商品上架
      * @param shopId
      * @param id
-     * @return
+     * @return ReturnObject
      */
     @Transactional
-    public ReturnObject putGoodsOnSale(Long shopId, Long id) {
-        ReturnObject returnObject=goodsDao.putGoodsOnSale(shopId,id);
+    public ReturnObject<ResponseCode> putGoodsOnSale(Long shopId, Long id) {
+        ReturnObject<ResponseCode> returnObject=goodsDao.putGoodsOnSale(shopId,id);
         return returnObject;
     }
 
@@ -208,11 +211,11 @@ public class GoodsService {
      * 店家商品下架
      * @param shopId
      * @param id
-     * @return
+     * @return ReturnObject
      */
-    public ReturnObject putOffGoodsOnSale(Long shopId,Long id)
+    public ReturnObject<ResponseCode> putOffGoodsOnSale(Long shopId,Long id)
     {
-        ReturnObject returnObject=goodsDao.putOffGoodsOnSale(shopId,id);
+        ReturnObject<ResponseCode> returnObject=goodsDao.putOffGoodsOnSale(shopId,id);
         return returnObject;
     }
 }
