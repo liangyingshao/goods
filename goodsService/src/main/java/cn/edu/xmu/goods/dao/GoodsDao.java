@@ -251,7 +251,18 @@ public class GoodsDao {
                 logger.debug("logicalDelete:update fail.sku id="+id);
                 return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             }
-            else return new ReturnObject<>();
+            else {
+                FloatPricePo floatPo=new FloatPricePo();
+                floatPo.setGoodsSkuId(skuPo.getId());
+                floatPo.setValid(FloatPrice.Validation.INVALID.getCode().byteValue());
+                ret=floatPricePoMapper.updateByPrimaryKeySelective(floatPo);
+                if(ret==0)
+                {
+                    logger.debug("logicalDelete:update fail.floatPrice skuId="+id);
+                    return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+                }
+                else return new ReturnObject<>();
+            }
         }
         else return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
     }
@@ -575,7 +586,8 @@ public class GoodsDao {
 
     public ReturnObject<Boolean> getVaildSkuId(Long skuId)
     {
-        return new ReturnObject<>((skuMapper.selectByPrimaryKey(skuId)!=null));
+        GoodsSkuPo skuPo=skuMapper.selectByPrimaryKey(skuId);
+        return new ReturnObject<>((skuPo!=null&&!GoodsSku.State.getTypeByCode(skuPo.getDisabled().intValue()).equals(GoodsSku.State.DELETED)));
     }
 
     public SkuInfoDTO getSelectSkuInfoBySkuId(Long skuId)

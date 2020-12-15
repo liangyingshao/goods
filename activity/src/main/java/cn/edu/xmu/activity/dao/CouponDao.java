@@ -723,9 +723,10 @@ public class CouponDao implements InitializingBean
     /**
      * 管理员新建己方优惠活动
      * @param activity
+     * @param createByName
      * @return ReturnObject
      */
-    public ReturnObject<CouponActivityVo> addCouponActivity(CouponActivity activity,SimpleShopDTO simpleShop) {
+    public ReturnObject<CouponActivityVo> addCouponActivity(CouponActivity activity, SimpleShopDTO simpleShop, String createByName) {
         CouponActivityPo activityPo=activity.createActivityPo();
         ReturnObject<CouponActivityVo> returnObject=null;
         try{
@@ -1176,5 +1177,6 @@ public class CouponDao implements InitializingBean
         if(activityPo==null||!activityPo.getState().equals(1))return false;
         LocalDateTime now=LocalDateTime.now();
         if(activityPo.getBeginTime().isBefore(now)&&activityPo.getEndTime().isAfter(now))return true;
+        return false;
     }
 }
