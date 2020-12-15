@@ -4,6 +4,7 @@ import cn.edu.xmu.goods.mapper.*;
 import cn.edu.xmu.goods.model.bo.FloatPrice;
 import cn.edu.xmu.goods.model.bo.GoodsSku;
 import cn.edu.xmu.goods.model.bo.GoodsSpu;
+import cn.edu.xmu.goods.model.bo.Shop;
 import cn.edu.xmu.goods.model.po.*;
 import cn.edu.xmu.goods.model.vo.*;
 import cn.edu.xmu.ooad.util.JacksonUtil;
@@ -983,6 +984,39 @@ public class GoodsDao {
         }
     }
 
+    public ReturnObject<GoodsFreightDTO> getGoodsFreightDetailBySkuId(Long skuId) {
+        GoodsSkuPo skuPo=skuMapper.selectByPrimaryKey(skuId);
+        if(skuPo==null)return new ReturnObject<>(null);
+        GoodsSpuPo spuPo= spuMapper.selectByPrimaryKey(skuPo.getGoodsSpuId());
+        if(spuPo==null)return new ReturnObject<>(null);
+        GoodsFreightDTO dto=new GoodsFreightDTO();
+        dto.setFreightModelId(spuPo.getFreightId());
+        dto.setShopId(spuPo.getShopId());
+        dto.setWeight(skuPo.getWeight());
+        return new ReturnObject<>(dto);
+    }
+
+    public ReturnObject<ShopDetailDTO> getShopInfoBySkuId(Long skuId) {
+        GoodsSkuPo skuPo=skuMapper.selectByPrimaryKey(skuId);
+        if(skuPo==null)return new ReturnObject<>(null);
+        GoodsSpuPo spuPo= spuMapper.selectByPrimaryKey(skuPo.getGoodsSpuId());
+        if(spuPo==null)return new ReturnObject<>(null);
+        ShopPo shopPo=shopMapper.selectByPrimaryKey(spuPo.getShopId());
+        if(shopPo==null)return new ReturnObject<>(null);
+        ShopDetailDTO dto=new ShopDetailDTO();
+        dto.setGmtCreate(shopPo.getGmtCreate().toString());
+        dto.setGmtModified(shopPo.getGmtModified().toString());
+        dto.setName(shopPo.getName());
+        dto.setState(shopPo.getState());
+        return new ReturnObject<>(dto);
+    }
+
+//    public List<Long> getSkuIdsBySpuId(Long spuId) {
+//        GoodsSkuPoExample example = new GoodsSkuPoExample();
+//        GoodsSkuPoExample.Criteria criteria = example.createCriteria();
+//        criteria.andGoodsSpuIdEqualTo(spuId);
+//
+//    }
 
     public ReturnObject<List<Long>> getSkuIdsBySpuId(Long spuId) {
         List<Long>skuIds=new ArrayList<>();
