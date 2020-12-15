@@ -254,6 +254,8 @@ public class PresaleDao {
         //5.从redis中删除
         if(delelePresaleInventoryFromRedis(id).getCode()!=ResponseCode.OK)
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+        if(delelePresalePriceFromRedis(id).getCode()!=ResponseCode.OK)
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
 
         //6.返回
         return new ReturnObject<>(ResponseCode.OK);
@@ -350,6 +352,8 @@ public class PresaleDao {
 
         //6.从redis中删除
         if(delelePresaleInventoryFromRedis(id).getCode()!=ResponseCode.OK)
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+        if(delelePresalePriceFromRedis(id).getCode()!=ResponseCode.OK)
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
 
         //7.返回
@@ -487,6 +491,15 @@ public class PresaleDao {
         //如果存在
         if(redisTemplate.opsForHash().hasKey(key,"quantity")) {
             redisTemplate.opsForHash().delete(key,"quantity");
+        }
+        return new ReturnObject<>(ResponseCode.OK);
+    }
+
+    public ReturnObject delelePresalePriceFromRedis(Long presaleId){
+        String key="pa_"+ presaleId;
+        //如果存在
+        if(redisTemplate.opsForHash().hasKey(key,"price")) {
+            redisTemplate.opsForHash().delete(key,"price");
         }
         return new ReturnObject<>(ResponseCode.OK);
     }
