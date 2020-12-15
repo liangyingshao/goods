@@ -12,8 +12,11 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GoodsInfoDTO implements Serializable {
+
     private String skuName;
+
     private Long spuId;
+
     private String spuName;
     /**
      * 此时单价

@@ -6,10 +6,11 @@ import cn.edu.xmu.ooad.util.ReturnObject;
 
 import java.util.List;
 
-public interface IFootprintService {
+public interface ICartService {
 
     /**
-     * 增加足迹
+     * 通过skuId清购物车
      */
-    ReturnObject<ResponseCode> postFootprint(Long customerId, Long skuId);
+    ReturnObject<ResponseCode> deleteGoodsInCart(Long customerId, List<Long> skuIdList);
+
 }

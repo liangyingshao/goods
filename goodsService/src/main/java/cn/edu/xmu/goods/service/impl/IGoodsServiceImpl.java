@@ -226,6 +226,21 @@ public class IGoodsServiceImpl implements IGoodsService {
     }
 
     @Override
+    public ReturnObject<Boolean> updateSpuFreightId(Long freightModelId) {
+        return null;
+    }
+
+    @Override
+    public ReturnObject<ResponseCode> signalDecrInventory(List<Long> skuIds, List<Integer> quantity) {
+        return null;
+    }
+
+    @Override
+    public ReturnObject<List<String>> getActivityRule(Long couponId, List<Long> activityId) {
+        return null;
+    }
+
+    @Override
     public ReturnObject<ShopDetailDTO> getShopInfoByShopId(Long shopId) {
         ShopDetailDTO shopDetailDTO = null;
         ShopPo shopPo = shopDao.getShopById(shopId).getData();
