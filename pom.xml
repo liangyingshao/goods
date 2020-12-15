@@ -16,12 +16,12 @@
 
     <modules>
         <module>core</module>
-        <module>goodsservice</module>
         <module>flashsale</module>
         <module>goods-client</module>
         <module>order-client</module>
         <module>other-client</module>
         <module>activity</module>
+        <module>goodsservice</module>
 <!--        <module>oomall-test</module>-->
         <module>oomall-gateway</module>
     </modules>

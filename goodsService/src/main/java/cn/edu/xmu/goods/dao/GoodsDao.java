@@ -830,7 +830,7 @@ public class GoodsDao {
         }
 
         //3. 浮动表中无数据，则返回sku原价
-        if(floatPricePo != null) {
+        if(floatPricePo != null && floatPricePo.size()>0) {
             return new ReturnObject<>(floatPricePo.get(0).getActivityPrice());
         }else {
             return new ReturnObject<>(sku.getOriginalPrice());
@@ -960,4 +960,11 @@ public class GoodsDao {
             logger.error("严重错误：" + e.getMessage());
         }
     }
+
+//    public List<Long> getSkuIdsBySpuId(Long spuId) {
+//        GoodsSkuPoExample example = new GoodsSkuPoExample();
+//        GoodsSkuPoExample.Criteria criteria = example.createCriteria();
+//        criteria.andGoodsSpuIdEqualTo(spuId);
+//
+//    }
 }
