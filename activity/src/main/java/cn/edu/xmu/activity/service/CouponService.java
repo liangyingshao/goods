@@ -212,8 +212,8 @@ public class CouponService {
      * @param id
      * @return ReturnObject
      */
-    public ReturnObject offlineCouponActivity(Long shopId, Long id) {
-        ReturnObject returnObject= couponDao.offlineCouponActivity(shopId, id);
+    public ReturnObject offlineCouponActivity(Long shopId, Long id,Long userId) {
+        ReturnObject returnObject= couponDao.offlineCouponActivity(shopId, id,userId);
         return returnObject;
     }
 

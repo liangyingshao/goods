@@ -738,7 +738,7 @@ public class CouponDao implements InitializingBean
             } else {
                 //插入成功
                 logger.debug("insertRole: insert coupon activity = " + activityPo.toString());
-                //检验
+                //检验 有点问题？
                 CouponActivityPoExample couponActivityExample=new CouponActivityPoExample();
                 CouponActivityPoExample.Criteria couponActivityCriteria=couponActivityExample.createCriteria();
                 couponActivityCriteria.andNameEqualTo(activityPo.getName());
@@ -762,7 +762,6 @@ public class CouponDao implements InitializingBean
                     modiBy.setId(null);
                     modiBy.setUsername(null);
                     retVo.setModifiedBy(modiBy);
-
                     return new ReturnObject<>(retVo);
 
                 }
@@ -794,7 +793,7 @@ public class CouponDao implements InitializingBean
         CouponActivityPoExample.Criteria criteria=activityPoExample.createCriteria();
         criteria.andIdEqualTo(activity.getId());
         criteria.andShopIdEqualTo(activity.getShopId());
-        criteria.andStateEqualTo((byte)0);//待修改活动必须为“已下线”
+        criteria.andStateEqualTo((byte)0);//待修改活动必须为【已下线】
         try{
             int ret = activityMapper.updateByExampleSelective(activityPo,activityPoExample);
             if(ret==0){//修改失败
@@ -828,26 +827,27 @@ public class CouponDao implements InitializingBean
      * @param id
      * @return ReturnObject
      */
-    public ReturnObject offlineCouponActivity(Long shopId, Long id) {
+    public ReturnObject offlineCouponActivity(Long shopId, Long id,Long userId) {
         ReturnObject returnObject=null;
         CouponActivityPoExample activityPoExample=new CouponActivityPoExample();
         CouponActivityPoExample.Criteria criteria=activityPoExample.createCriteria();
         criteria.andIdEqualTo(id);
         criteria.andShopIdEqualTo(shopId);
-        //criteria.andStateEqualTo((byte)0);//待取消活动必须为“可执行”
+        //criteria.andStateEqualTo((byte)1);//待取消活动必须为1【已上线】
         try{
             //下线优惠活动
             List<CouponActivityPo> activityPo=activityMapper.selectByExample(activityPoExample);
-            if(!activityPo.get(0).getState().equals((byte)0)){//未找到符合条件的优惠活动
-//                returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,String.format("下线优惠活动失败"));
-                return returnObject=new ReturnObject<>(ResponseCode.ACTIVITYALTER_INVALID,String.format("下线优惠活动失败"));
+            if(activityPo==null)//未找到符合条件的优惠活动
+                returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            if(!activityPo.get(0).getState().equals((byte)1)){//未找到符合条件的优惠活动
+                return returnObject=new ReturnObject<>(ResponseCode.ACTIVITYALTER_INVALID,String.format("不可重复下线"));
             }
 
-            activityPo.get(0).setState((byte)1);
+            activityPo.get(0).setState((byte)0);//活动状态修改为0【已下线】
+            activityPo.get(0).setModiBy(userId);//修改者更新
             int ret = activityMapper.updateByExampleSelective(activityPo.get(0),activityPoExample);
             if(ret==0){//修改失败
                 logger.debug("updateCouponActivity fail:"+activityPo.toString());
-                //returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,String.format("下线优惠活动失败"));
                 returnObject=new ReturnObject<>(ResponseCode.ACTIVITYALTER_INVALID,String.format("下线优惠活动失败"));
             }
             else{//修改活动状态成功
@@ -903,18 +903,18 @@ public class CouponDao implements InitializingBean
     public ReturnObject<PageInfo<CouponActivityByNewCouponRetVo>> showActivities(Long shopId, Integer timeline, Integer page, Integer pageSize) {
         CouponActivityPoExample activityExample=new CouponActivityPoExample();
         CouponActivityPoExample.Criteria criteria=activityExample.createCriteria();
-        criteria.andStateEqualTo((byte)0);//必须为可执行活动
+        criteria.andStateEqualTo((byte)1);//必须为【已上线】活动
         //设置shopId
         if(shopId!=null)
             criteria.andShopIdEqualTo(shopId);
         //设置timeline
-        if(timeline==0)
+        if(timeline==0)//未上线的
             criteria.andBeginTimeGreaterThan(LocalDateTime.now());
-        else if(timeline==2){
+        else if(timeline==2){//正在进行中的
             criteria.andBeginTimeLessThanOrEqualTo(LocalDateTime.now());
             criteria.andEndTimeGreaterThanOrEqualTo(LocalDateTime.now());
         }
-        else if(timeline==3)
+        else if(timeline==3)//已下线的
             criteria.andEndTimeLessThan(LocalDateTime.now());
         else if(timeline==1){//明天上线的
             LocalDateTime searchTime= LocalDateTime.now();
@@ -934,7 +934,7 @@ public class CouponDao implements InitializingBean
         List<CouponActivityPo> activityPos=null;
         try{
             activityPos=activityMapper.selectByExample(activityExample);
-            if(activityPos.size()==0)
+            if(activityPos.size()==0)//未找到相应活动
                 return new ReturnObject<>(ResponseCode.ACTIVITY_NOTFOUND);
             List<CouponActivityByNewCouponRetVo> retList=new ArrayList<>(activityPos.size());
             for(CouponActivityPo po:activityPos){
@@ -968,7 +968,7 @@ public class CouponDao implements InitializingBean
     public ReturnObject<PageInfo<CouponActivityByNewCouponRetVo>> showInvalidCouponActivities(Long shopId, Integer page, Integer pageSize) {
         CouponActivityPoExample activityExample=new CouponActivityPoExample();
         CouponActivityPoExample.Criteria criteria=activityExample.createCriteria();
-        criteria.andStateEqualTo((byte)1);//必须为不可执行活动
+        criteria.andStateEqualTo((byte)0);//必须为【已下线】活动
         //设置shopId
         criteria.andShopIdEqualTo(shopId);
         //分页查询
@@ -977,7 +977,7 @@ public class CouponDao implements InitializingBean
         List<CouponActivityPo> activityPos=null;
         try{
             activityPos=activityMapper.selectByExample(activityExample);
-            if(activityPos.size()==0)
+            if(activityPos.size()==0)//未找到符合条件的活动
                 return new ReturnObject<>(ResponseCode.ACTIVITY_NOTFOUND);
             List<CouponActivityByNewCouponRetVo> retList=new ArrayList<>(activityPos.size());
             for(CouponActivityPo po:activityPos){
