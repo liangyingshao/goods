@@ -1,6 +1,7 @@
 package cn.edu.xmu.oomall.goods.service;
 
 import cn.edu.xmu.ooad.util.ReturnObject;
+import cn.edu.xmu.oomall.goods.model.GoodsDetailDTO;
 
 /**
  * @author: 24320182203259 邵良颖
@@ -14,4 +15,6 @@ public interface IFlashsaleService {
      * id：时间段id
      */
     ReturnObject deleteSegmentFlashsale(Long id);
+
+    ReturnObject<GoodsDetailDTO> modifyFlashsaleItem(Long skuId, Integer quantity);
 }

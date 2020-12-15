@@ -6,12 +6,14 @@ import cn.edu.xmu.goods.dao.ShopDao;
 import cn.edu.xmu.goods.model.po.GoodsSkuPo;
 import cn.edu.xmu.goods.model.po.ShopPo;
 import cn.edu.xmu.goods.model.vo.GoodsSkuDetailRetVo;
+import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.goods.model.*;
 //import cn.edu.xmu.oomall.goods.model.GoodsDetailDTO;
 //import cn.edu.xmu.oomall.goods.model.GoodsFreightDTO;
 //import cn.edu.xmu.oomall.goods.model.ShopDetailDTO;
 import cn.edu.xmu.oomall.goods.service.IActivityService;
+import cn.edu.xmu.oomall.goods.service.IFlashsaleService;
 import cn.edu.xmu.oomall.goods.service.IGoodsService;
 //import com.alibaba.dubbo.config.annotation.Service;
 import org.apache.dubbo.config.annotation.DubboReference;
@@ -40,6 +42,9 @@ public class IGoodsServiceImpl implements IGoodsService {
 
     @DubboReference
     private IActivityService IActivityService;
+
+    @DubboReference
+    private IFlashsaleService iFlashsaleService;
 
     @Override
     public ReturnObject<List<Long>> getAllSkuIdByShopId(Long shopId) {
@@ -171,13 +176,24 @@ public class IGoodsServiceImpl implements IGoodsService {
                     break;
                 }
                 case (0)://秒杀/普通
-
+                {
+                    returnObject = iFlashsaleService.modifyFlashsaleItem(skuId,quantity);
+                    if(returnObject.getCode()==ResponseCode.RESOURCE_ID_NOTEXIST) {
+                        //不是秒杀商品，查出普通SKU
+                        returnObject=goodsDao.getGoodsBySkuId(skuId);
+                    } else {
+                        GoodsDetailDTO dto = returnObject.getData();
+                        dto.setName(goodsDao.getGoodsBySkuId(skuId).getData().getName());//获取sku name
+                        returnObject = new ReturnObject<>(dto);
+                    }
+                    break;
+                }
                 case (1)://团购
                 case (3)://优惠券
                 break;
             }
             if(returnObject.getCode().equals(ResponseCode.OK))
-                returnObject=goodsDao.modifyInventory(skuId,quantity);
+                returnObject=goodsDao.modifyInventory(skuId,quantity);//在这里更新SKU的inventory
         }
         return returnObject;
     }
