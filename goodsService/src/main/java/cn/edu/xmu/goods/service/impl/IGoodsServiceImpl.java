@@ -218,8 +218,9 @@ public class IGoodsServiceImpl implements IGoodsService {
                 ret=goodsDao.modifyInventory(skuId,quantity);
                 returnObject.getData().setPrice(ret.getData().getPrice());
                 returnObject.getData().setInventory(ret.getData().getInventory());
+                break;
             }
-            break;
+            default:return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
         }
         return returnObject;
     }
