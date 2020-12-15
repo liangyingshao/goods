@@ -1,8 +1,8 @@
 package cn.edu.xmu.oomall.order.service;
 
+import cn.edu.xmu.oomall.order.model.OrderDTO;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
-import cn.edu.xmu.oomall.order.model.OrderDTO;
 import cn.edu.xmu.oomall.order.model.OrderInnerDTO;
 import cn.edu.xmu.oomall.order.model.SimpleFreightModelDTO;
 

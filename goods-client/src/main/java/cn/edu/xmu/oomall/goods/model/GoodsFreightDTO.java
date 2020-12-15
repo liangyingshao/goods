@@ -15,7 +15,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GoodsFreightDTO implements Serializable {
-    private Integer weight;
+    private Long weight;
     private Long freightModelId;
     private Long shopId;
 }

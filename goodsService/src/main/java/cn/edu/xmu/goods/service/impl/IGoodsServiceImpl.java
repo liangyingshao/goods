@@ -95,11 +95,10 @@ public class IGoodsServiceImpl implements IGoodsService {
     @Override
     public List<SkuNameInfoDTO> getSelectSkuNameListBySkuIdList(List<Long> idList) {
         List<SkuNameInfoDTO> nameList = new ArrayList<>();
-        for (int i=0;i<idList.size();i++)
-        {
-            GoodsSkuDetailRetVo goodsSkuRetVo = goodsDao.getSku(idList.get(i));
+        for (Long aLong : idList) {
+            GoodsSkuDetailRetVo goodsSkuRetVo = goodsDao.getSku(aLong);
             //判空指针
-            if(goodsSkuRetVo!=null){
+            if (goodsSkuRetVo != null) {
                 SkuNameInfoDTO skuNameInfoDTO = new SkuNameInfoDTO();
                 skuNameInfoDTO.setId(skuNameInfoDTO.getId());
                 skuNameInfoDTO.setName(goodsSkuRetVo.getName());
@@ -110,8 +109,8 @@ public class IGoodsServiceImpl implements IGoodsService {
     }
 
     @Override
-    public ReturnObject checkSkuUsableBySkuShop(Long skuId, Long shopId) {
-        ReturnObject returnObject=goodsDao.checkSkuUsableBySkuShop(skuId,shopId);
+    public ReturnObject<ResponseCode> checkSkuUsableBySkuShop(Long skuId, Long shopId) {
+        ReturnObject<ResponseCode> returnObject=goodsDao.checkSkuUsableBySkuShop(skuId,shopId);
         return returnObject;
     }
 
@@ -145,7 +144,7 @@ public class IGoodsServiceImpl implements IGoodsService {
     @Override
     public List<SkuInfoDTO> getSelectSkuListBySkuIdList(List<Long> idList) {
         List<SkuInfoDTO> list=new ArrayList<>();
-        idList.stream().forEach(x->{
+        idList.forEach(x->{
             list.add(getSelectSkuInfoBySkuId(x).getData());
         });
         return list;
@@ -153,12 +152,14 @@ public class IGoodsServiceImpl implements IGoodsService {
 
     @Override
     public ReturnObject<ShopDetailDTO> getShopInfoBySkuId(Long skuId) {
-        return null;
+        ReturnObject<ShopDetailDTO>returnObject=goodsDao.getShopInfoBySkuId(skuId);
+        return returnObject;
     }
 
     @Override
     public ReturnObject<GoodsFreightDTO> getGoodsFreightDetailBySkuId(Long skuId) {
-        return null;
+        ReturnObject<GoodsFreightDTO> returnObject=goodsDao.getGoodsFreightDetailBySkuId(skuId);
+        return returnObject;
     }
 
     /**
@@ -170,7 +171,7 @@ public class IGoodsServiceImpl implements IGoodsService {
      * @param type
      * @param activityId
      * @param quantity
-     * @return
+     * @return ReturnObject<GoodsDetailDTO>
      */
     @Override
     public ReturnObject<GoodsDetailDTO> getGoodsBySkuId(Long skuId, Byte type, Long activityId, Integer quantity) {
@@ -255,8 +256,7 @@ public class IGoodsServiceImpl implements IGoodsService {
 
     @Override
     public ReturnObject<List<Long>> getSkuIdsBySpuId(Long spuId){
-//        List<Long> skuIdList=goodsDao.getSkuIdsBySpuId(spuId);
-        return new ReturnObject<List<Long>>();
+        return goodsDao.getSkuIdsBySpuId(spuId);
     }
 
 }

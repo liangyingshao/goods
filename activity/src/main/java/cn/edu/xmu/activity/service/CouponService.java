@@ -5,7 +5,6 @@ import cn.edu.xmu.activity.model.bo.CouponActivity;
 import cn.edu.xmu.activity.model.po.CouponSkuPo;
 import cn.edu.xmu.activity.model.vo.*;
 import cn.edu.xmu.activity.model.bo.CouponSku;
-import cn.edu.xmu.activity.model.vo.CouponNewRetVo;
 import cn.edu.xmu.activity.model.vo.CouponRetVo;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
@@ -65,8 +64,8 @@ public class CouponService {
      * @return ReturnObject<CouponSkuRetVo>
      */
     @Transactional
-    public ReturnObject createCouponSkus(Long shopId, Long id, List<CouponSku> couponSkus) {
-        ReturnObject returnObject;
+    public ReturnObject<List<CouponSkuRetVo>> createCouponSkus(Long shopId, Long id, List<CouponSku> couponSkus) {
+        ReturnObject<List<CouponSkuRetVo>> returnObject;
         for(CouponSku couponSku:couponSkus)
         {
             returnObject= iGoodsService.checkSkuUsableBySkuShop(couponSku.getSkuId(), shopId);
@@ -83,9 +82,9 @@ public class CouponService {
      * @return ReturnObject
      */
     @Transactional
-    public ReturnObject deleteCouponSku(Long shopId, Long id)
+    public ReturnObject<ResponseCode> deleteCouponSku(Long shopId, Long id)
     {
-        ReturnObject returnObject= couponDao.deleteCouponSku(shopId,id);
+        ReturnObject<ResponseCode> returnObject= couponDao.deleteCouponSku(shopId,id);
         return returnObject;
     }
 
@@ -112,9 +111,9 @@ public class CouponService {
      * @return ReturnObject
      */
     @Transactional
-    public ReturnObject useCoupon(Long userId, Long id)
+    public ReturnObject<ResponseCode> useCoupon(Long userId, Long id)
     {
-        ReturnObject returnObject= couponDao.useCoupon(userId,id);
+        ReturnObject<ResponseCode> returnObject= couponDao.useCoupon(userId,id);
         return returnObject;
     }
 
@@ -126,9 +125,9 @@ public class CouponService {
      * @return ReturnObject
      */
     @Transactional
-    public ReturnObject deleteCoupon(Long userId, Long id)
+    public ReturnObject<ResponseCode> deleteCoupon(Long userId, Long id)
     {
-        ReturnObject returnObject= couponDao.deleteCoupon(userId,id);
+        ReturnObject<ResponseCode> returnObject= couponDao.deleteCoupon(userId,id);
         return returnObject;
     }
 
@@ -154,9 +153,9 @@ public class CouponService {
      * @return ReturnObject
      */
     @Transactional
-    public ReturnObject returnCoupon(Long shopId, Long id)
+    public ReturnObject<ResponseCode> returnCoupon(Long shopId, Long id)
     {
-        ReturnObject returnObject= couponDao.returnCoupon(shopId,id);
+        ReturnObject<ResponseCode> returnObject= couponDao.returnCoupon(shopId,id);
         return returnObject;
     }
 
@@ -178,7 +177,7 @@ public class CouponService {
 //            createByName=iPrivilegeService.getUserName(bo.getCreatedBy());
 //            modiByName=iPrivilegeService.getUserName(bo.getModiBy());
 //        }
-        ReturnObject returnObject= couponDao.showCouponActivity(simpleShopDTOReturnObject.getData(),id,createByName,modiByName);
+        ReturnObject<Object> returnObject= couponDao.showCouponActivity(simpleShopDTOReturnObject.getData(),id,createByName,modiByName);
         return returnObject;
     }
 
@@ -187,7 +186,7 @@ public class CouponService {
      * @param activity
      * @return ReturnObject
      */
-    public ReturnObject addCouponActivity(CouponActivity activity) {
+    public ReturnObject<CouponActivityVo> addCouponActivity(CouponActivity activity) {
         Long shopId = activity.getShopId();
         ReturnObject<SimpleShopDTO> simpleShopDTOReturnObject=iGoodsService.getSimpleShopByShopId(shopId);
         String createByName="";
@@ -201,8 +200,8 @@ public class CouponService {
      * @param activity
      * @return ReturnObject
      */
-    public ReturnObject modifyCouponActivity(CouponActivity activity) {
-        ReturnObject returnObject= couponDao.modifyCouponActivity(activity);
+    public ReturnObject<ResponseCode> modifyCouponActivity(CouponActivity activity) {
+        ReturnObject<ResponseCode> returnObject= couponDao.modifyCouponActivity(activity);
         return returnObject;
     }
 
@@ -212,8 +211,8 @@ public class CouponService {
      * @param id
      * @return ReturnObject
      */
-    public ReturnObject offlineCouponActivity(Long shopId, Long id,Long userId) {
-        ReturnObject returnObject= couponDao.offlineCouponActivity(shopId, id,userId);
+    public ReturnObject<ResponseCode> offlineCouponActivity(Long shopId, Long id,Long userId) {
+        ReturnObject<ResponseCode> returnObject= couponDao.offlineCouponActivity(shopId, id,userId);
         return returnObject;
     }
 
@@ -248,7 +247,7 @@ public class CouponService {
      * @param file
      * @return ReturnObject
      */
-    public ReturnObject uploadActivityImg(CouponActivity activity, MultipartFile file) {
+    public ReturnObject<Object> uploadActivityImg(CouponActivity activity, MultipartFile file) {
         ReturnObject<Object> returnObject = couponDao.uploadActivityImg(activity,file);
         return returnObject;
     }
