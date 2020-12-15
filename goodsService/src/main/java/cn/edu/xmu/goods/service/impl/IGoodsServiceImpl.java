@@ -239,8 +239,7 @@ public class IGoodsServiceImpl implements IGoodsService {
 
     @Override
     public ReturnObject<List<Long>> getSkuIdsBySpuId(Long spuId){
-//        List<Long> skuIdList=goodsDao.getSkuIdsBySpuId(spuId);
-        return new ReturnObject<List<Long>>();
+        return goodsDao.getSkuIdsBySpuId(spuId);
     }
 
 }

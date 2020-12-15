@@ -983,10 +983,16 @@ public class GoodsDao {
         }
     }
 
-//    public List<Long> getSkuIdsBySpuId(Long spuId) {
-//        GoodsSkuPoExample example = new GoodsSkuPoExample();
-//        GoodsSkuPoExample.Criteria criteria = example.createCriteria();
-//        criteria.andGoodsSpuIdEqualTo(spuId);
-//
-//    }
+
+    public ReturnObject<List<Long>> getSkuIdsBySpuId(Long spuId) {
+        List<Long>skuIds=new ArrayList<>();
+        GoodsSkuPoExample skuExample=new GoodsSkuPoExample();
+        GoodsSkuPoExample.Criteria skuCriteria=skuExample.createCriteria();
+        skuCriteria.andGoodsSpuIdEqualTo(spuId);
+        List<GoodsSkuPo> skuPos=skuMapper.selectByExample(skuExample);
+        //查得到spu下的sku
+        if(skuPos!=null&&skuPos.size()>0)
+            skuIds.addAll(skuPos.stream().map(GoodsSkuPo::getId).collect(Collectors.toList()));
+        return new ReturnObject<>(skuIds);
+    }
 }

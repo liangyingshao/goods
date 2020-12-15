@@ -14,5 +14,11 @@ import java.util.List;
  */
 public interface IFootprintService {
 
+    /**
+     * 添加足迹
+     * @param customerId
+     * @param skuId
+     * @return
+     */
     ReturnObject<ResponseCode> postFootprint(Long customerId, Long skuId);
 }
