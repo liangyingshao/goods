@@ -15,9 +15,6 @@ import java.util.Objects;
 
 /**
  * 分类访问类
- * @author Ming Qiu
- * createdBy Ming Qiu 2020/11/02 13:57
- * modifiedBy 王纬策 2020/11/7 19:20
  **/
 @Repository
 public class GoodsCategoryDao {
@@ -26,20 +23,11 @@ public class GoodsCategoryDao {
 
     @Autowired
     private GoodsCategoryPoMapper goodsCategoryMapper;
-
-//    @Autowired
-    //private RedisTemplate<String, Serializable> redisTemplate;
-
-
+    @Autowired
+    private GoodsSpuPoMapper goodsSpuMapper;
 
     /**
      * 根据 id 修改商品类目信息
-     *
-     * @param goodsCategoryVo 传入的 GoodsCategory 对象
-     * @return 返回对象 ReturnObj
-     * @author 19720182203919 李涵
-     * Created at 2020/11/4 20:30
-     * Modified by 19720182203919 李涵 at 2020/11/5 10:42
      */
     public ReturnObject<Object> modifyGoodsCategoryByVo(Long id, GoodsCategoryVo goodsCategoryVo) {
         // 查询密码等资料以计算新签名
@@ -64,10 +52,6 @@ public class GoodsCategoryDao {
                 logger.info("类目名称重复：" + goodsCategoryVo.getName());
                 retObj = new ReturnObject<>(ResponseCode.CATEGORY_NAME_SAME);
             }
-//            else if (e.getMessage().contains("auth_goodsCategory.auth_goodsCategory_email_uindex")) {
-//                logger.info("邮箱重复：" + goodsCategoryVo.getEmail());
-//                retObj = new ReturnObject<>(ResponseCode.EMAIL_REGISTERED);
-//            }
             else {
                 // 其他情况属未知错误
                 logger.error("数据库错误：" + e.getMessage());
@@ -93,27 +77,73 @@ public class GoodsCategoryDao {
     }
 
     /**
-     * (物理) 删除category
-     *
-     * @param id 用户 id
-     * @return 返回对象 ReturnObj
-     * @author 19720182203919 李涵
-     * Created at 2020/11/4 20:30
-     * Modified by 19720182203919 李涵 at 2020/11/5 10:42
+     * 删除category
      */
     public ReturnObject<Object> physicallyDeleteCategory(Long id) {
+
         ReturnObject<Object> retObj;
-        int ret = goodsCategoryMapper.deleteByPrimaryKey(id);
-        if (ret == 0) {
-            logger.info("category不存在或已被删除：id = " + id);
-            retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-        } else {
+        //获取该分类
+        GoodsCategoryPo orig = goodsCategoryMapper.selectByPrimaryKey(id);
+
+        if (orig == null ) {
+            logger.info("类目不存在或已被删除：id = " + id);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+
+        //为一级分类
+        else if(orig.getPid()==0)
+        {
+            //删除一级类目
+            goodsCategoryMapper.deleteByPrimaryKey(id);
+
+            //一并删除二级类目
+            GoodsCategoryPoExample example1 = new GoodsCategoryPoExample();
+            GoodsCategoryPoExample.Criteria criteria = example1.createCriteria();
+            criteria.andPidEqualTo(id);
+
+            List<GoodsCategoryPo> goodsCategoryPos = goodsCategoryMapper.selectByExample(example1);
+            //先将每一个二级分类下的商品变为没有分类的商品
+            for (GoodsCategoryPo po : goodsCategoryPos) {
+                GoodsSpuPoExample example2 = new GoodsSpuPoExample();
+                GoodsSpuPoExample.Criteria criteria2 = example2.createCriteria();
+                criteria2.andCategoryIdEqualTo(po.getId());
+                List<GoodsSpuPo> goodsSpuPos = goodsSpuMapper.selectByExample(example2);
+                for (GoodsSpuPo spupo : goodsSpuPos) {
+                    spupo.setCategoryId((long)0);
+                    goodsSpuMapper.updateByPrimaryKeySelective(spupo);
+                }
+            }
+
+            //删除所有二级类目
+            goodsCategoryMapper.deleteByExample(example1);
             logger.info("category id = " + id + " 已被永久删除");
             retObj = new ReturnObject<>();
+
         }
+
+        //为二级分类
+        else{
+
+            //删除二级类目
+            int ret = goodsCategoryMapper.deleteByPrimaryKey(id);
+
+            //将二级分类下的商品变为没有分类的商品
+            GoodsSpuPoExample example2 = new GoodsSpuPoExample();
+            GoodsSpuPoExample.Criteria criteria2 = example2.createCriteria();
+            criteria2.andCategoryIdEqualTo(id);
+
+            List<GoodsSpuPo> goodsSpuPos = goodsSpuMapper.selectByExample(example2);
+            for (GoodsSpuPo spupo : goodsSpuPos) {
+                spupo.setCategoryId((long)0);
+                goodsSpuMapper.updateByPrimaryKeySelective(spupo);
+            }
+
+            retObj = new ReturnObject<>();
+        }
+
         return retObj;
     }
-//
+
 public void initialize() throws Exception {
     //初始化goodsCategory
     GoodsCategoryPoExample example = new GoodsCategoryPoExample();
@@ -174,7 +204,8 @@ public void initialize() throws Exception {
             if (Objects.requireNonNull(e.getMessage()).contains("goods_category_name_uindex")) {
                 //若有重复的分类名则新增失败
                 logger.debug("updateGoodsCategory: have same goodsCategory name = " + goodsCategoryPo.getName());
-                retObj = new ReturnObject<>(ResponseCode.CATEGORY_NAME_SAME, String.format("类目名称已存在：" + goodsCategoryPo.getName()));
+                //retObj = new ReturnObject<>(ResponseCode.CATEGORY_NAME_SAME, String.format("类目名称已存在：" + goodsCategoryPo.getName()));
+                retObj = new ReturnObject<>(ResponseCode.CATEGORY_NAME_SAME, String.format("类目名称已存在"));
             } else {
                 // 其他数据库错误
                 logger.debug("other sql exception : " + e.getMessage());
@@ -191,12 +222,13 @@ public void initialize() throws Exception {
 
     public ReturnObject getSubcategoriesById(Long id) {
 
-        GoodsCategoryPo orig = goodsCategoryMapper.selectByPrimaryKey(id);
-        if (orig == null ) {
-            logger.info("类目不存在：id = " + id);
-            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        if(id!=0) {
+            GoodsCategoryPo orig = goodsCategoryMapper.selectByPrimaryKey(id);
+            if (orig == null) {
+                logger.info("类目不存在：id = " + id);
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            }
         }
-
         GoodsCategoryPoExample example = new GoodsCategoryPoExample();
         GoodsCategoryPoExample.Criteria criteria = example.createCriteria();
         criteria.andPidEqualTo(id);
