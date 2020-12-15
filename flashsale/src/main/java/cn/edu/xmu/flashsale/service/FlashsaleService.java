@@ -85,25 +85,28 @@ public class FlashsaleService {
         return returnObject;
     }
 
-    public ReturnObject deleteflashsale(Long id) {
-        ReturnObject<FlashSalePo> flashSalePoReturnObject = flashsaleDao.selectByFlashsaleId(id);
-        if(flashSalePoReturnObject.getCode()!= ResponseCode.OK) {
-            return flashSalePoReturnObject;
-        }
-        FlashSalePo flashSalePo = flashSalePoReturnObject.getData();
-        String key = "FlashSaleItem:" + flashSalePo.getFlashDate().toString() + flashSalePo.getTimeSegId().toString();
-        List<FlashSaleItemPo> flashSaleItemPos = flashSaleItemDao.selectByFlashsaleId(id).getData();
-        ReturnObject retObj =  flashsaleDao.deleteflashsale(id);
-        if(retObj.getCode()==ResponseCode.OK && flashSalePoReturnObject.getData().getFlashDate().isBefore(LocalDateTime.now().plusDays(1))) {
-            for (FlashSaleItemPo itemPo : flashSaleItemPos) {
-                redisTemplate.boundSetOps(key).remove(itemPo);
-            }
-        }
-        return retObj;
-    }
+//    public ReturnObject deleteflashsale(Long id) {
+//        ReturnObject<FlashSalePo> flashSalePoReturnObject = flashsaleDao.selectByFlashsaleId(id);
+//        if(flashSalePoReturnObject.getCode()!= ResponseCode.OK) {
+//            return flashSalePoReturnObject;
+//        }
+//        FlashSalePo flashSalePo = flashSalePoReturnObject.getData();
+//        String key = "FlashSaleItem:" + flashSalePo.getFlashDate().toString() + flashSalePo.getTimeSegId().toString();
+//        List<FlashSaleItemPo> flashSaleItemPos = flashSaleItemDao.selectByFlashsaleId(id).getData();
+//        ReturnObject retObj =  flashsaleDao.deleteflashsale(id);
+//        if(retObj.getCode()==ResponseCode.OK && flashSalePoReturnObject.getData().getFlashDate().isBefore(LocalDateTime.now().plusDays(1))) {
+//            for (FlashSaleItemPo itemPo : flashSaleItemPos) {
+//                redisTemplate.boundSetOps(key).remove(itemPo);
+//            }
+//        }
+//        return retObj;
+//    }
 
     public ReturnObject updateflashsale(Long id, LocalDateTime flashDate) {
         return flashsaleDao.updateflashsale(id, flashDate);
     }
 
+    public ReturnObject flashsaleOn(Long id, Byte state) {
+        return flashsaleDao.updateFlashsaleState(id, state);
+    }
 }
