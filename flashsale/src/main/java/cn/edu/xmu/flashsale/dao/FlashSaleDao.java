@@ -51,9 +51,9 @@ public class FlashSaleDao {
         //如果没有，插入数据库
         try
         {
-            logger.error("does it in?");
             FlashSalePo flashSalePo = new FlashSalePo();
             flashSalePo.setFlashDate(LocalDateTime.of(flashDate.toLocalDate(), LocalTime.MIN));
+            logger.error(flashSalePo.getFlashDate().toString());
             flashSalePo.setTimeSegId(id);
             flashSalePo.setGmtCreate(LocalDateTime.now());
             Byte state = 0;
@@ -73,6 +73,8 @@ public class FlashSaleDao {
                 FlashSalePoExample.Criteria flashsaleCriteria=flashSalePoExample.createCriteria();
                 flashsaleCriteria.andFlashDateEqualTo(flashDate);
                 flashsaleCriteria.andTimeSegIdEqualTo(id);
+                Byte type = 2;
+                flashsaleCriteria.andStateNotEqualTo(type);
                 List<FlashSalePo> checkList = flashSalePoMapper.selectByExample(flashSalePoExample);
                 if(checkList.size()==0)
                     return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
@@ -127,6 +129,8 @@ public class FlashSaleDao {
             if (null == flashSalePo)//id没有对应数据
             {
                 return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+            } else if(flashSalePo.getFlashDate().isBefore(LocalDateTime.of(LocalDate.now(), LocalTime.MIN))) {
+                return new ReturnObject(ResponseCode.ACTIVITYALTER_INVALID);
             }
             //修改flashDate
             flashSalePo.setFlashDate(flashDate);
@@ -171,6 +175,8 @@ public class FlashSaleDao {
         FlashSalePoExample.Criteria criteria = example.createCriteria();
         criteria.andFlashDateEqualTo(time);
         criteria.andTimeSegIdEqualTo(id);
+        Byte type = 2;
+        criteria.andStateNotEqualTo(type);
         List<FlashSalePo> pos = flashSalePoMapper.selectByExample(example);
         if(pos.size()==0) {
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
@@ -217,6 +223,7 @@ public class FlashSaleDao {
                 if(state.intValue()==2)
                     return new ReturnObject(ResponseCode.DELETE_ONLINE_NOTALLOW);
             } else if(flashSalePo.getState().intValue() == 2) {
+                logger.error("932:"+id.toString());
                 return  new ReturnObject(ResponseCode.DELETE_CHANGAE_NOTALLOW);
             }
             //更新

@@ -135,7 +135,7 @@ public class FlashsaleController {
 //        ReturnObject object = flashsaleService.deleteflashsale(id);
 //        return Common.decorateReturnObject(object);
         Byte state = 2;
-        ReturnObject object = flashsaleService.flashsaleOn(id, state);//0：已下线，1：已上线，2：已删除
+        ReturnObject object = flashsaleService.updateFlashsaleState(id, state);//0：已下线，1：已上线，2：已删除
         return Common.decorateReturnObject(object);
     }
 
@@ -233,7 +233,7 @@ public class FlashsaleController {
     @PutMapping("/shops/{did}/flashsales/{id}/onshelves")
     public Object flashsaleOn(@PathVariable Long did, @PathVariable Long id) {
         Byte state = 1;
-        ReturnObject object = flashsaleService.flashsaleOn(id, state);//0：已下线，1：已上线，2：已删除
+        ReturnObject object = flashsaleService.updateFlashsaleState(id, state);//0：已下线，1：已上线，2：已删除
         return Common.decorateReturnObject(object);
     }
 
@@ -250,7 +250,7 @@ public class FlashsaleController {
     @PutMapping("/shops/{did}/flashsales/{id}/offshelves")
     public Object flashsaleOff(@PathVariable Long did, @PathVariable Long id) {
         Byte state = 0;
-        ReturnObject object = flashsaleService.flashsaleOn(id, state);//0：已下线，1：已上线，2：已删除
+        ReturnObject object = flashsaleService.updateFlashsaleState(id, state);//0：已下线，1：已上线，2：已删除
         return Common.decorateReturnObject(object);
     }
 }
