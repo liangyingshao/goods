@@ -145,7 +145,7 @@ dubbo:
     qos-accept-foreign-ip: false
   # 配置注册中心
   registry:
-    address: nacos://192.168.43.73:8848
+    address: nacos://192.168.43.194:8848
     #192.168.137.1:8848
   # 设置协议-协议由提供方指定消费方被动接受
   protocol:
@@ -167,7 +167,7 @@ spring:
     nacos:
       discovery:
         ip: 192.168.43.180
-        server-addr: 192.168.43.73:8848
+        server-addr: 192.168.43.194:8848
         #192.168.137.1:8848
   profiles:
     active: dev

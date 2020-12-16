@@ -9,6 +9,7 @@ import cn.edu.xmu.ooad.annotation.LoginUser;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.*;
 import cn.edu.xmu.oomall.other.service.IFootprintService;
+import cn.edu.xmu.oomall.other.service.IShareService;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.*;
 import org.apache.dubbo.config.annotation.DubboReference;
@@ -55,7 +56,10 @@ public class GoodsController {
     private GoodsCategoryService goodsCategoryService;
 
     @DubboReference
-    private IFootprintService IFootprintService;
+    private IFootprintService iFootprintService;
+
+    @DubboReference
+    private IShareService iShareService;
 
 
     /**
@@ -84,7 +88,7 @@ public class GoodsController {
     {
         logger.debug("getSkuList:page="+page+" pageSize="+pageSize);
         ReturnObject returnObject=goodsService.getSkuList(shopId,skuSn,spuId,spuSn,page,pageSize);
-        return Common.decorateReturnObject(returnObject);
+        return Common.getRetObject(returnObject);
     }
 
     /**
@@ -101,12 +105,12 @@ public class GoodsController {
     @Audit
     @GetMapping("/skus/{id}")
     @ResponseBody
-    public Object getSku(@PathVariable Long id,@RequestParam(required = false) Long userId)
+    public Object getSku(@PathVariable Long id,@LoginUser @ApiIgnore @RequestParam(required = false) Long userId)
     {
         logger.debug("getSku:id="+id);
         ReturnObject returnObject=goodsService.getSku(id);
         if(userId!=null&&returnObject.getCode().equals(ResponseCode.OK)){
-            returnObject= IFootprintService.postFootprint(userId, id);
+            iFootprintService.postFootprint(userId, id);
         }
         return Common.decorateReturnObject(returnObject);
     }
@@ -143,7 +147,7 @@ public class GoodsController {
             return returnObject;
         }
         if(!Objects.equals(departId, shopId))
-            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
+            return Common.getRetObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         ReturnObject retObject = goodsService.uploadSkuImg(shopId,id,file);
         return Common.getNullRetObj(retObject, httpServletResponse);
     }
@@ -171,9 +175,9 @@ public class GoodsController {
     {
         logger.debug("deleteSku: id = "+ id+" shopId="+shopId);
         if(departId!=0&&departId!=shopId)
-            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
+            return Common.getRetObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         ReturnObject retObject=goodsService.deleteSku(shopId,id);
-        return Common.decorateReturnObject(retObject);
+        return Common.getRetObject(retObject);
     }
 
     /**
@@ -206,7 +210,7 @@ public class GoodsController {
             return returnObject;
         }
         if(departId!=0&&departId!=shopId)
-            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
+            return Common.getRetObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         GoodsSku sku=vo.createGoodsSku();
         sku.setId(id);
         ReturnObject retObject=goodsService.modifySku(shopId,sku);
@@ -248,14 +252,14 @@ public class GoodsController {
         if (null != returnObject) {
             return returnObject;
         }
-        if(!Objects.equals(departId, shopId))return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
+        if(!Objects.equals(departId, shopId))return Common.getRetObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         FloatPrice floatPrice=vo.createFloatPrice();
         floatPrice.setGoodsSkuId(id);
         floatPrice.setValid(FloatPrice.Validation.VALID);
         floatPrice.setCreatedBy(userId);
-        ReturnObject<FloatPriceRetVo> retObject=goodsService.addFloatPrice(shopId,floatPrice,userId);
+        ReturnObject retObject=goodsService.addFloatPrice(shopId,floatPrice,userId);
         if (retObject.getData() != null) {
-            return Common.decorateReturnObject(retObject);
+            return Common.getRetObject(retObject);
         } else {
             return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }
@@ -293,13 +297,13 @@ public class GoodsController {
         if (null != returnObject) {
             return returnObject;
         }
-        if(!Objects.equals(departId, shopId))return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
+        if(!Objects.equals(departId, shopId))return Common.getRetObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         GoodsSku sku=vo.createGoodsSku();
         sku.setGoodsSpuId(id);
         sku.setDisabled(GoodsSku.State.ONSHELF);
-        ReturnObject<GoodsSkuRetVo> retObject=goodsService.createSKU(shopId,sku);
+        ReturnObject retObject=goodsService.createSKU(shopId,sku);
         if (retObject.getData() != null) {
-            return Common.decorateReturnObject(retObject);
+            return Common.getRetObject(retObject);
         } else {
             return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }
@@ -344,9 +348,9 @@ public class GoodsController {
     @ResponseBody
     public Object showSpu(@PathVariable Long id) {
         Object returnObject=null;
-        ReturnObject<Object> spu = spuService.showSpu(id);
+        ReturnObject spu = spuService.showSpu(id);
         logger.debug("findSpuById: spu="+spu.getData()+" code="+spu.getCode());
-        return Common.decorateReturnObject(spu);
+        return Common.getRetObject(spu);
     }
 
     /**
@@ -514,7 +518,7 @@ public class GoodsController {
 
         //校验是否为该商铺管理员
         if(departId!=shopId)
-            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
+            return Common.getRetObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         ReturnObject retObject = goodsService.putOffGoodsOnSale(shopId,id);
         if (retObject.getData() != null) {
             return Common.getRetObject(retObject);
@@ -563,7 +567,7 @@ public class GoodsController {
 //        if(shopId!=departId)
 //            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW), httpServletResponse);
         if(retObject.getData()!=null){
-            return Common.decorateReturnObject(retObject);
+            return Common.getRetObject(retObject);
         }else{
             return  Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }
@@ -656,7 +660,7 @@ public class GoodsController {
 //        if(shopId!=departId)
 //            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW), httpServletResponse);
         if(retObject.getData()!=null){
-            return Common.decorateReturnObject(retObject);
+            return Common.getRetObject(retObject);
         }else{
             return  Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }
@@ -763,8 +767,8 @@ public class GoodsController {
     //@Audit
     @GetMapping("/categories/{id}/subcategories")
     public Object getSubcategories(@PathVariable Long id){
-        ReturnObject<List> returnObject =  goodsCategoryService.getSubcategories(id);
-        return  Common.decorateReturnObject(returnObject);
+        ReturnObject returnObject =  goodsCategoryService.getSubcategories(id);
+        return  Common.getRetObject(returnObject);
     }
 
     /**
@@ -851,7 +855,7 @@ public class GoodsController {
         if (returnObject.getCode() == ResponseCode.OK) {
             return Common.getRetObject(returnObject);
         } else {
-            return Common.decorateReturnObject(returnObject);
+            return Common.getRetObject(returnObject);
         }
     }
 
@@ -880,7 +884,7 @@ public class GoodsController {
             logger.debug("deleteCategory: id = "+ id);
         }
         ReturnObject returnObject = goodsCategoryService.deleteCategory(id);
-        return Common.decorateReturnObject(returnObject);
+        return Common.getRetObject(returnObject);
     }
 
 
@@ -1024,7 +1028,7 @@ public class GoodsController {
         if (returnObject.getCode() == ResponseCode.OK) {
             return Common.getRetObject(returnObject);
         } else {
-            return Common.decorateReturnObject(returnObject);
+            return Common.getRetObject(returnObject);
         }
     }
 
@@ -1052,7 +1056,7 @@ public class GoodsController {
             logger.debug("deleteBrand: id = "+ id);
         }
         ReturnObject returnObject = brandService.deleteBrand(id);
-        return Common.decorateReturnObject(returnObject);
+        return Common.getRetObject(returnObject);
     }
 
     /**
@@ -1060,7 +1064,6 @@ public class GoodsController {
      * @param sid
      * @param id
      * @param userId
-     * @param departId
      * @return Object
      */
     @ApiOperation(value = "查看一条分享商品SKU的详细信息（需登录）")
@@ -1076,11 +1079,14 @@ public class GoodsController {
     @GetMapping("/share/{sid}/skus/{id}")
     @ResponseBody
     public Object getShareSku(@PathVariable Long sid, @PathVariable Long id,
-                              @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
-                              @Depart @ApiIgnore @RequestParam(required = false) Long departId)
+                              @LoginUser @ApiIgnore @RequestParam(required = false) Long userId)
     {
-        ReturnObject<GoodsSkuRetVo> returnObject=goodsService.getShareSku(sid,id,userId);
-        return Common.decorateReturnObject(returnObject);
+        ReturnObject returnObject
+                //=iShareService.shareUserSkuMatch(sid,id,userId)
+                ;
+        //if(returnObject.getCode().equals(ResponseCode.OK))
+            returnObject=goodsService.getShareSku(sid,id,userId);
+        return Common.getRetObject(returnObject);
     }
 
     /**

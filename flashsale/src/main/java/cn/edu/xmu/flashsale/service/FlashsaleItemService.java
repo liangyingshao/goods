@@ -39,7 +39,7 @@ public class FlashsaleItemService {
 
     private static final Logger logger = LoggerFactory.getLogger(FlashSaleDao.class);
 
-    @DubboReference
+    @DubboReference(check = false)
     private IGoodsService goodsService;
 
     @Autowired

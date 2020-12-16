@@ -35,7 +35,7 @@ public class GrouponService {
     @Autowired
     GrouponDao grouponDao;
 
-    @DubboReference
+    @DubboReference(check = false)
     IGoodsService iGoodsService;
     
     public ReturnObject modifyGrouponofSPU(Long shopId, Long id, GrouponVo grouponVo) {

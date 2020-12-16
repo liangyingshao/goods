@@ -96,7 +96,7 @@ public class IGoodsServiceImpl implements IGoodsService {
     public List<SkuNameInfoDTO> getSelectSkuNameListBySkuIdList(List<Long> idList) {
         List<SkuNameInfoDTO> nameList = new ArrayList<>();
         for (Long aLong : idList) {
-            GoodsSkuDetailRetVo goodsSkuRetVo = goodsDao.getSku(aLong);
+            GoodsSkuDetailRetVo goodsSkuRetVo = goodsDao.getSku(aLong).getData();
             //判空指针
             if (goodsSkuRetVo != null) {
                 SkuNameInfoDTO skuNameInfoDTO = new SkuNameInfoDTO();

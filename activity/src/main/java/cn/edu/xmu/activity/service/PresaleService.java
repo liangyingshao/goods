@@ -33,7 +33,7 @@ public class PresaleService {
     @Autowired
     PresaleDao presaleDao;
 
-    @DubboReference
+    @DubboReference(check = false)
     IGoodsService iGoodsService;
 
     public ReturnObject<PageInfo<VoObject>> QueryPresales(Long shopId, Long skuId, Integer state, Integer timeline, Integer page, Integer pagesize, boolean isadmin) {

@@ -1,21 +1,16 @@
 package cn.edu.xmu.goods.controller;
 import cn.edu.xmu.ooad.Application;
 import cn.edu.xmu.ooad.util.JacksonUtil;
-import cn.edu.xmu.ooad.util.JwtHelper;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
-import org.json.JSONException;
 import org.junit.jupiter.api.*;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.reactive.server.WebTestClient;
-
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 /**
  * description: ZhangYueTest1
@@ -29,18 +24,11 @@ import java.nio.file.Paths;
 public class ZhangYueTest1 {
 
 
-//    @Value("${public-test.managementgate}")
-//    private String managementGate;
-//
-//    @Value("${public-test.mallgate}")
-//    private String mallGate;
-//
-//    private WebTestClient manageClient;
-//
-//    private WebTestClient mallClient;
+    @Value("${public-test.managementgate}")
+    private String managementGate;
 
-    private String managementGate = "localhost:8090";
-    private String mallGate = "localhost:8090";
+    @Value("${public-test.mallgate}")
+    private String mallGate;
 
     private WebTestClient manageClient;
 
@@ -68,7 +56,7 @@ public class ZhangYueTest1 {
     @Order(00)
     public void findAllBrands1() throws Exception{
 
-        byte[] responseString = mallClient.get().uri("/goods/brands?page=1&pageSize=2")
+        byte[] responseString = mallClient.get().uri("/brands?page=1&pageSize=2")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -115,7 +103,7 @@ public class ZhangYueTest1 {
     @Test
     @Order(00)
     public  void findAllBrands2() throws Exception {
-        byte[] responseString = mallClient.get().uri("/goods/brands?page=2&pageSize=1")
+        byte[] responseString = mallClient.get().uri("/brands?page=2&pageSize=1")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -157,16 +145,16 @@ public class ZhangYueTest1 {
      */
     @Test
     @Order(01)
-    public void insertBrandTest2() {
+    public void insertBrandTest2() throws Exception {
 
-        String token = creatTestToken(1L, 0L, 100);
+        String token = this.login("13088admin", "123456");
 
         JSONObject body = new JSONObject();
         body.put("name", "黄卖九");
         body.put("detail", null);
         String brandJson = body.toJSONString();
 
-        byte[] responseString = manageClient.post().uri("/goods/shops/{shopId}/brands",0)
+        byte[] responseString = manageClient.post().uri("/shops/{shopId}/brands",0)
                 .header("authorization", token)
                 .bodyValue(brandJson)
                 .exchange()
@@ -196,8 +184,8 @@ public class ZhangYueTest1 {
         body.put("detail", "test");
         String brandJson = body.toJSONString();
 
-        String token = creatTestToken(1L, 0L, 100);
-        byte[] responseString = manageClient.post().uri("/goods/shops/{shopId}/brands",0)
+        String token = this.login("13088admin", "123456");
+        byte[] responseString = manageClient.post().uri("/shops/{shopId}/brands",0)
                 .header("authorization", token)
                 .bodyValue(brandJson)
                 .exchange()
@@ -226,7 +214,7 @@ public class ZhangYueTest1 {
         body.put("detail", "test");
         String brandJson = body.toJSONString();
 
-        byte[] responseString = manageClient.post().uri("/goods/shops/{shopId}/brands",0)
+        byte[] responseString = manageClient.post().uri("/shops/{shopId}/brands",0)
                 .bodyValue(brandJson)
                 .exchange()
                 .expectStatus().isUnauthorized()
@@ -252,7 +240,7 @@ public class ZhangYueTest1 {
         body.put("detail", "test");
         String brandJson = body.toJSONString();
 
-        byte[] responseString = manageClient.post().uri("/goods/shops/{shopId}/brands",0)
+        byte[] responseString = manageClient.post().uri("/shops/{shopId}/brands",0)
                 .header("authorization", "test")
                 .bodyValue(brandJson)
                 .exchange()
@@ -279,9 +267,9 @@ public class ZhangYueTest1 {
         body.put("detail", "test");
         String brandJson = body.toJSONString();
 
-        String token = creatTestToken(1L, 0L, 100);
+        String token = this.login("13088admin", "123456");
 
-        byte[] responseString = manageClient.post().uri("/goods/shops/{shopId}/brands",0)
+        byte[] responseString = manageClient.post().uri("/shops/{shopId}/brands",0)
                 .header("authorization", token)
                 .bodyValue(brandJson)
                 .exchange()
@@ -304,7 +292,7 @@ public class ZhangYueTest1 {
         JSONAssert.assertEquals(expectedResponse,  new String(responseString, StandardCharsets.UTF_8), false);
 
         //查询验证品牌新增成功
-        byte[] responseString2 = mallClient.get().uri("/goods/brands?page=1&pageSize=4")
+        byte[] responseString2 = mallClient.get().uri("/brands?page=1&pageSize=4")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -373,10 +361,10 @@ public class ZhangYueTest1 {
         body.put("name", "test");
         body.put("detail", "test");
         String brandJson = body.toJSONString();
-        String token = creatTestToken(1L, 0L, 100);
+        String token = this.login("13088admin", "123456");
         //String token = this.login("13088admin","123456");
 
-        byte[] responseString = manageClient.put().uri("/goods/shops/{shopId}/brands/{id}", 0, 99)
+        byte[] responseString = manageClient.put().uri("/shops/{shopId}/brands/{id}", 0, 99)
                 .header("authorization", token)
                 .bodyValue(brandJson)
                 .exchange()
@@ -406,9 +394,9 @@ public class ZhangYueTest1 {
         body.put("detail", "test");
         String brandJson = body.toJSONString();
 
-        String token = creatTestToken(1L, 0L, 100);
+        String token = this.login("13088admin", "123456");
 
-        byte[] responseString = manageClient.put().uri("/goods/shops/{shopId}/brands/{id}", 0, 71)
+        byte[] responseString = manageClient.put().uri("/shops/{shopId}/brands/{id}", 0, 71)
                 .header("authorization", token)
                 .bodyValue(brandJson)
                 .exchange()
@@ -438,7 +426,7 @@ public class ZhangYueTest1 {
         body.put("detail", "test");
         String brandJson = body.toJSONString();
 
-        byte[] responseString = manageClient.put().uri("/goods/shops/{shopId}/brands/{id}", 0, 71)
+        byte[] responseString = manageClient.put().uri("/shops/{shopId}/brands/{id}", 0, 71)
                 .bodyValue(brandJson)
                 .exchange()
                 .expectStatus().isUnauthorized()
@@ -464,7 +452,7 @@ public class ZhangYueTest1 {
         body.put("detail", "test");
         String brandJson = body.toJSONString();
 
-        byte[] responseString = manageClient.put().uri("/goods/shops/{shopId}/brands/{id}", 0, 71)
+        byte[] responseString = manageClient.put().uri("/shops/{shopId}/brands/{id}", 0, 71)
                 .header("authorization", "test")
                 .bodyValue(brandJson)
                 .exchange()
@@ -487,14 +475,14 @@ public class ZhangYueTest1 {
     @Test
     @Order(02)
     public void modifyBrand1() throws Exception {
-        String token = this.creatTestToken(1L, 0L, 100);
+       String token = this.login("13088admin", "123456");
 
         JSONObject body = new JSONObject();
         body.put("name", "test1");
         body.put("detail", "test");
         String brandJson = body.toJSONString();
 
-        byte[] responseString = manageClient.put().uri("/goods/shops/{shopId}/brands/{id}", 0, 72)
+        byte[] responseString = manageClient.put().uri("/shops/{shopId}/brands/{id}", 0, 72)
                 .header("authorization", token)
                 .bodyValue(brandJson)
                 .exchange()
@@ -506,7 +494,7 @@ public class ZhangYueTest1 {
                 .getResponseBodyContent();
 
         //查询验证品牌修改成功
-        byte[] responseString2 = mallClient.get().uri("/goods/brands?page=1&pageSize=4")
+        byte[] responseString2 = mallClient.get().uri("/brands?page=1&pageSize=4")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -560,7 +548,7 @@ public class ZhangYueTest1 {
 
 
     /**
-     * description: 删除品牌，品牌下的spu成为没有品牌的spu，品牌id=0
+     * description: 删除品牌
      * version: 1.0
      * date: 2020/12/2 20:48
      * author: 张悦
@@ -571,9 +559,9 @@ public class ZhangYueTest1 {
     @Test
     @Order(03)
     public void deleteBrandTest5() throws Exception{
-        String token = this.creatTestToken(1L, 0L, 100);
+       String token = this.login("13088admin", "123456");
 
-        byte[] responseString1 = manageClient.delete().uri("/goods/shops/{shopId}/brands/{id}", 0, 73)
+        byte[] responseString1 = manageClient.delete().uri("/shops/{shopId}/brands/{id}", 0, 73)
                 .header("authorization", token)
                 .exchange()
                 .expectStatus().isOk()
@@ -584,7 +572,7 @@ public class ZhangYueTest1 {
                 .getResponseBodyContent();
 
         //查询验证品牌删除成功
-        byte[] responseString2 = mallClient.get().uri("/goods/brands?page=1&pageSize=4")
+        byte[] responseString2 = mallClient.get().uri("/brands?page=1&pageSize=4")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -628,7 +616,7 @@ public class ZhangYueTest1 {
         JSONAssert.assertEquals(expectedResponse2, new String(responseString2, StandardCharsets.UTF_8), false);
 
         //查询验证品牌下的spu是否变成没有品牌的spu
-        byte[] responseString3 = mallClient.get().uri("/goods/spus/274")
+        byte[] responseString3 = mallClient.get().uri("/spus/274")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -660,10 +648,10 @@ public class ZhangYueTest1 {
      */
     @Test
     @Order(03)
-    public void deleteBrandTest2() {
-        String token = this.creatTestToken(1L, 0L, 100);
+    public void deleteBrandTest2() throws Exception {
+       String token = this.login("13088admin", "123456");
         //String token = this.login("13088admin","123456");
-        byte[] responseString = manageClient.delete().uri("/goods/shops/0/brands/1")
+        byte[] responseString = manageClient.delete().uri("/shops/0/brands/1")
                 .header("authorization", token)
                 .exchange()
                 .expectStatus().isNotFound()
@@ -687,7 +675,7 @@ public class ZhangYueTest1 {
     @Test
     @Order(03)
     public void deleteBrandTest3() {
-        byte[] responseString = manageClient.delete().uri("/goods/shops/0/brands/72")
+        byte[] responseString = manageClient.delete().uri("/shops/0/brands/72")
                 .header("authorization", "test")
                 .exchange()
                 .expectStatus().isUnauthorized()
@@ -708,7 +696,7 @@ public class ZhangYueTest1 {
     @Test
     @Order(03)
     public void deleteBrandTest4() {
-        byte[] responseString = manageClient.delete().uri("/goods/shops/0/brands/72", 0, 0)
+        byte[] responseString = manageClient.delete().uri("/shops/0/brands/72", 0, 0)
                 .exchange()
                 .expectStatus().isUnauthorized()
                 .expectBody()
@@ -730,7 +718,7 @@ public class ZhangYueTest1 {
     @Order(00)
     public void listSubcategories1() throws Exception{
 
-        byte[] responseString = mallClient.get().uri("/goods/categories/122/subcategories")
+        byte[] responseString = mallClient.get().uri("/categories/122/subcategories")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -775,7 +763,7 @@ public class ZhangYueTest1 {
     @Test
     @Order(00)
     public void listSubcategories2() throws Exception{
-        byte[] responseString = mallClient.get().uri("/goods/categories/199/subcategories")
+        byte[] responseString = mallClient.get().uri("/categories/199/subcategories")
                 .exchange()
                 .expectStatus().isNotFound()
                 .expectBody()
@@ -802,9 +790,9 @@ public class ZhangYueTest1 {
         body.put("name", "test2");
         String goodsCategoryJson = body.toJSONString();
 
-        String token = creatTestToken(1L, 0L, 100);
+        String token = this.login("13088admin", "123456");
 
-        byte[] responseString = manageClient.post().uri("/goods/shops/0/categories/0/subcategories")
+        byte[] responseString = manageClient.post().uri("/shops/0/categories/0/subcategories")
                 .header("authorization", token)
                 .bodyValue(goodsCategoryJson)
                 .exchange()
@@ -826,7 +814,7 @@ public class ZhangYueTest1 {
         JSONAssert.assertEquals(expectedResponse,  new String(responseString, StandardCharsets.UTF_8), false);
 
         //查询验证分类新增成功
-        byte[] responseString2 = mallClient.get().uri("/goods/categories/0/subcategories")
+        byte[] responseString2 = mallClient.get().uri("/categories/0/subcategories")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -895,9 +883,9 @@ public class ZhangYueTest1 {
         body.put("name", "test");
         String goodsCategoryJson = body.toJSONString();
 
-        String token = creatTestToken(1L, 0L, 100);
+        String token = this.login("13088admin", "123456");
 
-        byte[] responseString = manageClient.post().uri("/goods/shops/0/categories/131/subcategories")
+        byte[] responseString = manageClient.post().uri("/shops/0/categories/131/subcategories")
                 .header("authorization", token)
                 .bodyValue(goodsCategoryJson)
                 .exchange()
@@ -920,7 +908,7 @@ public class ZhangYueTest1 {
 
 
         //查询验证分类新增成功
-        byte[] responseString2 = mallClient.get().uri("/goods/categories/131/subcategories")
+        byte[] responseString2 = mallClient.get().uri("/categories/131/subcategories")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -961,9 +949,9 @@ public class ZhangYueTest1 {
         body.put("name", "test");
         String goodsCategoryJson = body.toJSONString();
 
-        String token = creatTestToken(1L, 0L, 100);
+        String token = this.login("13088admin", "123456");
 
-        byte[] responseString = manageClient.post().uri("/goods/shops/0/categories/9/subcategories")
+        byte[] responseString = manageClient.post().uri("/shops/0/categories/9/subcategories")
                 .header("authorization", token)
                 .bodyValue(goodsCategoryJson)
                 .exchange()
@@ -986,15 +974,15 @@ public class ZhangYueTest1 {
      */
     @Test
     @Order(01)
-    public void insertGoodsCategoryTest2() {
+    public void insertGoodsCategoryTest2() throws Exception {
 
         JSONObject body = new JSONObject();
         body.put("name", "艺术品");
         String goodsCategoryJson = body.toJSONString();
 
-        String token = creatTestToken(1L, 0L, 100);
+        String token = this.login("13088admin", "123456");
 
-        byte[] responseString = manageClient.post().uri("/goods/shops/0/categories/122/subcategories")
+        byte[] responseString = manageClient.post().uri("/shops/0/categories/122/subcategories")
                 .header("authorization", token)
                 .bodyValue(goodsCategoryJson)
                 .exchange()
@@ -1022,9 +1010,9 @@ public class ZhangYueTest1 {
         body.put("name", "");
         String goodsCategoryJson = body.toJSONString();
 
-        String token = creatTestToken(1L, 0L, 100);
+        String token = this.login("13088admin", "123456");
 
-        byte[] responseString = manageClient.post().uri("/goods/shops/0/categories/122/subcategories")
+        byte[] responseString = manageClient.post().uri("/shops/0/categories/122/subcategories")
                 .header("authorization", token)
                 .bodyValue(goodsCategoryJson)
                 .exchange()
@@ -1054,7 +1042,7 @@ public class ZhangYueTest1 {
         body.put("name", "test");
         String goodsCategoryJson = body.toJSONString();
 
-        byte[] responseString = manageClient.post().uri("/goods/shops/0/categories/122/subcategories",0)
+        byte[] responseString = manageClient.post().uri("/shops/0/categories/122/subcategories",0)
                 .bodyValue(goodsCategoryJson)
                 .exchange()
                 .expectStatus().isUnauthorized()
@@ -1079,7 +1067,7 @@ public class ZhangYueTest1 {
         body.put("name", "test");
         String goodsCategoryJson = body.toJSONString();
 
-        byte[] responseString = manageClient.post().uri("/goods/shops/0/categories/122/subcategories")
+        byte[] responseString = manageClient.post().uri("/shops/0/categories/122/subcategories")
                 .header("authorization", "test")
                 .bodyValue(goodsCategoryJson)
                 .exchange()
@@ -1102,9 +1090,9 @@ public class ZhangYueTest1 {
         body.put("name", "test");
         String goodsCategoryJson = body.toJSONString();
 
-        String token = creatTestToken(1L, 0L, 100);
+        String token = this.login("13088admin", "123456");
 
-        byte[] responseString = manageClient.put().uri("/goods/shops/0/categories/99")
+        byte[] responseString = manageClient.put().uri("/shops/0/categories/99")
                 .header("authorization", token)
                 .bodyValue(goodsCategoryJson)
                 .exchange()
@@ -1130,9 +1118,9 @@ public class ZhangYueTest1 {
         body.put("name", "收藏品");
         String goodsCategoryJson = body.toJSONString();
 
-        String token = creatTestToken(1L, 0L, 100);
+        String token = this.login("13088admin", "123456");
 
-        byte[] responseString = manageClient.put().uri("/goods/shops/0/categories/123")
+        byte[] responseString = manageClient.put().uri("/shops/0/categories/123")
                 .header("authorization", token)
                 .bodyValue(goodsCategoryJson)
                 .exchange()
@@ -1161,7 +1149,7 @@ public class ZhangYueTest1 {
         body.put("name", "test");
         String goodsCategoryJson = body.toJSONString();
 
-        byte[] responseString = manageClient.put().uri("/goods/shops/0/categories/123")
+        byte[] responseString = manageClient.put().uri("/shops/0/categories/123")
                 .bodyValue(goodsCategoryJson)
                 .exchange()
                 .expectStatus().isUnauthorized()
@@ -1187,7 +1175,7 @@ public class ZhangYueTest1 {
         body.put("name", "test");
         String goodsCategoryJson = body.toJSONString();
 
-        byte[] responseString = manageClient.put().uri("/goods/shops/0/categories/123")
+        byte[] responseString = manageClient.put().uri("/shops/0/categories/123")
                 .header("authorization", "test")
                 .bodyValue(goodsCategoryJson)
                 .exchange()
@@ -1215,9 +1203,9 @@ public class ZhangYueTest1 {
         body.put("name", "test3");
         String goodsCategoryJson = body.toJSONString();
 
-        String token = this.creatTestToken(1L, 0L, 100);
+       String token = this.login("13088admin", "123456");
 
-        byte[] responseString = manageClient.put().uri("/goods/shops/0/categories/128")
+        byte[] responseString = manageClient.put().uri("/shops/0/categories/128")
                 .header("authorization", token)
                 .bodyValue(goodsCategoryJson)
                 .exchange()
@@ -1229,7 +1217,7 @@ public class ZhangYueTest1 {
                 .getResponseBodyContent();
 
         //查询验证是否修改成功
-        byte[] responseString2 = mallClient.get().uri("/goods/categories/127/subcategories")
+        byte[] responseString2 = mallClient.get().uri("/categories/127/subcategories")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -1269,7 +1257,7 @@ public class ZhangYueTest1 {
     @Order(03)
     public void deleteCategoryTest1() throws Exception {
 
-        String token = this.creatTestToken(1L, 0L, 100);
+       String token = this.login("13088admin", "123456");
 
         byte[] responseString = manageClient.delete().uri("/goods/shops/0/categories/122")
                 .header("authorization", token)
@@ -1313,7 +1301,6 @@ public class ZhangYueTest1 {
         JSONAssert.assertEquals(expectedResponse5, new String(responseString5, StandardCharsets.UTF_8), false);
     }
 
-
     /**
      * description: 删除二级类目 (成功)
      * version: 1.0
@@ -1324,7 +1311,7 @@ public class ZhangYueTest1 {
     @Order(03)
     public void deleteCategoryTest5() throws Exception {
 
-        String token = this.creatTestToken(1L, 0L, 100);
+        String token = this.login("13088admin", "123456");
 
         byte[] responseString = manageClient.delete().uri("/goods/shops/0/categories/128")
                 .header("authorization", token)
@@ -1358,7 +1345,6 @@ public class ZhangYueTest1 {
         JSONAssert.assertEquals(expectedResponse5, new String(responseString5, StandardCharsets.UTF_8), false);
     }
 
-
     /**
      * description: 删除类目（ id不存在)
      * version: 1.0
@@ -1370,11 +1356,11 @@ public class ZhangYueTest1 {
      */
     @Test
     @Order(03)
-    public void deleteCategoryTest2() {
+    public void deleteCategoryTest2() throws Exception {
 
-        String token = this.creatTestToken(1L, 0L, 100);
+       String token = this.login("13088admin", "123456");
 
-        byte[] responseString = manageClient.delete().uri("/goods/shops/0/categories/1")
+        byte[] responseString = manageClient.delete().uri("/shops/0/categories/1")
                 .header("authorization", token)
                 .exchange()
                 .expectStatus().isNotFound()
@@ -1398,7 +1384,7 @@ public class ZhangYueTest1 {
     @Order(03)
     public void deleteCategoryTest3() {
 
-        byte[] responseString = manageClient.delete().uri("/goods/shops/0/categories/127")
+        byte[] responseString = manageClient.delete().uri("/shops/0/categories/127")
                 .header("authorization", "test")
                 .exchange()
                 .expectStatus().isUnauthorized()
@@ -1419,7 +1405,7 @@ public class ZhangYueTest1 {
     @Test
     @Order(03)
     public void deleteCategoryTest4() {
-        byte[] responseString = manageClient.delete().uri("/goods/shops/0/categories/127")
+        byte[] responseString = manageClient.delete().uri("/shops/0/categories/127")
                 .exchange()
                 .expectStatus().isUnauthorized()
                 .expectBody()
@@ -1427,30 +1413,22 @@ public class ZhangYueTest1 {
                 .getResponseBodyContent();
     }
 
-    /**
-     * 创建测试用token
-     */
-    private final String creatTestToken(Long userId, Long departId, int expireTime) {
-        String token = new JwtHelper().createToken(userId, departId, expireTime);
-        log.info(token);
-        return token;
+    private String login(String userName, String password) throws Exception {
+
+        JSONObject body = new JSONObject();
+        body.put("userName", userName);
+        body.put("password", password);
+        String requireJson = body.toJSONString();
+        byte[] ret = manageClient.post().uri("/privileges/login").bodyValue(requireJson).exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
+                .jsonPath("$.errmsg").isEqualTo("成功")
+                .returnResult()
+                .getResponseBodyContent();
+        return JacksonUtil.parseString(new String(ret, "UTF-8"), "data");
+        //endregion
     }
-//
-////    private String login(String userName, String password) throws Exception {
-////        LoginVo vo = new LoginVo();
-////        vo.setUserName(userName);
-////        vo.setPassword(password);
-////        String requireJson = JacksonUtil.toJson(vo);
-////        byte[] ret = manageClient.post().uri("/privileges/login").bodyValue(requireJson).exchange()
-////                .expectStatus().isOk()
-////                .expectBody()
-////                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-////                .jsonPath("$.errmsg").isEqualTo("成功")
-////                .returnResult()
-////                .getResponseBodyContent();
-////        return JacksonUtil.parseString(new String(ret, "UTF-8"), "data");
-////        //endregion
-////    }
 
 
 }

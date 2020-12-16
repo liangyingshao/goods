@@ -4,7 +4,6 @@ import cn.edu.xmu.goods.mapper.*;
 import cn.edu.xmu.goods.model.bo.FloatPrice;
 import cn.edu.xmu.goods.model.bo.GoodsSku;
 import cn.edu.xmu.goods.model.bo.GoodsSpu;
-import cn.edu.xmu.goods.model.bo.Shop;
 import cn.edu.xmu.goods.model.po.*;
 import cn.edu.xmu.goods.model.vo.*;
 import cn.edu.xmu.ooad.util.JacksonUtil;
@@ -27,10 +26,8 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.Resource;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -181,22 +178,23 @@ public class GoodsDao {
      * @param id
      * @return GoodsSkuPo
      */
-    public GoodsSkuDetailRetVo getSku(Long id)
+    public ReturnObject<GoodsSkuDetailRetVo> getSku(Long id)
     {
         GoodsSkuPo skuPo=skuMapper.selectByPrimaryKey(id);
         GoodsSkuDetailRetVo retVo=new GoodsSkuDetailRetVo();
         if(skuPo!=null&&GoodsSku.State.getTypeByCode(skuPo.getDisabled().intValue()) != GoodsSku.State.DELETED)
         {
-            log.error("retVo.set:"+skuPo.getName());
+            log.info("retVo.set:"+skuPo.getName());
             retVo.set(new GoodsSku(skuPo));
         }
-        else return null;
+        else return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         //此处取出的spuPo不可为null，否则返回的数据就是空的
         GoodsSpuPo spuPo= spuMapper.selectByPrimaryKey(skuPo.getGoodsSpuId());
+        if(spuPo==null)return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         GoodsSpu spu=new GoodsSpu(spuPo);
         GoodsSpuVo spuVo= new GoodsSpuVo(spu);
         retVo.setSpu(spuVo);
-        return retVo;
+        return new ReturnObject<>(retVo);
     }
 
     public GoodsSkuPo internalGetSku(Long id)
@@ -256,18 +254,11 @@ public class GoodsDao {
                 logger.debug("logicalDelete:update fail.sku id="+id);
                 return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             }
-            else {
-                FloatPricePo floatPo=new FloatPricePo();
-                floatPo.setGoodsSkuId(skuPo.getId());
-                floatPo.setValid(FloatPrice.Validation.INVALID.getCode().byteValue());
-                ret=floatPricePoMapper.updateByPrimaryKeySelective(floatPo);
-                if(ret==0)
-                {
-                    logger.debug("logicalDelete:update fail.floatPrice skuId="+id);
-                    return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-                }
-                else return new ReturnObject<>();
-            }
+            FloatPricePo floatPo=new FloatPricePo();
+            floatPo.setGoodsSkuId(skuPo.getId());
+            floatPo.setValid(FloatPrice.Validation.INVALID.getCode().byteValue());
+            ret=floatPricePoMapper.updateByPrimaryKeySelective(floatPo);
+            return new ReturnObject<>();
         }
         else return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
     }
@@ -546,9 +537,11 @@ public class GoodsDao {
     public ReturnObject<GoodsSkuRetVo> getShareSku(Long id)
     {
         GoodsSkuPo skuPo=skuMapper.selectByPrimaryKey(id);
+        if(skuPo==null)return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+
         GoodsSku sku=new GoodsSku(skuPo);
         GoodsSkuRetVo skuRetVo=new GoodsSkuRetVo(sku);
-        return new ReturnObject<GoodsSkuRetVo>(skuRetVo);
+        return new ReturnObject<>(skuRetVo);
     }
 
     public ReturnObject<List<Long>> getAllSkuIdByShopId(Long shopId)

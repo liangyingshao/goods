@@ -47,9 +47,9 @@ class GoodsDaoTest {
 
     @Test
     void getSku() {
-        GoodsSkuDetailRetVo skuDetailRetVo=goodsDao.getSku((long) 273);
-        assertEquals(skuDetailRetVo.getName(),"+");
-        assertEquals(skuDetailRetVo.getSpu().getId(),273);
+        ReturnObject<GoodsSkuDetailRetVo> skuDetailRetVo=goodsDao.getSku((long) 273);
+        assertEquals(skuDetailRetVo.getData().getName(),"+");
+        assertEquals(skuDetailRetVo.getData().getSpu().getId(),273);
 
         goodsDao.logicalDelete((long)0,(long)273);
         skuDetailRetVo=goodsDao.getSku((long) 273);

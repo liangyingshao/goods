@@ -9,6 +9,7 @@ import cn.edu.xmu.oomall.goods.service.IGoodsService;
 import cn.edu.xmu.oomall.order.model.SimpleFreightModelDTO;
 import cn.edu.xmu.oomall.order.service.IOrderService;
 import org.apache.dubbo.config.annotation.DubboReference;
+import org.apache.dubbo.config.annotation.DubboService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,7 @@ public class SpuService {
     @Autowired
     GoodsSpuDao spuDao;
 
-    @DubboReference
+    @DubboReference(check = false)
     private IOrderService iOrderService;
 
     private Logger logger = LoggerFactory.getLogger(SpuService.class);

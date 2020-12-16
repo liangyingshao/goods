@@ -35,8 +35,8 @@ public class GoodsService {
     private final String davPassword="admin";
     private final String baseUrl="http://192.168.148.131:8888/webdav/";
 
-    @DubboReference
-    private IShareService IShareService;
+    @DubboReference(check = false)
+    private IShareService iShareService;
 
     @Transactional
     public ReturnObject<ResponseCode> modifyShop(Long id, String name) {
@@ -72,12 +72,11 @@ public class GoodsService {
     @Transactional
     public ReturnObject<GoodsSkuDetailRetVo> getSku(Long id)
     {
-        GoodsSkuDetailRetVo retVo=goodsDao.getSku(id);
-        if(retVo==null)
-            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        ReturnObject<GoodsSkuDetailRetVo> retVo=goodsDao.getSku(id);
+        if(retVo.getCode().equals(ResponseCode.OK))
+            retVo.getData().setShareable(iShareService.skuSharable(id).getData());
 
-        retVo.setShareable(IShareService.skuSharable(id).getData());
-        return new ReturnObject<>(retVo);
+        return retVo;
     }
 
     /**
@@ -190,8 +189,7 @@ public class GoodsService {
     @Transactional
     public ReturnObject<GoodsSkuRetVo> getShareSku(Long sid, Long id, Long userId)
     {
-        ReturnObject<GoodsSkuRetVo> returnObject=new ReturnObject<>(IShareService.shareUserSkuMatch(sid,id,userId).getCode());
-        if(returnObject.getCode().equals(ResponseCode.OK)) returnObject=goodsDao.getShareSku(id);
+        ReturnObject<GoodsSkuRetVo> returnObject=goodsDao.getShareSku(id);
         return returnObject;
     }
 
