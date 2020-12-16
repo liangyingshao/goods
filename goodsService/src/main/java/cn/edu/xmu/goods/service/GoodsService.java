@@ -193,13 +193,11 @@ public class GoodsService {
 
     /**
      * 查看一条分享商品SKU的详细信息（需登录）
-     * @param sid
      * @param id
-     * @param userId
      * @return ReturnObject<GoodsSkuRetVo>
      */
     @Transactional
-    public ReturnObject<GoodsSkuRetVo> getShareSku(Long sid, Long id, Long userId)
+    public ReturnObject<GoodsSkuRetVo> getShareSku(Long id)
     {
         ReturnObject<GoodsSkuRetVo> returnObject=goodsDao.getShareSku(id);
         return returnObject;

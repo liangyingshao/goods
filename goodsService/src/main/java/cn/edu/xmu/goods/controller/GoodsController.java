@@ -1086,7 +1086,7 @@ public class GoodsController {
                 //=iShareService.shareUserSkuMatch(sid,id,userId)
                 ;
         //if(returnObject.getCode().equals(ResponseCode.OK))
-            returnObject=goodsService.getShareSku(sid,id,userId);
+            returnObject=goodsService.getShareSku(id);
         return Common.getRetObject(returnObject);
     }
 

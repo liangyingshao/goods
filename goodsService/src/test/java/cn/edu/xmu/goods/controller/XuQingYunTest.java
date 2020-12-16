@@ -1,12 +1,14 @@
 package cn.edu.xmu.goods.controller;
 
+import cn.edu.xmu.ooad.Application;
 import cn.edu.xmu.ooad.util.JacksonUtil;
+import cn.edu.xmu.ooad.util.JwtHelper;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import com.alibaba.fastjson.JSONObject;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
@@ -19,18 +21,22 @@ import java.time.LocalDateTime;
  * author: 24320182203306 徐清韵
  * version: 1.0
  */
+@SpringBootTest(classes = Application.class)   //标识本类是一个SpringBootTest
+@Slf4j
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class XuQingYunTest {
-    @Value("${public-test.managementgate}")
-    private String managementGate;
+    //@Value("${public-test.managementgate}")
+    private String managementGate="192.168.43.90:8881";
 
-    @Value("${public-test.mallgate}")
-    private String mallGate;
+    //@Value("${public-test.mallgate}")
+    private String mallGate="192.168.43.90:8880";
     private WebTestClient manageClient;
 
     private WebTestClient mallClient;
 
 
-    XuQingYunTest(){
+    @BeforeEach
+    public void setUp(){
 
         this.manageClient = WebTestClient.bindToServer()
                 .baseUrl("http://"+managementGate)
@@ -65,7 +71,7 @@ public class XuQingYunTest {
         body.put("userName", userName);
         body.put("password", password);
         String requireJson = body.toJSONString();
-        byte[] responseString = manageClient.post().uri("/privileges/login").bodyValue(requireJson).exchange()
+        byte[] responseString = manageClient.post().uri("/adminusers/login").bodyValue(requireJson).exchange()
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
@@ -73,6 +79,11 @@ public class XuQingYunTest {
                 .returnResult()
                 .getResponseBodyContent();
         return JSONObject.parseObject(new String(responseString, StandardCharsets.UTF_8)).getString("data");
+    }
+
+    private final String creatTestToken(Long userId, Long departId, int expireTime) {
+        String token = new JwtHelper().createToken(userId, departId, expireTime);
+        return token;
     }
 
     @Test
@@ -189,17 +200,20 @@ public class XuQingYunTest {
     @Order(03)
     void getShareSku() throws Exception
     {
-        String token = this.userLogin("17857289610", "123456");
+        String token =
+                //creatTestToken(9L,0L,1000);
+                this.userLogin("17857289610", "123456")
+                ;
         byte[] response  = mallClient.get().uri("/share/442315/skus/300")
                 .header("authorization",token)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
+                //.jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
                 .returnResult()
                 .getResponseBodyContent();
         String expectedResponse="{\"code\":\"OK\",\"errmsg\":\"成功\",\"data\":{\"id\":273,\"name\":\"+\",\"skuSn\":null,\"imageUrl\":\"http://47.52.88.176/file/images/201612/file_586206d4c7d2f.jpg\",\"inventory\":1,\"originalPrice\":980000,\"price\":null,\"disabled\":4}}";
-        String str=new String(response);
+        String str=new String(response,StandardCharsets.UTF_8);
         System.out.println(str);
         response  = mallClient.get().uri("/share/442316/skus/300")
                 .header("authorization",token)
@@ -287,7 +301,7 @@ public class XuQingYunTest {
         String requireJson="{\n    \"name\": \"name\",\n    \"originalPrice\": \"100\",\n    \"configuration\": \"configuration\",\n    \"weight\": \"100\",\n    \"inventory\": \"9999\",\n    \"detail\": \"detail\"\n}";
         String token = this.adminLogin("13088admin", "123456");
 
-        byte[] response =manageClient.put().uri("/shops/0/skus/8992")
+        byte[] response =manageClient.put().uri("/shops/0/skus/20682")
                 .header("authorization",token)
                 .bodyValue(requireJson)
                 .exchange()
@@ -525,7 +539,7 @@ public class XuQingYunTest {
     void deleteSku() throws Exception{
         String token = this.adminLogin("13088admin", "123456");
 
-        byte[] response =manageClient.delete().uri("/shops/1/skus/8992").header("authorization",token)
+        byte[] response =manageClient.delete().uri("/shops/1/skus/20682").header("authorization",token)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -535,7 +549,7 @@ public class XuQingYunTest {
         String expectedResponse = "{\"errno\":505,\"errmsg\":\"操作的资源id不是自己的对象\"}";
 
 
-        response =manageClient.delete().uri("/shops/0/skus/8992").header("authorization",token)
+        response =manageClient.delete().uri("/shops/0/skus/20682").header("authorization",token)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -544,7 +558,7 @@ public class XuQingYunTest {
                 .getResponseBodyContent();
         expectedResponse="{\"errno\":0,\"errmsg\":\"成功\"}";
 
-        response =manageClient.delete().uri("/shops/0/skus/8992").header("authorization",token)
+        response =manageClient.delete().uri("/shops/0/skus/20682").header("authorization",token)
                 .exchange()
                 .expectStatus().isOk().expectBody()
                 .jsonPath("$.errno").isEqualTo(504)
