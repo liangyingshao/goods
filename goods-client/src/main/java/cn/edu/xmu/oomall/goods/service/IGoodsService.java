@@ -98,7 +98,7 @@ public interface IGoodsService {
      */
     ReturnObject<GoodsDetailDTO> getGoodsBySkuId(Long skuId, Byte type, Long activityId, Integer quantity);
 
-    /**
+    /*
      *将所有运费模板值为freightId的spu改为默认运费模板
      */
     ReturnObject<Boolean> updateSpuFreightId(Long freightModelId);
@@ -108,8 +108,4 @@ public interface IGoodsService {
      */
     ReturnObject<ResponseCode> signalDecrInventory(List<Long> skuIds, List<Integer> quantity);
 
-    /**
-     * 根据activityId获得优惠活动Json字符串
-     */
-    ReturnObject<List<String>> getActivityRule(Long couponId,List<Long> activityId);
 }

@@ -24,6 +24,7 @@
         <module>goodsservice</module>
 <!--        <module>oomall-test</module>-->
         <module>oomall-gateway</module>
+        <module>privilegeservice-client</module>
     </modules>
     <name>goods module</name>
     <description>the goods module system</description>
