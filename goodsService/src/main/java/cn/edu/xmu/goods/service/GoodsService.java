@@ -41,12 +41,6 @@ public class GoodsService {
     @DubboReference(check = false)
     private IUserService iUserService;
 
-    @Transactional
-    public ReturnObject<ResponseCode> modifyShop(Long id, String name) {
-
-        return goodsDao.modifyShop(id,name);
-
-    }
 
     /**
      *查询SKU

@@ -434,24 +434,4 @@ class ActivityControllerTest1 {
     }
 
 
-    @Test
-    public void modifyGrouponofSPU()throws Exception{
-        String token = creatTestToken(1L, 0L, 100);
-        GrouponVo grouponVo = new GrouponVo();
-        grouponVo.setBeginTime("2020-12-20 15:55:18");
-        grouponVo.setEndTime("2022-01-05 15:55:18");
-        grouponVo.setStrategy("teststrategy");
-        String Json = JacksonUtil.toJson(grouponVo);
-
-        String responseString=this.mvc.perform(put("/goods/shops/1/groupons/1")
-                .header("authorization",token)
-                .contentType("application/json;charset=UTF-8")
-                .content(Json))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json;charset=UTF-8"))
-                .andReturn().getResponse().getContentAsString();
-        String expectedResponse="{\"errno\": 0, \"errmsg\": \"成功\"}";
-        JSONAssert.assertEquals(expectedResponse,responseString,true);
-        //测试是否真的改变
-    }
 }

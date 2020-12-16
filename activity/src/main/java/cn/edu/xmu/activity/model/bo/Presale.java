@@ -53,8 +53,8 @@ public class Presale implements VoObject {
         vo.setBeginTime(beginTime);
         vo.setPayTime(payTime);
         vo.setEndTime(endTime);
-        vo.setSimpleGoodsSkuDTO(simpleGoodsSkuDTO);
-        vo.setSimpleShopDTO(simpleShopDTO);
+        vo.setGoodsSku(simpleGoodsSkuDTO);
+        vo.setShop(simpleShopDTO);
         return vo;
     }
 

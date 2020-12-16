@@ -75,30 +75,34 @@ public class PresaleDao {
                 return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
         }
         //5.按timeline查询
-        switch (timeline){
-            case 0:
-                criteria.andBeginTimeGreaterThan(LocalDateTime.now());
-                break;
-            case 1:
-                LocalDateTime searchTime= LocalDateTime.now();
-                searchTime=searchTime.plusDays(2);
-                searchTime=searchTime.minusHours(searchTime.getHour());
-                searchTime=searchTime.minusMinutes(searchTime.getMinute());
-                searchTime=searchTime.minusSeconds(searchTime.getSecond());
-                searchTime=searchTime.minusNanos(searchTime.getNano());
-                LocalDateTime searchTimeMax=searchTime;//时间段上限
-                LocalDateTime searchTimeMin=searchTime.minusDays(1);//时间段下限
-                criteria.andBeginTimeGreaterThanOrEqualTo(searchTimeMin);//beginTime>=明日零点
-                criteria.andBeginTimeLessThan(searchTimeMax);//beginTime<后日零点
-                break;
-            case 2:
-                criteria.andBeginTimeLessThanOrEqualTo(LocalDateTime.now());
-                criteria.andEndTimeGreaterThanOrEqualTo(LocalDateTime.now());
-                break;
-            case 3:
-                criteria.andEndTimeLessThan(LocalDateTime.now());
+        if(timeline!=null)
+        {
+            switch (timeline){
+                case 0:
+                    criteria.andBeginTimeGreaterThan(LocalDateTime.now());
+                    break;
+                case 1:
+                    LocalDateTime searchTime= LocalDateTime.now();
+                    searchTime=searchTime.plusDays(2);
+                    searchTime=searchTime.minusHours(searchTime.getHour());
+                    searchTime=searchTime.minusMinutes(searchTime.getMinute());
+                    searchTime=searchTime.minusSeconds(searchTime.getSecond());
+                    searchTime=searchTime.minusNanos(searchTime.getNano());
+                    LocalDateTime searchTimeMax=searchTime;//时间段上限
+                    LocalDateTime searchTimeMin=searchTime.minusDays(1);//时间段下限
+                    criteria.andBeginTimeGreaterThanOrEqualTo(searchTimeMin);//beginTime>=明日零点
+                    criteria.andBeginTimeLessThan(searchTimeMax);//beginTime<后日零点
+                    break;
+                case 2:
+                    criteria.andBeginTimeLessThanOrEqualTo(LocalDateTime.now());
+                    criteria.andEndTimeGreaterThanOrEqualTo(LocalDateTime.now());
+                    break;
+                case 3:
+                    criteria.andEndTimeLessThan(LocalDateTime.now());
 
+            }
         }
+
 
         //7.如果不是管理员，仅显示有效的活动
         if(!isadmin) {
@@ -116,7 +120,6 @@ public class PresaleDao {
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
         }
 
-        //TODO 返回需要查浮动库存表
         //9.返回
         return new ReturnObject<>(results);
 

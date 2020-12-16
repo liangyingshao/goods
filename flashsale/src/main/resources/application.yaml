@@ -157,12 +157,12 @@ dubbo:
     qos-accept-foreign-ip: false
   # 配置注册中心
   registry:
-    address: nacos://192.168.43.73:8848
+    address: nacos://localhost:8848
   # 设置协议-协议由提供方指定消费方被动接受
   protocol:
     name: dubbo
     port: -1 # -1 表示端口自增 from 20880
-    host: 192.168.43.180
+    host: localhost
     # 设置超时时间
 #    host:
   consumer:
@@ -178,8 +178,8 @@ spring:
   cloud:
     nacos:
       discovery:
-        ip: 192.168.43.180
-        server-addr: 192.168.43.73:8848
+        ip: localhost
+        server-addr: localhost:8848
   profiles:
     active: dev
   datasource:

@@ -191,8 +191,8 @@ public class CouponService {
         ReturnObject<SimpleShopDTO> simpleShopDTOReturnObject=iGoodsService.getSimpleShopByShopId(shopId);
         String createByName="";
 //      createByName=iPrivilegeService.getUserName(activity.getCreatedBy());
-        ReturnObject<CouponActivityVo> returnObject= couponDao.addCouponActivity(activity,simpleShopDTOReturnObject.getData(),createByName);
-        return returnObject;
+        //ReturnObject<CouponActivityVo> returnObject= couponDao.addCouponActivity(activity,simpleShopDTOReturnObject.getData(),createByName);
+        return null;
     }
 
     /**

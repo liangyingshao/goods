@@ -47,11 +47,7 @@ public class PresaleController {
      * @return java.lang.Object
      */
     @ApiOperation(value="获得预售活动的所有状态")
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
-    })
     @ApiResponse(code = 0,message = "成功")
-    @Audit
     @GetMapping("/presales/states")
     public Object getPresaleState() {
         ActivityStatus[] states= ActivityStatus.class.getEnumConstants();
@@ -67,11 +63,10 @@ public class PresaleController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
-    @Audit
     @ResponseBody
     @GetMapping("/presales")
     public Object customerQueryPresales(
-            @RequestParam(required = false) int timeline,
+            @RequestParam(required = false) Integer timeline,
             @RequestParam(required = false) Long skuId,
             @RequestParam(required = false) Long shopId,
             @RequestParam(required = false, defaultValue = "1") Integer page,
@@ -101,13 +96,13 @@ public class PresaleController {
     })
     @Audit
     @ResponseBody
-    @GetMapping("/shops/{id}/presales")
+    @GetMapping("/shops/{shopId}/presales")
     public Object adminQueryPresales(
             @PathVariable Long shopId,
             @RequestParam(required = false) Integer state,
             @RequestParam(required = false) Long skuId,
-            @RequestParam(required = false, defaultValue = "1") int page,
-            @RequestParam(required = false, defaultValue = "10") int pagesize
+            @RequestParam(required = false, defaultValue = "1") Integer page,
+            @RequestParam(required = false, defaultValue = "10") Integer pagesize
     ){
 
         Object object = null;
@@ -125,32 +120,51 @@ public class PresaleController {
 
 
 
-    @ApiOperation(value="管理员新增SPU预售活动")
+    @ApiOperation(value="管理员新增SKU预售活动")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "authorization", value ="用户token", paramType = "header", dataType = "String",  required = true),
             @ApiImplicitParam(name = "shopId", value ="商铺id", paramType = "path", dataType = "Integer",  required = true),
-            @ApiImplicitParam(name = "id", value ="商品SPUid", paramType = "path", dataType = "Integer",  required = true)
+            @ApiImplicitParam(name = "id", value ="商品SKUid", paramType = "path", dataType = "Integer",  required = true)
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功")
     })
     @Audit
-    @PostMapping("/shops/{shopid}/skus/{id}/presales")
+    @PostMapping("/shops/{shopId}/skus/{id}/presales")
     @ResponseBody
     public Object createPresaleOfSKU(@PathVariable(name = "id") Long id, @PathVariable(name="shopId") Long shopId, @RequestBody PresaleVo presaleVo ){
 
+        //beginTime，endTime的验证
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        if(LocalDateTime.parse(presaleVo.getBeginTime(),dtf).isBefore(LocalDateTime.now())||
-                LocalDateTime.parse(presaleVo.getEndTime(),dtf).isBefore(LocalDateTime.now())||
-                LocalDateTime.parse(presaleVo.getEndTime(),dtf).isBefore(LocalDateTime.parse(presaleVo.getBeginTime(),dtf)))
-            return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+        LocalDateTime beginTime = null;
+        try {
+            beginTime = LocalDateTime.parse(presaleVo.getBeginTime(),dtf);
+        } catch (Exception e) {
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
+        }
+        LocalDateTime endTime = null;
+        try {
+            endTime = LocalDateTime.parse(presaleVo.getEndTime(),dtf);
+        } catch (Exception e) {
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
+        }
+        LocalDateTime payTime = null;
+        try {
+            payTime = LocalDateTime.parse(presaleVo.getPayTime(),dtf);
+        } catch (Exception e) {
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
+        }
+
+        if(beginTime.isBefore(LocalDateTime.now())||
+                endTime.isBefore(LocalDateTime.now())||
+                endTime.isBefore(payTime)||
+                payTime.isBefore(beginTime))
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
 
         ReturnObject returnObject = null;
-        try {
-            returnObject = presaleService.createPresaleOfSKU(shopId,id,presaleVo);
-        } catch (Exception e) {
-            return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
-        }
+
+        returnObject = presaleService.createPresaleOfSKU(shopId,id,presaleVo);
+
         if (returnObject.getCode() == ResponseCode.OK) {
             return Common.getRetObject(returnObject);
         } else {
@@ -172,13 +186,13 @@ public class PresaleController {
     })
     @Audit
     @PutMapping("/shops/{shopId}/presales/{id}")
-    public Object modifyPresaleofSPU(@PathVariable Long shopId, @PathVariable Long id,@RequestBody(required = true) PresaleVo presaleVo){
+    public Object modifyPresaleofSKU(@PathVariable Long shopId, @PathVariable Long id,@RequestBody(required = true) PresaleVo presaleVo){
 
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         if(LocalDateTime.parse(presaleVo.getBeginTime(),dtf).isBefore(LocalDateTime.now())||
                 LocalDateTime.parse(presaleVo.getEndTime(),dtf).isBefore(LocalDateTime.now())||
                 LocalDateTime.parse(presaleVo.getEndTime(),dtf).isBefore(LocalDateTime.parse(presaleVo.getBeginTime(),dtf)))
-            return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
 
         ReturnObject returnObject = presaleService.modifyPresaleOfSKU(shopId,id,presaleVo);
         return Common.getRetObject(returnObject);

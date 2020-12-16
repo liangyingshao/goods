@@ -51,6 +51,7 @@ public class FlashSaleDao {
         //如果没有，插入数据库
         try
         {
+            logger.error("does it in?");
             FlashSalePo flashSalePo = new FlashSalePo();
             flashSalePo.setFlashDate(LocalDateTime.of(flashDate.toLocalDate(), LocalTime.MIN));
             flashSalePo.setTimeSegId(id);
@@ -214,7 +215,7 @@ public class FlashSaleDao {
             //判断状态，0可以到1、2，1可以到0，2状态的秒杀活动状态不可变更
             if(flashSalePo.getState().intValue() == 1) {
                 if(state.intValue()==2)
-                    return new ReturnObject(ResponseCode.DELETE_OFFLINE_NOTALLOW);
+                    return new ReturnObject(ResponseCode.DELETE_ONLINE_NOTALLOW);
             } else if(flashSalePo.getState().intValue() == 2) {
                 return  new ReturnObject(ResponseCode.DELETE_CHANGAE_NOTALLOW);
             }
