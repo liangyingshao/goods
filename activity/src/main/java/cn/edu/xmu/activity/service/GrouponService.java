@@ -56,7 +56,7 @@ public class GrouponService {
 
         //3. 此spu是否在此shop中,否则无权限操作
         if(goodsSpuPoDTO.getShopId()!=shopId)
-            return new ReturnObject(ResponseCode.FIELD_NOTVALID);//TODO 考虑错误码是否合适
+            return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);//TODO 考虑错误码是否合适
 
         //4. 此spu是否正在参加其他团购
         if(grouponDao.checkInGroupon(id,grouponVo.getBeginTime(),grouponVo.getEndTime()).getData())

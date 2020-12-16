@@ -51,14 +51,29 @@ class GrouponControllerTest {
         return token;
     }
 
+    @Test
+    public void getgrouponState()throws Exception{
+
+        String token = creatTestToken(1L, 0L, 100);
+        String responseString=this.mvc.perform(MockMvcRequestBuilders.get("/goods/groupons/states")
+                .header("authorization",token)
+                .contentType("application/json;charset=UTF-8"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        String expectedResponse="{\n" +
+                "  \"errno\": 0,\n" +
+                "  \"data\": [\n" +
+                "    \"OFF_SHELVES\",\n" +
+                "    \"ON_SHELVES\",\n" +
+                "    \"DELETED\"\n" +
+                "  ],\n" +
+                "  \"errmsg\": \"成功\"\n" +
+                "}";
+    }
+
     /**
-     * description: 此api涉及内部其他模块的调用，暂时无法测过
-     * version: 1.0
-     * date: 2020/12/11 8:17
-     * author: 杨铭
-     *
-     * @param
-     * @return void
+     * 成功
      */
     @Test
     public void createGrouponofSPU()throws Exception {
@@ -80,7 +95,9 @@ class GrouponControllerTest {
         JSONAssert.assertEquals(expectedResponse,responseString,true);
     }
 
-
+    /**
+     * 成功
+     */
     @Test
     public void modifyGrouponofSPU()throws Exception{
 
@@ -98,7 +115,7 @@ class GrouponControllerTest {
         grouponVo.setStrategy(strategy);
         String Json = JacksonUtil.toJson(grouponVo);
 
-        String responseString=this.mvc.perform(put("/goods/shops/1/groupons/2")
+        String responseString=this.mvc.perform(put("/goods/shops/1/groupons/100")
                 .header("authorization",token)
                 .contentType("application/json;charset=UTF-8")
                 .content(Json))
@@ -115,12 +132,15 @@ class GrouponControllerTest {
         Assert.state(newPo.getEndTime() == oldPo.getEndTime(), "endTime未修改！");
     }
 
+    /**
+     * 成功
+     */
     @Test
     public void putGrouponOnShelves()throws Exception {
 
         String token = creatTestToken(1L, 0L, 100);
 
-        String responseString=this.mvc.perform(put("/goods/shops/1/groupons/2/onshelves")
+        String responseString=this.mvc.perform(put("/goods/shops/1/groupons/101/onshelves")
                 .header("authorization",token))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
@@ -132,12 +152,34 @@ class GrouponControllerTest {
         Assert.state(newPo.getState()== ActivityStatus.ON_SHELVES.getCode().byteValue(), "状态未修改！");
     }
 
+    /**
+     * 成功
+     */
+    @Test
+    public void cancelGrouponofSPU()throws Exception{
+        String token = creatTestToken(1L, 0L, 100);
+
+        String responseString=this.mvc.perform(delete("/goods/shops/1/groupons/101")
+                .header("authorization",token))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        String expectedResponse="{\"errno\": 0, \"errmsg\": \"成功\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+        //查看是否真的发生修改
+        GrouponActivityPo newPo = grouponActivityPoMapper.selectByPrimaryKey(12L);
+        Assert.state(newPo.getState()== ActivityStatus.DELETED.getCode().byteValue(), "状态未修改！");
+    }
+
+    /**
+     * 成功
+     */
     @Test
     public void putGrouponOffShelves()throws Exception {
 
         String token = creatTestToken(1L, 0L, 100);
 
-        String responseString=this.mvc.perform(put("/goods/shops/1/groupons/2/offshelves")
+        String responseString=this.mvc.perform(put("/goods/shops/1/groupons/103/offshelves")
                 .header("authorization",token))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
@@ -149,6 +191,9 @@ class GrouponControllerTest {
         Assert.state(newPo.getState()== ActivityStatus.OFF_SHELVES.getCode().byteValue(), "状态未修改");
     }
 
+    /**
+     * 无条件 成功
+     */
     @Test
     public void customerQueryGroupons1() throws Exception{
         String token = creatTestToken(1L, 0L, 100);
@@ -167,18 +212,12 @@ class GrouponControllerTest {
     }
 
     /**
-     * description: 管理员查询groupons 无条件
-     * version: 1.0
-     * date: 2020/12/13 14:08
-     * author: 杨铭
-     *
-     * @param
-     * @return void
+     * 无条件 成功
      */
     @Test
     public void adminQueryGroupons1() throws Exception{
         String token = creatTestToken(1L, 0L, 100);
-        String responseString=this.mvc.perform(MockMvcRequestBuilders.get("/goods/shops/0/groupons")
+        String responseString=this.mvc.perform(MockMvcRequestBuilders.get("/goods/shops/1/groupons")
                 .header("authorization",token))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json;charset=UTF-8"))
@@ -199,10 +238,13 @@ class GrouponControllerTest {
                 .andReturn().getResponse().getContentAsString();
     }
 
+    /**
+     * 条件：beginTime,endTime
+     */
     @Test
     public void adminQueryGroupons2() throws Exception{
         String token = creatTestToken(1L, 0L, 100);
-        String responseString=this.mvc.perform(MockMvcRequestBuilders.get("/goods/shops/0/groupons")
+        String responseString=this.mvc.perform(MockMvcRequestBuilders.get("/goods/shops/1/groupons")
                 .header("authorization",token)
                 .queryParam("beginTime", "2020-12-02 01:25:25")
                 .queryParam("endTime", "2021-02-20 01:24:31"))
@@ -218,5 +260,366 @@ class GrouponControllerTest {
 
     }
 
+    /**
+     * beginTime > EndTime
+     */
+    @Test
+    public void createGrouponofSPU1() throws Exception {
+
+        GrouponVo grouponVo = new GrouponVo();
+        grouponVo.setBeginTime("2022-01-20 15:55:18");
+        grouponVo.setEndTime("2022-01-09 15:55:18");
+        grouponVo.setStrategy("teststrategy");
+        String Json = JacksonUtil.toJson(grouponVo);//{"beginTime":"2022-01-20 15:55:18","endTime":"2022-01-09 15:55:18","strategy":"teststrategy"}
+
+        String token = creatTestToken(1L, 0L, 100);
+
+        String responseString=this.mvc.perform(MockMvcRequestBuilders.post("/goods/shops/1/spus/10/groupons")
+                .header("authorization",token)
+                .contentType("application/json;charset=UTF-8")
+                .content(Json))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        String expectedString= "{\"errno\":503,\"errmsg\":\"字段不合法\"}";
+        JSONAssert.assertEquals(expectedString,responseString,true);
+    }
+
+    /**
+     * EndTime < now
+     */
+    @Test
+    public void createGrouponofSPU2() throws Exception {
+        GrouponVo grouponVo = new GrouponVo();
+        grouponVo.setBeginTime("2018-01-20 15:55:18");
+        grouponVo.setEndTime("2019-01-09 15:55:18");
+        grouponVo.setStrategy("teststrategy");
+        String Json = JacksonUtil.toJson(grouponVo);//{"beginTime":"2018-01-20 15:55:18","endTime":"2019-01-09 15:55:18","strategy":"teststrategy"}
+
+        String token = creatTestToken(1L, 0L, 100);
+
+        String responseString=this.mvc.perform(MockMvcRequestBuilders.post("/goods/shops/1/spus/10/groupons")
+                .header("authorization",token)
+                .contentType("application/json;charset=UTF-8")
+                .content(Json))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        String expectedString= "{\"errno\":503,\"errmsg\":\"字段不合法\"}";
+        JSONAssert.assertEquals(expectedString,responseString,true);
+    }
+
+    /**
+     * spuId不存在
+     */
+    @Test
+    public void createGrouponofSPU3() throws Exception {
+        GrouponVo grouponVo = new GrouponVo();
+        grouponVo.setBeginTime("2021-01-20 15:55:18");
+        grouponVo.setEndTime("2021-01-09 15:55:18");
+        grouponVo.setStrategy("teststrategy");
+        String Json = JacksonUtil.toJson(grouponVo);//{"beginTime":"2021-01-20 15:55:18","endTime":"2021-01-09 15:55:18","strategy":"teststrategy"}
+
+        String token = creatTestToken(1L, 0L, 100);
+
+        String responseString=this.mvc.perform(MockMvcRequestBuilders.post("/goods/shops/1/spus/1001/groupons")
+                .header("authorization",token)
+                .contentType("application/json;charset=UTF-8")
+                .content(Json))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        String expectedResponse= "{\"errno\":504,\"errmsg\":\"操作的资源id不存在\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+    }
+
+    /**
+     * skuId存在，但不在此shop中
+     */
+    @Test
+    public void createGrouponofSPU4() throws Exception {
+        GrouponVo grouponVo = new GrouponVo();
+        grouponVo.setBeginTime("2021-01-20 15:55:18");
+        grouponVo.setEndTime("2021-01-31 15:55:18");
+        grouponVo.setStrategy("teststrategy");
+        String Json = JacksonUtil.toJson(grouponVo);//{"beginTime":"2021-01-20 15:55:18","endTime":"2021-01-09 15:55:18","strategy":"teststrategy"}
+
+        String token = creatTestToken(1L, 0L, 100);
+
+        String responseString=this.mvc.perform(MockMvcRequestBuilders.post("/goods/shops/2/spus/10/groupons")
+                .header("authorization",token)
+                .contentType("application/json;charset=UTF-8")
+                .content(Json))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        String expectedResponse= "{\"errno\":505,\"errmsg\":\"操作的资源id不是自己的对象\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+    }
+
+    /**
+     * 此spu当前已经参与了其他团购活动
+     */
+    @Test
+    public void createGrouponofSPU5() throws Exception {
+        GrouponVo grouponVo = new GrouponVo();
+        grouponVo.setBeginTime("2021-01-20 15:55:18");
+        grouponVo.setEndTime("2021-01-31 15:55:18");
+        grouponVo.setStrategy("teststrategy");
+        String Json = JacksonUtil.toJson(grouponVo);//{"beginTime":"2021-01-20 15:55:18","endTime":"2021-01-09 15:55:18","strategy":"teststrategy"}
+
+        String token = creatTestToken(1L, 0L, 100);
+
+        String responseString=this.mvc.perform(MockMvcRequestBuilders.post("/goods/shops/1/spus/10/groupons")
+                .header("authorization",token)
+                .contentType("application/json;charset=UTF-8")
+                .content(Json))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        String expectedResponse= "{\"errno\":907,\"errmsg\":\"团购活动状态禁止\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+    }
+
+
+
+    /**
+     * state = 已上线，则活动状态禁止修改
+     */
+    @Test
+    public void modifyGrouponofSPU1() throws Exception {
+
+
+        String token = creatTestToken(1L, 0L, 100);
+        String strategy = "teststrategy";
+        String beginTime = "2020-12-20 15:55:18";
+        String endTime = "2022-01-05 15:55:18";
+
+        GrouponVo grouponVo = new GrouponVo();
+        grouponVo.setBeginTime(beginTime);
+        grouponVo.setEndTime(endTime);
+        grouponVo.setStrategy(strategy);
+        String Json = JacksonUtil.toJson(grouponVo);
+
+        String responseString=this.mvc.perform(put("/goods/shops/1/groupons/105")
+                .header("authorization",token)
+                .contentType("application/json;charset=UTF-8")
+                .content(Json))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        String expectedResponse= "{\"errno\":907,\"errmsg\":\"团购活动状态禁止\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+
+}
+
+    /**
+     * shopId 无权限操作此 presaleId
+     */
+    @Test
+    public void modifyGrouponofSPU2() throws Exception {
+        String token = creatTestToken(1L, 0L, 100);
+        String strategy = "teststrategy";
+        String beginTime = "2020-12-20 15:55:18";
+        String endTime = "2022-01-05 15:55:18";
+
+        GrouponVo grouponVo = new GrouponVo();
+        grouponVo.setBeginTime(beginTime);
+        grouponVo.setEndTime(endTime);
+        grouponVo.setStrategy(strategy);
+        String Json = JacksonUtil.toJson(grouponVo);
+
+        String responseString=this.mvc.perform(put("/goods/shops/2/groupons/106")
+                .header("authorization",token)
+                .contentType("application/json;charset=UTF-8")
+                .content(Json))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        String expectedResponse= "{\"errno\":505,\"errmsg\":\"操作的资源id不是自己的对象\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+    }
+
+    /**
+     * 此团购已被逻辑删除
+     */
+    @Test
+    public void modifyGrouponofSPU3() throws Exception {
+        String token = creatTestToken(1L, 0L, 100);
+        String strategy = "teststrategy";
+        String beginTime = "2020-12-20 15:55:18";
+        String endTime = "2022-01-05 15:55:18";
+
+        GrouponVo grouponVo = new GrouponVo();
+        grouponVo.setBeginTime(beginTime);
+        grouponVo.setEndTime(endTime);
+        grouponVo.setStrategy(strategy);
+        String Json = JacksonUtil.toJson(grouponVo);
+
+        String responseString=this.mvc.perform(put("/goods/shops/1/groupons/107")
+                .header("authorization",token)
+                .contentType("application/json;charset=UTF-8")
+                .content(Json))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        String expectedResponse= "{\"errno\":907,\"errmsg\":\"团购活动状态禁止\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+    }
+
+    /**
+     * 修改的beginTime > endTime
+     */
+    @Test
+    public void modifyGrouponofSPU4() throws Exception {
+        String token = creatTestToken(1L, 0L, 100);
+        String strategy = "teststrategy";
+        String beginTime = "2020-12-20 15:55:18";
+        String endTime = "2022-01-05 15:55:18";
+
+        GrouponVo grouponVo = new GrouponVo();
+        grouponVo.setBeginTime(beginTime);
+        grouponVo.setEndTime(endTime);
+        grouponVo.setStrategy(strategy);
+        String Json = JacksonUtil.toJson(grouponVo);
+
+        String responseString=this.mvc.perform(put("/goods/shops/1/groupons/108")
+                .header("authorization",token)
+                .contentType("application/json;charset=UTF-8")
+                .content(Json))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        String expectedString= "{\"errno\":503,\"errmsg\":\"字段不合法\"}";
+        JSONAssert.assertEquals(expectedString,responseString,true);
+    }
+
+    /**
+     * 修改的endTime早于now
+     */
+    @Test
+    public void modifyGrouponofSPU5() throws Exception {
+        String token = creatTestToken(1L, 0L, 100);
+        String strategy = "teststrategy";
+        String beginTime = "2020-12-20 15:55:18";
+        String endTime = "2022-01-05 15:55:18";
+
+        GrouponVo grouponVo = new GrouponVo();
+        grouponVo.setBeginTime(beginTime);
+        grouponVo.setEndTime(endTime);
+        grouponVo.setStrategy(strategy);
+        String Json = JacksonUtil.toJson(grouponVo);
+
+        String responseString=this.mvc.perform(put("/goods/shops/1/groupons/109")
+                .header("authorization",token)
+                .contentType("application/json;charset=UTF-8")
+                .content(Json))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        String expectedString= "{\"errno\":503,\"errmsg\":\"字段不合法\"}";
+        JSONAssert.assertEquals(expectedString,responseString,true);
+    }
+
+
+    /**
+     * state不为已下线，则无法删除
+     */
+    @Test
+    public void cancelGrouponofSPU1() throws Exception {
+        String token = creatTestToken(1L, 0L, 100);
+
+        String responseString=this.mvc.perform(delete("/goods/shops/1/groupons/110")
+                .header("authorization",token))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        String expectedResponse="{\"errno\":907,\"errmsg\":\"团购活动状态禁止\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+    }
+
+    /**
+     * 此shopId无权操作此grouponId
+     */
+    @Test
+    public void cancelGrouponofSPU2() throws Exception {
+        String token = creatTestToken(1L, 0L, 100);
+
+        String responseString=this.mvc.perform(delete("/goods/shops/2/groupons/111")
+                .header("authorization",token))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        String expectedResponse= "{\"errno\":505,\"errmsg\":\"操作的资源id不是自己的对象\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+
+    }
+
+    /**
+     * 若预售状态不为已下线（已上线、已删除），则预售状态不允许上线
+     */
+    @Test
+    public void putGrouponOnShelves1() throws Exception {
+        String token = creatTestToken(1L, 0L, 100);
+
+        String responseString=this.mvc.perform(put("/goods/shops/1/groupons/112/onshelves")
+                .header("authorization",token))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        String expectedResponse="{\"errno\":907,\"errmsg\":\"团购活动状态禁止\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+    }
+
+    /**
+     * 此shopId无权操作此presaleId
+     */
+    @Test
+    public void putGrouponOnShelves2() throws Exception {
+        String token = creatTestToken(1L, 0L, 100);
+
+        String responseString=this.mvc.perform(put("/goods/shops/2/groupons/113/onshelves")
+                .header("authorization",token))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        String expectedResponse= "{\"errno\":505,\"errmsg\":\"操作的资源id不是自己的对象\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+    }
+
+    /**
+     * 若预售状态不为已上线（已下线、已删除），则预售状态不允许下线
+     */
+    @Test
+    public void putGrouponOffShelves1() throws Exception {
+
+        String token = creatTestToken(1L, 0L, 100);
+
+        String responseString=this.mvc.perform(put("/goods/shops/1/groupons/114/offshelves")
+                .header("authorization",token))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        String expectedResponse="{\"errno\":907,\"errmsg\":\"团购活动状态禁止\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+    }
+
+    /**
+     * 此shopId无权操作此presaleId
+     */
+    @Test
+    public void putGrouponOffShelves2() throws Exception {
+
+        String token = creatTestToken(1L, 0L, 100);
+
+        String responseString=this.mvc.perform(put("/goods/shops/2/groupons/115/offshelves")
+                .header("authorization",token))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn().getResponse().getContentAsString();
+        String expectedResponse="{\"errno\":907,\"errmsg\":\"团购活动状态禁止\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
+
+    }
 
 }

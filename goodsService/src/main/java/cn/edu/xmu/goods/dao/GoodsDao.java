@@ -555,15 +555,31 @@ public class GoodsDao {
 
     public ReturnObject<Long> getShopIdBySkuId(Long skuId)
     {
-        GoodsSkuPo skuPo=skuMapper.selectByPrimaryKey(skuId);
+        GoodsSkuPo skuPo= null;
+        try {
+            skuPo = skuMapper.selectByPrimaryKey(skuId);
+        } catch (Exception e) {
+            StringBuilder message = new StringBuilder().append("getShopIdBySkuId: ").append(e.getMessage());
+            logger.error(message.toString());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+        }
 
         //查不到sku
-        if(skuPo==null)return new ReturnObject<>(null);
+        if(skuPo==null)
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
 
-        GoodsSpuPo spuPo= spuMapper.selectByPrimaryKey(skuPo.getGoodsSpuId());
+        GoodsSpuPo spuPo= null;
+        try {
+            spuPo = spuMapper.selectByPrimaryKey(skuPo.getGoodsSpuId());
+        } catch (Exception e) {
+            StringBuilder message = new StringBuilder().append("getShopIdBySkuId: ").append(e.getMessage());
+            logger.error(message.toString());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+        }
 
         //查不到spu
-        if(spuPo==null)return new ReturnObject<>(null);
+        if(spuPo==null)
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
 
         return new ReturnObject<>(spuPo.getShopId());
     }
@@ -820,21 +836,20 @@ public class GoodsDao {
             return new ReturnObject<>(sku.getOriginalPrice());
         }
     }
-//瞎写的
-    public ReturnObject<ResponseCode> modifyShop(Long id, String name) {
-        return new ReturnObject<>();
-    }
 
     public SimpleGoodsSkuDTO getSimpleSkuBySkuId(Long skuId) {
         GoodsSkuPo skuPo=skuMapper.selectByPrimaryKey(skuId);
-        SimpleGoodsSkuDTO simpleGoodsSkuDTO=new SimpleGoodsSkuDTO();
-        simpleGoodsSkuDTO.setDisabled(skuPo.getDisabled());
-        simpleGoodsSkuDTO.setId(skuPo.getId());
-        simpleGoodsSkuDTO.setImageUrl(skuPo.getImageUrl());
-        simpleGoodsSkuDTO.setInventory(skuPo.getInventory());
-        simpleGoodsSkuDTO.setName(skuPo.getName());
-        simpleGoodsSkuDTO.setOriginalPrice(skuPo.getOriginalPrice());
-        simpleGoodsSkuDTO.setSkuSn(skuPo.getSkuSn());
+        SimpleGoodsSkuDTO simpleGoodsSkuDTO = null;
+        if(skuPo != null) {
+            simpleGoodsSkuDTO=new SimpleGoodsSkuDTO();
+            simpleGoodsSkuDTO.setDisabled(skuPo.getDisabled());
+            simpleGoodsSkuDTO.setId(skuPo.getId());
+            simpleGoodsSkuDTO.setImageUrl(skuPo.getImageUrl());
+            simpleGoodsSkuDTO.setInventory(skuPo.getInventory());
+            simpleGoodsSkuDTO.setName(skuPo.getName());
+            simpleGoodsSkuDTO.setOriginalPrice(skuPo.getOriginalPrice());
+            simpleGoodsSkuDTO.setSkuSn(skuPo.getSkuSn());
+        }
         return simpleGoodsSkuDTO;
     }
 

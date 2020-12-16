@@ -89,7 +89,6 @@ public class GrouponController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
-    @Audit
     @ResponseBody
     @GetMapping("/groupons")
     public Object customerQueryGroupons(
@@ -194,19 +193,19 @@ public class GrouponController {
         try {
             beginTime = LocalDateTime.parse(grouponVo.getBeginTime(),dtf);
         } catch (Exception e) {
-            return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
         }
         LocalDateTime endTime = null;
         try {
             endTime = LocalDateTime.parse(grouponVo.getEndTime(),dtf);
         } catch (Exception e) {
-            return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
         }
 
         if(beginTime.isBefore(LocalDateTime.now()) ||
                 endTime.isBefore(LocalDateTime.now())||
                 endTime.isBefore(beginTime))
-            return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
 
         ReturnObject returnObject = grouponService.createGrouponofSPU(shopId,id,grouponVo);
         if (returnObject.getCode() == ResponseCode.OK) {
@@ -251,21 +250,25 @@ public class GrouponController {
         try {
             beginTime= LocalDateTime.parse(grouponVo.getBeginTime(),dtf);
         } catch (Exception e) {
-            return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
         }
         LocalDateTime endTime = null;
         try {
             endTime = LocalDateTime.parse(grouponVo.getEndTime(),dtf);
         } catch (Exception e) {
-            return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
         }
         if(endTime.isBefore(LocalDateTime.now())||
                 beginTime.isBefore(LocalDateTime.now())||
                 endTime.isBefore(beginTime))
-            return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
 
         ReturnObject returnObject = grouponService.modifyGrouponofSPU(shopId,id,grouponVo);
-        return Common.getRetObject(returnObject);
+        if (returnObject.getCode() == ResponseCode.OK) {
+            return Common.getRetObject(returnObject);
+        } else {
+            return Common.decorateReturnObject(returnObject);
+        }
     }
 
 
@@ -293,7 +296,11 @@ public class GrouponController {
     @DeleteMapping("/shops/{shopId}/groupons/{id}")
     public Object cancelGrouponofSPU(@PathVariable Long shopId, @PathVariable Long id) {
         ReturnObject returnObject =  grouponService.cancelGrouponofSPU(shopId,id);
-        return Common.getRetObject(returnObject);
+        if (returnObject.getCode() == ResponseCode.OK) {
+            return Common.getRetObject(returnObject);
+        } else {
+            return Common.decorateReturnObject(returnObject);
+        }
     }
 
 
@@ -324,7 +331,11 @@ public class GrouponController {
     public Object putGrouponOnShelves(@PathVariable Long id,@PathVariable Long shopId){
 
         ReturnObject returnObject = grouponService.putGrouponOnShelves(shopId,id);
-        return Common.getRetObject(returnObject);
+        if (returnObject.getCode() == ResponseCode.OK) {
+            return Common.getRetObject(returnObject);
+        } else {
+            return Common.decorateReturnObject(returnObject);
+        }
     }
 
 
@@ -355,7 +366,11 @@ public class GrouponController {
     public Object putGrouponOffShelves(@PathVariable Long id,@PathVariable Long shopId){
 
         ReturnObject returnObject = grouponService.putGrouponOffShelves(shopId,id);
-        return Common.getRetObject(returnObject);
+        if (returnObject.getCode() == ResponseCode.OK) {
+            return Common.getRetObject(returnObject);
+        } else {
+            return Common.decorateReturnObject(returnObject);
+        }
     }
 
 

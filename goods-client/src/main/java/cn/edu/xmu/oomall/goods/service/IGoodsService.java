@@ -103,6 +103,8 @@ public interface IGoodsService {
      */
     ReturnObject<Boolean> updateSpuFreightId(Long freightModelId);
 
+    ReturnObject<Long> getPriceBySkuId(Long skuId);
+
     /**
      * 通知商品模块扣库存
      */

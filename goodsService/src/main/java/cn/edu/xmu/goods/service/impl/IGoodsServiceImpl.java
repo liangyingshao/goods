@@ -4,6 +4,7 @@ import cn.edu.xmu.goods.dao.GoodsDao;
 import cn.edu.xmu.goods.dao.GoodsSpuDao;
 import cn.edu.xmu.goods.dao.ShopDao;
 import cn.edu.xmu.goods.model.po.GoodsSkuPo;
+import cn.edu.xmu.goods.model.po.GoodsSpuPo;
 import cn.edu.xmu.goods.model.po.ShopPo;
 import cn.edu.xmu.goods.model.vo.GoodsSkuDetailRetVo;
 import cn.edu.xmu.ooad.util.ResponseCode;
@@ -54,8 +55,8 @@ public class IGoodsServiceImpl implements IGoodsService {
 
     @Override
     public ReturnObject<Long> getShopIdBySkuId(Long skuId) {
-        ReturnObject<Long> returnObject=goodsDao.getShopIdBySkuId(skuId);
-        return returnObject;
+        return goodsDao.getShopIdBySkuId(skuId);
+
     }
 
     @Override
@@ -91,6 +92,7 @@ public class IGoodsServiceImpl implements IGoodsService {
         }
         return new ReturnObject<>(goodsInfoDTO);
     }
+
 
     @Override
     public List<SkuNameInfoDTO> getSelectSkuNameListBySkuIdList(List<Long> idList) {
@@ -131,14 +133,37 @@ public class IGoodsServiceImpl implements IGoodsService {
 
     @Override
     public ReturnObject<SimpleGoodsSkuDTO> getSimpleSkuBySkuId(Long skuId) {
-        SimpleGoodsSkuDTO simpleGoodsSkuDTO=goodsDao.getSimpleSkuBySkuId(skuId);
-        simpleGoodsSkuDTO.setPrice(goodsDao.getPriceBySkuId(skuId).getData());
+        SimpleGoodsSkuDTO simpleGoodsSkuDTO = null;
+        if(skuId!=null) {
+            simpleGoodsSkuDTO=goodsDao.getSimpleSkuBySkuId(skuId);
+            simpleGoodsSkuDTO.setPrice(goodsDao.getPriceBySkuId(skuId).getData());
+        }
         return new ReturnObject<>(simpleGoodsSkuDTO);
     }
 
     @Override
     public ReturnObject<GoodsSpuPoDTO> getSpuBySpuId(Long spuId) {
-        return null;
+        GoodsSpuPo goodsSpuPo = goodsSpuDao.getSpuBySpuId(spuId).getData();
+        GoodsSpuPoDTO goodsSpuPoDTO = null;
+        if(goodsSpuPo!=null)
+        {
+            goodsSpuPoDTO = new GoodsSpuPoDTO();
+            goodsSpuPoDTO.setId(goodsSpuPo.getId());
+            goodsSpuPoDTO.setGmtModified(goodsSpuPo.getGmtModified());
+            goodsSpuPoDTO.setGmtCreate(goodsSpuPo.getGmtCreate());
+            goodsSpuPoDTO.setDisabled(goodsSpuPo.getDisabled());
+            goodsSpuPoDTO.setSpec(goodsSpuPo.getSpec());
+            goodsSpuPoDTO.setImageUrl(goodsSpuPo.getImageUrl());
+            goodsSpuPoDTO.setDetail(goodsSpuPo.getDetail());
+            goodsSpuPoDTO.setGoodsSn(goodsSpuPo.getGoodsSn());
+            goodsSpuPoDTO.setShopId(goodsSpuPo.getShopId());
+            goodsSpuPoDTO.setFreightId(goodsSpuPo.getFreightId());
+            goodsSpuPoDTO.setCategoryId(goodsSpuPo.getCategoryId());
+            goodsSpuPoDTO.setBrandId(goodsSpuPo.getBrandId());
+            goodsSpuPoDTO.setName(goodsSpuPo.getName());
+        }
+
+        return new ReturnObject<>(goodsSpuPoDTO);
     }
 
     @Override
@@ -155,6 +180,7 @@ public class IGoodsServiceImpl implements IGoodsService {
         ReturnObject<ShopDetailDTO>returnObject=goodsDao.getShopInfoBySkuId(skuId);
         return returnObject;
     }
+
 
     @Override
     public ReturnObject<GoodsFreightDTO> getGoodsFreightDetailBySkuId(Long skuId) {
@@ -236,13 +262,15 @@ public class IGoodsServiceImpl implements IGoodsService {
     @Override
     public ReturnObject<ShopDetailDTO> getShopInfoByShopId(Long shopId) {
         ShopDetailDTO shopDetailDTO = null;
-        ShopPo shopPo = shopDao.getShopById(shopId).getData();
-        shopDetailDTO.setShopId(shopPo.getId());
-        shopDetailDTO.setName(shopPo.getName());
-        shopDetailDTO.setState(shopPo.getState());
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        shopDetailDTO.setGmtCreate(dtf.format(shopPo.getGmtCreate()));
-        shopDetailDTO.setGmtModified(dtf.format(shopPo.getGmtModified()));
+        if(shopId!=null) {
+            ShopPo shopPo = shopDao.getShopById(shopId).getData();
+            shopDetailDTO.setShopId(shopPo.getId());
+            shopDetailDTO.setName(shopPo.getName());
+            shopDetailDTO.setState(shopPo.getState());
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            shopDetailDTO.setGmtCreate(dtf.format(shopPo.getGmtCreate()));
+            shopDetailDTO.setGmtModified(dtf.format(shopPo.getGmtModified()));
+        }
         return new ReturnObject<>(shopDetailDTO);
     }
 
@@ -260,4 +288,9 @@ public class IGoodsServiceImpl implements IGoodsService {
         return goodsDao.updateSpuFreightId(freightModelId);
     }
 
+
+    @Override
+    public ReturnObject<Long> getPriceBySkuId(Long skuId) {
+        return new ReturnObject<>(goodsDao.getPriceBySkuId(skuId).getData());
+    }
 }

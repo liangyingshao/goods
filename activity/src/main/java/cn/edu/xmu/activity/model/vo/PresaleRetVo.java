@@ -17,7 +17,7 @@ public class PresaleRetVo {
     String beginTime;
     String endTime;
     String payTime;
-    SimpleGoodsSkuDTO simpleGoodsSkuDTO;
-    SimpleShopDTO simpleShopDTO;
+    SimpleGoodsSkuDTO goodsSku;
+    SimpleShopDTO shop;
 
 }
