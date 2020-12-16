@@ -1083,9 +1083,9 @@ public class GoodsController {
                               @LoginUser @ApiIgnore @RequestParam(required = false) Long userId)
     {
         ReturnObject returnObject
-                //=iShareService.shareUserSkuMatch(sid,id,userId)
+                =iShareService.shareUserSkuMatch(sid,id,userId)
                 ;
-        //if(returnObject.getCode().equals(ResponseCode.OK))
+        if(returnObject.getCode().equals(ResponseCode.OK))
             returnObject=goodsService.getShareSku(id);
         return Common.getRetObject(returnObject);
     }

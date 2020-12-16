@@ -518,14 +518,14 @@ public class GoodsDao {
      * @param id
      * @return ReturnObject<GoodsSkuRetVo>
      */
-    public ReturnObject<GoodsSkuRetVo> getShareSku(Long id)
+    public ReturnObject<GoodsSku> getShareSku(Long id)
     {
         GoodsSkuPo skuPo=skuMapper.selectByPrimaryKey(id);
         if(skuPo==null)return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
 
         GoodsSku sku=new GoodsSku(skuPo);
-        GoodsSkuRetVo skuRetVo=new GoodsSkuRetVo(sku);
-        return new ReturnObject<>(skuRetVo);
+//        GoodsSkuRetVo skuRetVo=new GoodsSkuRetVo(sku);
+        return new ReturnObject<>(sku);
     }
 
     public ReturnObject<List<Long>> getAllSkuIdByShopId(Long shopId)

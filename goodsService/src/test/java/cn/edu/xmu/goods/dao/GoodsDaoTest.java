@@ -179,7 +179,7 @@ class GoodsDaoTest {
     @Test
     void getShareSku()
     {
-        ReturnObject<GoodsSkuRetVo> returnObject= goodsDao.getShareSku((long)273);
+        ReturnObject<GoodsSku> returnObject= goodsDao.getShareSku((long)273);
         assertEquals(returnObject.getCode(),ResponseCode.OK);
     }
 
