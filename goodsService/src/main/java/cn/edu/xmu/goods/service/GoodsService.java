@@ -191,9 +191,9 @@ public class GoodsService {
      * @return ReturnObject<GoodsSkuRetVo>
      */
     @Transactional
-    public ReturnObject<GoodsSku> getShareSku(Long id)
+    public ReturnObject<GoodsSkuRetVo> getShareSku(Long id)
     {
-        ReturnObject<GoodsSku> returnObject=goodsDao.getShareSku(id);
+        ReturnObject<GoodsSkuRetVo> returnObject=goodsDao.getShareSku(id);
         return returnObject;
     }
 

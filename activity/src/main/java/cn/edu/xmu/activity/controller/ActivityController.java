@@ -204,7 +204,7 @@ public class ActivityController {
         logger.debug("showCoupons:page="+page+" pageSize="+pageSize);
         if(state!=null&&Coupon.State.getTypeByCode(state)==null)return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.FIELD_NOTVALID));
         ReturnObject returnObject=activityService.showCoupons(userId,state,page,pageSize);
-        return returnObject;
+        return Common.getPageRetObject(returnObject);
     }
 
     //变内部接口了

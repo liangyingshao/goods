@@ -88,7 +88,7 @@ public class GoodsController {
     {
         logger.debug("getSkuList:page="+page+" pageSize="+pageSize);
         ReturnObject returnObject=goodsService.getSkuList(shopId,skuSn,spuId,spuSn,page,pageSize);
-        return Common.getRetObject(returnObject);
+        return Common.decorateReturnObject(returnObject);
     }
 
     /**
@@ -260,7 +260,7 @@ public class GoodsController {
         ReturnObject retObject=goodsService.addFloatPrice(shopId,floatPrice,userId);
         if (retObject.getData() != null) {
 
-            return Common.getRetObject(retObject);
+            return Common.decorateReturnObject(retObject);
         } else {
             return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }
@@ -304,7 +304,7 @@ public class GoodsController {
         sku.setDisabled(GoodsSku.State.ONSHELF);
         ReturnObject retObject=goodsService.createSKU(shopId,sku);
         if (retObject.getData() != null) {
-            return Common.getRetObject(retObject);
+            return Common.decorateReturnObject(retObject);
         } else {
             return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }
@@ -1082,12 +1082,10 @@ public class GoodsController {
     public Object getShareSku(@PathVariable Long sid, @PathVariable Long id,
                               @LoginUser @ApiIgnore @RequestParam(required = false) Long userId)
     {
-        ReturnObject returnObject
-                =iShareService.shareUserSkuMatch(sid,id,userId)
-                ;
+        ReturnObject returnObject = iShareService.shareUserSkuMatch(sid,id,userId);
         if(returnObject.getCode().equals(ResponseCode.OK))
             returnObject=goodsService.getShareSku(id);
-        return Common.getRetObject(returnObject);
+        return Common.decorateReturnObject(returnObject);
     }
 
     /**

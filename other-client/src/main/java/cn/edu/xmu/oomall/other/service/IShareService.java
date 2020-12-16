@@ -16,7 +16,7 @@ public interface IShareService {
     /**
      * 判断sid和skuid是否匹配
      */
-    ReturnObject shareUserSkuMatch(Long sid, Long skuId, Long userId);
+    ReturnObject<Boolean> shareUserSkuMatch(Long sid, Long skuId, Long userId);
 
     /**
      * 判断SKU是否可分享

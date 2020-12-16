@@ -26,10 +26,10 @@ import java.time.LocalDateTime;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class XuQingYunTest {
     //@Value("${public-test.managementgate}")
-    private String managementGate="192.168.43.90:8881";
+    private String managementGate="192.168.43.73:8881";
 
     //@Value("${public-test.mallgate}")
-    private String mallGate="192.168.43.90:8880";
+    private String mallGate="192.168.43.73:8880";
     private WebTestClient manageClient;
 
     private WebTestClient mallClient;
@@ -209,7 +209,7 @@ public class XuQingYunTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                //.jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
+                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
                 .returnResult()
                 .getResponseBodyContent();
         String expectedResponse="{\"code\":\"OK\",\"errmsg\":\"成功\",\"data\":{\"id\":273,\"name\":\"+\",\"skuSn\":null,\"imageUrl\":\"http://47.52.88.176/file/images/201612/file_586206d4c7d2f.jpg\",\"inventory\":1,\"originalPrice\":980000,\"price\":null,\"disabled\":4}}";
@@ -444,8 +444,6 @@ public class XuQingYunTest {
                 .returnResult()
                 .getResponseBodyContent();
     }
-
-
 
     @Test
     @Order(8)
