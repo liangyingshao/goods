@@ -7,8 +7,6 @@ public interface ICustomerService {
 
     /**
      * 通过userId查找用户信息
-     * @param userId
-     * @return
      */
     ReturnObject<CustomerDTO> findCustomerByUserId(Long userId);
 

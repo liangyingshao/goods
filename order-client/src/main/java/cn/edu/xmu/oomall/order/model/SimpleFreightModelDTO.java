@@ -7,17 +7,10 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-/**
- * 简单运费模板dto
- * @date 2020/12/13 17:13
- * @version 1.0
- */
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SimpleFreightModelDTO implements Serializable
-{
+public class SimpleFreightModelDTO implements Serializable {
     private Long id;
     private String name;
     private Byte type;

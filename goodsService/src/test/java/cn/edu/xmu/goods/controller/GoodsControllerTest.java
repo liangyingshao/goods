@@ -50,22 +50,6 @@ class GoodsControllerTest {
         return token;
     }
 
-    @Test
-    public void modifyshop1() throws Exception{
-
-        String token = creatTestToken(1L, 0L, 100);
-        byte[] response = webClient.put().uri("/shops/1").header("authorization",token)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
-                .returnResult()
-                .getResponseBodyContent();
-
-        String expectedResponse = "{\"errno\": 0, \"errmsg\": \"成功\"}";
-        
-    }
 
     @Test
     void getSkuList() throws Exception{

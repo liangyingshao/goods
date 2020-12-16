@@ -1024,9 +1024,32 @@ public class GoodsDao {
         GoodsSkuPoExample.Criteria skuCriteria=skuExample.createCriteria();
         skuCriteria.andGoodsSpuIdEqualTo(spuId);
         List<GoodsSkuPo> skuPos=skuMapper.selectByExample(skuExample);
-        //查得到spu下的sku
+        //查到该spu下的sku
         if(skuPos!=null&&skuPos.size()>0)
             skuIds.addAll(skuPos.stream().map(GoodsSkuPo::getId).collect(Collectors.toList()));
         return new ReturnObject<>(skuIds);
+    }
+
+    /*
+     *将所有运费模板值为freightId的spu改为默认运费模板
+     */
+    public ReturnObject<Boolean> updateSpuFreightId(Long freightModelId) {
+        if(freightModelId!=null){
+            GoodsSpuPoExample spuPoExample=new GoodsSpuPoExample();
+            GoodsSpuPoExample.Criteria spuCriteria=spuPoExample.createCriteria();
+            spuCriteria.andFreightIdEqualTo(freightModelId);
+            List<GoodsSpuPo> spuPos=spuMapper.selectByExample(spuPoExample);
+            if(spuPos!=null&&spuPos.size()>0)
+            {//将spu设置为默认运费模板
+                for(GoodsSpuPo po:spuPos)
+                {
+                    po.setFreightId(null);
+                    //写回
+                    spuMapper.updateByPrimaryKey(po);
+                }
+                return new ReturnObject<>(true);
+            }
+        }
+        return new ReturnObject<>(false);
     }
 }

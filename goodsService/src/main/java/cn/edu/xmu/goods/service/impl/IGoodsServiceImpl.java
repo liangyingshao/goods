@@ -226,6 +226,13 @@ public class IGoodsServiceImpl implements IGoodsService {
         return returnObject;
     }
 
+
+    @Override
+    public ReturnObject<ResponseCode> signalDecrInventory(List<Long> skuIds, List<Integer> quantity) {
+        return null;
+    }
+
+
     @Override
     public ReturnObject<ShopDetailDTO> getShopInfoByShopId(Long shopId) {
         ShopDetailDTO shopDetailDTO = null;
@@ -241,7 +248,16 @@ public class IGoodsServiceImpl implements IGoodsService {
 
     @Override
     public ReturnObject<List<Long>> getSkuIdsBySpuId(Long spuId){
+
         return goodsDao.getSkuIdsBySpuId(spuId);
+    }
+
+    /**
+     * 根据activityId获得优惠活动Json字符串
+     */
+    @Override
+    public ReturnObject<Boolean> updateSpuFreightId(Long freightModelId){
+        return goodsDao.updateSpuFreightId(freightModelId);
     }
 
 }

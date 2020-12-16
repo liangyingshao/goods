@@ -8,11 +8,7 @@ import java.io.Serializable;
 import java.time.LocalTime;
 
 /**
- * 时间dto
- *
- * @author wwc
- * @date 2020/11/24 23:08
- * @version 1.0
+ * @date 2020/12/15 23:08
  */
 @Data
 @NoArgsConstructor
