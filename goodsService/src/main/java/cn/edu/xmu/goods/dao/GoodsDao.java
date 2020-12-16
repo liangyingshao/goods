@@ -402,22 +402,6 @@ public class GoodsDao {
                 else {//构造FloatPriceRetVo
                     FloatPriceRetVo retVo=new FloatPriceRetVo();
                     retVo.set(new FloatPrice(checkFloatPo.get(0)));
-                    /**
-                     * 获取用户名
-                     * 输入：checkFloatPo.get(0).getCreatedBy()
-                     * 输出：UserPo
-                     */
-                    CreatedBy createdBy=new CreatedBy();
-                    createdBy.set(userId,"createUser");
-                    retVo.setCreatedBy(createdBy);
-                    /**
-                     * 获取用户名
-                     * 输入：userId
-                     * 输出：UserPo
-                     */
-                    ModifiedBy modifiedBy=new ModifiedBy();
-                    modifiedBy.set(userId,"testUser");
-                    retVo.setModifiedBy(modifiedBy);
                     return new ReturnObject<>(retVo);
                 }
             }

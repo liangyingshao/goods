@@ -26,7 +26,7 @@ public class FlashsaleService {
 
     private static final Logger logger = LoggerFactory.getLogger(FlashSaleDao.class);
 
-    @DubboReference
+    @DubboReference(check = false)
     private ITimeService timeService;
 
     @Autowired

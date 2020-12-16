@@ -30,7 +30,7 @@ public class IFlashsaleServiceImpl implements IFlashsaleService {
     @Autowired
     private FlashSaleItemDao flashSaleItemDao;
 
-    @DubboReference
+    @DubboReference(check = false)
     private ITimeService iTimeService;
 
     @Override

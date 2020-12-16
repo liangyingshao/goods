@@ -10,6 +10,7 @@ import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.*;
 import cn.edu.xmu.oomall.other.service.IFootprintService;
 import cn.edu.xmu.oomall.other.service.IShareService;
+import cn.edu.xmu.privilegeservice.client.IUserService;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.*;
 import org.apache.dubbo.config.annotation.DubboReference;
@@ -55,12 +56,11 @@ public class GoodsController {
     @Autowired
     private GoodsCategoryService goodsCategoryService;
 
-    @DubboReference
+    @DubboReference(check = false)
     private IFootprintService iFootprintService;
 
-    @DubboReference
+    @DubboReference(check = false)
     private IShareService iShareService;
-
 
     /**
      *查询SKU
@@ -259,6 +259,7 @@ public class GoodsController {
         floatPrice.setCreatedBy(userId);
         ReturnObject retObject=goodsService.addFloatPrice(shopId,floatPrice,userId);
         if (retObject.getData() != null) {
+
             return Common.getRetObject(retObject);
         } else {
             return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);

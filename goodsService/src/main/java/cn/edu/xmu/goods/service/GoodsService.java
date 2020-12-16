@@ -5,14 +5,13 @@ import cn.edu.xmu.goods.model.bo.FloatPrice;
 import cn.edu.xmu.goods.model.bo.GoodsSku;
 import cn.edu.xmu.goods.model.bo.GoodsSpu;
 import cn.edu.xmu.goods.model.po.GoodsSkuPo;
-import cn.edu.xmu.goods.model.vo.FloatPriceRetVo;
-import cn.edu.xmu.goods.model.vo.GoodsSkuDetailRetVo;
-import cn.edu.xmu.goods.model.vo.GoodsSkuRetVo;
+import cn.edu.xmu.goods.model.vo.*;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ImgHelper;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.other.service.IShareService;
+import cn.edu.xmu.privilegeservice.client.IUserService;
 import com.github.pagehelper.PageInfo;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.slf4j.Logger;
@@ -37,6 +36,10 @@ public class GoodsService {
 
     @DubboReference(check = false)
     private IShareService iShareService;
+
+
+    @DubboReference(check = false)
+    private IUserService iUserService;
 
     @Transactional
     public ReturnObject<ResponseCode> modifyShop(Long id, String name) {
@@ -162,7 +165,16 @@ public class GoodsService {
     public ReturnObject<FloatPriceRetVo> addFloatPrice(Long shopId, FloatPrice floatPrice, Long userId)
     {
         ReturnObject<FloatPriceRetVo> returnObject= goodsDao.addFloatPrice(shopId,floatPrice,userId);
-
+        if(returnObject.getData()!=null)
+        {
+            CreatedBy createdBy=new CreatedBy();
+            ModifiedBy modifiedBy=new ModifiedBy();
+            String userName=iUserService.getUserName(userId);
+            createdBy.set(userId,userName);
+            modifiedBy.set(userId,userName);
+            returnObject.getData().setCreatedBy(createdBy);
+            returnObject.getData().setModifiedBy(modifiedBy);
+        }
         return returnObject;
     }
 

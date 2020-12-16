@@ -40,10 +40,10 @@ public class IGoodsServiceImpl implements IGoodsService {
     @Autowired
     ShopDao shopDao;
 
-    @DubboReference
+    @DubboReference(check = false)
     private IActivityService IActivityService;
 
-    @DubboReference
+    @DubboReference(check = false)
     private IFlashsaleService iFlashsaleService;
 
     @Override

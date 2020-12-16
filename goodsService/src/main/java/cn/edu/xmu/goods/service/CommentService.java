@@ -27,7 +27,7 @@ public class CommentService {
     @Autowired
     private CommentDao commentDao;
 
-    @DubboReference
+    @DubboReference(check = false)
     private IUserService iUserService;
 
     @Transactional
