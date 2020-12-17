@@ -60,7 +60,6 @@ public class CommentController {
      */
     @ApiOperation(value = "comment001:获得评论的所有状态",  produces="application/json")
     @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value ="用户token", required = true)
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功")
@@ -122,7 +121,6 @@ public class CommentController {
      */
     @ApiOperation(value = "查询已通过审核的评论", produces = "application/json")
     @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
             @ApiImplicitParam(paramType = "path", dataType = "int", name = "id", value = "SKU Id", required = true),
             @ApiImplicitParam(paramType = "query", dataType = "int", name = "page", value = "页码", required = false),
             @ApiImplicitParam(paramType = "query", dataType = "int", name = "pageSize", value = "每页数目", required = false)
@@ -130,7 +128,6 @@ public class CommentController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
-    @Audit
     @GetMapping("/skus/{id}/comments")
     public Object selectAllPassComment(
             @PathVariable("id") Long id,
