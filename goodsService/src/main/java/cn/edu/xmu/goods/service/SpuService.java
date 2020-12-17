@@ -4,6 +4,7 @@ import cn.edu.xmu.goods.dao.GoodsSpuDao;
 import cn.edu.xmu.goods.model.bo.GoodsSpu;
 import cn.edu.xmu.goods.model.vo.GoodsSkuVo;
 import cn.edu.xmu.goods.model.vo.GoodsSpuVo;
+import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.goods.service.IGoodsService;
 import cn.edu.xmu.oomall.order.model.SimpleFreightModelDTO;
@@ -45,8 +46,12 @@ public class SpuService {
      * Modified at 2020/12/13
      */
     public ReturnObject<Object> showSpu(Long id) {
-        Long freightId=spuDao.getFreightIdBySpuId(id);
-        ReturnObject<SimpleFreightModelDTO> retFeightModel=iOrderService.getSimpleFreightById(freightId);
+        ReturnObject<SimpleFreightModelDTO> retFeightModel=new ReturnObject<>();
+
+        ReturnObject<Long> freightId=spuDao.getFreightIdBySpuId(id);
+        if(!freightId.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST.getCode())){
+            retFeightModel=iOrderService.getSimpleFreightById(freightId.getData());
+        }
         ReturnObject<Object> returnObject= spuDao.showSpu(id,retFeightModel.getData());
         return returnObject;
     }
@@ -60,8 +65,9 @@ public class SpuService {
      */
     @Transactional
     public ReturnObject addSpu(GoodsSpu spu) {
-        ReturnObject<GoodsSpu> returnObject = spuDao.addSpu(spu);
-        return returnObject;
+        ReturnObject<GoodsSpu> ret = spuDao.addSpu(spu);
+        //ReturnObject<Object> ret=showSpu(returnObject.getData().getId());
+        return ret;
     }
 
 //    /**

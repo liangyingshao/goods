@@ -97,6 +97,8 @@ public enum ResponseCode {
     BRANDALTER_INVALID(922,"对SPU品牌操作无效"),
     ACTIVITYALTER_INVALID(923,"对活动的无效操作"),
     ACTIVITY_NOTFOUND(924,"无符合条件的优惠活动"),
+    SHOP_NOTOPERABLE(925,"不可对该商铺进行操作"),
+    SPU_NOTOPERABLE(926,"失效的SPU"),
     TOMORROW_FLASHSALE_INVALID(930,"不允许增加明天的秒杀"),
     DELETE_ONLINE_NOTALLOW(931, "不允许删除已上线状态的活动"),
     DELETE_CHANGAE_NOTALLOW(932, "不允许修改已删除活动的状态"),

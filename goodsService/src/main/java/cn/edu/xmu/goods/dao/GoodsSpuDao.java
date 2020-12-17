@@ -37,6 +37,9 @@ public class GoodsSpuDao {
     private GoodsSpuPoMapper goodsSpuMapper;
 
     @Autowired
+    private ShopPoMapper shopMapper;
+
+    @Autowired
     private GoodsSkuPoMapper goodsSkuMapper;
 
     @Autowired
@@ -62,36 +65,37 @@ public class GoodsSpuDao {
      */
     public ReturnObject<GoodsSpu> addSpu(GoodsSpu spu) {
         GoodsSpuPo spuPo =spu.createSpuPo();
-        ReturnObject<GoodsSpu> returnObject=null;
-        try{
-            int ret = goodsSpuMapper.insertSelective(spuPo);
-            if (ret == 0) {
-                //插入失败
-                logger.debug("insertRole: insert role fail " + spuPo.toString());
-                returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("新增失败：" + spuPo.getName()));
-            } else {
-                //插入成功
-                logger.debug("insertRole: insert role = " + spuPo.toString());
-                spu.setId(spuPo.getId());
-                returnObject = new ReturnObject<>(spu);
+        ReturnObject<GoodsSpu> returnObject;
+        ShopPo shopPo=shopMapper.selectByPrimaryKey(spu.getShopId());
+        if(shopPo!=null){
+            if(shopPo.getState().equals(1)||shopPo.getState().equals(2))//如果商店状态为[未上线]或[已上线],可添加SPU
+            {
+                try {
+                    int ret = goodsSpuMapper.insertSelective(spuPo);
+                    if (ret == 0) {
+                        //插入失败
+                        logger.debug("insertRole: insert role fail " + spuPo.toString());
+                        returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("新增失败：" + spuPo.getName()));
+                    } else {
+                        //插入成功
+                        logger.debug("insertRole: insert role = " + spuPo.toString());
+                        spu.setId(spuPo.getId());
+                        returnObject = new ReturnObject<>(spu);
+                    }
+                } catch (DataAccessException e) {
+                    // 其他数据库错误
+                    logger.debug("other sql exception : " + e.getMessage());
+                    returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+
+                } catch (Exception e) {
+                    // 其他Exception错误
+                    logger.error("other exception : " + e.getMessage());
+                    returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+                }
             }
+
         }
-        catch (DataAccessException e) {
-            if (Objects.requireNonNull(e.getMessage()).contains("?")) {
-                //若有重复的角色名则新增失败????
-                logger.debug("updateRole: have same role name = " + spuPo.getName());
-                returnObject = new ReturnObject<>(ResponseCode.ROLE_REGISTERED, String.format("?：" + spuPo.getName()));
-            } else {
-                // 其他数据库错误
-                logger.debug("other sql exception : " + e.getMessage());
-                returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
-            }
-        }
-        catch (Exception e) {
-            // 其他Exception错误
-            logger.error("other exception : " + e.getMessage());
-            returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
-        }
+        returnObject=new ReturnObject<>(ResponseCode.SHOP_NOTOPERABLE);
         return returnObject;
     }
 
@@ -105,8 +109,12 @@ public class GoodsSpuDao {
     public ReturnObject<Object> showSpu(Long id, SimpleFreightModelDTO freightModelDTO) {
 
         GoodsSpuPo spuPo= goodsSpuMapper.selectByPrimaryKey(id);
+
         if(spuPo==null)
             return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+        if(spuPo.getDisabled().equals(1))//disable=true 对SPU的无效操作
+            return new ReturnObject(ResponseCode.SPU_NOTOPERABLE);
+
         //查找该spu下的所有sku
         GoodsSkuPoExample skuPoExample=new GoodsSkuPoExample();
         GoodsSkuPoExample.Criteria skuCriteria=skuPoExample.createCriteria();
@@ -125,6 +133,7 @@ public class GoodsSpuDao {
             if(floatPos.size()==0)sku.setPrice(sku.getOriginalPrice());
             else if(floatPos.size()==1)sku.setPrice(floatPos.get(0).getActivityPrice());
         }
+
         List<GoodsSkuRetVo> ret = skus.stream().map(GoodsSkuRetVo::new).collect(Collectors.toList());
         GoodsSpu spu=new GoodsSpu(spuPo);
         GoodsSpuVo spuVo= new GoodsSpuVo(spu);
@@ -193,7 +202,7 @@ public class GoodsSpuDao {
         criteria.andIdEqualTo(spu.getId());
         criteria.andShopIdEqualTo(spu.getShopId());
         try{
-            int ret = goodsSpuMapper.updateByExampleSelective(spuPo, spuPoExample);
+            int ret = goodsSpuMapper.updateByPrimaryKeySelective(spuPo);
             if (ret == 0) {
                 //修改失败
                 logger.debug("updateRole: update spu fail : " + spuPo.toString());
@@ -485,6 +494,8 @@ public class GoodsSpuDao {
         GoodsSpuPo goodsSpuPo = null;
         try {
             goodsSpuPo = goodsSpuMapper.selectByPrimaryKey(id);
+            if(goodsSpuPo==null)
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         } catch (Exception e) {
             logger.debug("other sql exception : " + e.getMessage());
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
@@ -521,10 +532,10 @@ public class GoodsSpuDao {
      * @author 24320182203254 秦楚彦
      * Created at 2020/12/13 17：51
      */
-    public Long getFreightIdBySpuId(Long id) {
+    public ReturnObject<Long> getFreightIdBySpuId(Long id) {
         GoodsSpuPo po=goodsSpuMapper.selectByPrimaryKey(id);
         if (po == null)
-            return null;
-        return po.getFreightId();
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        return new ReturnObject<>(po.getFreightId());
     }
 }
