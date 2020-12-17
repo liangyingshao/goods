@@ -18,14 +18,14 @@ public class NewGroupon  implements VoObject {
 
     Long id;
     String name;
-    GoodsSpuPoDTO goodsSpuPoDTO;
-    SimpleShopDTO simpleShopDTO;
+    GoodsSpuPoDTO goodsSpu;
+    SimpleShopDTO shop;
     
     public NewGroupon(GrouponActivityPo grouponActivityPo, GoodsSpuPoDTO goodsSpuPoDTO, SimpleShopDTO simpleShopDTO){
         this.id = grouponActivityPo.getId();
         this.name = grouponActivityPo.getName();
-        this.goodsSpuPoDTO = goodsSpuPoDTO;
-        this.simpleShopDTO = simpleShopDTO;
+        this.goodsSpu = goodsSpuPoDTO;
+        this.shop = simpleShopDTO;
 
     }
 
@@ -39,8 +39,8 @@ public class NewGroupon  implements VoObject {
         NewGrouponRetVo vo = new NewGrouponRetVo();
         vo.setId(this.id);
         vo.setName(this.name);
-        vo.setSimpleShopDTO(this.simpleShopDTO);
-        vo.setGoodsSpuPoDTO(this.goodsSpuPoDTO);
+        vo.setShop(this.shop);
+        vo.setGoodsSpu(this.goodsSpu);
         return vo;
     }
 }

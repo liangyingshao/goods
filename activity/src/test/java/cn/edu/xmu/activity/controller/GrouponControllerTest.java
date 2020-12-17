@@ -61,15 +61,8 @@ class GrouponControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
-        String expectedResponse="{\n" +
-                "  \"errno\": 0,\n" +
-                "  \"data\": [\n" +
-                "    \"OFF_SHELVES\",\n" +
-                "    \"ON_SHELVES\",\n" +
-                "    \"DELETED\"\n" +
-                "  ],\n" +
-                "  \"errmsg\": \"成功\"\n" +
-                "}";
+        String expectedResponse="{\"errno\":0,\"data\":[{\"code\":0,\"name\":\"已下线\"},{\"code\":1,\"name\":\"已上线\"},{\"code\":2,\"name\":\"已删除\"}],\"errmsg\":\"成功\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
     }
 
     /**
@@ -84,7 +77,7 @@ class GrouponControllerTest {
         grouponVo.setStrategy("teststrategy");
         String Json = JacksonUtil.toJson(grouponVo);
 
-        String responseString=this.mvc.perform(MockMvcRequestBuilders.post("/goods/shops/1/spus/10/groupons")
+        String responseString=this.mvc.perform(MockMvcRequestBuilders.post("/shops/1/spus/10/groupons")
                 .header("authorization",token)
                 .contentType("application/json;charset=UTF-8")
                 .content(Json))

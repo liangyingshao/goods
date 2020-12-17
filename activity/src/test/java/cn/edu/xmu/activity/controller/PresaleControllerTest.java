@@ -65,16 +65,8 @@ class PresaleControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
-        String expectedResponse="{\n" +
-                "  \"errno\": 0,\n" +
-                "  \"data\": [\n" +
-                "    \"OFF_SHELVES\",\n" +
-                "    \"ON_SHELVES\",\n" +
-                "    \"DELETED\"\n" +
-                "  ],\n" +
-                "  \"errmsg\": \"成功\"\n" +
-                "}";
-
+        String expectedResponse="{\"errno\":0,\"data\":[{\"code\":0,\"name\":\"已下线\"},{\"code\":1,\"name\":\"已上线\"},{\"code\":2,\"name\":\"已删除\"}],\"errmsg\":\"成功\"}";
+        JSONAssert.assertEquals(expectedResponse,responseString,true);
     }
 
 
@@ -85,7 +77,7 @@ class PresaleControllerTest {
     @Test
     public void customerQueryPresales() throws Exception {
 
-        String responseString=this.mvc.perform(MockMvcRequestBuilders.get("/goods/presales"))
+        String responseString=this.mvc.perform(MockMvcRequestBuilders.get("/presales"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -110,6 +102,24 @@ class PresaleControllerTest {
         JSONAssert.assertEquals(expectedResponse,responseString,true);
     }
 
+    /**
+     * state字段不合法
+     */
+    @Order(3)
+    @Test
+    public void adminQueryPresales3() throws Exception {
+        //String token = this.login("13088admin", "123456");
+        String token = createTestToken(1L, 1L, 100);
+        String responseString=this.mvc.perform(MockMvcRequestBuilders.get("/shops/1/presales?state=4")
+                .header("authorization",token))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json;charset=UTF-8"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.errno").value(ResponseCode.OK.getCode()))
+                .andReturn().getResponse().getContentAsString();
+
+        String expectedResponse="{\"errno\":0,\"data\":{\"total\":0,\"pages\":0,\"pageSize\":0,\"page\":1,\"list\":[]},\"errmsg\":\"成功\"}";
+        JSONAssert.assertEquals(expectedResponse, responseString,  true);
+    }
 
     /**
      * 成功
@@ -129,14 +139,14 @@ class PresaleControllerTest {
 
         String Json = JacksonUtil.toJson(presaleVo);
 
-        String responseString=this.mvc.perform(MockMvcRequestBuilders.post("/goods/shops/1/skus/3311/presales")
+        String responseString=this.mvc.perform(MockMvcRequestBuilders.post("/shops/1/skus/3311/presales")
                 .header("authorization",token)
                 .contentType("application/json;charset=UTF-8")
                 .content(Json))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
-        String expectedResponse="{\"errno\":0,\"data\":{\"id\":3113,\"name\":null,\"beginTime\":\"2031-01-09 15:55:18\",\"endTime\":\"2032-01-20 15:55:18\",\"payTime\":\"2031-01-09 23:55:18\",\"goodsSku\":{\"id\":3311,\"name\":\"+\",\"skuSn\":null,\"imageUrl\":\"http://47.52.88.176/file/images/201612/file_5862230d20162.jpg\",\"inventory\":1,\"originalPrice\":3344,\"price\":3344,\"disabled\":0},\"shop\":{\"id\":1,\"name\":\"Nike\"}},\"errmsg\":\"成功\"}";
+        String expectedResponse="{\"errno\":0,\"data\":{\"id\":3112,\"name\":null,\"beginTime\":\"2031-01-09 15:55:18\",\"endTime\":\"2032-01-20 15:55:18\",\"payTime\":\"2031-01-09 23:55:18\",\"goodsSku\":{\"id\":3311,\"name\":\"+\",\"skuSn\":null,\"imageUrl\":\"http://47.52.88.176/file/images/201612/file_5862230d20162.jpg\",\"inventory\":1,\"originalPrice\":3344,\"price\":3344,\"disabled\":0},\"shop\":{\"id\":1,\"name\":\"Nike\"}},\"errmsg\":\"成功\"}";
         JSONAssert.assertEquals(expectedResponse,responseString,true);
     }
 
