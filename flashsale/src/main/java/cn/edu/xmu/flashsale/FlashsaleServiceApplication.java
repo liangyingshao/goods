@@ -19,7 +19,7 @@ import java.io.Serializable;
         "cn.edu.xmu.flashsale"
 })
 @MapperScan("cn.edu.xmu.flashsale.mapper")
-@EnableDubbo(scanBasePackages = "cn.edu.xmu.goods.falshsale.impl")
+@EnableDubbo(scanBasePackages = "cn.edu.xmu.goods.flashsale.impl")
 @EnableDiscoveryClient
 public class FlashsaleServiceApplication implements ApplicationRunner{
     private  static  final Logger logger = LoggerFactory.getLogger(FlashsaleServiceApplication.class);

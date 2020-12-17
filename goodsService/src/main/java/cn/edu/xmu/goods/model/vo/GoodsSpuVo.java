@@ -46,7 +46,7 @@ public class GoodsSpuVo {
     private String imageUrl;
 
     @ApiModelProperty(name = "规格")
-    private String spec;
+    private String specs;
 
     @ApiModelProperty(name = "SKU列表")
     private List<GoodsSkuRetVo> skuList;
@@ -74,7 +74,7 @@ public class GoodsSpuVo {
         this.goodsSn=bo.getGoodsSn();
         this.detail=bo.getDetail();
         this.imageUrl=bo.getImageUrl();
-        this.spec=bo.getSpec();
+        this.specs=bo.getSpecs();
         this.gmtCreate=bo.getGmtCreated();
         this.gmtModified=bo.getGmtModified();
         this.disable=bo.isDisable();

@@ -228,7 +228,7 @@ public class IGoodsServiceImpl implements IGoodsService {
             }
             case (0)://秒杀/普通
             {
-                ret= IActivityService.modifyPresaleInventory(activityId, quantity);
+                ret= iFlashsaleService.modifyFlashsaleItem(activityId, quantity);
                 //如果秒杀不存在返回RESOURCE_ID_NOTEXIST，跳到下个环节
                 //如果库存不够返回库存不够的错误码
                 //如果库存足够，就扣库存，并返回扣库存之前的库存和定金
@@ -295,9 +295,10 @@ public class IGoodsServiceImpl implements IGoodsService {
         return goodsDao.updateSpuFreightId(freightModelId);
     }
 
-
-    @Override
     public ReturnObject<Long> getPriceBySkuId(Long skuId) {
+        ReturnObject<GoodsDetailDTO> ret=iFlashsaleService.modifyFlashsaleItem(skuId,0);
+        if(ret.getCode().equals(ResponseCode.OK))
+            return new ReturnObject<>(ret.getData().getPrice());
         return new ReturnObject<>(goodsDao.getPriceBySkuId(skuId).getData());
     }
 }

@@ -1,5 +1,6 @@
 package cn.edu.xmu.goods.controller;
 
+import cn.edu.xmu.goods.GoodsServiceApplication;
 import cn.edu.xmu.ooad.Application;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.JwtHelper;
@@ -21,15 +22,15 @@ import java.time.LocalDateTime;
  * author: 24320182203306 徐清韵
  * version: 1.0
  */
-@SpringBootTest(classes = Application.class)   //标识本类是一个SpringBootTest
+@SpringBootTest(classes = GoodsServiceApplication.class)   //标识本类是一个SpringBootTest
 @Slf4j
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class XuQingYunTest {
     //@Value("${public-test.managementgate}")
-    private String managementGate="192.168.43.73:8881";
+    private String managementGate="192.168.137.1:8881";
 
     //@Value("${public-test.mallgate}")
-    private String mallGate="192.168.43.73:8880";
+    private String mallGate="192.168.137.1:8880";
     private WebTestClient manageClient;
 
     private WebTestClient mallClient;
@@ -201,7 +202,7 @@ public class XuQingYunTest {
     void getShareSku() throws Exception
     {
         String token =
-                //creatTestToken(9L,0L,1000);
+                //"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE2MjM1NzU1NTlZIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzc4NzUsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM0Mjc1fQ.pPt1eKnY36zI2sZcBbiN57FTdGaq3Pj_CbbXdJUzt2U"
                 this.userLogin("17857289610", "123456")
                 ;
         byte[] response  = mallClient.get().uri("/share/442315/skus/300")
@@ -252,13 +253,15 @@ public class XuQingYunTest {
                 "  \"inventory\": 100,\n" +
                 "  \"detail\": \"detail\"\n" +
                 "}";
-        String token = this.adminLogin("13088admin", "123456");
+        String token = //"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE2MjM1NzU1NTlZIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzc4NzUsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM0Mjc1fQ.pPt1eKnY36zI2sZcBbiN57FTdGaq3Pj_CbbXdJUzt2U"
+                this.adminLogin("13088admin", "123456")
+                ;
 
         byte[] response =manageClient.post().uri("/shops/0/spus/273")
                 .header("authorization",token)
                 .bodyValue(requireJson)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().is2xxSuccessful()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
                 .jsonPath("$.data").isMap()
@@ -299,7 +302,9 @@ public class XuQingYunTest {
     @Order(05)
     void modifySKU() throws Exception{
         String requireJson="{\n    \"name\": \"name\",\n    \"originalPrice\": \"100\",\n    \"configuration\": \"configuration\",\n    \"weight\": \"100\",\n    \"inventory\": \"9999\",\n    \"detail\": \"detail\"\n}";
-        String token = this.adminLogin("13088admin", "123456");
+        String token = //"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE2MjM1NzU1NTlZIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzc4NzUsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM0Mjc1fQ.pPt1eKnY36zI2sZcBbiN57FTdGaq3Pj_CbbXdJUzt2U"
+                this.adminLogin("13088admin", "123456")
+                ;
 
         byte[] response =manageClient.put().uri("/shops/0/skus/20682")
                 .header("authorization",token)
@@ -347,58 +352,10 @@ public class XuQingYunTest {
 
     @Test
     @Order(06)
-    void putOffGoodsOnSale() throws Exception {
-        String token = this.adminLogin("13088admin", "123456");
-        byte[] response  = manageClient.put().uri("/shops/0/skus/400/offshelves")
-                .header("authorization",token)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .returnResult()
-                .getResponseBodyContent();
-
-        response  = manageClient.put().uri("/shops/0/skus/400/offshelves")
-                .header("authorization",token)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.STATE_NOCHANGE.getCode())
-                .returnResult()
-                .getResponseBodyContent();
-
-        response  = manageClient.put().uri("/shops/1/skus/400/offshelves")
-                .header("authorization",token)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_OUTSCOPE.getCode())
-                .returnResult()
-                .getResponseBodyContent();
-
-        response  = manageClient.put().uri("/shops/0/skus/1/offshelves")
-                .header("authorization",token)
-                .exchange()
-                .expectStatus().is4xxClientError()
-                .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_NOTEXIST.getCode())
-                .returnResult()
-                .getResponseBodyContent();
-
-        response  = manageClient.put().uri("/shops/1/skus/400/offshelves")
-                .header("authorization",token)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_OUTSCOPE.getCode())
-                .returnResult()
-                .getResponseBodyContent();
-    }
-
-    @Test
-    @Order(07)
     void putGoodsOnSale() throws Exception {
-        String token = this.adminLogin("13088admin", "123456");
+        String token = //"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE2MjM1NzU1NTlZIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzc4NzUsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM0Mjc1fQ.pPt1eKnY36zI2sZcBbiN57FTdGaq3Pj_CbbXdJUzt2U"
+                this.adminLogin("13088admin", "123456")
+                ;
         byte[] response  = manageClient.put().uri("/shops/0/skus/400/onshelves")
                 .header("authorization",token)
                 .exchange()
@@ -446,19 +403,73 @@ public class XuQingYunTest {
     }
 
     @Test
+    @Order(07)
+    void putOffGoodsOnSale() throws Exception {
+        String token = //"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE2MjM1NzU1NTlZIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzc4NzUsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM0Mjc1fQ.pPt1eKnY36zI2sZcBbiN57FTdGaq3Pj_CbbXdJUzt2U"
+                this.adminLogin("13088admin", "123456")
+                ;
+        byte[] response  = manageClient.put().uri("/shops/0/skus/400/offshelves")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
+                .returnResult()
+                .getResponseBodyContent();
+
+        response  = manageClient.put().uri("/shops/0/skus/400/offshelves")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.STATE_NOCHANGE.getCode())
+                .returnResult()
+                .getResponseBodyContent();
+
+        response  = manageClient.put().uri("/shops/1/skus/400/offshelves")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_OUTSCOPE.getCode())
+                .returnResult()
+                .getResponseBodyContent();
+
+        response  = manageClient.put().uri("/shops/0/skus/1/offshelves")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().is4xxClientError()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_NOTEXIST.getCode())
+                .returnResult()
+                .getResponseBodyContent();
+
+        response  = manageClient.put().uri("/shops/1/skus/400/offshelves")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_OUTSCOPE.getCode())
+                .returnResult()
+                .getResponseBodyContent();
+    }
+
+    @Test
     @Order(8)
     void add_floating_price() throws Exception
     {
         LocalDateTime beginTime= LocalDateTime.of(2020,12,20,20,0,0);
         LocalDateTime endTime=LocalDateTime.of(2020,12,30,10,0,0);
         String requireJson="{\n    \"activityPrice\": \"100\",\n    \"beginTime\": \""+beginTime.toString()+"\",\n    \"endTime\": \""+endTime.toString()+"\",\n    \"quantity\": \"100\"\n}";
-        String token = this.adminLogin("13088admin", "123456");
+        String token = //"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE2MjM1NzU1NTlZIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzc4NzUsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM0Mjc1fQ.pPt1eKnY36zI2sZcBbiN57FTdGaq3Pj_CbbXdJUzt2U"
+                this.adminLogin("13088admin", "123456")
+                ;
 
         byte[] response =manageClient.post().uri("/shops/0/skus/278/floatPrices")
                 .header("authorization",token)
                 .bodyValue(requireJson)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().is2xxSuccessful()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
                 .jsonPath("$.data.activityPrice").isEqualTo(100)
@@ -535,7 +546,9 @@ public class XuQingYunTest {
     @Test
     @Order(9)
     void deleteSku() throws Exception{
-        String token = this.adminLogin("13088admin", "123456");
+        String token = //"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE2MjM1NzU1NTlZIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzc4NzUsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM0Mjc1fQ.pPt1eKnY36zI2sZcBbiN57FTdGaq3Pj_CbbXdJUzt2U"
+                this.adminLogin("13088admin", "123456")
+                ;
 
         byte[] response =manageClient.delete().uri("/shops/1/skus/20682").header("authorization",token)
                 .exchange()

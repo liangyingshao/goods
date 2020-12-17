@@ -47,6 +47,40 @@ public class GoodsSku implements VoObject {
         }
     }
 
+    public enum Disable {
+        OPEN(0,"开放"),
+        CLOSE(1,"关闭");
+
+        private static final Map<Integer, GoodsSku.Disable> stateMap;
+
+        static { //由类加载机制，静态块初始加载对应的枚举属性到map中，而不用每次取属性时，遍历一次所有枚举值
+            stateMap = new HashMap();
+            for (GoodsSku.Disable enum1 : values()) {
+                stateMap.put(enum1.code, enum1);
+            }
+        }
+
+        private int code;
+        private String description;
+
+        Disable(int code, String description) {
+            this.code = code;
+            this.description = description;
+        }
+
+        public static GoodsSku.Disable getTypeByCode(Integer code) {
+            return stateMap.get(code);
+        }
+
+        public Integer getCode() {
+            return code;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+    }
+
     private Long id;
 
     private Long goodsSpuId;
@@ -69,11 +103,13 @@ public class GoodsSku implements VoObject {
 
     private String detail;
 
-    private State disabled;
+    private Disable disabled;
 
     private LocalDateTime gmtCreated;
 
     private LocalDateTime gmtModified;
+
+    private State state;
 
     //private String spuSpec;
 
@@ -92,9 +128,10 @@ public class GoodsSku implements VoObject {
         imageUrl=po.getImageUrl();
         inventory=po.getInventory();
         detail=po.getDetail();
-        disabled=State.getTypeByCode(po.getDisabled().intValue());
+        disabled=Disable.getTypeByCode(po.getDisabled().intValue());
         gmtCreated=po.getGmtCreate();
         gmtModified=po.getGmtModified();
+        state=State.getTypeByCode(po.getState().intValue());
     }
 
     @Override

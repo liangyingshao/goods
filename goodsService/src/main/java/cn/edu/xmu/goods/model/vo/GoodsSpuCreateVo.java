@@ -21,7 +21,7 @@ public class GoodsSpuCreateVo {
     private String description;
 
     @ApiModelProperty(name = "SPU规格")
-    private String spec;
+    private String specs;
 
     /**
      * 构造函数
@@ -32,7 +32,7 @@ public class GoodsSpuCreateVo {
         GoodsSpu spu =new GoodsSpu();
         spu.setDetail(this.description);
         spu.setName(this.name);
-        spu.setSpec(this.spec);
+        spu.setSpecs(this.specs);
         return spu;
     }
 }

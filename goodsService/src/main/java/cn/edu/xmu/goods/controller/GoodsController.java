@@ -3,6 +3,7 @@ package cn.edu.xmu.goods.controller;
 import cn.edu.xmu.goods.model.bo.*;
 import cn.edu.xmu.goods.model.vo.*;
 import cn.edu.xmu.goods.service.*;
+import cn.edu.xmu.goods.service.impl.IGoodsServiceImpl;
 import cn.edu.xmu.ooad.annotation.Audit;
 import cn.edu.xmu.ooad.annotation.Depart;
 import cn.edu.xmu.ooad.annotation.LoginUser;
@@ -88,7 +89,7 @@ public class GoodsController {
     {
         logger.debug("getSkuList:page="+page+" pageSize="+pageSize);
         ReturnObject returnObject=goodsService.getSkuList(shopId,skuSn,spuId,spuSn,page,pageSize);
-        return Common.decorateReturnObject(returnObject);
+        return Common.getPageRetObject(returnObject);
     }
 
     /**
@@ -259,7 +260,7 @@ public class GoodsController {
         floatPrice.setCreatedBy(userId);
         ReturnObject retObject=goodsService.addFloatPrice(shopId,floatPrice,userId);
         if (retObject.getData() != null) {
-
+            httpServletResponse.setStatus(HttpStatus.CREATED.value());
             return Common.decorateReturnObject(retObject);
         } else {
             return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
@@ -301,9 +302,10 @@ public class GoodsController {
         if(!Objects.equals(departId, shopId))return Common.getRetObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         GoodsSku sku=vo.createGoodsSku();
         sku.setGoodsSpuId(id);
-        sku.setDisabled(GoodsSku.State.ONSHELF);
+        sku.setState(GoodsSku.State.OFFSHELF);
         ReturnObject retObject=goodsService.createSKU(shopId,sku);
         if (retObject.getData() != null) {
+            httpServletResponse.setStatus(HttpStatus.CREATED.value());
             return Common.decorateReturnObject(retObject);
         } else {
             return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
@@ -350,7 +352,6 @@ public class GoodsController {
     public Object showSpu(@PathVariable Long id) {
         Object returnObject=null;
         ReturnObject spu = spuService.showSpu(id);
-        logger.debug("findSpuById: spu="+spu.getData()+" code="+spu.getCode());
         return Common.getRetObject(spu);
     }
 
@@ -396,7 +397,7 @@ public class GoodsController {
         ReturnObject retObject = spuService.addSpu(spu);
         if (retObject.getData() != null) {
             httpServletResponse.setStatus(HttpStatus.CREATED.value());
-            return retObject;
+            return ResponseUtil.ok(retObject.getData());
         } else {
             return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }
@@ -415,7 +416,8 @@ public class GoodsController {
     @ApiImplicitParams({
             @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
             @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "shopId", value = "商铺id", required = true),
-            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "id", value = "SpuId", required = true)
+            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "id", value = "SpuId", required = true),
+            @ApiImplicitParam(paramType = "body", dataType = "GoodsSpuCreateVo", name = "body", value = "可修改的信息", required = true)
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
@@ -424,9 +426,8 @@ public class GoodsController {
     @Audit // 需要认证
     @PutMapping("shops/{shopId}/spus/{id}")
     @ResponseBody
-    public Object modifyGoodsSpu(@Validated @RequestBody GoodsSpuCreateVo vo,
+    public Object modifyGoodsSpu(@Validated @RequestBody GoodsSpuCreateVo vo,BindingResult bindingResult,
                                  @PathVariable Long shopId,@PathVariable Long id,
-                                 BindingResult bindingResult,
                                  @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
                                  @Depart @ApiIgnore @RequestParam(required = false) Long departId) {
         logger.debug("modify SPU by shopId:" + shopId+ " spuId:" + id);
@@ -441,10 +442,6 @@ public class GoodsController {
         spu.setShopId(shopId);
         spu.setId(id);
         spu.setGmtModified(LocalDateTime.now());
-//        //校验是否为该商铺管理员
-//        if(shopId!=departId)
-//            return  Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE), httpServletResponse);
-
         ReturnObject retObject = spuService.modifyGoodsSpu(spu);
         if(retObject.getData()!=null){
             return Common.getRetObject(retObject);

@@ -152,7 +152,7 @@ class GoodsDaoTest {
         sku.setImageUrl("http://47.52.88.176/file/images/201612/file_586227f3cd5c9.jpg");
         sku.setInventory(9999);
         sku.setDetail("detail");
-        sku.setDisabled(GoodsSku.State.ONSHELF);
+        sku.setState(GoodsSku.State.OFFSHELF);
         ReturnObject<GoodsSkuRetVo> returnObject=goodsDao.createSKU((long)0,sku);
         assertEquals(returnObject.getCode(),ResponseCode.OK);
 

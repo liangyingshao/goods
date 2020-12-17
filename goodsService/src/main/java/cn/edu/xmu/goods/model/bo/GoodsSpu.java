@@ -74,7 +74,7 @@ public class GoodsSpu {
 //
 //    private SpuState state= SpuState.OFFSHELF;
 
-    private String spec;
+    private String specs;
 
     private boolean disable;
 
@@ -126,7 +126,7 @@ public class GoodsSpu {
         spuPo.setImageUrl(this.imageUrl);
         spuPo.setName(this.name);
 //        spuPo.setState(state.getCode().byteValue());
-        spuPo.setSpec(this.spec);
+        spuPo.setSpec(this.specs);
         return spuPo;
     }
 

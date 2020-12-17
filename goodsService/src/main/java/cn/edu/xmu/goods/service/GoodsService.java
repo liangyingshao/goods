@@ -6,6 +6,7 @@ import cn.edu.xmu.goods.model.bo.GoodsSku;
 import cn.edu.xmu.goods.model.bo.GoodsSpu;
 import cn.edu.xmu.goods.model.po.GoodsSkuPo;
 import cn.edu.xmu.goods.model.vo.*;
+import cn.edu.xmu.goods.service.impl.IGoodsServiceImpl;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ImgHelper;
 import cn.edu.xmu.ooad.util.ResponseCode;
@@ -41,7 +42,8 @@ public class GoodsService {
     @DubboReference(check = false)
     private IUserService iUserService;
 
-
+    @Autowired
+    private IGoodsServiceImpl iGoodsService;
     /**
      *查询SKU
      * @param shopId
@@ -57,7 +59,7 @@ public class GoodsService {
     {
         PageInfo<GoodsSkuRetVo> skuRetVos=goodsDao.getSkuList(shopId,skuSn,spuId,spuSn,page,pageSize);
         if(skuRetVos!=null&&skuRetVos.getList().size()>0)
-            skuRetVos.getList().forEach(x->x.setPrice(goodsDao.getPriceBySkuId(x.getId()).getData()));
+            skuRetVos.getList().forEach(x->x.setPrice(iGoodsService.getPriceBySkuId(x.getId()).getData()));
         return new ReturnObject<>(skuRetVos);
     }
 
@@ -71,7 +73,10 @@ public class GoodsService {
     {
         ReturnObject<GoodsSkuDetailRetVo> retVo=goodsDao.getSku(id);
         if(retVo.getCode().equals(ResponseCode.OK))
+        {
+            retVo.getData().setPrice(iGoodsService.getPriceBySkuId(id).getData());
             retVo.getData().setShareable(iShareService.skuSharable(id).getData());
+        }
 
         return retVo;
     }

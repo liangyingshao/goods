@@ -116,9 +116,6 @@ INSERT INTO `float_price` VALUES
 INSERT INTO `float_price` VALUES
 (9001, 8991, 4, '2020-12-15 22:55:00', '2020-12-20 22:55:00', 10, 1, NULL, 1, '2020-12-15 17:04:58', '2020-12-15 17:04:58');
 
-/*ChenPinzhenTest*/
-insert  into `float_price`(`id`,`goods_sku_id`,`activity_price`,`begin_time`,`end_time`,`quantity`,`created_by`,`invalid_by`,`valid`,`gmt_create`,`gmt_modified`) values (20001,20680,78,'2020-12-01 01:41:22','2020-12-10 01:41:28',32,0,0,0,'2020-12-14 01:41:52','0000-00-00 00:00:00'),(20002,20680,10,'2021-12-13 22:02:50','2021-12-14 22:02:50',80,0,0,1,'2020-12-14 14:04:33','0000-00-00 00:00:00');
-
 /*!40000 ALTER TABLE `float_price` ENABLE KEYS */;
 UNLOCK TABLES;
 
