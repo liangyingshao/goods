@@ -12,8 +12,11 @@ import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.goods.model.GoodsSpuPoDTO;
 import cn.edu.xmu.oomall.goods.model.SimpleShopDTO;
 import cn.edu.xmu.oomall.goods.service.IGoodsService;
+import cn.edu.xmu.oomall.order.service.IOrderService;
 import com.github.pagehelper.PageInfo;
 import org.apache.dubbo.config.annotation.DubboReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.annotation.Reference;
 import org.springframework.stereotype.Service;
@@ -37,6 +40,11 @@ public class GrouponService {
 
     @DubboReference(check = false)
     IGoodsService iGoodsService;
+
+    @DubboReference(check = false)
+    IOrderService iOrderService;
+
+    private static final Logger logger = LoggerFactory.getLogger(GrouponService.class);
     
     public ReturnObject modifyGrouponofSPU(Long shopId, Long id, GrouponVo grouponVo) {
         return grouponDao.modifyGrouponofSPU(shopId, id, grouponVo);
@@ -61,13 +69,9 @@ public class GrouponService {
         //4. 此spu是否正在参加其他团购
         if(grouponDao.checkInGroupon(id,grouponVo.getBeginTime(),grouponVo.getEndTime()).getData())
             return new ReturnObject(ResponseCode.FIELD_NOTVALID);//TODO 考虑错误码是否合适
-        
-        //5. 为spu创建团购活动
-        GrouponActivityPo grouponActivityPo = grouponDao.createGrouponofSPU(shopId, id, grouponVo).getData();
-        
-        //6. 封装返回值
-        NewGroupon newGrouponActivity = new NewGroupon(grouponActivityPo,goodsSpuPoDTO,simpleShopDTO);
-        return new ReturnObject<>(newGrouponActivity);
+
+        return grouponDao.createGrouponofSPU(shopId, id, grouponVo, goodsSpuPoDTO, simpleShopDTO);
+
     }
 
     public ReturnObject putGrouponOnShelves(Long shopId, Long id) {
@@ -76,10 +80,20 @@ public class GrouponService {
     }
 
     public ReturnObject putGrouponOffShelves(Long shopId, Long id) {
+        try {
+            iOrderService.putGrouponOffshelves(id);
+        } catch (Exception e) {
+            logger.debug("dubbo error!");
+        }
         return grouponDao.putGrouponOffShelves(shopId,id);
     }
 
     public ReturnObject cancelGrouponofSPU(Long shopId, Long id) {
+        try {
+            iOrderService.putGrouponOffshelves(id);
+        } catch (Exception e) {
+            logger.debug("dubbo error!");
+        }
         return grouponDao.cancelGrouponofSPU(shopId,id);
     }
 

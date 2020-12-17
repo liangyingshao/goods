@@ -2,6 +2,7 @@ package cn.edu.xmu.activity.controller;
 
 import cn.edu.xmu.activity.mapper.GrouponActivityPoMapper;
 import cn.edu.xmu.activity.model.bo.ActivityStatus;
+import cn.edu.xmu.activity.model.vo.ActivityStatusRetVo;
 import cn.edu.xmu.activity.model.vo.GrouponVo;
 import cn.edu.xmu.activity.service.GrouponService;
 import cn.edu.xmu.ooad.annotation.Audit;
@@ -31,7 +32,8 @@ import java.util.List;
  */
 @Api(value = "团购服务", tags = "Groupon")
 @RestController /*Restful的Controller对象*/
-@RequestMapping(value = "/goods", produces = "application/json;charset=UTF-8")
+//@RequestMapping(value = "/goods", produces = "application/json;charset=UTF-8")
+@RequestMapping(produces = "application/json;charset=UTF-8")
 public class GrouponController {
 
     @Autowired
@@ -60,9 +62,9 @@ public class GrouponController {
     @GetMapping("/groupons/states")
     public Object getgrouponState() {
         ActivityStatus[] states= ActivityStatus.class.getEnumConstants();
-        List<ActivityStatus> stateVos=new ArrayList<ActivityStatus>();
+        List<ActivityStatusRetVo> stateVos=new ArrayList<ActivityStatusRetVo>();
         for(int i=0;i<states.length;i++){
-            stateVos.add(states[i]);
+            stateVos.add(new ActivityStatusRetVo(states[i]));
         }
         return ResponseUtil.ok(new ReturnObject<List>(stateVos).getData());
     }

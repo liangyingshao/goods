@@ -5,13 +5,13 @@ import cn.edu.xmu.activity.model.bo.Presale;
 import cn.edu.xmu.activity.model.po.PresaleActivityPo;
 import cn.edu.xmu.activity.model.vo.PresaleRetVo;
 import cn.edu.xmu.activity.model.vo.PresaleVo;
-import cn.edu.xmu.goods.dao.GoodsDao;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.goods.model.SimpleGoodsSkuDTO;
 import cn.edu.xmu.oomall.goods.model.SimpleShopDTO;
 import cn.edu.xmu.oomall.goods.service.IGoodsService;
+import cn.edu.xmu.oomall.order.service.IOrderService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.dubbo.config.annotation.DubboReference;
@@ -39,27 +39,40 @@ public class PresaleService {
     @DubboReference(check = false)
     IGoodsService iGoodsService;
 
+    @DubboReference(check = false)
+    IOrderService iOrderService;
+
     private static final Logger logger = LoggerFactory.getLogger(PresaleService.class);
 
     public ReturnObject<PageInfo<VoObject>> QueryPresales(Long shopId, Long skuId, Integer state, Integer timeline, Integer page, Integer pagesize, boolean isadmin) {
 
         //1.调用dao查询
-        List<PresaleActivityPo> results = presaleDao.queryPresales(shopId,skuId,state,timeline,isadmin).getData();
+        List<PresaleActivityPo> results = null;
+        ReturnObject<List<PresaleActivityPo>> returnObject = presaleDao.queryPresales(shopId,skuId,state,timeline,isadmin);
 
-        //2.分页返回
+        //2.返回dao层的错误
+        if(returnObject.getCode() != ResponseCode.OK) {
+            return new ReturnObject<PageInfo<VoObject>>(returnObject.getCode());
+        }
+
+        //3.取出dao层的数据
+        results = presaleDao.queryPresales(shopId,skuId,state,timeline,isadmin).getData();
+
+        //4.分页返回
         PageHelper.startPage(page, pagesize);
         List<VoObject> BoList = new ArrayList<>(results.size());
         for(PresaleActivityPo po: results)
         {
-            //3. 查询此presale对应的sku
+            //5. 查询此presale对应的sku
             SimpleGoodsSkuDTO simpleGoodsSkuDTO = iGoodsService.getSimpleSkuBySkuId(po.getGoodsSkuId()).getData();
-            //4. 查询此presale对应的shop
+            //6. 查询此presale对应的shop
             SimpleShopDTO simpleShopDTO = iGoodsService.getSimpleShopByShopId(po.getShopId()).getData();
             Presale bo = new Presale(po,simpleGoodsSkuDTO,simpleShopDTO);
             BoList.add(bo);
         }
         PageInfo<VoObject> PresalePage = PageInfo.of(BoList);
         return new ReturnObject<>(PresalePage);
+
     }
 
     public ReturnObject createPresaleOfSKU(Long shopId, Long id, PresaleVo presaleVo) {
@@ -91,15 +104,9 @@ public class PresaleService {
             logger.debug("此sku正在参加其他预售");
             return new ReturnObject(ResponseCode.FIELD_NOTVALID);//TODO 考虑错误码是否合适
         }
-
-
-        //5. 插入数据库
-        PresaleActivityPo presaleActivityPo = presaleDao.createPresaleOfSKU(shopId, id, presaleVo).getData();
-
-        //6.封装返回对象
-        Presale presale = new Presale(presaleActivityPo,simpleGoodsSkuDTO,simpleShopDTO);
-        return new ReturnObject<>(presale);
-
+        
+        return presaleDao.createPresaleOfSKU(shopId, id, presaleVo,simpleGoodsSkuDTO,simpleShopDTO);
+        
     }
 
     public ReturnObject modifyPresaleOfSKU(Long shopId, Long id, PresaleVo presaleVo) {
@@ -107,14 +114,25 @@ public class PresaleService {
     }
 
     public ReturnObject cancelPresaleOfSKU(Long shopId, Long id) {
+        try {
+            iOrderService.putPresaleOffshevles(id);
+        } catch (Exception e) {
+            logger.debug("dubbo error!");
+        }
         return presaleDao.cancelPresaleOfSKU(shopId,id);
     }
 
     public ReturnObject putPresaleOnShelves(Long shopId, Long id) {
+        try {
+            iOrderService.putPresaleOffshevles(id);
+        } catch (Exception e) {
+            logger.debug("dubbo error!");
+        }
         return presaleDao.putPresaleOnShelves(shopId,id);
     }
 
     public ReturnObject putPresaleOffShelves(Long shopId, Long id) {
+
         return presaleDao.putPresaleOffShelves(shopId,id);
     }
 }
