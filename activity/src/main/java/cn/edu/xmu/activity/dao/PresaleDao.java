@@ -2,6 +2,7 @@ package cn.edu.xmu.activity.dao;
 
 import cn.edu.xmu.activity.mapper.PresaleActivityPoMapper;
 import cn.edu.xmu.activity.model.bo.ActivityStatus;
+import cn.edu.xmu.activity.model.bo.Presale;
 import cn.edu.xmu.activity.model.po.PresaleActivityPo;
 import cn.edu.xmu.activity.model.po.PresaleActivityPoExample;
 import cn.edu.xmu.activity.model.vo.PresaleVo;
@@ -151,7 +152,7 @@ public class PresaleDao {
     }
 
 
-    public ReturnObject<PresaleActivityPo> createPresaleOfSKU(Long shopId, Long id, PresaleVo presaleVo) {
+    public ReturnObject createPresaleOfSKU(Long shopId, Long id, PresaleVo presaleVo,SimpleGoodsSkuDTO simpleGoodsSkuDTO,SimpleShopDTO simpleShopDTO) {
 
         PresaleActivityPo presaleActivityPo = new PresaleActivityPo();
         presaleActivityPo.setShopId(shopId);
@@ -172,7 +173,8 @@ public class PresaleDao {
             logger.error(message.toString());
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
         }
-        return new ReturnObject<>(presaleActivityPo);
+        Presale presale = new Presale(presaleActivityPo,simpleGoodsSkuDTO,simpleShopDTO);
+        return new ReturnObject<>(presale);
     }
 
     public ReturnObject modifyPresaleOfSKU(Long shopId, Long id, PresaleVo presaleVo) {

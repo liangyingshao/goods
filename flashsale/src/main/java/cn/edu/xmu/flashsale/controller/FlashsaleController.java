@@ -55,7 +55,6 @@ public class FlashsaleController {
 
     @ApiOperation(value = "flashsale001:查询某一时段秒杀活动详情",  produces="application/json")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
             @ApiImplicitParam(name="id", required = true, dataType="String", paramType="path")//时间段id
     })
     @ApiResponses({
@@ -68,7 +67,6 @@ public class FlashsaleController {
 
     @ApiOperation(value = "flashsale003:获取当前时段秒杀列表,响应式API，会多次返回",  produces="application/json")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header")
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功")
@@ -135,7 +133,7 @@ public class FlashsaleController {
 //        ReturnObject object = flashsaleService.deleteflashsale(id);
 //        return Common.decorateReturnObject(object);
         Byte state = 2;
-        ReturnObject object = flashsaleService.flashsaleOn(id, state);//0：已下线，1：已上线，2：已删除
+        ReturnObject object = flashsaleService.updateFlashsaleState(id, state);//0：已下线，1：已上线，2：已删除
         return Common.decorateReturnObject(object);
     }
 
@@ -189,7 +187,6 @@ public class FlashsaleController {
 
     @ApiOperation(value = "flashsale007:获取秒杀活动商品",produces = "application/json")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="authorization", value = "Token", required = true, dataType = "String", paramType = "header"),
             @ApiImplicitParam(name = "id", required = true, dataType = "Long", paramType = "path"),//秒杀id
             @ApiImplicitParam(name="page", required = false, dataType = "int", paramType = "query", value="页码"),
             @ApiImplicitParam(name="pageSize", required = false, dataType = "int", paramType = "query", value="每页数目")
@@ -233,7 +230,7 @@ public class FlashsaleController {
     @PutMapping("/shops/{did}/flashsales/{id}/onshelves")
     public Object flashsaleOn(@PathVariable Long did, @PathVariable Long id) {
         Byte state = 1;
-        ReturnObject object = flashsaleService.flashsaleOn(id, state);//0：已下线，1：已上线，2：已删除
+        ReturnObject object = flashsaleService.updateFlashsaleState(id, state);//0：已下线，1：已上线，2：已删除
         return Common.decorateReturnObject(object);
     }
 
@@ -250,7 +247,7 @@ public class FlashsaleController {
     @PutMapping("/shops/{did}/flashsales/{id}/offshelves")
     public Object flashsaleOff(@PathVariable Long did, @PathVariable Long id) {
         Byte state = 0;
-        ReturnObject object = flashsaleService.flashsaleOn(id, state);//0：已下线，1：已上线，2：已删除
+        ReturnObject object = flashsaleService.updateFlashsaleState(id, state);//0：已下线，1：已上线，2：已删除
         return Common.decorateReturnObject(object);
     }
 }

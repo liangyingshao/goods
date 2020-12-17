@@ -53,6 +53,7 @@ public class FlashsaleService {
             Byte type = 1;
             dto.setType(type);
             ReturnObject<TimeDTO> timeDTOReturnObject = new ReturnObject<>(dto);
+            logger.error("1");
             //检查时段id是否存在
             if(timeDTOReturnObject.getData() == null)
             {
@@ -60,17 +61,23 @@ public class FlashsaleService {
                 return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             }
 
+            logger.error("2");
             //时段存在
-            //时段id+falshDate是否已经存在
+            //时段id+falshDate且未删除的活动是否已经存在
             ReturnObject<FlashSalePo> flashSalePoReturnObject = flashsaleDao.selectByFlashDateAndSegId(flashDate, id);
+
+            logger.error("3");
 
             if(flashSalePoReturnObject.getData()!=null) {
                 return new ReturnObject<>(ResponseCode.TIMESEG_CONFLICT);
             }
 
+            logger.error("4");
+
             //时段不冲突
             returnObject = flashsaleDao.createflash(id, flashDate);
 
+            logger.error("4");
             FlashsaleNewRetVo retVo = returnObject.getData();
             logger.error(retVo.toString());
             retVo.setTimeDTO(timeDTOReturnObject.getData());
@@ -80,7 +87,7 @@ public class FlashsaleService {
             return retVoReturnObject;
         }
         catch (Exception e) {
-
+            logger.error(e.toString());
         }
         return returnObject;
     }
@@ -106,7 +113,7 @@ public class FlashsaleService {
         return flashsaleDao.updateflashsale(id, flashDate);
     }
 
-    public ReturnObject flashsaleOn(Long id, Byte state) {
+    public ReturnObject updateFlashsaleState(Long id, Byte state) {
         return flashsaleDao.updateFlashsaleState(id, state);
     }
 }

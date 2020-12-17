@@ -14,6 +14,6 @@ import lombok.Data;
 public class NewGrouponRetVo {
     Long id;
     String name;
-    GoodsSpuPoDTO goodsSpuPoDTO;
-    SimpleShopDTO simpleShopDTO;
+    GoodsSpuPoDTO goodsSpu;
+    SimpleShopDTO shop;
 }

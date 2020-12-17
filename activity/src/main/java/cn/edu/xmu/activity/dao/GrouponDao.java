@@ -4,12 +4,15 @@ package cn.edu.xmu.activity.dao;
 import cn.edu.xmu.activity.mapper.GrouponActivityPoMapper;
 import cn.edu.xmu.activity.model.bo.ActivityStatus;
 import cn.edu.xmu.activity.model.bo.Groupon;
+import cn.edu.xmu.activity.model.bo.NewGroupon;
 import cn.edu.xmu.activity.model.po.GrouponActivityPo;
 import cn.edu.xmu.activity.model.po.GrouponActivityPoExample;
 import cn.edu.xmu.activity.model.vo.GrouponVo;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
+import cn.edu.xmu.oomall.goods.model.GoodsSpuPoDTO;
+import cn.edu.xmu.oomall.goods.model.SimpleShopDTO;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -48,7 +51,7 @@ public class GrouponDao {
      * @param grouponVo
      * @return cn.edu.xmu.ooad.util.ReturnObject
      */
-    public ReturnObject<GrouponActivityPo> createGrouponofSPU(Long shopId, Long id, GrouponVo grouponVo) {
+    public ReturnObject<NewGroupon> createGrouponofSPU(Long shopId, Long id, GrouponVo grouponVo, GoodsSpuPoDTO goodsSpuPoDTO, SimpleShopDTO simpleShopDTO) {
 
 
         GrouponActivityPo grouponActivityPo = new GrouponActivityPo();
@@ -68,8 +71,8 @@ public class GrouponDao {
             logger.error(message.toString());
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
         }
-
-        return new ReturnObject<>(grouponActivityPo);
+        NewGroupon newGrouponActivity = new NewGroupon(grouponActivityPo,goodsSpuPoDTO,simpleShopDTO);
+        return new ReturnObject<>(newGrouponActivity);
 
 
     }
