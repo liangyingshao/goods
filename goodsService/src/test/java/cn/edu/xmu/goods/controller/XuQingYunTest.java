@@ -1,5 +1,6 @@
 package cn.edu.xmu.goods.controller;
 
+import cn.edu.xmu.goods.GoodsServiceApplication;
 import cn.edu.xmu.ooad.Application;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.JwtHelper;
@@ -21,15 +22,15 @@ import java.time.LocalDateTime;
  * author: 24320182203306 徐清韵
  * version: 1.0
  */
-@SpringBootTest(classes = Application.class)   //标识本类是一个SpringBootTest
+@SpringBootTest(classes = GoodsServiceApplication.class)   //标识本类是一个SpringBootTest
 @Slf4j
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class XuQingYunTest {
     //@Value("${public-test.managementgate}")
-    private String managementGate="192.168.43.73:8881";
+    private String managementGate="192.168.137.1:8881";
 
     //@Value("${public-test.mallgate}")
-    private String mallGate="192.168.43.73:8880";
+    private String mallGate="192.168.137.1:8880";
     private WebTestClient manageClient;
 
     private WebTestClient mallClient;

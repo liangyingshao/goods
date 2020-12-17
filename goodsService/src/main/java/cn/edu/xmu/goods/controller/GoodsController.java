@@ -89,7 +89,7 @@ public class GoodsController {
     {
         logger.debug("getSkuList:page="+page+" pageSize="+pageSize);
         ReturnObject returnObject=goodsService.getSkuList(shopId,skuSn,spuId,spuSn,page,pageSize);
-        return Common.decorateReturnObject(returnObject);
+        return Common.getPageRetObject(returnObject);
     }
 
     /**
@@ -261,7 +261,7 @@ public class GoodsController {
         ReturnObject retObject=goodsService.addFloatPrice(shopId,floatPrice,userId);
         if (retObject.getData() != null) {
             httpServletResponse.setStatus(HttpStatus.CREATED.value());
-            return ResponseUtil.ok(retObject.getData());
+            return Common.decorateReturnObject(retObject);
         } else {
             return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }
@@ -302,11 +302,11 @@ public class GoodsController {
         if(!Objects.equals(departId, shopId))return Common.getRetObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         GoodsSku sku=vo.createGoodsSku();
         sku.setGoodsSpuId(id);
-        sku.setState(GoodsSku.State.ONSHELF);
+        sku.setState(GoodsSku.State.OFFSHELF);
         ReturnObject retObject=goodsService.createSKU(shopId,sku);
         if (retObject.getData() != null) {
             httpServletResponse.setStatus(HttpStatus.CREATED.value());
-            return ResponseUtil.ok(retObject.getData());
+            return Common.decorateReturnObject(retObject);
         } else {
             return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }

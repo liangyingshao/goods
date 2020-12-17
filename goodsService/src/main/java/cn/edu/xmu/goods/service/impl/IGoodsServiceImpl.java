@@ -288,8 +288,6 @@ public class IGoodsServiceImpl implements IGoodsService {
         return goodsDao.updateSpuFreightId(freightModelId);
     }
 
-
-    @Override
     public ReturnObject<Long> getPriceBySkuId(Long skuId) {
         ReturnObject<GoodsDetailDTO> ret=iFlashsaleService.modifyFlashsaleItem(skuId,0);
         if(ret.getCode().equals(ResponseCode.OK))

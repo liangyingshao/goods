@@ -466,6 +466,7 @@ public class GoodsDao {
                 criteria.andImageUrlEqualTo(sku.getImageUrl());
                 criteria.andInventoryEqualTo(sku.getInventory());
                 criteria.andDetailEqualTo(sku.getDetail());
+                criteria.andStateEqualTo(GoodsSku.State.OFFSHELF.getCode().byteValue());
                 List<GoodsSkuPo> checkSkuPo=skuMapper.selectByExample(checkSkuExample);
                 if(checkSkuPo.size()==0)
                     return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("floatPrice字段不合法：" + checkSkuExample.toString()));
