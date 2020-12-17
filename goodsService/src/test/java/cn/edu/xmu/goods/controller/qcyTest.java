@@ -68,7 +68,7 @@ public class qcyTest {
      */
     @Test
     public void getAllState() throws Exception {
-        String responseString = this.mvc.perform(get("/goods/spus/states"))
+        String responseString = this.mvc.perform(get("/goods/skus/states"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -88,8 +88,7 @@ public class qcyTest {
         GoodsSpuCreateVo vo = new GoodsSpuCreateVo();
         vo.setName("ipadair3");
         vo.setDescription("最新一代air系列产品");
-
-        vo.setSpec("{\"id\":1,\"name\":\"ipadspec\", \"specItems\":{\"id\":1, \"name\":\"color\"},{\"id\":2, \"name\":\"memory\"}}");
+        vo.setSpecs("{\"id\":1,\"name\":\"ipadspec\", \"specItems\":{\"id\":1, \"name\":\"color\"},{\"id\":2, \"name\":\"memory\"}}");
         String spuJson = JacksonUtil.toJson(vo);
         String responseString=null;
         try{
@@ -174,7 +173,7 @@ public class qcyTest {
         vo.setName("ipadpro");
         vo.setDescription("最新一代pro系列产品");
         String token = creatTestToken(1L,1L,100);
-        vo.setSpec("{\"id\":1,\"name\":\"ipadspec\", \"specItems\":{\"id\":1, \"name\":\"color\"},{\"id\":2, \"name\":\"memory\"}}");
+        vo.setSpecs("{\"id\":1,\"name\":\"ipadspec\", \"specItems\":{\"id\":1, \"name\":\"color\"},{\"id\":2, \"name\":\"memory\"}}");
         String spuJson = JacksonUtil.toJson(vo);
         String responseString=null;
         try{
