@@ -95,14 +95,14 @@ public class PresaleService {
         //3. 此sku是否在此shop中,否则无权限操作
         if(iGoodsService.getShopIdBySkuId(id).getData()!=shopId){
             logger.debug("此shop无权限操作此sku");
-            return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);//TODO 考虑错误码是否合适
+            return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
         }
 
 
         //4. 此sku是否正在参加其他预售
         if(presaleDao.checkInPresale(id,presaleVo.getBeginTime(),presaleVo.getEndTime()).getData()){
             logger.debug("此sku正在参加其他预售");
-            return new ReturnObject(ResponseCode.FIELD_NOTVALID);//TODO 考虑错误码是否合适
+            return new ReturnObject(ResponseCode.PRESALE_STATENOTALLOW);
         }
         
         return presaleDao.createPresaleOfSKU(shopId, id, presaleVo,simpleGoodsSkuDTO,simpleShopDTO);

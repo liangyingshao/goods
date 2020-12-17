@@ -20,6 +20,8 @@ import cn.edu.xmu.oomall.goods.service.IGoodsService;
 import org.apache.dubbo.config.annotation.DubboReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.stereotype.Component;
 
@@ -46,6 +48,8 @@ public class IGoodsServiceImpl implements IGoodsService {
 
     @DubboReference(check = false)
     private IFlashsaleService iFlashsaleService;
+
+    private static final Logger logger = LoggerFactory.getLogger(IGoodsServiceImpl.class);
 
     @Override
     public ReturnObject<List<Long>> getAllSkuIdByShopId(Long shopId) {
@@ -120,6 +124,7 @@ public class IGoodsServiceImpl implements IGoodsService {
 
     @Override
     public ReturnObject<SimpleShopDTO> getSimpleShopByShopId(Long id) {
+        logger.debug("in getSimpleShopByShopId");
         SimpleShopDTO simpleShopDTO = null;
         ShopPo shopPo = shopDao.getShopById(id).getData();
         if(shopPo!=null)
@@ -133,10 +138,12 @@ public class IGoodsServiceImpl implements IGoodsService {
 
     @Override
     public ReturnObject<SimpleGoodsSkuDTO> getSimpleSkuBySkuId(Long skuId) {
+        logger.debug("in getSimpleSkuBySkuId");
         SimpleGoodsSkuDTO simpleGoodsSkuDTO = null;
         if(skuId!=null) {
             simpleGoodsSkuDTO=goodsDao.getSimpleSkuBySkuId(skuId);
-            simpleGoodsSkuDTO.setPrice(goodsDao.getPriceBySkuId(skuId).getData());
+            if(simpleGoodsSkuDTO!=null)
+                simpleGoodsSkuDTO.setPrice(goodsDao.getPriceBySkuId(skuId).getData());
         }
         return new ReturnObject<>(simpleGoodsSkuDTO);
     }

@@ -193,7 +193,7 @@ public class PresaleDao {
 
         //2.若shopId不一致，则无权限访问
         if(oldPo.getShopId()!= shopId)
-            return new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
 
         //3.若状态不为下线，则团购活动禁止
         if(oldPo.getState()!=ActivityStatus.OFF_SHELVES.getCode().byteValue())
@@ -238,11 +238,11 @@ public class PresaleDao {
 
         //2.若shopId不一致，则无权限访问
         if(oldPo.getShopId()!= shopId)
-            return new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
 
         //3.若状态不为下线，则团购活动禁止
         if(oldPo.getState()!=ActivityStatus.OFF_SHELVES.getCode().byteValue())
-            return new ReturnObject<>(ResponseCode.GROUPON_STATENOTALLOW);
+            return new ReturnObject<>(ResponseCode.PRESALE_STATENOTALLOW);
 
         //4.修改状态
         PresaleActivityPo newPresalePo = new PresaleActivityPo();
@@ -283,7 +283,7 @@ public class PresaleDao {
 
         //2.若shopId不一致，则无权限访问
         if(presaleActivityPo.getShopId()!= shopId)
-            return new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
 
         //3.若状态已删除，或已上线，则预售活动禁止
         if(presaleActivityPo.getState() == ActivityStatus.DELETED.getCode().byteValue()
@@ -329,7 +329,7 @@ public class PresaleDao {
 
         //2.若shopId不一致，则无权限访问
         if(presaleActivityPo.getShopId()!= shopId)
-            return new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
 
         //3.若状态已删除，或已下线，则预售活动禁止
         if(presaleActivityPo.getState() == ActivityStatus.DELETED.getCode().byteValue()
