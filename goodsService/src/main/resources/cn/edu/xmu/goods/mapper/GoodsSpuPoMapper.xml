@@ -151,12 +151,12 @@
     </selectKey>
     insert into goods_spu (name, brand_id, category_id, 
       freight_id, shop_id, goods_sn, 
-      detail, image_url, spec,
+      detail, image_url, spec, 
       disabled, gmt_create, gmt_modified
       )
     values (#{name,jdbcType=VARCHAR}, #{brandId,jdbcType=BIGINT}, #{categoryId,jdbcType=BIGINT}, 
       #{freightId,jdbcType=BIGINT}, #{shopId,jdbcType=BIGINT}, #{goodsSn,jdbcType=VARCHAR}, 
-      #{detail,jdbcType=VARCHAR}, #{imageUrl,jdbcType=VARCHAR}, #{spec,jdbcType=VARCHAR},
+      #{detail,jdbcType=VARCHAR}, #{imageUrl,jdbcType=VARCHAR}, #{spec,jdbcType=VARCHAR}, 
       #{disabled,jdbcType=TINYINT}, #{gmtCreate,jdbcType=TIMESTAMP}, #{gmtModified,jdbcType=TIMESTAMP}
       )
   </insert>

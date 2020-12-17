@@ -393,7 +393,6 @@ public class ActivityController {
         } else {
             return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }
-
     }
 
     /**
