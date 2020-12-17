@@ -3,6 +3,7 @@ package cn.edu.xmu.goods.controller;
 import cn.edu.xmu.goods.model.bo.*;
 import cn.edu.xmu.goods.model.vo.*;
 import cn.edu.xmu.goods.service.*;
+import cn.edu.xmu.goods.service.impl.IGoodsServiceImpl;
 import cn.edu.xmu.ooad.annotation.Audit;
 import cn.edu.xmu.ooad.annotation.Depart;
 import cn.edu.xmu.ooad.annotation.LoginUser;
@@ -259,8 +260,8 @@ public class GoodsController {
         floatPrice.setCreatedBy(userId);
         ReturnObject retObject=goodsService.addFloatPrice(shopId,floatPrice,userId);
         if (retObject.getData() != null) {
-
-            return Common.decorateReturnObject(retObject);
+            httpServletResponse.setStatus(HttpStatus.CREATED.value());
+            return ResponseUtil.ok(retObject.getData());
         } else {
             return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }
@@ -301,10 +302,11 @@ public class GoodsController {
         if(!Objects.equals(departId, shopId))return Common.getRetObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         GoodsSku sku=vo.createGoodsSku();
         sku.setGoodsSpuId(id);
-        sku.setDisabled(GoodsSku.State.ONSHELF);
+        sku.setState(GoodsSku.State.ONSHELF);
         ReturnObject retObject=goodsService.createSKU(shopId,sku);
         if (retObject.getData() != null) {
-            return Common.decorateReturnObject(retObject);
+            httpServletResponse.setStatus(HttpStatus.CREATED.value());
+            return ResponseUtil.ok(retObject.getData());
         } else {
             return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }

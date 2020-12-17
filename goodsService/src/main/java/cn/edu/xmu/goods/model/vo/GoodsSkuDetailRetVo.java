@@ -4,6 +4,7 @@ import cn.edu.xmu.goods.model.bo.GoodsSku;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
+import javax.validation.constraints.Min;
 import java.time.LocalDateTime;
 
 @Data
@@ -35,7 +36,7 @@ public class GoodsSkuDetailRetVo{
 
     private GoodsSpuVo spu;
 
-    private Byte disable;
+    private Boolean disable;
 
     private Boolean shareable;
 
@@ -48,11 +49,11 @@ public class GoodsSkuDetailRetVo{
         imageUrl=obj.getImageUrl();
         inventory=obj.getInventory();
         originalPrice=obj.getOriginalPrice();
-        price=obj.getPrice();
         configuration = obj.getConfiguration();
         weight = obj.getWeight();
         gmtCreated = obj.getGmtCreated();
         gmtModified = obj.getGmtModified();
-        disable=obj.getDisabled().getCode().byteValue();
+        disable= !GoodsSku.Disable.getTypeByCode(obj.getDisabled().getCode()).equals(GoodsSku.Disable.OPEN);
+
     }
 }

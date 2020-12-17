@@ -25,7 +25,7 @@ public class GoodsSkuRetVo {
 
     private Long price;
 
-    private Integer disabled;
+    private Boolean disable;
 
     public GoodsSkuRetVo(GoodsSku obj)
     {
@@ -35,7 +35,6 @@ public class GoodsSkuRetVo {
         imageUrl=obj.getImageUrl();
         inventory=obj.getInventory();
         originalPrice=obj.getOriginalPrice();
-        price=obj.getPrice();
-        disabled=obj.getDisabled().getCode().intValue();
+        disable= !GoodsSku.Disable.getTypeByCode(obj.getDisabled().getCode()).equals(GoodsSku.Disable.OPEN);
     }
 }

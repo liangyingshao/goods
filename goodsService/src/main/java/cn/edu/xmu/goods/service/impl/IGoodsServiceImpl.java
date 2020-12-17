@@ -291,6 +291,9 @@ public class IGoodsServiceImpl implements IGoodsService {
 
     @Override
     public ReturnObject<Long> getPriceBySkuId(Long skuId) {
+        ReturnObject<GoodsDetailDTO> ret=iFlashsaleService.modifyFlashsaleItem(skuId,0);
+        if(ret.getCode().equals(ResponseCode.OK))
+            return new ReturnObject<>(ret.getData().getPrice());
         return new ReturnObject<>(goodsDao.getPriceBySkuId(skuId).getData());
     }
 }
