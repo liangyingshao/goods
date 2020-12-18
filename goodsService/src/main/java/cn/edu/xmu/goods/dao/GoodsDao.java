@@ -158,7 +158,7 @@ public class GoodsDao {
         List<GoodsSkuRetVo> ret = skus.stream().map(GoodsSkuRetVo::new).collect(Collectors.toList());
         PageHelper.startPage(page,pageSize);
         logger.debug("page="+page+" pageSize="+pageSize);
-        PageInfo<GoodsSku> returns=new PageInfo<GoodsSku>(skus);
+        PageInfo<GoodsSku> returns=PageInfo.of(skus);
         returns.setPageNum(page);
         return returns;
     }

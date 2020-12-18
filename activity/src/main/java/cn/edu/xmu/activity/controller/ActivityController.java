@@ -160,18 +160,15 @@ public class ActivityController {
 
     /**
      * 获得优惠卷的所有状态
-     * @param userId
      * @return Object
      */
     @ApiOperation(value="获得优惠卷的所有状态")
-    @ApiImplicitParam(paramType = "header",dataType = "String",name = "authorization",value = "用户token",required = true)
-    @Audit
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功")
     })
     @GetMapping("/coupons/states")
     @ResponseBody
-    public Object getcouponState(@LoginUser @ApiIgnore @RequestParam(required = false) Long userId)
+    public Object getcouponState()
     {
         Coupon.State[] states=Coupon.State.class.getEnumConstants();
         List<CouponStateRetVo> stateRetVos=new ArrayList<CouponStateRetVo>();

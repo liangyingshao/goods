@@ -24,6 +24,7 @@ public class ImgHelper {
      * @param username     dav服务器用户名
      * @param password     dav服务器密码
      * @param baseUrl      dav地址及其目录
+     * @author 3218
      * @return
      */
     public static ReturnObject remoteSaveImg(MultipartFile multipartFile,

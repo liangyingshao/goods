@@ -78,9 +78,9 @@ INSERT INTO `coupon_activity` VALUES (1,'string','2022-12-13 08:02:14','2024-12-
 insert  into `coupon_activity`(`id`,`name`,`begin_time`,`end_time`,`coupon_time`,`state`,`shop_id`,`quantity`,`valid_term`,`image_url`,`strategy`,`created_by`,`modi_by`,`gmt_create`,`gmt_modified`,`quantitiy_type`) values (20001,'cpz1','2020-11-01 03:22:30','2021-01-31 03:22:39','2020-12-01 03:22:52',1,0,100,NULL,NULL,NULL,1,NULL,'2020-12-16 03:23:24',NULL,0),(20002,'cpz2','2020-11-01 03:31:24','2021-01-31 03:31:38','2020-12-01 03:31:44',1,0,200,NULL,NULL,NULL,1,NULL,'2020-12-16 03:31:56',NULL,1),(20003,'cpz3','2020-11-01 06:11:36','2021-01-01 06:11:41','2020-12-01 06:11:49',1,1,100,NULL,NULL,NULL,1,NULL,'2020-12-16 06:12:00',NULL,0),(20004,'cpz4','2020-11-01 06:15:00','2021-01-31 06:15:05','2021-01-01 06:15:16',1,1,100,NULL,NULL,NULL,NULL,NULL,'2020-12-16 06:15:28',NULL,0),(20005,'cpz5','2020-11-01 06:17:59','2021-01-31 06:18:08','2020-12-01 06:18:14',1,1,0,NULL,NULL,NULL,NULL,NULL,'2020-12-16 06:18:47',NULL,1),(20006,'cpz6','2020-12-01 06:20:49','2020-12-03 06:20:52','2020-12-02 06:20:57',1,1,100,NULL,NULL,NULL,NULL,NULL,'2020-12-16 06:21:15',NULL,1);
 
 
-INSERT INTO `coupon_activity`(`id`, `name`, `begin_time`, `end_time`, `coupon_time`, `state`, `shop_id`, `quantity`, `valid_term`, `image_url`, `strategy`, `created_by`, `modi_by`, `gmt_create`, `gmt_modified`, `quantitiy_type`) VALUES (2158, '双十一', '2021-01-20 22:46:38', '2021-01-30 22:46:55', '2021-01-10 22:47:01', 0, 0, 0, 0, NULL, NULL, NULL, NULL, '2020-12-15 22:47:50', NULL, NULL);
-INSERT INTO `coupon_activity`(`id`, `name`, `begin_time`, `end_time`, `coupon_time`, `state`, `shop_id`, `quantity`, `valid_term`, `image_url`, `strategy`, `created_by`, `modi_by`, `gmt_create`, `gmt_modified`, `quantitiy_type`) VALUES (1582, '年终大促', '2020-12-15 23:08:24', '2020-12-16 23:08:29', '2020-12-15 23:08:33', 1, 0, 0, 0, NULL, '', NULL, NULL, '2020-12-15 23:07:50', NULL, NULL);
-INSERT INTO `coupon_activity`(`id`, `name`, `begin_time`, `end_time`, `coupon_time`, `state`, `shop_id`, `quantity`, `valid_term`, `image_url`, `strategy`, `created_by`, `modi_by`, `gmt_create`, `gmt_modified`, `quantitiy_type`) VALUES (5821, '开学季', '2020-12-30 23:09:04', '2020-12-31 23:09:09', '2020-12-30 23:09:12', 2, 0, 0, 0, NULL, NULL, NULL, NULL, '2020-12-15 23:52:30', NULL, NULL);
+INSERT INTO `coupon_activity`(`id`, `name`, `begin_time`, `end_time`, `coupon_time`, `state`, `shop_id`, `quantity`, `valid_term`, `image_url`, `strategy`, `created_by`, `modi_by`, `gmt_create`, `gmt_modified`, `quantitiy_type`) VALUES (1582, '年终大促', '2020-12-15 23:08:24', '2020-12-16 23:08:29', '2020-12-15 23:08:33', 1, 0, 0, 0, NULL, '1', 1, 1, '2020-12-15 23:07:50', '2020-12-17 22:33:09', 0);
+INSERT INTO `coupon_activity`(`id`, `name`, `begin_time`, `end_time`, `coupon_time`, `state`, `shop_id`, `quantity`, `valid_term`, `image_url`, `strategy`, `created_by`, `modi_by`, `gmt_create`, `gmt_modified`, `quantitiy_type`) VALUES (2158, '双十一', '2021-01-20 22:46:38', '2021-01-30 22:46:55', '2021-01-10 22:47:01', 0, 0, 0, 0, NULL, '1', 1, 1, '2020-12-15 22:47:50', '2020-12-17 22:33:14', 0);
+INSERT INTO `coupon_activity`(`id`, `name`, `begin_time`, `end_time`, `coupon_time`, `state`, `shop_id`, `quantity`, `valid_term`, `image_url`, `strategy`, `created_by`, `modi_by`, `gmt_create`, `gmt_modified`, `quantitiy_type`) VALUES (5821, '开学季', '2020-12-30 23:09:04', '2020-12-31 23:09:09', '2020-12-30 23:09:12', 2, 0, 0, 0, NULL, '1', 1, 1, '2020-12-15 23:52:30', NULL, 0);
 
 
 INSERT INTO `coupon_activity`(`id`, `name`, `begin_time`, `end_time`, `coupon_time`, `state`, `shop_id`, `quantity`, `valid_term`, `image_url`, `strategy`, `created_by`, `modi_by`, `gmt_create`, `gmt_modified`, `quantitiy_type`)
@@ -89,7 +89,7 @@ VALUES (12158, '满500 - 50', '2019-01-20 22:46:38', '2021-01-30 22:46:55', '202
         1, 1, '2020-12-15 22:47:50', NULL, 1);
 INSERT INTO `coupon_activity`(`id`, `name`, `begin_time`, `end_time`, `coupon_time`, `state`, `shop_id`, `quantity`, `valid_term`, `image_url`, `strategy`, `created_by`, `modi_by`, `gmt_create`, `gmt_modified`, `quantitiy_type`)
 VALUES (12159, '满500 - 10%', '2019-01-20 22:46:38', '2021-01-30 22:46:55', '2020-01-10 22:47:01', 1, 1, 1, 0, NULL,
-        '{"value":5000,"className":"cn.edu.xmu.ooad.order.discount.impl.PriceCouponDiscount","couponLimitation":{"value":50000,"className":"cn.edu.xmu.ooad.order.discount.impl.PriceCouponLimitation"}}',
+        '{"value":90,"className":"cn.edu.xmu.ooad.order.discount.impl.PercentageCouponDiscount","couponLimitation":{"value":50000,"className":"cn.edu.xmu.ooad.order.discount.impl.PriceCouponLimitation"}}',
         1, 1, '2020-12-15 22:47:50', NULL, 0);
 
 /*!40000 ALTER TABLE `coupon_activity` ENABLE KEYS */;
@@ -121,7 +121,7 @@ UNLOCK TABLES;
 LOCK TABLES `flash_sale` WRITE;
 /*!40000 ALTER TABLE `flash_sale` DISABLE KEYS */;
 
-INSERT INTO `flash_sale` VALUES (1,addDate(now(), interval 1 day),0,'2020-12-11 00:00:00','2020-12-11 00:00:00',1),(2,addDate(now(), interval 1 day),1,'2020-12-11 00:00:00','2020-12-11 00:00:00',1),(3,now(),0,'2020-12-11 00:00:00','2020-12-11 00:00:00',1),(4,now(),1,'2020-12-11 00:00:00','2020-12-11 00:00:00',1);
+INSERT INTO `flash_sale` VALUES (1,addDate(now(), interval 1 day),8,'2020-12-11 00:00:00','2020-12-11 00:00:00',1),(2,addDate(now(), interval 1 day),9,'2020-12-11 00:00:00','2020-12-11 00:00:00',1),(3,now(),8,'2020-12-11 00:00:00','2020-12-11 00:00:00',1),(4,now(),9,'2020-12-11 00:00:00','2020-12-11 00:00:00',1);
 
 
 insert into `flash_sale` value(10828, "2020-11-14 00:00:00", 8, "2020-10-14 10:46:32",null,1);
