@@ -41,8 +41,8 @@ public class YueHaoTest {
 //
 //    private WebTestClient mallClient;
 
-    private String managementGate = "192.168.137.1:8881";
-    private String mallGate = "192.168.137.1:8880";
+    private String managementGate = "192.168.43.194:8881";
+    private String mallGate = "192.168.43.194:8880";
 
     private WebTestClient manageClient;
 
@@ -358,7 +358,8 @@ public class YueHaoTest {
     @Test
     @Order(17)
     public void insertCategoryTest1() throws Exception {
-        String token = this.login("13088admin", "123456");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAyMjA3NFdaIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTIxMjcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA4NTI3fQ.ERt-uhNQCxjsalzvizGeO_CMSxgi01I5MSdcaycNgn4";
+                //this.login("13088admin", "123456");
         String roleJson = "{\"name\": \"test\"}";
         byte[] responseString = manageClient.post().uri("/shops/0/categories/139/subcategories")
                 .header("authorization", token)
@@ -390,7 +391,8 @@ public class YueHaoTest {
     @Test
     @Order(18)
     public void modifyCategoryTest1() throws Exception {
-        String token = this.login("13088admin", "123456");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAyMjA3NFdaIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTIxMjcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA4NTI3fQ.ERt-uhNQCxjsalzvizGeO_CMSxgi01I5MSdcaycNgn4";
+                //this.login("13088admin", "123456");
         String roleJson = "{\"name\": \"testCategory\"}";
         byte[] responseString = manageClient.put().uri("/shops/0/categories/126")
                 .header("authorization", token)
@@ -422,7 +424,8 @@ public class YueHaoTest {
     @Test
     @Order(19)
     public void deleteCategoryTest1() throws Exception {
-        String token = this.login("13088admin", "123456");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAyMjA3NFdaIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTIxMjcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA4NTI3fQ.ERt-uhNQCxjsalzvizGeO_CMSxgi01I5MSdcaycNgn4";
+                //this.login("13088admin", "123456");
         byte[] responseString = manageClient.delete().uri("/shops/0/categories/123")
                 .header("authorization", token)
                 .exchange()
@@ -452,7 +455,8 @@ public class YueHaoTest {
     @Test
     @Order(20)
     public void deleteCategoryTest2() throws Exception {
-        String token = this.login("13088admin", "123456");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAyMjA3NFdaIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTIxMjcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA4NTI3fQ.ERt-uhNQCxjsalzvizGeO_CMSxgi01I5MSdcaycNgn4";
+                //this.login("13088admin", "123456");
         byte[] responseString = manageClient.delete().uri("/shops/0/categories/131")
                 .header("authorization", token)
                 .exchange()
@@ -514,7 +518,8 @@ public class YueHaoTest {
     @Test
     @Order(23)
     public void modifyBrandTest1() throws Exception {
-        String token = this.login("13088admin", "123456");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAyMjA3NFdaIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTIxMjcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA4NTI3fQ.ERt-uhNQCxjsalzvizGeO_CMSxgi01I5MSdcaycNgn4";
+                //this.login("13088admin", "123456");
         String roleJson = "{\"name\": \"testBrand\"}";
         byte[] responseString = manageClient.put().uri("/shops/0/brands/126")
                 .header("authorization", token)
@@ -534,7 +539,8 @@ public class YueHaoTest {
     @Test
     @Order(24)
     public void modifyBrandTest2() throws Exception {
-        String token = this.login("13088admin", "123456");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAyMjA3NFdaIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTIxMjcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA4NTI3fQ.ERt-uhNQCxjsalzvizGeO_CMSxgi01I5MSdcaycNgn4";
+                //this.login("13088admin", "123456");
         String roleJson = "{\"name\": \"testBrand\"}";
         byte[] responseString = manageClient.put().uri("/shops/0/brands/71")
                 .header("authorization", token)
@@ -565,7 +571,8 @@ public class YueHaoTest {
     @Test
     @Order(25)
     public void modifyBrandTest3() throws Exception {
-        String token = this.login("13088admin", "123456");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAyMjA3NFdaIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTIxMjcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA4NTI3fQ.ERt-uhNQCxjsalzvizGeO_CMSxgi01I5MSdcaycNgn4";
+                //this.login("13088admin", "123456");
         String roleJson = "{\"name\": \"testBrand-56\",\"detail\": \"testBrandDetail\"}";
         byte[] responseString = manageClient.put().uri("/shops/0/brands/71")
                 .header("authorization", token)
@@ -596,7 +603,8 @@ public class YueHaoTest {
     @Test
     @Order(26)
     public void deleteBrandTest() throws Exception {
-        String token = this.login("13088admin", "123456");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAyMjA3NFdaIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTIxMjcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA4NTI3fQ.ERt-uhNQCxjsalzvizGeO_CMSxgi01I5MSdcaycNgn4";
+                //this.login("13088admin", "123456");
         byte[] responseString = manageClient.delete().uri("/shops/0/brands/10000")
                 .header("authorization", token)
                 .exchange()
@@ -615,7 +623,8 @@ public class YueHaoTest {
     @Test
     @Order(27)
     public void deleteCategoryTest3() throws Exception {
-        String token = this.login("13088admin", "123456");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAyMjA3NFdaIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTIxMjcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA4NTI3fQ.ERt-uhNQCxjsalzvizGeO_CMSxgi01I5MSdcaycNgn4";
+                //this.login("13088admin", "123456");
         byte[] responseString = manageClient.delete().uri("/shops/0/categories/10000")
                 .header("authorization", token)
                 .exchange()
@@ -634,7 +643,8 @@ public class YueHaoTest {
     @Test
     @Order(28)
     public void deleteBrandTest2() throws Exception {
-        String token = this.login("13088admin", "123456");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAyMjA3NFdaIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTIxMjcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA4NTI3fQ.ERt-uhNQCxjsalzvizGeO_CMSxgi01I5MSdcaycNgn4";
+                //this.login("13088admin", "123456");
         byte[] responseString = manageClient.delete().uri("/shops/0/brands/71")
                 .header("authorization", token)
                 .exchange()
@@ -661,7 +671,8 @@ public class YueHaoTest {
     @Test
     @Order(29)
     public void modifyCategoryTest() throws Exception {
-        String token = this.login("13088admin", "123456");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAyMjA3NFdaIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTIxMjcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA4NTI3fQ.ERt-uhNQCxjsalzvizGeO_CMSxgi01I5MSdcaycNgn4";
+                //this.login("13088admin", "123456");
         String roleJson = "{\"name\": \"testCategory\"}";
         byte[] responseString = manageClient.put().uri("/shops/0/categories/10000")
                 .header("authorization", token)
@@ -681,7 +692,8 @@ public class YueHaoTest {
     @Test
     @Order(30)
     public void deleteSkuTest() throws Exception {
-        String token = this.login("13088admin", "123456");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAyMjA3NFdaIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTIxMjcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA4NTI3fQ.ERt-uhNQCxjsalzvizGeO_CMSxgi01I5MSdcaycNgn4";
+                //this.login("13088admin", "123456");
         byte[] responseString = manageClient.delete().uri("/shops/0/skus/12936")
                 .header("authorization", token)
                 .exchange()

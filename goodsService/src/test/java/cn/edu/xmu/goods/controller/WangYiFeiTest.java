@@ -119,7 +119,7 @@ public class WangYiFeiTest {
                 "  \"inventory\": 100,\n" +
                 "  \"detail\": \"aaaaa\"\n" +
                 "}";
-        WebTestClient.RequestHeadersSpec res = manageClient.post().uri(getPath("/shops/0/spus/300/skus")).bodyValue(bodyValue).header("authorization",token);
+        WebTestClient.RequestHeadersSpec res = manageClient.post().uri(getPath("/shops/1/spus/300/skus")).bodyValue(bodyValue).header("authorization",token);
         responseBuffer = res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
@@ -179,7 +179,7 @@ public class WangYiFeiTest {
         String response = new String(responseBuffer, "utf-8");
     }
 
-    //添加sku到spu 登录 但是操作的sku不存在
+    //添加sku到spu 登录 但是操作的spu不存在
     @Test
     @Order(6)
     public void addSkuToSpu3() throws Exception{
@@ -195,7 +195,7 @@ public class WangYiFeiTest {
                 "  \"inventory\": 100,\n" +
                 "  \"detail\": \"aaaaa\"\n" +
                 "}";
-        WebTestClient.RequestHeadersSpec res = manageClient.post().uri(getPath("/shops/1/spus/9000/skus")).bodyValue(bodyValue).header("authorization",token);
+        WebTestClient.RequestHeadersSpec res = manageClient.post().uri(getPath("/shops/1/spus/500000/skus")).bodyValue(bodyValue).header("authorization",token);
         responseBuffer = res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_NOTEXIST.getCode())
@@ -250,8 +250,8 @@ public class WangYiFeiTest {
         String token = login("13088admin", "123456");
         String bodyValue = "{\n" +
                 "  \"activityPrice\": 12,\n" +
-                "  \"beginTime\": \"2020-12-15 22:55:00\",\n" +
-                "  \"endTime\": \"2020-12-20 22:55:00\",\n" +
+                "  \"beginTime\": \"2022-12-15T22:55:00\",\n" +
+                "  \"endTime\": \"2022-12-20T22:55:00\",\n" +
                 "  \"quantity\": 10\n" +
                 "}";
         WebTestClient.RequestHeadersSpec res = manageClient.post().uri(getPath("/shops/1/skus/8989/floatPrices")).bodyValue(bodyValue).header("authorization", token);
@@ -279,11 +279,11 @@ public class WangYiFeiTest {
         String token = login("13088admin", "123456");
         String bodyValue = "{\n" +
                 "  \"activityPrice\": 12,\n" +
-                "  \"beginTime\": \"2020-12-15 22:55:00\",\n" +
-                "  \"endTime\": \"2020-12-20 22:55:00\",\n" +
+                "  \"beginTime\": \"2022-12-15T22:55:00\",\n" +
+                "  \"endTime\": \"2022-12-20T22:55:00\",\n" +
                 "  \"quantity\": 10\n" +
                 "}";
-        WebTestClient.RequestHeadersSpec res = manageClient.post().uri(getPath("/shops/1/skus/300/floatPrices")).bodyValue(bodyValue).header("authorization", token);
+        WebTestClient.RequestHeadersSpec res = manageClient.post().uri(getPath("/shops/2/skus/8989/floatPrices")).bodyValue(bodyValue).header("authorization", token);
         responseBuffer = res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_OUTSCOPE.getCode())
@@ -307,7 +307,7 @@ public class WangYiFeiTest {
         WebTestClient.RequestHeadersSpec res2 = manageClient.delete().uri(getPath("/shops/1/floatPrices/9000")).header("authorization", token);
         responseBuffer = res2.exchange().expectStatus().isNotFound().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_NOTEXIST)
+                .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_NOTEXIST.getCode())
                 .returnResult()
                 .getResponseBodyContent();
     }
@@ -319,14 +319,13 @@ public class WangYiFeiTest {
     public void deleteFloatPrice2() throws Exception{
         byte[] responseBuffer = null;
         String token = login("13088admin", "123456");
-        WebTestClient.RequestHeadersSpec res = manageClient.delete().uri(getPath("/shops/1/floatPrices/9001")).header("authorization", token);
+        WebTestClient.RequestHeadersSpec res = manageClient.delete().uri(getPath("/shops/2/floatPrices/9001")).header("authorization", token);
         responseBuffer = res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_OUTSCOPE.getCode())
                 .returnResult()
                 .getResponseBodyContent();
     }
-
 
     private String login(String userName, String password) throws Exception {
         LoginVo vo = new LoginVo();
@@ -341,7 +340,5 @@ public class WangYiFeiTest {
                 .returnResult()
                 .getResponseBodyContent();
         return JacksonUtil.parseString(new String(ret, "UTF-8"), "data");
-//   return "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE3MDAzOTAyNDBaIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxNDAzNDIsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM2NzQyfQ.oK5vs6BQw0PdpiJfwSQR3Dwbs0n86s8yE4VvbdX11As";
     }
 }
-

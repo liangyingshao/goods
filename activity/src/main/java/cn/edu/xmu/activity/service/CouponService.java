@@ -51,9 +51,10 @@ public class CouponService {
         List<CouponSkuPo> list = couponDao.getCouponSkuList(id);
         if(list==null||list.size()==0)return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
 
+        PageHelper.startPage(page,pageSize);
         List<Long> idList = new ArrayList<>(list.stream().map(CouponSkuPo::getSkuId).collect(Collectors.toList()));
         List<SkuInfoDTO> skuList = iGoodsService.getSelectSkuListBySkuIdList(idList);
-        PageHelper.startPage(page,pageSize);
+
         PageInfo<SkuInfoDTO> skuInfoDTOPageInfo = PageInfo.of(skuList);
         skuInfoDTOPageInfo.setPageSize(pageSize);
         skuInfoDTOPageInfo.setPageNum(page);
@@ -141,13 +142,14 @@ public class CouponService {
      * 买家领取活动优惠券
      * @param userId
      * @param id
+     * @param departId
      * @return ReturnObject<CouponNewRetVo>
      */
     @Transactional
-    public ReturnObject<List<String>> getCoupon(Long userId, Long id)
+    public ReturnObject<List<String>> getCoupon(Long userId, Long id, Long departId)
     {
         logger.debug("getCoupon:userId="+userId+" activityId="+id);
-        ReturnObject<List<String>> returnObject= couponDao.getCoupon(userId,id);
+        ReturnObject<List<String>> returnObject= couponDao.getCoupon(userId,id,departId);
         return returnObject;
     }
 
