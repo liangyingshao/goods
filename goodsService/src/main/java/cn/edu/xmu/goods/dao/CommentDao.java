@@ -4,15 +4,21 @@ import cn.edu.xmu.goods.mapper.CommentPoMapper;
 import cn.edu.xmu.goods.mapper.GoodsSkuPoMapper;
 import cn.edu.xmu.goods.mapper.GoodsSpuPoMapper;
 import cn.edu.xmu.goods.model.bo.Comment;
+import cn.edu.xmu.goods.model.bo.GoodsSku;
 import cn.edu.xmu.goods.model.po.CommentPo;
 import cn.edu.xmu.goods.model.po.CommentPoExample;
+import cn.edu.xmu.goods.model.po.GoodsSkuPo;
 import cn.edu.xmu.goods.model.vo.CommentRetVo;
 import cn.edu.xmu.goods.model.vo.Customer;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
+import cn.edu.xmu.oomall.other.model.CustomerDTO;
+import cn.edu.xmu.oomall.other.service.ICustomerService;
+import cn.edu.xmu.privilegeservice.client.IUserService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +38,9 @@ public class CommentDao {
 
     @Autowired
     private GoodsSpuPoMapper goodsSpuPoMapper;
+
+    @DubboReference(check = false)
+    private ICustomerService iCustomerService;
 
     private static final Logger logger = LoggerFactory.getLogger(CommentDao.class);
 
@@ -89,9 +98,10 @@ public class CommentDao {
                     //构造CommentRetVo
                     Customer customer=new Customer();
                     //根据comment.getCustomerId()查询name和realName
+                    ReturnObject<CustomerDTO> name = iCustomerService.findCustomerByUserId(comment.getCustomerId());
                     customer.setId(comment.getCustomerId());
-                    customer.setUserName("用户姓名");
-                    customer.setRealName("真实姓名");
+                    customer.setUserName(name.getData().getUserName());
+                    customer.setName(name.getData().getName());
                     CommentRetVo commentRetVo=new CommentRetVo(new Comment(commentPo));
                     commentRetVo.setCustomer(customer);
                     ReturnObject<CommentRetVo> commentRetVoReturnObject = new ReturnObject<>(commentRetVo);
@@ -112,6 +122,12 @@ public class CommentDao {
     }
 
     public ReturnObject<PageInfo<VoObject>> selectAllPassComment(Long SKU_Id, Integer pageNum, Integer pageSize) {
+        //sku存在
+        GoodsSkuPo goodsSkuPo = goodsSkuPoMapper.selectByPrimaryKey(SKU_Id);
+        if(goodsSkuPo==null) {
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+
         CommentPoExample example = new CommentPoExample();
         CommentPoExample.Criteria criteria = example.createCriteria();
         //增加state=2的查询

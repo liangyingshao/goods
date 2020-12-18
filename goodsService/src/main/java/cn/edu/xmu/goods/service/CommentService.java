@@ -33,9 +33,6 @@ public class CommentService {
     private CommentDao commentDao;
 
     @DubboReference(check = false)
-    private IUserService iUserService;
-
-    @DubboReference(check = false)
     private IOrderService iOrderService;
 
     @Transactional
@@ -83,11 +80,6 @@ public class CommentService {
 //        Long userId=0L;
 //        Long type=0L;
 //        Long SKU_Id=0L;
-        String name = iUserService.getUserName(comment.getCustomerId());
-        logger.error(comment.getCustomerId().toString());
-//        String name = "袁沈阳对接";
-        logger.error("!!!!!!"+name);
-        comment.setContent(name);
         return commentDao.addSkuComment(comment);
     }
 
