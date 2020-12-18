@@ -156,9 +156,11 @@ public class FlashSaleDao {
     }
 
     public ReturnObject<List<FlashSalePo>> selectByFlashDate(LocalDateTime date) {
+        LocalDateTime date_begin = LocalDateTime.of(date.toLocalDate(),LocalTime.MIN);
+        LocalDateTime date_end = LocalDateTime.of(date.toLocalDate(),LocalTime.MAX);
         FlashSalePoExample example = new FlashSalePoExample();
         FlashSalePoExample.Criteria criteria = example.createCriteria();
-        criteria.andFlashDateEqualTo(date);
+        criteria.andFlashDateBetween(date_begin,date_end);
         return new ReturnObject<>(flashSalePoMapper.selectByExample(example));
     }
 
@@ -224,7 +226,7 @@ public class FlashSaleDao {
                     return new ReturnObject(ResponseCode.DELETE_ONLINE_NOTALLOW);
             } else if(flashSalePo.getState().intValue() == 2) {
                 logger.error("932:"+id.toString());
-                return  new ReturnObject(ResponseCode.DELETE_CHANGAE_NOTALLOW);
+                return  new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
             }
             //更新
             flashSalePo.setState(state);

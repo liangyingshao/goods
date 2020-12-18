@@ -74,7 +74,8 @@ public class FlashsaleController {
     @GetMapping("/flashsales/current")
     public Flux<FlashsaleItemRetVo> getCurrentflash() {
         Byte type = 1;
-        Long id = iTimeService.getCurrentSegmentId(type).getData();
+//        Long id = iTimeService.getCurrentSegmentId(type).getData();
+        Long id = 9L;
         return flashsaleItemService.queryTopicsByTime(id);
     }
 
@@ -172,11 +173,13 @@ public class FlashsaleController {
     @Audit
     @PostMapping("/shops/{did}/flashsales/{id}/flashitems")
     public Object addSKUofTopic(@PathVariable Long did, @PathVariable Long id, @Validated @RequestBody FlashsaleItemVo vo, BindingResult bindingResult) {
+        logger.error("1");
         Object object = Common.processFieldErrors(bindingResult, httpServletResponse);
         if(null != object)
         {
             return object;
         }
+        logger.error("2");
         ReturnObject returnObject = flashsaleItemService.addSKUofTopic(id, vo.getSkuId(), vo.getPrice(), vo.getQuantity());
         if(returnObject.getData()!=null) {
             return Common.decorateReturnObject(returnObject);
