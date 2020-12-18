@@ -109,7 +109,7 @@ public class SlyTest {
      * 增加不存在时段id的秒杀
      * @throws Exception
      */
-//    @Test
+    @Test
     public void createflash3() throws Exception {
         LocalDateTime dateTime = LocalDateTime.now().plusDays(3);
         String requestJson = "{\"flashDate\":\""+ dateTime.toString() +"\"}";
@@ -396,23 +396,6 @@ public class SlyTest {
     }
 
     /**
-     * 向已存在的秒杀活动中增加一个秒杀商品
-     */
-
-    /**
-     * 向不存在的秒杀活动中增加一个秒杀商品
-     */
-
-    /**
-     * 向已存在的秒杀活动中增加一个不存在的商品
-     */
-
-    /**
-     * 向已存在的秒杀活动中增加一个秒杀商品，错误的参数校验
-     */
-
-
-    /**
      * 成功新增商品评论
      * @throws Exception
      */
@@ -606,7 +589,7 @@ public class SlyTest {
         //开始时间大于结束时间
         LocalDateTime beginTime = LocalDateTime.parse("2020-12-28 17:42:20",df);
         LocalDateTime endTime = LocalDateTime.parse("2020-01-28 17:42:20",df);
-        String requestJson = "{\"activityPrice\":\"120\", \"beginTime\":\""+beginTime.toString()+"\",\"endTime\":\""+endTime.toString()+"\",\"quantity\": \"100\"}";
+        String requestJson = "{\"activityPrice\":\"120\", \"beginTime\":\""+beginTime.toString()+"\",\"endTime\":\""+endTime.toString()+"\",\"quantity\": \"10\"}";
         WebTestClient.RequestHeadersSpec res = manageClient.post().uri("/shops/0/skus/626/floatPrices").header("authorization",adminToken).bodyValue(requestJson);
         responseBuffer = res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()

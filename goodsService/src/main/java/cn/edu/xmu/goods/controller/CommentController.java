@@ -17,6 +17,7 @@ import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -100,7 +101,7 @@ public class CommentController {
     @PostMapping("/orderitems/{id}/comments")
     @ResponseBody
     public Object addSkuComment(@PathVariable Long id,  @LoginUser @ApiIgnore @RequestParam(required = false) Long userId, @Validated @RequestBody CommentVo vo,BindingResult bindingResult){
-//        logger.error("11111111111111");
+        logger.error("11111111111111");
         Object object = Common.processFieldErrors(bindingResult,httpServletResponse);
         if(null!=object){
             return object;
@@ -116,7 +117,12 @@ public class CommentController {
         comment.setOrderitemId(id);
         comment.setCustomerId(userId);
         ReturnObject<CommentRetVo> commentRetVoReturnObject = commentService.addSkuComment(comment);
-        return Common.decorateReturnObject(commentRetVoReturnObject);
+        if (commentRetVoReturnObject.getData() != null) {
+            httpServletResponse.setStatus(HttpStatus.CREATED.value());
+            return Common.decorateReturnObject(commentRetVoReturnObject);
+        } else {
+            return Common.getNullRetObj(new ReturnObject<>(commentRetVoReturnObject.getCode(), commentRetVoReturnObject.getErrmsg()), httpServletResponse);
+        }
     }
 
     /**
@@ -144,6 +150,7 @@ public class CommentController {
             @RequestParam(required = false, defaultValue = "1") Integer page,
             @RequestParam(required = false, defaultValue = "10") Integer pageSize) {
         ReturnObject<PageInfo<VoObject>> returnObject =  commentService.selectAllPassComment(id, page, pageSize);
+        logger.error("CONTROLLER:"+returnObject.toString());
         return Common.getPageRetObject(returnObject);
     }
 
@@ -300,9 +307,7 @@ public class CommentController {
                                      @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
                                      @Depart @ApiIgnore @RequestParam(required = false) Long departId)
     {
-        //其实应该交给网关？
-//        if(departId!=shopId)
-//            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
-        return Common.decorateReturnObject(floatPriceService.invalidFloatPrice(id));
+        logger.error("删除价格浮动想+"+id);
+        return Common.decorateReturnObject(floatPriceService.invalidFloatPrice(shopId, id));
     }
 }
