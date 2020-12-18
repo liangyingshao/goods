@@ -757,7 +757,7 @@ public class GoodsController {
     })
     @Audit
     @PostMapping("/shops/{shopId}/categories/{id}/subcategories")
-    public Object insertBrand(@Validated @RequestBody GoodsCategoryVo vo, BindingResult bindingResult,
+    public Object insertCategory(@Validated @RequestBody GoodsCategoryVo vo, BindingResult bindingResult,
                               @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
                               @Depart @ApiIgnore @RequestParam(required = false) Long departId,
                               @PathVariable Long id) {
@@ -773,7 +773,7 @@ public class GoodsController {
         ReturnObject retObject = goodsCategoryService.insertGoodsCategory(goodsCategory,id);
         if (retObject.getData() != null) {
             httpServletResponse.setStatus(HttpStatus.CREATED.value());
-            return Common.getRetObject(retObject);
+            return Common.decorateReturnObject(retObject);
         } else {
             return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }
@@ -814,12 +814,7 @@ public class GoodsController {
             return o;
         }
         ReturnObject<VoObject> returnObject = goodsCategoryService.changeCategory(id, vo);
-
-        if (returnObject.getCode() == ResponseCode.OK) {
-            return Common.getRetObject(returnObject);
-        } else {
-            return Common.getRetObject(returnObject);
-        }
+        return Common.decorateReturnObject(returnObject);
     }
 
 
@@ -847,7 +842,8 @@ public class GoodsController {
             logger.debug("deleteCategory: id = "+ id);
         }
         ReturnObject returnObject = goodsCategoryService.deleteCategory(id);
-        return Common.getRetObject(returnObject);
+        //return Common.getRetObject(returnObject);
+        return Common.decorateReturnObject(returnObject);
     }
 
 
@@ -889,7 +885,7 @@ public class GoodsController {
         ReturnObject retObject = brandService.insertBrand(brand);
         if (retObject.getData() != null) {
             httpServletResponse.setStatus(HttpStatus.CREATED.value());
-            return Common.decorateReturnObject(retObject);
+           return Common.decorateReturnObject(retObject);
         } else {
             return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }
@@ -987,12 +983,7 @@ public class GoodsController {
             return o;
         }
         ReturnObject<VoObject> returnObject = brandService.changeBrand(id, vo);
-
-        if (returnObject.getCode() == ResponseCode.OK) {
-            return Common.getRetObject(returnObject);
-        } else {
-            return Common.getRetObject(returnObject);
-        }
+        return Common.decorateReturnObject(returnObject);
     }
 
     /**
@@ -1019,7 +1010,7 @@ public class GoodsController {
             logger.debug("deleteBrand: id = "+ id);
         }
         ReturnObject returnObject = brandService.deleteBrand(id);
-        return Common.getRetObject(returnObject);
+        return Common.decorateReturnObject(returnObject);
     }
 
     /**
@@ -1085,5 +1076,6 @@ public class GoodsController {
         ReturnObject retObject = spuService.uploadSpuImg(spu,file);
         return Common.getNullRetObj(retObject, httpServletResponse);
     }
+
 }
 
