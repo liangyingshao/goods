@@ -226,10 +226,22 @@ public class CouponService {
      * 管理员上线己方优惠活动
      * @param shopId
      * @param id
+     * @param userId
      * @return ReturnObject
      */
     public ReturnObject onlineCouponActivity(Long shopId, Long id, Long userId) {
         ReturnObject<ResponseCode> returnObject= couponDao.onlineCouponActivity(shopId, id,userId);
+        return returnObject;
+    }
+    /**
+     * 删除优惠活动
+     * @param shopId
+     * @param id
+     * @param userId
+     * @return ReturnObject
+     */
+    public ReturnObject deleteCouponActivity(Long shopId, Long id, Long userId) {
+        ReturnObject<ResponseCode> returnObject= couponDao.deleteCouponActivity(shopId, id,userId);
         return returnObject;
     }
     /**

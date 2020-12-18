@@ -39,8 +39,8 @@ public class XuQingYunTest {
     @BeforeEach
     public void setUp(){
 
-        managementGate="172.20.10.3:8881";
-        mallGate="172.20.10.3:8880";
+        managementGate="192.168.137.1:8881";
+        mallGate="192.168.137.1:8880";
 
         this.manageClient = WebTestClient.bindToServer()
                 .baseUrl("http://"+managementGate)

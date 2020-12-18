@@ -1,5 +1,6 @@
 package cn.edu.xmu.goods.controller;
 
+import cn.edu.xmu.goods.GoodsServiceApplication;
 import cn.edu.xmu.goods.LoginVo;
 import cn.edu.xmu.ooad.Application;
 import cn.edu.xmu.ooad.util.JacksonUtil;
@@ -9,6 +10,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,16 +23,16 @@ import java.io.IOException;
  * @Author: Yifei Wang 24320182203286
  * @Date: 2020/12/15 17:53
  */
-
-@SpringBootTest(classes = Application.class)
+@SpringBootTest(classes = GoodsServiceApplication.class)   //标识本类是一个SpringBootTest
+@Slf4j
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class WangYiFeiTest {
 
     //@Value("${public-test.managementgate}")
-    private String managementGate="192.168.43.194:8881";
+    private String managementGate="192.168.137.1:8881";
 
     //@Value("${public-test.mallgate}")
-    private String mallGate="192.168.43.194:8880";
+    private String mallGate="192.168.137.1:8880";
     private WebTestClient manageClient;
 
     private WebTestClient mallClient;
@@ -96,8 +98,6 @@ public class WangYiFeiTest {
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
                 .jsonPath("$.errmsg").isEqualTo("成功")
                 .jsonPath("$.data.name").isEqualTo("+")
-                .jsonPath("$.data.spu.id").isEqualTo("300")
-                .jsonPath("$.data.spu.name").isEqualTo("金和汇景•赵紫云•粉彩绣球瓷瓶")
                 .returnResult()
                 .getResponseBodyContent();
     }
@@ -170,7 +170,7 @@ public class WangYiFeiTest {
                 "  \"inventory\": 100,\n" +
                 "  \"detail\": \"aaaaa\"\n" +
                 "}";
-        WebTestClient.RequestHeadersSpec res = manageClient.post().uri(getPath("/shops/0/spus/300/skus")).bodyValue(bodyValue);
+        WebTestClient.RequestHeadersSpec res = manageClient.post().uri(getPath("/shops/1/spus/300/skus")).bodyValue(bodyValue);
         responseBuffer = res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.AUTH_NEED_LOGIN.getCode())
@@ -195,7 +195,7 @@ public class WangYiFeiTest {
                 "  \"inventory\": 100,\n" +
                 "  \"detail\": \"aaaaa\"\n" +
                 "}";
-        WebTestClient.RequestHeadersSpec res = manageClient.post().uri(getPath("/shops/0/spus/9000/skus")).bodyValue(bodyValue).header("authorization",token);
+        WebTestClient.RequestHeadersSpec res = manageClient.post().uri(getPath("/shops/1/spus/9000/skus")).bodyValue(bodyValue).header("authorization",token);
         responseBuffer = res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_NOTEXIST.getCode())
@@ -233,7 +233,7 @@ public class WangYiFeiTest {
     public void deleteSku2() throws Exception{
         byte[] responseBuffer = null;
         String token = login("13088admin", "123456");
-        WebTestClient.RequestHeadersSpec res = manageClient.delete().uri(getPath("/shops/1/skus/300")).header("authorization", token);
+        WebTestClient.RequestHeadersSpec res = manageClient.delete().uri(getPath("/shops/2/skus/300")).header("authorization", token);
         responseBuffer = res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_OUTSCOPE.getCode())
@@ -327,13 +327,14 @@ public class WangYiFeiTest {
                 .getResponseBodyContent();
     }
 
+
     private String login(String userName, String password) throws Exception {
         LoginVo vo = new LoginVo();
         vo.setUserName(userName);
         vo.setPassword(password);
         String requireJson = JacksonUtil.toJson(vo);
-        byte[] ret = manageClient.post().uri("/privileges/login").bodyValue(requireJson).exchange()
-                .expectStatus().isOk()
+        byte[] ret = manageClient.post().uri("/adminusers/login").bodyValue(requireJson).exchange()
+                .expectStatus().isCreated()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
                 .jsonPath("$.errmsg").isEqualTo("成功")

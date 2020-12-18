@@ -15,6 +15,6 @@ public class Customer {
     @NotNull(message = "userName不得为空")
     private String userName;
 
-    @NotNull(message = "realName不得为空")
-    private String realName;
+    @NotNull(message = "name不得为空")
+    private String name;
 }
