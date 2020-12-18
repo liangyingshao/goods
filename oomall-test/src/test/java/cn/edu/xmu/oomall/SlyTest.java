@@ -36,11 +36,11 @@ public class SlyTest {
 
     public SlyTest(){
         this.manageClient = WebTestClient.bindToServer()
-                .baseUrl("http://127.0.0.1:8090")
+                .baseUrl("http://127.0.0.1:8091")
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/json;charset=UTF-8")
                 .build();
         this.mallClient = WebTestClient.bindToServer()
-                .baseUrl("http://127.0.0.1:8090")
+                .baseUrl("http://127.0.0.1:8091")
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/json;charset=UTF-8")
                 .build();
     }
@@ -69,18 +69,15 @@ public class SlyTest {
         responseBuffer = res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo("成功")
                 .returnResult()
                 .getResponseBodyContent();
         String response = new String(responseBuffer, "utf-8");
         JsonNode jsonNode = mObjectMapper.readTree(response).findPath("data").get("id");
         int insertId = jsonNode.asInt();
 
-        //恢复数据库
         responseBuffer = manageClient.delete().uri("/shops/0/flashsales/"+insertId).header("authorization",adminToken).exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo("成功")
                 .jsonPath("$.data").doesNotExist()
                 .returnResult()
                 .getResponseBodyContent();
@@ -112,7 +109,7 @@ public class SlyTest {
      * 增加不存在时段id的秒杀
      * @throws Exception
      */
-    @Test
+//    @Test
     public void createflash3() throws Exception {
         LocalDateTime dateTime = LocalDateTime.now().plusDays(3);
         String requestJson = "{\"flashDate\":\""+ dateTime.toString() +"\"}";
@@ -123,7 +120,6 @@ public class SlyTest {
         responseBuffer = res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_NOTEXIST.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.RESOURCE_ID_NOTEXIST)
                 .returnResult()
                 .getResponseBodyContent();
     }
@@ -151,7 +147,6 @@ public class SlyTest {
             String response = new String(responseBuffer, "utf-8");
             JsonNode jsonNode = mObjectMapper.readTree(response).findPath("data").get("id");
             int insertId = jsonNode.asInt();
-            logger.error("inserId:"+insertId);
 
             responseBuffer = res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                     .expectBody()
@@ -160,7 +155,6 @@ public class SlyTest {
                     .returnResult()
                     .getResponseBodyContent();
 
-            //恢复数据库
             responseBuffer = manageClient.delete().uri("/shops/0/flashsales/"+insertId).header("authorization",adminToken).exchange().expectHeader().contentType("application/json;charset=UTF-8")
                     .expectBody()
                     .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
@@ -202,7 +196,6 @@ public class SlyTest {
         responseBuffer = res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo("成功")
                 .returnResult()
                 .getResponseBodyContent();
         String response = new String(responseBuffer, "utf-8");
@@ -217,6 +210,13 @@ public class SlyTest {
         responseBuffer = res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.FIELD_NOTVALID.getCode())
+                .returnResult()
+                .getResponseBodyContent();
+
+        responseBuffer = manageClient.delete().uri("/shops/0/flashsales/"+insertId).header("authorization",adminToken).exchange().expectHeader().contentType("application/json;charset=UTF-8")
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
+                .jsonPath("$.data").doesNotExist()
                 .returnResult()
                 .getResponseBodyContent();
     }
@@ -262,7 +262,6 @@ public class SlyTest {
         responseBuffer = res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo("成功")
                 .returnResult()
                 .getResponseBodyContent();
         String response = new String(responseBuffer, "utf-8");
@@ -274,7 +273,6 @@ public class SlyTest {
         res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo("成功")
                 .returnResult()
                 .getResponseBodyContent();
 
@@ -283,7 +281,6 @@ public class SlyTest {
         res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo("成功")
                 .returnResult()
                 .getResponseBodyContent();
 
@@ -312,7 +309,6 @@ public class SlyTest {
         responseBuffer = res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo("成功")
                 .returnResult()
                 .getResponseBodyContent();
         String response = new String(responseBuffer, "utf-8");
@@ -324,7 +320,6 @@ public class SlyTest {
         res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo("成功")
                 .returnResult()
                 .getResponseBodyContent();
 
@@ -332,16 +327,14 @@ public class SlyTest {
         res = manageClient.put().uri("/shops/0/flashsales/"+insertId+"/onshelves").header("authorization",adminToken);
         res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.DELETE_CHANGAE_NOTALLOW.getCode())
-                .jsonPath("$.errmsg").isEqualTo("成功")
+                .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_NOTEXIST.getCode())
                 .returnResult()
                 .getResponseBodyContent();
 
         //恢复数据库
         responseBuffer = manageClient.delete().uri("/shops/0/flashsales/"+insertId).header("authorization",adminToken).exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.DELETE_CHANGAE_NOTALLOW.getCode())
-                .jsonPath("$.errmsg").isEqualTo("成功")
+                .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_NOTEXIST.getCode())
                 .jsonPath("$.data").doesNotExist()
                 .returnResult()
                 .getResponseBodyContent();
@@ -363,7 +356,6 @@ public class SlyTest {
         responseBuffer = res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo("成功")
                 .returnResult()
                 .getResponseBodyContent();
         String response = new String(responseBuffer, "utf-8");
@@ -375,7 +367,6 @@ public class SlyTest {
         res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo("成功")
                 .returnResult()
                 .getResponseBodyContent();
 
@@ -393,14 +384,12 @@ public class SlyTest {
         res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo("成功")
                 .returnResult()
                 .getResponseBodyContent();
         //删除该活动
         responseBuffer = manageClient.delete().uri("/shops/0/flashsales/"+insertId).header("authorization",adminToken).exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo("成功")
                 .jsonPath("$.data").doesNotExist()
                 .returnResult()
                 .getResponseBodyContent();
@@ -454,7 +443,6 @@ public class SlyTest {
         responseBuffer = res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo("成功")
                 .jsonPath("$.data").isNotEmpty()
                 .returnResult()
                 .getResponseBodyContent();
@@ -565,21 +553,21 @@ public class SlyTest {
     }
 
     /**
-     * 新增价格浮动项,店铺id不存在
+     * 新增价格浮动项,sku库存应大于价格浮动项库存
      * @throws Exception
      */
     @Test
     public void add_floating_price1() throws Exception{
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime beginTime = LocalDateTime.parse("2020-12-28 17:42:20",df);
-        LocalDateTime endTime = LocalDateTime.parse("2021-01-28 17:42:20",df);
-        String requestJson = "{\"activityPrice\":\"120\", \"beginTime\":\""+beginTime.toString()+"\",\"endTime\":\""+endTime.toString()+"\",\"quantity\": \"1000\"}";
+        LocalDateTime beginTime = LocalDateTime.parse("9041-12-28 17:42:20",df);
+        LocalDateTime endTime = LocalDateTime.parse("9042-01-28 17:42:20",df);
+        String requestJson = "{\"activityPrice\":\"120\", \"beginTime\":\""+beginTime.toString()+"\",\"endTime\":\""+endTime.toString()+"\",\"quantity\": \"10000\"}";
         byte[] responseBuffer = null;
-        WebTestClient.RequestHeadersSpec res = manageClient.post().uri("/shops/23333/skus/626/floatPrices").header("authorization",adminToken).bodyValue(requestJson);
-        //增加
+        WebTestClient.RequestHeadersSpec res = manageClient.post().uri("/shops/0/skus/626/floatPrices").header("authorization",adminToken).bodyValue(requestJson);
+        //sku库存应大于价格浮动项库存
         responseBuffer = res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_NOTEXIST.getCode())
+                .jsonPath("$.errno").isEqualTo(ResponseCode.SKU_NOTENOUGH.getCode())
                 .jsonPath("$.data").doesNotExist()
                 .returnResult()
                 .getResponseBodyContent();
@@ -596,7 +584,7 @@ public class SlyTest {
         LocalDateTime endTime = LocalDateTime.parse("2021-01-28 17:42:20",df);
         String requestJson = "{\"activityPrice\":\"120\", \"beginTime\":\""+beginTime.toString()+"\",\"endTime\":\""+endTime.toString()+"\",\"quantity\": \"1000\"}";
         byte[] responseBuffer = null;
-        WebTestClient.RequestHeadersSpec res = manageClient.post().uri("/shops/828/skus/23333/floatPrices").header("authorization",adminToken).bodyValue(requestJson);
+        WebTestClient.RequestHeadersSpec res = manageClient.post().uri("/shops/0/skus/23333/floatPrices").header("authorization",adminToken).bodyValue(requestJson);
         //增加
         responseBuffer = res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
@@ -613,38 +601,29 @@ public class SlyTest {
     @Test
     public void add_floating_price3() throws Exception{
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime beginTime = LocalDateTime.parse("9041-12-28 17:42:20",df);
-        LocalDateTime endTime = LocalDateTime.parse("9042-01-28 17:42:20",df);
-        String requestJson = "{\"activityPrice\":\"120\", \"beginTime\":\""+beginTime.toString()+"\",\"endTime\":\""+endTime.toString()+"\",\"quantity\": \"10000\"}";
         byte[] responseBuffer = null;
+
+        //开始时间大于结束时间
+        LocalDateTime beginTime = LocalDateTime.parse("2020-12-28 17:42:20",df);
+        LocalDateTime endTime = LocalDateTime.parse("2020-01-28 17:42:20",df);
+        String requestJson = "{\"activityPrice\":\"120\", \"beginTime\":\""+beginTime.toString()+"\",\"endTime\":\""+endTime.toString()+"\",\"quantity\": \"100\"}";
         WebTestClient.RequestHeadersSpec res = manageClient.post().uri("/shops/0/skus/626/floatPrices").header("authorization",adminToken).bodyValue(requestJson);
-        //sku库存应大于价格浮动项库存
         responseBuffer = res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.SKU_NOTENOUGH.getCode())
+                .jsonPath("$.errno").isEqualTo(ResponseCode.Log_Bigger.getCode())
                 .jsonPath("$.data").doesNotExist()
                 .returnResult()
                 .getResponseBodyContent();
 
         //shopId和skuId匹配
-        //sku-spu-shop:626-626-0
-        requestJson = "{\"activityPrice\":\"120\", \"beginTime\":\""+beginTime.toString()+"\",\"endTime\":\""+endTime.toString()+"\",\"quantity\": \"100\"}";
-        res = manageClient.post().uri("/shops/828/skus/626/floatPrices").header("authorization",adminToken).bodyValue(requestJson);
+        //sku-spu-shop:626-626-0 9001-8991-22
+        beginTime = LocalDateTime.parse("2020-12-28 17:42:20",df);
+        endTime = LocalDateTime.parse("2021-01-28 17:42:20",df);
+        requestJson = "{\"activityPrice\":\"120\", \"beginTime\":\""+beginTime.toString()+"\",\"endTime\":\""+endTime.toString()+"\",\"quantity\": \"10\"}";
+        res = manageClient.post().uri("/shops/0/skus/8991/floatPrices").header("authorization",adminToken).bodyValue(requestJson);
         responseBuffer = res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_OUTSCOPE.getCode())
-                .jsonPath("$.data").doesNotExist()
-                .returnResult()
-                .getResponseBodyContent();
-
-        //开始时间大于结束时间
-        beginTime = LocalDateTime.parse("2020-12-28 17:42:20",df);
-        endTime = LocalDateTime.parse("2020-01-28 17:42:20",df);
-        requestJson = "{\"activityPrice\":\"120\", \"beginTime\":\""+beginTime.toString()+"\",\"endTime\":\""+endTime.toString()+"\",\"quantity\": \"100\"}";
-        res = manageClient.post().uri("/shops/0/skus/626/floatPrices").header("authorization",adminToken).bodyValue(requestJson);
-        responseBuffer = res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
-                .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.Log_Bigger.getCode())
                 .jsonPath("$.data").doesNotExist()
                 .returnResult()
                 .getResponseBodyContent();
