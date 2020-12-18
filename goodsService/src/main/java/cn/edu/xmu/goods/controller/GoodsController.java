@@ -175,8 +175,6 @@ public class GoodsController {
                             @Depart @ApiIgnore @RequestParam(required = false) Long departId)
     {
         logger.debug("deleteSku: id = "+ id+" shopId="+shopId);
-        if(departId!=0&&departId!=shopId)
-            return Common.getRetObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         ReturnObject retObject=goodsService.deleteSku(shopId,id);
         return Common.getRetObject(retObject);
     }
@@ -443,11 +441,8 @@ public class GoodsController {
         spu.setId(id);
         spu.setGmtModified(LocalDateTime.now());
         ReturnObject retObject = spuService.modifyGoodsSpu(spu);
-        if(retObject.getData()!=null){
-            return Common.getRetObject(retObject);
-        }else{
-            return  Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
-        }
+        return Common.decorateReturnObject(retObject);
+
 
     }
 
@@ -561,14 +556,8 @@ public class GoodsController {
         spu.setGmtModified(LocalDateTime.now());
 
         ReturnObject retObject = spuService.addSpuCategory(spu);
-        //校验是否为该商铺管理员
-//        if(shopId!=departId)
-//            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW), httpServletResponse);
-        if(retObject.getData()!=null){
-            return Common.getRetObject(retObject);
-        }else{
-            return  Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
-        }
+
+        return Common.decorateReturnObject(retObject);
 
     }
 
@@ -608,14 +597,7 @@ public class GoodsController {
         spu.setGmtModified(LocalDateTime.now());
 
         ReturnObject retObject = spuService.removeSpuCategory(spu);
-        //校验是否为该商铺管理员
-//        if(shopId!=departId)
-//            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW), httpServletResponse);
-        if(retObject.getData()!=null){
-            return Common.getRetObject(retObject);
-        }else{
-            return  Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
-        }
+        return Common.decorateReturnObject(retObject);
 
     }
     /**
@@ -654,14 +636,7 @@ public class GoodsController {
         spu.setGmtModified(LocalDateTime.now());
 
         ReturnObject retObject = spuService.addSpuBrand(spu);
-        //校验是否为该商铺管理员
-//        if(shopId!=departId)
-//            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW), httpServletResponse);
-        if(retObject.getData()!=null){
-            return Common.getRetObject(retObject);
-        }else{
-            return  Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
-        }
+        return Common.decorateReturnObject(retObject);
 
     }
 
@@ -701,13 +676,7 @@ public class GoodsController {
         spu.setGmtModified(LocalDateTime.now());
 
         ReturnObject retObject = spuService.removeSpuBrand(spu);
-        //校验是否为该商铺管理员
-
-        if(retObject.getData()!=null){
-            return Common.getRetObject(retObject);
-        }else{
-            return  Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
-        }
+        return Common.decorateReturnObject(retObject);
 
     }
 
@@ -740,11 +709,7 @@ public class GoodsController {
 
 
         ReturnObject retObject = spuService.deleteGoodsSpu(shopId,id);
-        if(retObject.getData()!=null){
-            return Common.getRetObject(retObject);
-        }else{
-            return  Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
-        }
+        return Common.decorateReturnObject(retObject);
 
     }
 
@@ -766,7 +731,7 @@ public class GoodsController {
     @GetMapping("/categories/{id}/subcategories")
     public Object getSubcategories(@PathVariable Long id){
         ReturnObject returnObject =  goodsCategoryService.getSubcategories(id);
-        return Common.decorateReturnObject(returnObject);
+        return  Common.getRetObject(returnObject);
     }
 
     /**

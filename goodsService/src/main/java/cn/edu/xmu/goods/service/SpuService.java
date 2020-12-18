@@ -8,6 +8,7 @@ import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.goods.service.IGoodsService;
 import cn.edu.xmu.oomall.order.model.SimpleFreightModelDTO;
+import cn.edu.xmu.oomall.order.service.IFreightService;
 import cn.edu.xmu.oomall.order.service.IOrderService;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.dubbo.config.annotation.DubboService;
@@ -33,7 +34,7 @@ public class SpuService {
     GoodsSpuDao spuDao;
 
     @DubboReference(check = false)
-    private IOrderService iOrderService;
+    private IFreightService iFreightService;
 
     private Logger logger = LoggerFactory.getLogger(SpuService.class);
 
@@ -50,7 +51,7 @@ public class SpuService {
 
         ReturnObject<Long> freightId=spuDao.getFreightIdBySpuId(id);
         if(!freightId.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST.getCode())){
-            retFeightModel=iOrderService.getSimpleFreightById(freightId.getData());
+            retFeightModel=iFreightService.getSimpleFreightById(freightId.getData());
         }
         ReturnObject<Object> returnObject= spuDao.showSpu(id,retFeightModel.getData());
         return returnObject;
@@ -109,8 +110,7 @@ public class SpuService {
      */
     @Transactional
     public ReturnObject modifyGoodsSpu(GoodsSpu spu) {
-        ReturnObject<Object> returnObject = spuDao.modifyGoodsSpu(spu);
-        return returnObject;
+        return spuDao.modifyGoodsSpu(spu);
     }
 
     /**

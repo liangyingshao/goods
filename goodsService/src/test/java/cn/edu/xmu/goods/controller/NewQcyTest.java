@@ -32,11 +32,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class NewQcyTest {
 //    @Value("${public-test.managementgate}")
 //    private String managementGate;
-//
 //    @Value("${public-test.mallgate}")
 //    private String mallGate;
-    private String managementGate = "127.0.0.1:8090";
-    private String mallGate = "127.0.0.1:8090";
+    private String managementGate = "127.0.0.1:8881";
+    private String mallGate = "127.0.0.1:8880";
 
     private WebTestClient manageClient;
     private WebTestClient mallClient;
@@ -44,7 +43,7 @@ public class NewQcyTest {
 
     @BeforeEach
     public void setUp(){
-        token = creatTestToken(1L,0L,100);
+        token = creatTestToken(1L,2L,100);
         this.manageClient = WebTestClient.bindToServer()
                 .baseUrl("http://"+managementGate)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/json;charset=UTF-8")
@@ -164,7 +163,7 @@ public class NewQcyTest {
     }
 
     /**
-     * 店家新建商品SPU 商铺已关闭/商铺未通过审核/商铺未审核
+     * 店家新建商品SPU 商铺已关闭
      */
     @Test
     public void addSpuTest2() throws Exception {
@@ -175,7 +174,7 @@ public class NewQcyTest {
         body.put("specs", "{\"id\":1,\"name\":\"ipadspec\", \"specItems\":{\"id\":1, \"name\":\"flavor\"},{\"id\":2, \"name\":\"unit\"}}\" }");
         String skuJson = body.toJSONString();
         byte[] responseString=null;
-        responseString = manageClient.post().uri("/shops/3/spus")
+        responseString = manageClient.post().uri("/shops/10/spus")
                 .header("authorization",token)
                 .bodyValue(skuJson)
                 .exchange()
@@ -184,6 +183,20 @@ public class NewQcyTest {
                 .jsonPath("$.errno").isEqualTo(ResponseCode.SHOP_NOTOPERABLE.getCode())
                 .returnResult()
                 .getResponseBodyContent();
+    }
+    /**
+     * 店家新建商品SPU 商铺未通过审核
+     */
+    @Test
+    public void addSpuTest3() throws Exception {
+//        String token = this.adminLogin("13088admin", "123456");
+        JSONObject body = new JSONObject();
+        body.put("name", "milk");
+        body.put("description", "高蛋白");
+        body.put("specs", "{\"id\":1,\"name\":\"ipadspec\", \"specItems\":{\"id\":1, \"name\":\"flavor\"},{\"id\":2, \"name\":\"unit\"}}\" }");
+        String skuJson = body.toJSONString();
+        byte[] responseString=null;
+
 
         responseString = manageClient.post().uri("/shops/6/spus")
                 .header("authorization",token)
@@ -195,6 +208,21 @@ public class NewQcyTest {
                 .returnResult()
                 .getResponseBodyContent();
 
+
+    }
+    /**
+     * 店家新建商品SPU 商铺未审核
+     */
+    @Test
+    public void addSpuTest4() throws Exception {
+//        String token = this.adminLogin("13088admin", "123456");
+        JSONObject body = new JSONObject();
+        body.put("name", "milk");
+        body.put("description", "高蛋白");
+        body.put("specs", "{\"id\":1,\"name\":\"ipadspec\", \"specItems\":{\"id\":1, \"name\":\"flavor\"},{\"id\":2, \"name\":\"unit\"}}\" }");
+        String skuJson = body.toJSONString();
+        byte[] responseString=null;
+
         responseString = manageClient.post().uri("/shops/1/spus")
                 .header("authorization",token)
                 .bodyValue(skuJson)
@@ -205,32 +233,51 @@ public class NewQcyTest {
                 .returnResult()
                 .getResponseBodyContent();
     }
-
     /**
      * description: 查看一条商品SPU的详细信息 (成功)
      */
     @Test
     public void showSpuTest1() throws Exception {
-        byte[] responseString = mallClient.get().uri("/goods/spus/10003")
+        byte[] responseString = mallClient.get().uri("/spus/10005")
                 .exchange().expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.data.id").isEqualTo(10003)
-                .jsonPath("$.data.name").isEqualTo("spu10003")
+                .jsonPath("$.data.id").isEqualTo(10005)
+                .jsonPath("$.data.name").isEqualTo("spu10005")
                 .jsonPath("$.data.freight.name").isEqualTo("测试模板3")
                 .jsonPath("$.data.freight.id").isEqualTo(11)
                 .jsonPath("$.data.category.name").isEqualTo("邮品")
                 .jsonPath("$.data.brand.name").isEqualTo("中国集邮总公司")
                 .returnResult()
                 .getResponseBodyContent();
-    }
 
+    }
+    /**
+     * description: 查看一条商品SPU的详细信息 (成功)
+     */
+    @Test
+    public void showSpuTest2() throws Exception {
+
+
+        byte[] responseString = mallClient.get().uri("/spus/9001")
+                .exchange().expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
+                .jsonPath("$.data.id").isEqualTo(9001)
+                .jsonPath("$.data.name").isEqualTo("ysl")
+                .jsonPath("$.data.freight.name").isEqualTo("测试模板3")
+                .jsonPath("$.data.freight.id").isEqualTo(11)
+                .jsonPath("$.data.category.name").isEqualTo("大师原作")
+                .jsonPath("$.data.brand.name").isEqualTo("戴荣华")
+                .returnResult()
+                .getResponseBodyContent();
+    }
     /**
      * description: 查看一条商品SPU的详细信息 该SPU的disable==true,不可查看
      */
     @Test
-    public void showSpuTest2() throws Exception {
-        byte[] responseString = mallClient.get().uri("/goods/spus/10004")
+    public void showSpuTest3() throws Exception {
+        byte[] responseString = mallClient.get().uri("/spus/10004")
                 .exchange().expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.SPU_NOTOPERABLE.getCode())
@@ -244,7 +291,7 @@ public class NewQcyTest {
      * version: 1.0
      */
     @Test
-    public void showSpuTest3() throws Exception {
+    public void showSpuTest4() throws Exception {
 
         byte[] responseString = mallClient.get().uri("/spus/100001")
                 .header("authorization",token)
@@ -256,168 +303,13 @@ public class NewQcyTest {
 
     }
 
-    /**
-     * description: 店家SKU上架 成功
-     */
-    @Test
-    public void onSaleSkuTest1() throws Exception {
-//        String token = this.adminLogin("13088admin", "123456");
-        String token="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE3MDAyNjM2NTFRIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzk1OTYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM1OTk2fQ.yBb0uUJTf8zmQIK0BYWXVARxGX49D5Lrv4-y1GB8fzE";
-        byte[] responseString = manageClient.put().uri("/goods/shops/2/skus/8000/onshelves")
-                .header("authorization",token)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .returnResult()
-                .getResponseBodyContent();
-
-    }
-
-    /**
-     * description: 店家SKU上架 重复上架
-     */
-    @Test
-    public void onSaleSkuTest2() throws Exception {
-//        String token = this.adminLogin("13088admin", "123456");
-        //String token="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE3MDAyNjM2NTFRIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzk1OTYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM1OTk2fQ.yBb0uUJTf8zmQIK0BYWXVARxGX49D5Lrv4-y1GB8fzE";
-        byte[] responseString1 = manageClient.put().uri("/goods/shops/2/skus/8001/onshelves")
-                .exchange().expectStatus().isOk()
-                .expectHeader().contentType("application/json;charset=UTF-8")
-                .expectBody()
-                .returnResult().getResponseBodyContent();
-
-        byte[] responseString2 = manageClient.put().uri("/goods/shops/2/skus/8001/onshelves")
-                .exchange().expectStatus().isOk()
-                .expectHeader().contentType("application/json;charset=UTF-8")
-                .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.STATE_NOCHANGE.getCode())
-                .returnResult().getResponseBodyContent();
-
-        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\"}";
-        JSONAssert.assertEquals(expectedResponse, new String(responseString1, "UTF-8"), true);
-    }
-
-    /**
-     * description: 店家SKU上架 spu不在shopid对应商铺
-     */
-    @Test
-    public void onSaleSkuTest3() throws Exception {
-//        String token = this.adminLogin("13088admin", "123456");
-        //String token="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE3MDAyNjM2NTFRIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzk1OTYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM1OTk2fQ.yBb0uUJTf8zmQIK0BYWXVARxGX49D5Lrv4-y1GB8fzE";
-        byte[] responseString = manageClient.put().uri("/goods/shops/2/skus/8002/onshelves")
-                .exchange().expectStatus().isUnauthorized()
-                .expectHeader().contentType("application/json;charset=UTF-8")
-                .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_OUTSCOPE.getCode())
-                .returnResult().getResponseBodyContent();
-
-        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\"}";
-        JSONAssert.assertEquals(expectedResponse, new String(responseString, "UTF-8"), true);
-    }
-
-    /**
-     * description: 店家SKU上架 spu已为上架状态
-     */
-    @Test
-    public void onSaleSkuTest4() throws Exception {
-//        String token = this.adminLogin("13088admin", "123456");
-        //String token="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE3MDAyNjM2NTFRIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzk1OTYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM1OTk2fQ.yBb0uUJTf8zmQIK0BYWXVARxGX49D5Lrv4-y1GB8fzE";
-        byte[] responseString = manageClient.put().uri("/goods/shops/2/skus/8003/onshelves")
-                .exchange().expectStatus().isOk()
-                .expectHeader().contentType("application/json;charset=UTF-8")
-                .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.STATE_NOCHANGE.getCode())
-                .returnResult().getResponseBodyContent();
-
-        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\"}";
-        JSONAssert.assertEquals(expectedResponse, new String(responseString, "UTF-8"), true);
-    }
-
-    /**
-     * description: 店家SKU下架 成功
-     */
-    @Test
-    public void offSaleSkuTest1() throws Exception {
-//        String token = this.adminLogin("13088admin", "123456");
-        //String token="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE3MDAyNjM2NTFRIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzk1OTYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM1OTk2fQ.yBb0uUJTf8zmQIK0BYWXVARxGX49D5Lrv4-y1GB8fzE";
-        byte[] responseString = manageClient.put().uri("/goods/shops/2/skus/8003/offshelves")
-                .exchange().expectStatus().isOk()
-                .expectHeader().contentType("application/json;charset=UTF-8")
-                .expectBody()
-                .returnResult().getResponseBodyContent();
-
-
-        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\"}";
-        JSONAssert.assertEquals(expectedResponse, new String(responseString, "UTF-8"), true);
-    }
-
-    /**
-     * description: 店家SKU下架 重复下架
-     */
-    @Test
-    public void offSaleSkuTest2() throws Exception {
-//        String token = this.adminLogin("13088admin", "123456");
-        //String token="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE3MDAyNjM2NTFRIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzk1OTYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM1OTk2fQ.yBb0uUJTf8zmQIK0BYWXVARxGX49D5Lrv4-y1GB8fzE";
-        byte[] responseString1 = manageClient.put().uri("/goods/shops/2/skus/8004/offshelves")
-                .exchange().expectStatus().isOk()
-                .expectHeader().contentType("application/json;charset=UTF-8")
-                .expectBody()
-                .returnResult().getResponseBodyContent();
-
-        byte[] responseString2 = manageClient.put().uri("/goods/shops/2/spus/8004/offshelves")
-                .exchange().expectStatus().isOk()
-                .expectHeader().contentType("application/json;charset=UTF-8")
-                .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.STATE_NOCHANGE.getCode())
-                .returnResult().getResponseBodyContent();
-
-        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\"}";
-        JSONAssert.assertEquals(expectedResponse, new String(responseString1, "UTF-8"), true);
-    }
-
-    /**
-     * description: 店家SKU下架 spu不在shopid对应商铺
-     */
-    @Test
-    public void offSaleSkuTest3() throws Exception {
-//        String token = this.adminLogin("13088admin", "123456");
-        //String token="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE3MDAyNjM2NTFRIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzk1OTYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM1OTk2fQ.yBb0uUJTf8zmQIK0BYWXVARxGX49D5Lrv4-y1GB8fzE";
-        byte[] responseString = manageClient.put().uri("/goods/shops/1/skus/8004/offshelves")
-                .exchange().expectStatus().isUnauthorized()
-                .expectHeader().contentType("application/json;charset=UTF-8")
-                .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_OUTSCOPE.getCode())
-                .returnResult().getResponseBodyContent();
-
-        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\"}";
-        JSONAssert.assertEquals(expectedResponse, new String(responseString, "UTF-8"), true);
-    }
-
-    /**
-     * description: 店家SKU下架 spu已为下架状态
-     */
-    @Test
-    public void offSaleSkuTest4() throws Exception {
-//        String token = this.adminLogin("13088admin", "123456");
-        //String token="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE3MDAyNjM2NTFRIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzk1OTYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM1OTk2fQ.yBb0uUJTf8zmQIK0BYWXVARxGX49D5Lrv4-y1GB8fzE";
-        byte[] responseString = manageClient.put().uri("/goods/shops/2/skus/8005/offshelves")
-                .exchange().expectStatus().isOk()
-                .expectHeader().contentType("application/json;charset=UTF-8")
-                .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.STATE_NOCHANGE.getCode())
-                .returnResult().getResponseBodyContent();
-
-        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\"}";
-        JSONAssert.assertEquals(expectedResponse, new String(responseString, "UTF-8"), true);
-    }
 
     /**
      * description: 店家修改SPU 成功
      */
     @Test
     public void modifySpuTest1() throws Exception {
-//        String token = this.adminLogin("13088admin", "123456");
+        //String token = this.adminLogin("13088admin", "123456");
         JSONObject body = new JSONObject();
         body.put("name", "milk");
         body.put("description", "高蛋白");
@@ -428,7 +320,6 @@ public class NewQcyTest {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo("成功")
                 .returnResult()
                 .getResponseBodyContent();
         String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\"}";
@@ -450,15 +341,14 @@ public class NewQcyTest {
      */
     @Test
     public void modifySpuTest2() throws Exception {
-//        String token = this.adminLogin("13088admin", "123456");
-        //String token="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE3MDAyNjM2NTFRIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzk1OTYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM1OTk2fQ.yBb0uUJTf8zmQIK0BYWXVARxGX49D5Lrv4-y1GB8fzE";
+
+
         String skuJson = "{\"name\":\"iphone13\",\"decription\":\"最新系列\",\"specs\": \"{\"id\":1,\"name\":\"ipadspec\", \"specItems\":{\"id\":1, \"name\":\"size\"},{\"id\":2, \"name\":\"color\"},{\"id\":3, \"name\":\"memory\"}}\" }";
-        byte[] responseString = manageClient.put().uri("shops/1/spus/8000").header("authorization", token)
+        byte[] responseString = manageClient.put().uri("shops/2/spus/8000").header("authorization", token)
                 .bodyValue(skuJson).exchange()
                 .expectStatus().isUnauthorized()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_OUTSCOPE.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.RESOURCE_ID_OUTSCOPE.getMessage())
                 .returnResult()
                 .getResponseBodyContent();
         String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\"}";
@@ -470,7 +360,7 @@ public class NewQcyTest {
      */
     @Test
     public void modifySpuTest3() throws Exception {
-//        String token = this.adminLogin("13088admin", "123456");
+        //String token = this.adminLogin("13088admin", "123456");
         //String token="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE3MDAyNjM2NTFRIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzk1OTYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM1OTk2fQ.yBb0uUJTf8zmQIK0BYWXVARxGX49D5Lrv4-y1GB8fzE";
         String skuJson = "{\"name\":\"iphone13\",\"decription\":\"最新系列\",\"specs\": \"{\"id\":1,\"name\":\"ipadspec\", \"specItems\":{\"id\":1, \"name\":\"size\"},{\"id\":2, \"name\":\"color\"},{\"id\":3, \"name\":\"memory\"}}\" }";
         byte[] responseString = manageClient.put().uri("shops/2/spus/898989").header("authorization", token)
@@ -492,10 +382,10 @@ public class NewQcyTest {
      */
     @Test
     public void addSpuCategoryTest1() throws Exception {
-//        String token = this.adminLogin("13088admin", "123456");
+        //String token = this.adminLogin("13088admin", "123456");
         //String token="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE3MDAyNjM2NTFRIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzk1OTYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM1OTk2fQ.yBb0uUJTf8zmQIK0BYWXVARxGX49D5Lrv4-y1GB8fzE";
 
-        byte[] responseString = manageClient.put().uri("/goods/shops/2/spus/8000/categories/124").header("authorization", token)
+        byte[] responseString = manageClient.put().uri("/shops/2/spus/8000/categories/124").header("authorization", token)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -509,10 +399,10 @@ public class NewQcyTest {
      */
     @Test
     public void addSpuCategoryTest2() throws Exception {
-//        String token = this.adminLogin("13088admin", "123456");
+        //String token = this.adminLogin("13088admin", "123456");
         //String token="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE3MDAyNjM2NTFRIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzk1OTYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM1OTk2fQ.yBb0uUJTf8zmQIK0BYWXVARxGX49D5Lrv4-y1GB8fzE";
 
-        byte[] responseString = manageClient.put().uri("/goods/shops/2/spus/8000/categories/122").header("authorization", token)
+        byte[] responseString = manageClient.put().uri("/shops/2/spus/8000/categories/122").header("authorization", token)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -527,10 +417,10 @@ public class NewQcyTest {
      */
     @Test
     public void addSpuCategoryTest3() throws Exception {
-//        String token = this.adminLogin("13088admin", "123456");
+        //String token = this.adminLogin("13088admin", "123456");
         //String token="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE3MDAyNjM2NTFRIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzk1OTYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM1OTk2fQ.yBb0uUJTf8zmQIK0BYWXVARxGX49D5Lrv4-y1GB8fzE";
         String skuJson = "{\"name\":\"iphone13\",\"decription\":\"最新系列\",\"specs\": \"{\"id\":1,\"name\":\"ipadspec\", \"specItems\":{\"id\":1, \"name\":\"size\"},{\"id\":2, \"name\":\"color\"},{\"id\":3, \"name\":\"memory\"}}\" }";
-        byte[] responseString = manageClient.put().uri("/goods/shops/2/spus/8000/categories/666").header("authorization", token)
+        byte[] responseString = manageClient.put().uri("/shops/2/spus/8000/categories/666").header("authorization", token)
                 .exchange()
                 .expectStatus().isNotFound()
                 .expectBody()
@@ -545,13 +435,12 @@ public class NewQcyTest {
 
     /**
      * description: 移除SPU分类 (成功)
-
      */
     @Test
     public void removeSpuCategoryTest1() throws Exception {
-//        String token = this.adminLogin("13088admin", "123456");
+        //String token = this.adminLogin("13088admin", "123456");
         //String token="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE3MDAyNjM2NTFRIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzk1OTYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM1OTk2fQ.yBb0uUJTf8zmQIK0BYWXVARxGX49D5Lrv4-y1GB8fzE";
-        byte[] responseString = manageClient.delete().uri("/goods/shops/2/spus/8001/categories/124").header("authorization", token)
+        byte[] responseString = manageClient.delete().uri("/shops/2/spus/8001/categories/124").header("authorization", token)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -566,13 +455,13 @@ public class NewQcyTest {
      */
     @Test
     public void removeSpuCategoryTest2() throws Exception {
-//        String token = this.adminLogin("13088admin", "123456");
+        //String token = this.adminLogin("13088admin", "123456");
         //String token="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE3MDAyNjM2NTFRIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzk1OTYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM1OTk2fQ.yBb0uUJTf8zmQIK0BYWXVARxGX49D5Lrv4-y1GB8fzE";
-        byte[] responseString = manageClient.delete().uri("/goods/shops/2/spus/8000/categories/888").header("authorization", token)
+        byte[] responseString = manageClient.delete().uri("/shops/2/spus/8000/categories/888").header("authorization", token)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isNotFound()
                 .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.ACTIVITYALTER_INVALID.getCode())
+                .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_NOTEXIST.getCode())
                 .returnResult()
                 .getResponseBodyContent();
 
@@ -583,11 +472,11 @@ public class NewQcyTest {
      */
     @Test
     public void removeSpuCategoryTest3() throws Exception {
-//        String token = this.adminLogin("13088admin", "123456");
+        //String token = this.adminLogin("13088admin", "123456");
         //String token="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE3MDAyNjM2NTFRIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzk1OTYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM1OTk2fQ.yBb0uUJTf8zmQIK0BYWXVARxGX49D5Lrv4-y1GB8fzE";
-        byte[] responseString = manageClient.delete().uri("/goods/shops/2/spus/8001/categories/126").header("authorization", token)
+        byte[] responseString = manageClient.delete().uri("/shops/2/spus/8001/categories/126").header("authorization", token)
                 .exchange()
-                .expectStatus().isNotModified()
+                .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.CATEALTER_INVALID.getCode())
                 .returnResult()
@@ -600,9 +489,9 @@ public class NewQcyTest {
     @Test
     public void addSpuBrandTest1() throws Exception {
 
-//        String token = this.adminLogin("13088admin", "123456");
+        //String token = this.adminLogin("13088admin", "123456");
         //String token="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE3MDAyNjM2NTFRIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzk1OTYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM1OTk2fQ.yBb0uUJTf8zmQIK0BYWXVARxGX49D5Lrv4-y1GB8fzE";
-        byte[] responseString = manageClient.put().uri("/goods/shops/2/spus/8004/brands/71").header("authorization", token)
+        byte[] responseString = manageClient.put().uri("/shops/2/spus/8004/brands/71").header("authorization", token)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -616,9 +505,8 @@ public class NewQcyTest {
      */
     @Test
     public void addSpuBrandTest2() throws Exception {
-//        String token = this.adminLogin("13088admin", "123456");
-        //String token="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE3MDAyNjM2NTFRIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzk1OTYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM1OTk2fQ.yBb0uUJTf8zmQIK0BYWXVARxGX49D5Lrv4-y1GB8fzE";
-        byte[] responseString = manageClient.put().uri("/goods/shops/2/spus/8001/brands/8888").header("authorization", token)
+        //String token = this.adminLogin("13088admin", "123456");
+        byte[] responseString = manageClient.put().uri("/shops/2/spus/8001/brands/8888").header("authorization", token)
                 .exchange()
                 .expectStatus().isNotFound()
                 .expectBody()
@@ -632,9 +520,8 @@ public class NewQcyTest {
      */
     @Test
     public void removeSpuBrandTest1() throws Exception {
-//        String token = this.adminLogin("13088admin", "123456");
-       // String token="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE3MDAyNjM2NTFRIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzk1OTYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM1OTk2fQ.yBb0uUJTf8zmQIK0BYWXVARxGX49D5Lrv4-y1GB8fzE";
-        byte[] responseString = manageClient.delete().uri("/goods/shops/2/spus/8000/brands/71").header("authorization", token)
+        //String token = this.adminLogin("13088admin", "123456");
+        byte[] responseString = manageClient.delete().uri("/shops/2/spus/8000/brands/71").header("authorization", token)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -651,9 +538,9 @@ public class NewQcyTest {
      */
     @Test
     public void removeSpuBrandTest2() throws Exception {
-//        String token = this.adminLogin("13088admin", "123456");
-        //String token="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE3MDAyNjM2NTFRIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzk1OTYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM1OTk2fQ.yBb0uUJTf8zmQIK0BYWXVARxGX49D5Lrv4-y1GB8fzE";
-        byte[] responseString = manageClient.delete().uri("/goods/shops/2/spus/8003/brands/91").header("authorization", token)
+        //String token = this.adminLogin("13088admin", "123456");
+
+        byte[] responseString = manageClient.delete().uri("/shops/2/spus/8003/brands/91").header("authorization", token)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -667,9 +554,8 @@ public class NewQcyTest {
      */
     @Test
     public void deleteSpuBrandTest1() throws Exception {
-//        String token = this.adminLogin("13088admin", "123456");
-        //String token="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE3MDAyNjM2NTFRIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzk1OTYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM1OTk2fQ.yBb0uUJTf8zmQIK0BYWXVARxGX49D5Lrv4-y1GB8fzE";
-        byte[] responseString = manageClient.delete().uri("/goods/shops/2/spus/8003").header("authorization", token)
+       //String token = this.adminLogin("13088admin", "123456");
+        byte[] responseString = manageClient.delete().uri("/shops/2/spus/8003").header("authorization", token)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -679,13 +565,13 @@ public class NewQcyTest {
     }
 
     /**
-     * description: 逻辑删除商品SPU 该SPU不存在
+     * description: 逻辑删除商品SPU 不存在
      */
     @Test
     public void deleteSpuBrandTest2() throws Exception {
-//        String token = this.adminLogin("13088admin", "123456");
-        //String token="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE3MDAyNjM2NTFRIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzk1OTYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM1OTk2fQ.yBb0uUJTf8zmQIK0BYWXVARxGX49D5Lrv4-y1GB8fzE";
-        byte[] responseString = manageClient.delete().uri("/goods/shops/2/spus/898989").header("authorization", token)
+        //String token = this.adminLogin("13088admin", "123456");
+
+        byte[] responseString = manageClient.delete().uri("/shops/2/spus/898989").header("authorization", token)
                 .exchange()
                 .expectStatus().isNotFound()
                 .expectBody()
