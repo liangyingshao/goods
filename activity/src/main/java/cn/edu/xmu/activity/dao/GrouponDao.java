@@ -93,7 +93,7 @@ public class GrouponDao {
 
         //2.若shopId不一致，则无权限访问
         if(grouponActivityPo.getShopId()!= shopId)
-            return new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
 
         //3.若状态已删除，或已上线，则团购活动禁止
         if(grouponActivityPo.getState() == ActivityStatus.DELETED.getCode().byteValue()
@@ -139,7 +139,7 @@ public class GrouponDao {
 
         //2.若shopId不一致，则无权限访问
         if(grouponActivityPo.getShopId()!= shopId)
-            return new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
 
         //3.若状态已删除，或已下线，则团购活动禁止
         if(grouponActivityPo.getState() == ActivityStatus.DELETED.getCode().byteValue()
@@ -186,7 +186,7 @@ public class GrouponDao {
 
         //2.若shopId不一致，则无权限访问
         if(oldPo.getShopId()!= shopId)
-            return new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
 
         //3.若状态不为下线，则团购活动禁止
         if(oldPo.getState()!=ActivityStatus.OFF_SHELVES.getCode().byteValue())
@@ -226,7 +226,7 @@ public class GrouponDao {
 
         //2.若shopId不一致，则无权限访问
         if(oldPo.getShopId()!= shopId)
-            return new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
 
         //3.若状态不为下线，则团购活动禁止
         if(oldPo.getState()!=ActivityStatus.OFF_SHELVES.getCode().byteValue())

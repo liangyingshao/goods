@@ -189,6 +189,10 @@ public class Common {
                 return new ResponseEntity(
                         ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg()),
                         HttpStatus.INTERNAL_SERVER_ERROR);
+            case RESOURCE_ID_OUTSCOPE:
+                return new ResponseEntity(
+                        ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg()),
+                        HttpStatus.UNAUTHORIZED);
             case OK:
                 // 200: 无错误
                 Object data = returnObject.getData();

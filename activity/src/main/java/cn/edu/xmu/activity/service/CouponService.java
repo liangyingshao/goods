@@ -172,7 +172,10 @@ public class CouponService {
     public ReturnObject<Object> showCouponActivity(Long shopId, Long id) {
         ReturnObject<SimpleShopDTO> simpleShopDTOReturnObject=iGoodsService.getSimpleShopByShopId(shopId);
         //获取创建者修改者ID
-        CouponActivity bo=couponDao.getCouponActivity(id);
+        ReturnObject<Object> retCouponActivity=couponDao.getCouponActivity(id,shopId);
+        //不存在该活动或无权限先返回
+        if(retCouponActivity.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST)||retCouponActivity.getCode().equals(ResponseCode.RESOURCE_ID_OUTSCOPE))
+            return retCouponActivity;
         String createByName="";
         String modiByName="";
 //        if(bo!=null)
@@ -193,8 +196,8 @@ public class CouponService {
         Long shopId = activity.getShopId();
         ReturnObject<SimpleShopDTO> simpleShopDTOReturnObject=iGoodsService.getSimpleShopByShopId(shopId);
         String createByName="";
-//      createByName=iPrivilegeService.getUserName(activity.getCreatedBy());
-        //ReturnObject<CouponActivityVo> returnObject= couponDao.addCouponActivity(activity,simpleShopDTOReturnObject.getData(),createByName);
+        //createByName=iPrivilegeService.getUserName(activity.getCreatedBy());
+        ReturnObject<CouponActivityVo> returnObject= couponDao.addCouponActivity(activity,simpleShopDTOReturnObject.getData(),createByName);
         return null;
     }
 
@@ -219,6 +222,16 @@ public class CouponService {
         return returnObject;
     }
 
+    /**
+     * 管理员上线己方优惠活动
+     * @param shopId
+     * @param id
+     * @return ReturnObject
+     */
+    public ReturnObject onlineCouponActivity(Long shopId, Long id, Long userId) {
+        ReturnObject<ResponseCode> returnObject= couponDao.onlineCouponActivity(shopId, id,userId);
+        return returnObject;
+    }
     /**
      * 查看上线的优惠活动列表
      * @param shopId
@@ -254,4 +267,6 @@ public class CouponService {
         ReturnObject<Object> returnObject = couponDao.uploadActivityImg(activity,file);
         return returnObject;
     }
+
+
 }

@@ -3,6 +3,7 @@ package cn.edu.xmu.goods.model.vo;
 import cn.edu.xmu.goods.model.bo.FloatPrice;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.validation.constraints.Future;
 import javax.validation.constraints.Min;
@@ -13,10 +14,15 @@ import java.time.LocalDateTime;
 public class FloatPriceVo {
     @Min(0)
     private Long activityPrice;
+
+    @DateTimeFormat
     @Future
     private LocalDateTime beginTime;
+
+    @DateTimeFormat
     @Future
     private LocalDateTime endTime;
+    
     @Min(0)
     private Integer quantity;
 
