@@ -165,6 +165,21 @@ public class ShopControllerTest {
 
     }
 
+
+    @Test
+    public void updateShop_other() throws Exception {
+        //String shopToken = this.login("shopadmin_No2", "123456");
+        String token = creatTestToken(1L, 6L, 100);
+        String Json = "{\"name\": \"别人的店铺\"}";
+        String responseString = this.mvc.perform(put("/goods/shops/8").header("authorization",token).contentType("application/json;charset=UTF-8").content(Json))
+                .andExpect(status().isForbidden())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.errno").value(ResponseCode.RESOURCE_ID_OUTSCOPE.getCode()))
+                .andReturn().getResponse().getContentAsString();
+
+    }
+
+
     /**
      * 修改审核未通过的商铺的名字
      */
@@ -216,7 +231,6 @@ public class ShopControllerTest {
                 .andReturn().getResponse().getContentAsString();
 
     }
-
 
 
     @Test
