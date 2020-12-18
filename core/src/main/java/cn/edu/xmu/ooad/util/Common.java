@@ -92,6 +92,19 @@ public class Common {
                 }else{
                     return ResponseUtil.ok();
                 }
+            case INTERNAL_SERVER_ERR:
+                // 500：数据库或其他严重错误
+                return new ResponseEntity(
+                        ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg()),
+                        HttpStatus.INTERNAL_SERVER_ERROR);
+            case RESOURCE_ID_OUTSCOPE:
+                return new ResponseEntity(
+                        ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg()),
+                        HttpStatus.FORBIDDEN);
+            case FIELD_NOTVALID:
+                return new ResponseEntity(
+                        ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg()),
+                        HttpStatus.BAD_REQUEST);
             default:
                 return ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
         }
@@ -118,6 +131,19 @@ public class Common {
                 }else{
                     return ResponseUtil.ok();
                 }
+            case INTERNAL_SERVER_ERR:
+                // 500：数据库或其他严重错误
+                return new ResponseEntity(
+                        ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg()),
+                        HttpStatus.INTERNAL_SERVER_ERROR);
+            case RESOURCE_ID_OUTSCOPE:
+                return new ResponseEntity(
+                        ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg()),
+                        HttpStatus.FORBIDDEN);
+            case FIELD_NOTVALID:
+                return new ResponseEntity(
+                        ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg()),
+                        HttpStatus.BAD_REQUEST);
             default:
                 return ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
         }
@@ -153,6 +179,19 @@ public class Common {
                 }else{
                     return ResponseUtil.ok();
                 }
+            case INTERNAL_SERVER_ERR:
+                // 500：数据库或其他严重错误
+                return new ResponseEntity(
+                        ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg()),
+                        HttpStatus.INTERNAL_SERVER_ERROR);
+            case RESOURCE_ID_OUTSCOPE:
+                return new ResponseEntity(
+                        ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg()),
+                        HttpStatus.FORBIDDEN);
+            case FIELD_NOTVALID:
+                return new ResponseEntity(
+                        ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg()),
+                        HttpStatus.BAD_REQUEST);
             default:
                 return ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
         }
@@ -167,6 +206,19 @@ public class Common {
             case RESOURCE_ID_NOTEXIST:
                 httpServletResponse.setStatus(HttpStatus.NOT_FOUND.value());
                 return ResponseUtil.fail(returnObject.getCode());
+            case INTERNAL_SERVER_ERR:
+                // 500：数据库或其他严重错误
+                return new ResponseEntity(
+                        ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg()),
+                        HttpStatus.INTERNAL_SERVER_ERROR);
+            case RESOURCE_ID_OUTSCOPE:
+                return new ResponseEntity(
+                        ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg()),
+                        HttpStatus.FORBIDDEN);
+            case FIELD_NOTVALID:
+                return new ResponseEntity(
+                        ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg()),
+                        HttpStatus.BAD_REQUEST);
             default:
                 return ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
         }
@@ -189,6 +241,14 @@ public class Common {
                 return new ResponseEntity(
                         ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg()),
                         HttpStatus.INTERNAL_SERVER_ERROR);
+            case RESOURCE_ID_OUTSCOPE:
+                return new ResponseEntity(
+                        ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg()),
+                        HttpStatus.FORBIDDEN);
+            case FIELD_NOTVALID:
+                return new ResponseEntity(
+                        ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg()),
+                        HttpStatus.BAD_REQUEST);
             case OK:
                 // 200: 无错误
                 Object data = returnObject.getData();

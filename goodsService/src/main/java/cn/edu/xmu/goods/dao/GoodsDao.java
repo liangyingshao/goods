@@ -140,6 +140,8 @@ public class GoodsDao {
         if(skuSn!=null&&!skuSn.isBlank())skuCriteria.andSkuSnEqualTo(skuSn);
         if(spuId!=null)skuCriteria.andGoodsSpuIdEqualTo(spuId);
         List<GoodsSkuPo> skuPos=new ArrayList<>();
+        PageHelper.startPage(page,pageSize);
+        logger.debug("page="+page+" pageSize="+pageSize);
         if((spuSn!=null&&!spuSn.isBlank())||shopId!=null)
         {
             GoodsSpuPoExample spuExample=new GoodsSpuPoExample();
@@ -155,9 +157,6 @@ public class GoodsDao {
         }
         else skuPos=skuMapper.selectByExample(skuExample);
         List<GoodsSku>skus=skuPos.stream().map(GoodsSku::new).collect(Collectors.toList());
-        List<GoodsSkuRetVo> ret = skus.stream().map(GoodsSkuRetVo::new).collect(Collectors.toList());
-        PageHelper.startPage(page,pageSize);
-        logger.debug("page="+page+" pageSize="+pageSize);
         PageInfo<GoodsSku> returns=PageInfo.of(skus);
         returns.setPageNum(page);
         returns.setPageSize(pageSize);
