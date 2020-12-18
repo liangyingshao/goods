@@ -220,6 +220,16 @@ public class CouponService {
     }
 
     /**
+     * 管理员上线己方优惠活动
+     * @param shopId
+     * @param id
+     * @return ReturnObject
+     */
+    public ReturnObject onlineCouponActivity(Long shopId, Long id, Long userId) {
+        ReturnObject<ResponseCode> returnObject= couponDao.onlineCouponActivity(shopId, id,userId);
+        return returnObject;
+    }
+    /**
      * 查看上线的优惠活动列表
      * @param shopId
      * @param timeline
@@ -254,4 +264,6 @@ public class CouponService {
         ReturnObject<Object> returnObject = couponDao.uploadActivityImg(activity,file);
         return returnObject;
     }
+
+
 }
