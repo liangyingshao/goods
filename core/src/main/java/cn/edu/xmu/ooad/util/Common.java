@@ -198,7 +198,11 @@ public class Common {
                     return ResponseUtil.ok();
                 }
             default:
-                return ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
+//                return ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg(),
+//                        HttpStatus.OK);
+                return new ResponseEntity(
+                        ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg()),
+                        HttpStatus.OK);
         }
     }
 

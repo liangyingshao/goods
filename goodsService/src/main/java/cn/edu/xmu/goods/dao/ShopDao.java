@@ -62,7 +62,7 @@ public class ShopDao {
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
 
         //3.店铺的状态为已下线，才能修改
-        if(oldPo.getState()!=Shop.ShopStatus.OFFLINE.getCode().byteValue())
+        if(oldPo.getState()!=Shop.ShopStatus.OFFLINE.getCode().byteValue()&&oldPo.getState()!=Shop.ShopStatus.NOT_AUDIT.getCode().byteValue())
             return new ReturnObject<>(ResponseCode.SHOP_STATENOTALLOW);
 
         //4.修改

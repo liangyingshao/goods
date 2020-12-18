@@ -157,7 +157,7 @@ public class ShopControllerTest {
 
         String token = creatTestToken(1L, 6L, 100);
         String Json = "{\"name\": \"没过审\"}";
-        String responseString = this.mvc.perform(put("/shops/6").header("authorization",token).contentType("application/json;charset=UTF-8").content(Json))
+        String responseString = this.mvc.perform(put("/goods/shops/6").header("authorization",token).contentType("application/json;charset=UTF-8").content(Json))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.errno").value(ResponseCode.SHOP_STATENOTALLOW.getCode()))
@@ -173,12 +173,11 @@ public class ShopControllerTest {
         String token = creatTestToken(1L, 8L, 100);
         String Json = "{\"name\": \"状态不会变\",\"state\":4}";
 
-        String responseString = this.mvc.perform(put("/shops/8").header("authorization",token).contentType("application/json;charset=UTF-8").content(Json))
-                .andExpect(status().isBadRequest())
+        String responseString = this.mvc.perform(put("/goods/shops/8").header("authorization",token).contentType("application/json;charset=UTF-8").content(Json))
+                .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
-                //.andExpect(MockMvcResultMatchers.jsonPath("$.errno").value(ResponseCode.FIELD_NOTVALID.getCode()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.errno").value(ResponseCode.OK.getCode()))
                 .andReturn().getResponse().getContentAsString();
-        String expected= "";
     }
 
     /**
@@ -193,13 +192,32 @@ public class ShopControllerTest {
 
         String Json = "{\"name\": \"  \"}";
 
-        String responseString = this.mvc.perform(put("/shops/8").header("authorization",token).contentType("application/json;charset=UTF-8").content(Json))
+        String responseString = this.mvc.perform(put("/goods/shops/8").header("authorization",token).contentType("application/json;charset=UTF-8").content(Json))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
-                //.andExpect(MockMvcResultMatchers.jsonPath("$.errno").value(ResponseCode.FIELD_NOTVALID.getCode()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.errno").value(ResponseCode.FIELD_NOTVALID.getCode()))
                 .andReturn().getResponse().getContentAsString();
 
     }
+
+
+
+    @Test
+    public void updateShop_ID() throws Exception {
+
+        String token = creatTestToken(1L, 8L, 100);
+
+        String Json = "{\"name\": \"ID不会变\",\"id\":120}";
+
+        String responseString = this.mvc.perform(put("/goods/shops/8").header("authorization",token).contentType("application/json;charset=UTF-8").content(Json))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.errno").value(ResponseCode.OK.getCode()))
+                .andReturn().getResponse().getContentAsString();
+
+    }
+
+
 
     @Test
     public void onshelfShop1() throws Exception{
