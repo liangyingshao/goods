@@ -36,7 +36,7 @@ import java.util.Objects;
 
 @Api(value = "活动服务", tags = "activity")
 @RestController /*Restful的Controller对象*/
-@RequestMapping(value = "/goods", produces = "application/json;charset=UTF-8")
+@RequestMapping(value = "", produces = "application/json;charset=UTF-8")
 public class ActivityController {
     private  static  final Logger logger = LoggerFactory.getLogger(ActivityController.class);
 
@@ -336,13 +336,7 @@ public class ActivityController {
         Object returnObject=null;
         ReturnObject<Object> couponActivity = activityService.showCouponActivity(shopId,id);
         logger.debug("showCouponActivity: couponActivity="+couponActivity.getData()+" code="+couponActivity.getCode());
-        if (!couponActivity.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST)) {
-            return Common.decorateReturnObject(couponActivity);
-        } else {
-            returnObject = Common.getNullRetObj(new ReturnObject<>(couponActivity.getCode(), couponActivity.getErrmsg()), httpServletResponse);
-        }
-
-        return returnObject;
+        return Common.decorateReturnObject(couponActivity);
     }
 
     /**
@@ -439,12 +433,7 @@ public class ActivityController {
         activity.setModiBy(userId);
         activity.setGmtCreate(LocalDateTime.now());
         ReturnObject retObject = activityService.modifyCouponActivity(activity);
-        if (retObject.getData() != null) {
-            httpServletResponse.setStatus(HttpStatus.OK.value());
-            return retObject;
-        } else {
-            return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
-        }
+        return Common.decorateReturnObject(retObject);
 
     }
 
@@ -467,7 +456,7 @@ public class ActivityController {
 
     })
     @Audit // 需要认证
-    @DeleteMapping("shops/{shopId}/couponactivities/{id}")
+    @PutMapping("shops/{shopId}/couponactivities/{id}/offshelves")
     @ResponseBody
     public Object offlineCouponActivity(@PathVariable Long shopId,@PathVariable Long id,
                                        @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
@@ -476,12 +465,39 @@ public class ActivityController {
     ) {
 
         ReturnObject retObject = activityService.offlineCouponActivity(shopId,id,userId);
-        if (retObject.getData() != null) {
-            httpServletResponse.setStatus(HttpStatus.OK.value());
-            return retObject;
-        } else {
-            return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
-        }
+        return Common.decorateReturnObject(retObject);
+
+    }
+
+    /**
+     * couponActivity 007 业务: 管理员上线己方某优惠活动
+     * @param shopId 商铺ID
+     * @param userId 当前用户ID
+     * @return  ReturnObject
+     * @author 24320182203254 秦楚彦
+     * Created at 2020/12/05 22：19
+     */
+    @ApiOperation(value="管理员上线己方优惠活动",produces="application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "shopId", value = "商铺id", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "id", value = "优惠活动id", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+
+    })
+    @Audit // 需要认证
+    @PutMapping("shops/{shopId}/couponactivities/{id}/onshelves")
+    @ResponseBody
+    public Object onlineCouponActivity(@PathVariable Long shopId,@PathVariable Long id,
+                                        @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
+                                        @Depart @ApiIgnore @RequestParam(required = false) Long departId
+
+    ) {
+
+        ReturnObject retObject = activityService.onlineCouponActivity(shopId,id,userId);
+        return Common.decorateReturnObject(retObject);
 
     }
 
@@ -515,7 +531,7 @@ public class ActivityController {
         logger.debug("showCoupons:page="+page+" pageSize="+pageSize);
         if(timeline!=null&&CouponActivity.State.getTypeByCode(timeline)==null)return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
         ReturnObject<PageInfo<CouponActivityByNewCouponRetVo>> returnObject=activityService.showActivities(shopId,timeline,page,pageSize);
-        return returnObject;
+        return Common.decorateReturnObject(returnObject);
     }
 
     /**
@@ -545,7 +561,7 @@ public class ActivityController {
     {
         logger.debug("showCoupons:page="+page+" pageSize="+pageSize);
         ReturnObject<PageInfo<CouponActivityByNewCouponRetVo>> returnObject=activityService.showInvalidCouponActivities(id,page,pageSize);
-        return returnObject;
+        return Common.decorateReturnObject(returnObject);
     }
 
     /**
@@ -575,7 +591,6 @@ public class ActivityController {
                                @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
                                @Depart @ApiIgnore @RequestParam(required = false) Long departId){
         logger.debug("uploadSpuImg: activityid = "+ id+" shopId="+shopId +" img=" + file.getOriginalFilename());
-
         CouponActivity activity=new CouponActivity();
         activity.setShopId(shopId);
         activity.setId(id);
