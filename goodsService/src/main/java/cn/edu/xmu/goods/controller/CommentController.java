@@ -1,7 +1,6 @@
 package cn.edu.xmu.goods.controller;
 
 import cn.edu.xmu.goods.model.bo.Comment;
-import cn.edu.xmu.goods.model.bo.FloatPrice;
 import cn.edu.xmu.goods.model.vo.*;
 import cn.edu.xmu.goods.service.CommentService;
 import cn.edu.xmu.goods.service.FloatPriceService;
@@ -18,6 +17,7 @@ import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
@@ -36,7 +36,8 @@ import java.util.List;
  */
 @Api(value = "评论服务", tags = "comment")
 @RestController /*Restful的Controller对象*/
-@RequestMapping(value = "/goods", produces = "application/json;charset=UTF-8")
+//@RequestMapping(value = "/goods", produces = "application/json;charset=UTF-8")
+@RequestMapping(produces = "application/json;charset=UTF-8")
 public class CommentController {
 
     private  static  final Logger logger = LoggerFactory.getLogger(GoodsController.class);
@@ -98,15 +99,24 @@ public class CommentController {
     @Audit
     @PostMapping("/orderitems/{id}/comments")
     @ResponseBody
-    public Object addSkuComment(@PathVariable Long id, @Validated @RequestBody CommentVo vo, @LoginUser @ApiIgnore @RequestParam(required = false, defaultValue = "0") Long userId){
-//        logger.debug("comment: id = "+ id+" userid: id = "+ userId + " type: " + type + " content: " + content);
+    public Object addSkuComment(@PathVariable Long id,  @LoginUser @ApiIgnore @RequestParam(required = false) Long userId, @Validated @RequestBody CommentVo vo,BindingResult bindingResult){
+//        logger.error("11111111111111");
+        Object object = Common.processFieldErrors(bindingResult,httpServletResponse);
+        if(null!=object){
+            return object;
+        }
+//        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+//        if (null != returnObject) {
+//            logger.error("return:"+returnObject.toString());
+//            return returnObject;
+//        }
         Comment comment = vo.createComment();
         comment.setType(vo.getType());
         comment.setContent(vo.getContent());
         comment.setOrderitemId(id);
         comment.setCustomerId(userId);
-        ReturnObject<CommentRetVo> returnObject = commentService.addSkuComment(comment);
-        return Common.decorateReturnObject(returnObject);
+        ReturnObject<CommentRetVo> commentRetVoReturnObject = commentService.addSkuComment(comment);
+        return Common.decorateReturnObject(commentRetVoReturnObject);
     }
 
     /**
@@ -160,19 +170,18 @@ public class CommentController {
             @ApiResponse(code = 705, message = "无权限访问")
     })
     @Audit // 需要认证
-    @PutMapping("/comments/{id}/confirm")
-    public Object auditComment(@PathVariable("id") Long id, @RequestBody CommentAuditVo conclusion,
-                               @Depart Long shopid) {
+    @PutMapping("/shops/{did}/comments/{id}/confirm")
+    public Object auditComment(@PathVariable("did") Long did, @PathVariable("id") Long id, @RequestBody CommentAuditVo conclusion,@Depart Long shopid) {
         ReturnObject returnObject=null;
-        if(shopid==0)
-        {
-            returnObject=commentService.auditComment(id, conclusion.getConclusion());
-        }
-        else
-        {
-            return new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW);
-        }
-        return returnObject;
+//        if(shopid==0)
+//        {
+        returnObject=commentService.auditComment(id, conclusion.getConclusion());
+//        }
+//        else
+//        {
+//            return new ReturnObject<>(ResponseCode.AUTH_NOT_ALLOW);
+//        }
+        return Common.decorateReturnObject(returnObject);
     }
 
     /**
@@ -226,8 +235,8 @@ public class CommentController {
                                       @RequestParam(required = false, defaultValue = "2") Integer state,//默认查看已审核
                                       @RequestParam(required = false, defaultValue = "1") Integer page,
                                       @RequestParam(required = false, defaultValue = "10") Integer pageSize) {
-        if(!id.equals(departId))
-            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("部门id不匹配：" + id)), httpServletResponse);
+//        if(!id.equals(departId))
+//            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("部门id不匹配：" + id)), httpServletResponse);
         return commentService.showUnAuditComments(state, page, pageSize);
     }
 
@@ -292,8 +301,8 @@ public class CommentController {
                                      @Depart @ApiIgnore @RequestParam(required = false) Long departId)
     {
         //其实应该交给网关？
-        if(departId!=shopId)
-            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
-        return floatPriceService.invalidFloatPrice(id);
+//        if(departId!=shopId)
+//            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        return Common.decorateReturnObject(floatPriceService.invalidFloatPrice(id));
     }
 }

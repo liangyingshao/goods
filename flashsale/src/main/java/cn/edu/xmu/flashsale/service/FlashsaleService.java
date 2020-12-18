@@ -44,15 +44,15 @@ public class FlashsaleService {
         {
             Byte timeType = 1;//0代表广告，1代表秒杀
             //调用other的微服务得到id对应的时段的具体数据
-//            ReturnObject<TimeDTO> timeDTOReturnObject = timeService.getTimeSegmentId(timeType,id);
+            ReturnObject<TimeDTO> timeDTOReturnObject = timeService.getTimeSegmentId(timeType,id);
 //            logger.error("timeDTOReturnObject: " + timeDTOReturnObject.toString());
-            TimeDTO dto = new TimeDTO();
-            dto.setId(1L);
-            dto.setBeginTime(LocalTime.now());
-            dto.setEndTime(LocalTime.now().plusHours(2L));
-            Byte type = 1;
-            dto.setType(type);
-            ReturnObject<TimeDTO> timeDTOReturnObject = new ReturnObject<>(dto);
+//            TimeDTO dto = new TimeDTO();
+//            dto.setId(1L);
+//            dto.setBeginTime(LocalTime.now());
+//            dto.setEndTime(LocalTime.now().plusHours(2L));
+//            Byte type = 1;
+//            dto.setType(type);
+//            ReturnObject<TimeDTO> timeDTOReturnObject = new ReturnObject<>(dto);
             logger.error("1");
             //检查时段id是否存在
             if(timeDTOReturnObject.getData() == null)

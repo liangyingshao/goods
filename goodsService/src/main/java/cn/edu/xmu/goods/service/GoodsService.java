@@ -55,9 +55,9 @@ public class GoodsService {
      * @return ReturnObject<PageInfo<VoObject>>
      */
     @Transactional
-    public ReturnObject<PageInfo<GoodsSkuRetVo>> getSkuList(Long shopId, String skuSn, Long spuId, String spuSn, Integer page, Integer pageSize)
+    public ReturnObject<PageInfo<GoodsSku>> getSkuList(Long shopId, String skuSn, Long spuId, String spuSn, Integer page, Integer pageSize)
     {
-        PageInfo<GoodsSkuRetVo> skuRetVos=goodsDao.getSkuList(shopId,skuSn,spuId,spuSn,page,pageSize);
+        PageInfo<GoodsSku> skuRetVos=goodsDao.getSkuList(shopId,skuSn,spuId,spuSn,page,pageSize);
         if(skuRetVos!=null&&skuRetVos.getList().size()>0)
             skuRetVos.getList().forEach(x->x.setPrice(iGoodsService.getPriceBySkuId(x.getId()).getData()));
         return new ReturnObject<>(skuRetVos);
@@ -74,8 +74,14 @@ public class GoodsService {
         ReturnObject<GoodsSkuDetailRetVo> retVo=goodsDao.getSku(id);
         if(retVo.getCode().equals(ResponseCode.OK))
         {
-            retVo.getData().setPrice(iGoodsService.getPriceBySkuId(id).getData());
-            retVo.getData().setShareable(iShareService.skuSharable(id).getData());
+            try {
+                retVo.getData().setPrice(iGoodsService.getPriceBySkuId(id).getData());
+                retVo.getData().setShareable(iShareService.skuSharable(id).getData());
+            }
+            catch (Exception e)
+            {
+                logger.error("IShareService未连接");
+            }
         }
 
         return retVo;
@@ -184,9 +190,9 @@ public class GoodsService {
      * @return ReturnObject<GoodsSkuRetVo>
      */
     @Transactional
-    public ReturnObject<GoodsSkuRetVo> createSKU(Long shopId, GoodsSku sku)
+    public ReturnObject<GoodsSku> createSKU(Long shopId, GoodsSku sku)
     {
-        ReturnObject<GoodsSkuRetVo>returnObject=goodsDao.createSKU(shopId,sku);
+        ReturnObject<GoodsSku> returnObject=goodsDao.createSKU(shopId,sku);
         return returnObject;
     }
 
@@ -196,9 +202,14 @@ public class GoodsService {
      * @return ReturnObject<GoodsSkuRetVo>
      */
     @Transactional
-    public ReturnObject<GoodsSkuRetVo> getShareSku(Long id)
+    public ReturnObject<GoodsSkuDetailRetVo> getShareSku(Long id)
     {
-        ReturnObject<GoodsSkuRetVo> returnObject=goodsDao.getShareSku(id);
+        ReturnObject<GoodsSkuDetailRetVo> returnObject=goodsDao.getShareSku(id);
+        if(returnObject.getCode().equals(ResponseCode.OK))
+        {
+            returnObject.getData().setPrice(iGoodsService.getPriceBySkuId(id).getData());
+            returnObject.getData().setShareable(iShareService.skuSharable(id).getData());
+        }
         return returnObject;
     }
 

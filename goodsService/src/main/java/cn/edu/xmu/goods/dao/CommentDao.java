@@ -45,18 +45,21 @@ public class CommentDao {
         commentPo.setContent(comment.getContent());
         commentPo.setState((byte) Comment.State.TOAUDIT.getCode());
         commentPo.setGmtCreate(LocalDateTime.now());
-//        logger.debug("success insert Comment: " + commentPo.getId());
+        logger.debug("success insert Comment: " + commentPo.getId());
         try{
             //是不是该查一下orderItemId是否已经有评论了
             CommentPoExample orderIdExample = new CommentPoExample();
             CommentPoExample.Criteria orderItemCriteria = orderIdExample.createCriteria();
             orderItemCriteria.andOrderitemIdEqualTo(commentPo.getOrderitemId());
+            logger.error("1");
             List<CommentPo> orderIdList = commentPoMapper.selectByExample(orderIdExample);
             if(orderIdList.size()!=0)
             {
                 return new ReturnObject<>(ResponseCode.COMMENT_EXISTED);
             }
+            logger.error("2");
             int ret = commentPoMapper.insert(commentPo);
+            logger.error("3");
             if (ret == 0)
             {
                 //修改失败
@@ -65,6 +68,7 @@ public class CommentDao {
             }
             else {
                 //检验是不是真的插入成功了
+                logger.error(comment.toString());
                 CommentPoExample example=new CommentPoExample();
                 CommentPoExample.Criteria criteria=example.createCriteria();
                 criteria.andCustomerIdEqualTo(comment.getCustomerId());
@@ -73,7 +77,9 @@ public class CommentDao {
                 criteria.andTypeEqualTo(comment.getType());
                 criteria.andContentEqualTo(comment.getContent());
                 criteria.andStateEqualTo(commentPo.getState());
+                logger.error("does it in?");
                 List<CommentPo> pos=commentPoMapper.selectByExample(example);
+                logger.error("4");
                 if(pos.size()==0)
                 {
                     return new ReturnObject<>(ResponseCode.FIELD_NOTVALID,"插入失败");
@@ -88,17 +94,19 @@ public class CommentDao {
                     customer.setRealName("真实姓名");
                     CommentRetVo commentRetVo=new CommentRetVo(new Comment(commentPo));
                     commentRetVo.setCustomer(customer);
-                    return new ReturnObject<>(commentRetVo);
+                    ReturnObject<CommentRetVo> commentRetVoReturnObject = new ReturnObject<>(commentRetVo);
+                    logger.error(commentRetVoReturnObject.getData().toString());
+                    return commentRetVoReturnObject;
                 }
             }
         }
         catch (DataAccessException e){
-//            logger.error("selectAllPassComment: DataAccessException:" + e.getMessage());
+            logger.error("selectAllPassComment: DataAccessException:" + e.getMessage());
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
         }
         catch (Exception e) {
             // 其他Exception错误
-//            logger.error("other exception : " + e.getMessage());
+            logger.error("other exception : " + e.getMessage());
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
         }
     }
@@ -138,6 +146,7 @@ public class CommentDao {
 
     public ReturnObject<Object> auditComment(Long comment_id, boolean conclusion) {
         try {
+            logger.error("dao");
             CommentPo commentPo = commentPoMapper.selectByPrimaryKey(comment_id);
             if (commentPo == null) {//如果没有这条评论
                 return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);

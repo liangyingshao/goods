@@ -202,6 +202,11 @@ public class GoodsSpuDao {
         criteria.andIdEqualTo(spu.getId());
         criteria.andShopIdEqualTo(spu.getShopId());
         try{
+            GoodsSpuPo po=goodsSpuMapper.selectByPrimaryKey(spu.getId());
+            if(!po.getShopId().equals(spu.getShopId()))
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+            if(po==null)
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             int ret = goodsSpuMapper.updateByPrimaryKeySelective(spuPo);
             if (ret == 0) {
                 //修改失败
@@ -209,8 +214,8 @@ public class GoodsSpuDao {
                 returnObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("spuid不存在：" + spuPo.getId()));
             } else {
                 //修改成功
-                logger.debug("updateRole: update spu = " + spuPo.toString());
-                returnObject = new ReturnObject<>();
+
+                returnObject = new ReturnObject<>(ResponseCode.OK);
             }
         }
         catch (DataAccessException e) {

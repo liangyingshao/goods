@@ -53,22 +53,31 @@ public class FlashsaleItemService {
     private ReactiveRedisTemplate<String, Serializable> reactiveRedisTemplate;
 
     @Autowired
-    private RedisTemplate redisTemplate;
+    private RedisTemplate<String, Serializable> redisTemplate;
 
     //响应式返回
     public Flux<FlashsaleItemRetVo> queryTopicsByTime(Long id) {
-        return reactiveRedisTemplate.opsForSet().members("FlashsaleItem" + LocalDate.now().toString() + id.toString()).map(x->
+        LocalDateTime dateTime = LocalDateTime.now();
+        logger.error("FlashSaleItem:" + dateTime.toLocalDate().toString() + id.toString());
+        return reactiveRedisTemplate.opsForSet().members("FlashSaleItem:" + dateTime.toLocalDate().toString() + id.toString()).map(x->
         {
-            SkuInfoDTO skuInfoDTO = goodsService.getSelectSkuInfoBySkuId(((FlashSaleItemPo)x).getGoodsSkuId()).getData();//懒得检验code； ，应该也不会有错吧
+//            SkuInfoDTO skuInfoDTO = goodsService.getSelectSkuInfoBySkuId(((FlashSaleItemPo)x).getGoodsSkuId()).getData();//懒得检验code； ，应该也不会有错吧
+            SkuInfoDTO skuInfoDTO = new SkuInfoDTO();
+            skuInfoDTO.setId(((FlashSaleItemPo)x).getGoodsSkuId());
+            logger.error(x.toString());
+            logger.error(((FlashSaleItemPo)x).toString());
             FlashsaleItemRetVo retVo = new FlashsaleItemRetVo((FlashSaleItemPo)x);
             retVo.setGoodsSku(skuInfoDTO);
+            logger.error("retVo:"+ retVo.toString());
             return retVo;
         });
     }
 
     public ReturnObject<FlashsaleItemRetVo> addSKUofTopic(Long id, Long skuId, Long price, Integer quantity) {
+        logger.error("3");
         //不允许增加今天和明天的秒杀商品
         ReturnObject<FlashSalePo> flashSalePoReturnObject = flashSaleDao.selectByFlashsaleId(id);
+        logger.error("4");
         if(flashSalePoReturnObject.getCode()!=ResponseCode.OK)
             return new ReturnObject<>(flashSalePoReturnObject.getCode());
         else {
@@ -76,6 +85,7 @@ public class FlashsaleItemService {
                 return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
             }
         }
+        logger.error("5");
         //获得sku信息
         ReturnObject<SkuInfoDTO> returnObject = goodsService.getSelectSkuInfoBySkuId(skuId);
         logger.error("goods Service返回给flashsale："+returnObject.getData().toString());
@@ -85,12 +95,14 @@ public class FlashsaleItemService {
             return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
 
+        logger.error("6");
         //存在，调dao
         ReturnObject<FlashsaleItemRetVo> itemRetObj =  flashSaleItemDao.addSKUofTopic(id, skuId, price, quantity);
         //插入不成功
         if(itemRetObj.getCode()!=ResponseCode.OK) {
             return new ReturnObject<>(itemRetObj.getCode());
         }
+        logger.error("7");
         //插入成功
         FlashsaleItemRetVo retVo = itemRetObj.getData();
         retVo.setGoodsSku(returnObject.getData());
@@ -99,7 +111,7 @@ public class FlashsaleItemService {
 
     public ReturnObject deleteSKUofTopic(Long fid, Long id) {
         ReturnObject<FlashSalePo> flashSalePoReturnObject = flashSaleDao.selectByFlashsaleId(fid);
-        String key = "FlashSaleItem:" + flashSalePoReturnObject.getData().getFlashDate().toString() + flashSalePoReturnObject.getData().getTimeSegId().toString();
+        String key = "FlashSaleItem:" + flashSalePoReturnObject.getData().getFlashDate().toLocalDate().toString() + flashSalePoReturnObject.getData().getTimeSegId().toString();
         FlashSaleItemPo itemPo;
         if(flashSalePoReturnObject.getCode()!=ResponseCode.OK)
             return new ReturnObject<>(flashSalePoReturnObject.getCode());
@@ -148,18 +160,18 @@ public class FlashsaleItemService {
         //将今天的item按照flashsale-segment存进redis
         for (FlashSalePo po:flashSalePosToday) {
             List<FlashSaleItemPo> itemPos = flashSaleItemDao.selectByFlashsaleId(po.getId()).getData();
-            String key = "FlashSaleItem:" + po.getFlashDate().toString() + po.getTimeSegId().toString();
+            String key = "FlashSaleItem:" + po.getFlashDate().toLocalDate().toString() + po.getTimeSegId().toString();
             for (FlashSaleItemPo itemPo : itemPos) {
-                redisTemplate.boundSetOps(key).add(itemPo);
+                redisTemplate.boundSetOps(key).add((Serializable) itemPo);
             }
             redisTemplate.expire(key, 24, TimeUnit.HOURS);
         }
         //将明天的item存进redis
         for (FlashSalePo po:flashSalePosTom) {
             List<FlashSaleItemPo> itemPos = flashSaleItemDao.selectByFlashsaleId(po.getId()).getData();
-            String key = "FlashSaleItem:" + po.getFlashDate().toString() + po.getTimeSegId().toString();
+            String key = "FlashSaleItem:" + po.getFlashDate().toLocalDate().toString() + po.getTimeSegId().toString();
             for (FlashSaleItemPo itemPo : itemPos) {
-                redisTemplate.boundSetOps(key).add(itemPo);
+                redisTemplate.boundSetOps(key).add((Serializable) itemPo);
             }
             redisTemplate.expire(key, 48, TimeUnit.HOURS);
         }

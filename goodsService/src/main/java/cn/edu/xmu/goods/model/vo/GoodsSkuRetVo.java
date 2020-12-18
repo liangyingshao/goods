@@ -36,5 +36,6 @@ public class GoodsSkuRetVo {
         inventory=obj.getInventory();
         originalPrice=obj.getOriginalPrice();
         disable= !GoodsSku.Disable.getTypeByCode(obj.getDisabled().getCode()).equals(GoodsSku.Disable.OPEN);
+        price=obj.getPrice();
     }
 }

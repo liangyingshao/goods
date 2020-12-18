@@ -169,6 +169,7 @@ public class GoodsSku implements VoObject {
         skuPo.setInventory(inventory);
         skuPo.setDetail(detail);
         skuPo.setDisabled(disabled.getCode().byteValue());
+        skuPo.setState(state.getCode().byteValue());
         return skuPo;
     }
 }

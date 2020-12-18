@@ -27,10 +27,10 @@ import java.time.LocalDateTime;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class XuQingYunTest {
     //@Value("${public-test.managementgate}")
-    private String managementGate="192.168.137.1:8881";
+    private String managementGate;
 
     //@Value("${public-test.mallgate}")
-    private String mallGate="192.168.137.1:8880";
+    private String mallGate;
     private WebTestClient manageClient;
 
     private WebTestClient mallClient;
@@ -38,6 +38,9 @@ public class XuQingYunTest {
 
     @BeforeEach
     public void setUp(){
+
+        managementGate="172.20.10.3:8881";
+        mallGate="172.20.10.3:8880";
 
         this.manageClient = WebTestClient.bindToServer()
                 .baseUrl("http://"+managementGate)
@@ -57,7 +60,7 @@ public class XuQingYunTest {
         body.put("password", password);
         String requireJson = body.toJSONString();
         byte[] responseString = mallClient.post().uri("/users/login").bodyValue(requireJson).exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
                 .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
@@ -73,7 +76,7 @@ public class XuQingYunTest {
         body.put("password", password);
         String requireJson = body.toJSONString();
         byte[] responseString = manageClient.post().uri("/adminusers/login").bodyValue(requireJson).exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
                 .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
@@ -99,7 +102,7 @@ public class XuQingYunTest {
                 .jsonPath("$.data.list").isArray()
                 .jsonPath("$.data.total").isEqualTo(1)
                 .jsonPath("$.data.list[?(@.id==273)].name").isEqualTo("+")
-                .jsonPath("$.data.pageNum").isEqualTo(1)
+                .jsonPath("$.data.page").isEqualTo(1)
                 .jsonPath("$.data.pageSize").isEqualTo(1)
                 .returnResult()
                 .getResponseBodyContent();
@@ -115,7 +118,7 @@ public class XuQingYunTest {
                 .jsonPath("$.data.list").isArray()
                 .jsonPath("$.data.total").isEqualTo(5)
                 .jsonPath("$.data.list[?(@.id==273)].name").isEqualTo("+")
-                .jsonPath("$.data.pageNum").isEqualTo(1)
+                .jsonPath("$.data.page").isEqualTo(1)
                 .jsonPath("$.data.pageSize").isEqualTo(5)
                 .returnResult()
                 .getResponseBodyContent();
@@ -131,7 +134,7 @@ public class XuQingYunTest {
                 .jsonPath("$.data.list").isArray()
                 .jsonPath("$.data.total").isEqualTo(5)
                 .jsonPath("$.data.list[?(@.id==278)].name").isEqualTo("+")
-                .jsonPath("$.data.pageNum").isEqualTo(2)
+                .jsonPath("$.data.page").isEqualTo(2)
                 .jsonPath("$.data.pageSize").isEqualTo(5)
                 .returnResult()
                 .getResponseBodyContent();
@@ -147,7 +150,7 @@ public class XuQingYunTest {
                 .jsonPath("$.data.list").isArray()
                 .jsonPath("$.data.total").isEqualTo(10)
                 .jsonPath("$.data.list[?(@.id==273)].name").isEqualTo("+")
-                .jsonPath("$.data.pageNum").isEqualTo(1)
+                .jsonPath("$.data.page").isEqualTo(1)
                 .jsonPath("$.data.pageSize").isNumber()
                 .returnResult()
                 .getResponseBodyContent();
@@ -201,9 +204,7 @@ public class XuQingYunTest {
     @Order(03)
     void getShareSku() throws Exception
     {
-        String token =
-                //"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE2MjM1NzU1NTlZIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzc4NzUsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM0Mjc1fQ.pPt1eKnY36zI2sZcBbiN57FTdGaq3Pj_CbbXdJUzt2U"
-                this.userLogin("17857289610", "123456")
+        String token =this.userLogin("17857289610", "123456")
                 ;
         byte[] response  = mallClient.get().uri("/share/442315/skus/300")
                 .header("authorization",token)
@@ -253,15 +254,15 @@ public class XuQingYunTest {
                 "  \"inventory\": 100,\n" +
                 "  \"detail\": \"detail\"\n" +
                 "}";
-        String token = //"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE2MjM1NzU1NTlZIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzc4NzUsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM0Mjc1fQ.pPt1eKnY36zI2sZcBbiN57FTdGaq3Pj_CbbXdJUzt2U"
+        String token = //"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE4MDE1MTU5MUxEIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgyMzExMTksInVzZXJJZCI6MSwiaWF0IjoxNjA4MjI3NTE5fQ.92E-mEq1cskfPM4muT67NnlbhNgGsss0ICoIk8G9t08"
                 this.adminLogin("13088admin", "123456")
                 ;
 
-        byte[] response =manageClient.post().uri("/shops/0/spus/273")
+        byte[] response =manageClient.post().uri("/shops/1/spus/273/skus")
                 .header("authorization",token)
                 .bodyValue(requireJson)
                 .exchange()
-                .expectStatus().is2xxSuccessful()
+                .expectStatus().isCreated()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
                 .jsonPath("$.data").isMap()
@@ -273,7 +274,7 @@ public class XuQingYunTest {
                 //="{\"errno\":0,\"data\":{\"id\":696,\"name\":\"name\",\"skuSn\":\"newSkuSn\",\"imageUrl\":\"http://47.52.88.176/file/images/201612/file_586227f3cd5c9.jpg\",\"inventory\":100,\"originalPrice\":100,\"price\":100,\"disabled\":0},\"errmsg\":\"成功\"}"
                 ;
 
-        response =manageClient.post().uri("/shops/0/spus/273")
+        response =manageClient.post().uri("/shops/1/spus/273/skus")
                 .header("authorization",token)
                 .bodyValue(requireJson)
                 .exchange()
@@ -285,7 +286,7 @@ public class XuQingYunTest {
         expectedResponse="{\"errno\":901,\"errmsg\":\"SKU规格重复：name\"}";
 
 
-        response =manageClient.post().uri("/shops/1/spus/273")
+        response =manageClient.post().uri("/shops/2/spus/273/skus")
                 .header("authorization",token)
                 .bodyValue(requireJson)
                 .exchange()
@@ -302,11 +303,11 @@ public class XuQingYunTest {
     @Order(05)
     void modifySKU() throws Exception{
         String requireJson="{\n    \"name\": \"name\",\n    \"originalPrice\": \"100\",\n    \"configuration\": \"configuration\",\n    \"weight\": \"100\",\n    \"inventory\": \"9999\",\n    \"detail\": \"detail\"\n}";
-        String token = //"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE2MjM1NzU1NTlZIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzc4NzUsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM0Mjc1fQ.pPt1eKnY36zI2sZcBbiN57FTdGaq3Pj_CbbXdJUzt2U"
+        String token = //"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE3MjI0NTQ3M0oyIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjoxLCJleHAiOjE2MDgyMTk5NDcsInVzZXJJZCI6NTksImlhdCI6MTYwODIxNjM0N30.Kbd-Zz-P_PWO7H6dok4LIyLnAXEVMtATIivgjny9eFA"
                 this.adminLogin("13088admin", "123456")
                 ;
 
-        byte[] response =manageClient.put().uri("/shops/0/skus/20682")
+        byte[] response =manageClient.put().uri("/shops/1/skus/20682")
                 .header("authorization",token)
                 .bodyValue(requireJson)
                 .exchange()
@@ -317,7 +318,7 @@ public class XuQingYunTest {
                 .getResponseBodyContent();
         String expectedResponse="{\"errno\":0,\"errmsg\":\"成功\"}";
 
-        response =manageClient.put().uri("/shops/0/skus/273")
+        response =manageClient.put().uri("/shops/1/skus/273")
                 .header("authorization",token)
                 .bodyValue(requireJson)
                 .exchange()
@@ -327,7 +328,7 @@ public class XuQingYunTest {
                 .returnResult()
                 .getResponseBodyContent();
 
-        response =manageClient.put().uri("/shops/1/skus/273")
+        response =manageClient.put().uri("/shops/2/skus/273")
                 .header("authorization",token)
                 .bodyValue(requireJson)
                 .exchange()
@@ -338,7 +339,7 @@ public class XuQingYunTest {
                 .getResponseBodyContent();
         expectedResponse="{\"errno\":505,\"errmsg\":\"操作的资源id不是自己的对象\"}";
 
-        response =manageClient.put().uri("/shops/0/skus/1")
+        response =manageClient.put().uri("/shops/1/skus/1")
                 .header("authorization",token)
                 .bodyValue(requireJson)
                 .exchange()
@@ -349,14 +350,13 @@ public class XuQingYunTest {
         expectedResponse="{\"errno\":504,\"errmsg\":\"操作的资源id不存在\"}";
 
     }
-
     @Test
     @Order(06)
-    void putGoodsOnSale() throws Exception {
-        String token = //"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE2MjM1NzU1NTlZIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzc4NzUsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM0Mjc1fQ.pPt1eKnY36zI2sZcBbiN57FTdGaq3Pj_CbbXdJUzt2U"
+    void putOffGoodsOnSale() throws Exception {
+        String token = //"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE3MjI0NTQ3M0oyIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjoxLCJleHAiOjE2MDgyMTk5NDcsInVzZXJJZCI6NTksImlhdCI6MTYwODIxNjM0N30.Kbd-Zz-P_PWO7H6dok4LIyLnAXEVMtATIivgjny9eFA"
                 this.adminLogin("13088admin", "123456")
                 ;
-        byte[] response  = manageClient.put().uri("/shops/0/skus/400/onshelves")
+        byte[] response  = manageClient.put().uri("/shops/1/skus/400/offshelves")
                 .header("authorization",token)
                 .exchange()
                 .expectStatus().isOk()
@@ -365,7 +365,7 @@ public class XuQingYunTest {
                 .returnResult()
                 .getResponseBodyContent();
 
-        response  = manageClient.put().uri("/shops/0/skus/400/onshelves")
+        response  = manageClient.put().uri("/shops/1/skus/400/offshelves")
                 .header("authorization",token)
                 .exchange()
                 .expectStatus().isOk()
@@ -374,7 +374,7 @@ public class XuQingYunTest {
                 .returnResult()
                 .getResponseBodyContent();
 
-        response  = manageClient.put().uri("/shops/1/skus/400/onshelves")
+        response  = manageClient.put().uri("/shops/2/skus/400/offshelves")
                 .header("authorization",token)
                 .exchange()
                 .expectStatus().isOk()
@@ -383,7 +383,7 @@ public class XuQingYunTest {
                 .returnResult()
                 .getResponseBodyContent();
 
-        response  = manageClient.put().uri("/shops/0/skus/1/onshelves")
+        response  = manageClient.put().uri("/shops/1/skus/1/offshelves")
                 .header("authorization",token)
                 .exchange()
                 .expectStatus().is4xxClientError()
@@ -392,7 +392,7 @@ public class XuQingYunTest {
                 .returnResult()
                 .getResponseBodyContent();
 
-        response  = manageClient.put().uri("/shops/1/skus/400/onshelves")
+        response  = manageClient.put().uri("/shops/2/skus/400/offshelves")
                 .header("authorization",token)
                 .exchange()
                 .expectStatus().isOk()
@@ -404,11 +404,11 @@ public class XuQingYunTest {
 
     @Test
     @Order(07)
-    void putOffGoodsOnSale() throws Exception {
-        String token = //"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE2MjM1NzU1NTlZIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzc4NzUsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM0Mjc1fQ.pPt1eKnY36zI2sZcBbiN57FTdGaq3Pj_CbbXdJUzt2U"
+    void putGoodsOnSale() throws Exception {
+        String token = //"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE3MjI0NTQ3M0oyIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjoxLCJleHAiOjE2MDgyMTk5NDcsInVzZXJJZCI6NTksImlhdCI6MTYwODIxNjM0N30.Kbd-Zz-P_PWO7H6dok4LIyLnAXEVMtATIivgjny9eFA"
                 this.adminLogin("13088admin", "123456")
                 ;
-        byte[] response  = manageClient.put().uri("/shops/0/skus/400/offshelves")
+        byte[] response  = manageClient.put().uri("/shops/1/skus/400/onshelves")
                 .header("authorization",token)
                 .exchange()
                 .expectStatus().isOk()
@@ -417,7 +417,7 @@ public class XuQingYunTest {
                 .returnResult()
                 .getResponseBodyContent();
 
-        response  = manageClient.put().uri("/shops/0/skus/400/offshelves")
+        response  = manageClient.put().uri("/shops/1/skus/400/onshelves")
                 .header("authorization",token)
                 .exchange()
                 .expectStatus().isOk()
@@ -426,7 +426,7 @@ public class XuQingYunTest {
                 .returnResult()
                 .getResponseBodyContent();
 
-        response  = manageClient.put().uri("/shops/1/skus/400/offshelves")
+        response  = manageClient.put().uri("/shops/2/skus/400/onshelves")
                 .header("authorization",token)
                 .exchange()
                 .expectStatus().isOk()
@@ -435,7 +435,7 @@ public class XuQingYunTest {
                 .returnResult()
                 .getResponseBodyContent();
 
-        response  = manageClient.put().uri("/shops/0/skus/1/offshelves")
+        response  = manageClient.put().uri("/shops/1/skus/1/onshelves")
                 .header("authorization",token)
                 .exchange()
                 .expectStatus().is4xxClientError()
@@ -444,7 +444,7 @@ public class XuQingYunTest {
                 .returnResult()
                 .getResponseBodyContent();
 
-        response  = manageClient.put().uri("/shops/1/skus/400/offshelves")
+        response  = manageClient.put().uri("/shops/2/skus/400/onshelves")
                 .header("authorization",token)
                 .exchange()
                 .expectStatus().isOk()
@@ -458,18 +458,18 @@ public class XuQingYunTest {
     @Order(8)
     void add_floating_price() throws Exception
     {
-        LocalDateTime beginTime= LocalDateTime.of(2020,12,20,20,0,0);
+        LocalDateTime beginTime= LocalDateTime.of(2020,12,29,20,0,0);
         LocalDateTime endTime=LocalDateTime.of(2020,12,30,10,0,0);
         String requireJson="{\n    \"activityPrice\": \"100\",\n    \"beginTime\": \""+beginTime.toString()+"\",\n    \"endTime\": \""+endTime.toString()+"\",\n    \"quantity\": \"100\"\n}";
-        String token = //"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE2MjM1NzU1NTlZIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzc4NzUsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM0Mjc1fQ.pPt1eKnY36zI2sZcBbiN57FTdGaq3Pj_CbbXdJUzt2U"
+        String token = //"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE3MjI0NTQ3M0oyIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjoxLCJleHAiOjE2MDgyMTk5NDcsInVzZXJJZCI6NTksImlhdCI6MTYwODIxNjM0N30.Kbd-Zz-P_PWO7H6dok4LIyLnAXEVMtATIivgjny9eFA"
                 this.adminLogin("13088admin", "123456")
                 ;
 
-        byte[] response =manageClient.post().uri("/shops/0/skus/278/floatPrices")
+        byte[] response =manageClient.post().uri("/shops/1/skus/278/floatPrices")
                 .header("authorization",token)
                 .bodyValue(requireJson)
                 .exchange()
-                .expectStatus().is2xxSuccessful()
+                .expectStatus().isCreated()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
                 .jsonPath("$.data.activityPrice").isEqualTo(100)
@@ -480,7 +480,7 @@ public class XuQingYunTest {
 
         String expectedResponse ="{\"errno\":0,\"data\":{\"id\":21,\"activityPrice\":100,\"quantity\":100,\"beginTime\":\"2020-12-12T10:00:00\",\"endTime\":\"2020-12-30T10:00:00\",\"createdBy\":{\"id\":1,\"username\":\"createUser\"},\"modifiedBy\":{\"id\":1,\"username\":\"testUser\"}},\"errmsg\":\"成功\"}";
 
-        response =manageClient.post().uri("/shops/0/skus/273/floatPrices")
+        response =manageClient.post().uri("/shops/1/skus/273/floatPrices")
                 .header("authorization",token)
                 .bodyValue(requireJson)
                 .exchange()
@@ -492,7 +492,7 @@ public class XuQingYunTest {
         expectedResponse="{\"errno\":900,\"errmsg\":\"库存不足：273\"}";
 
 
-        response =manageClient.post().uri("/shops/1/skus/278/floatPrices")
+        response =manageClient.post().uri("/shops/2/skus/278/floatPrices")
                 .header("authorization",token)
                 .bodyValue(requireJson)
                 .exchange()
@@ -507,7 +507,7 @@ public class XuQingYunTest {
 
         LocalDateTime beginTime1=LocalDateTime.of(2019,12,12,10,0,0);
         requireJson="{\n    \"activityPrice\": \"100\",\n    \"beginTime\": \""+beginTime1.toString()+"\",\n    \"endTime\": \""+endTime.toString()+"\",\n    \"quantity\": \"100\"\n}";
-        response =manageClient.post().uri("/shops/0/skus/278/floatPrices")
+        response =manageClient.post().uri("/shops/1/skus/278/floatPrices")
                 .header("authorization",token)
                 .bodyValue(requireJson)
                 .exchange()
@@ -519,7 +519,7 @@ public class XuQingYunTest {
 
         LocalDateTime endTime1=LocalDateTime.of(2020,12,11,20,0,0);
         requireJson="{\n    \"activityPrice\": \"100\",\n    \"beginTime\": \""+beginTime.toString()+"\",\n    \"endTime\": \""+endTime1.toString()+"\",\n    \"quantity\": \"100\"\n}";
-        response =manageClient.post().uri("/shops/0/skus/278/floatPrices")
+        response =manageClient.post().uri("/shops/1/skus/278/floatPrices")
                 .header("authorization",token)
                 .bodyValue(requireJson)
                 .exchange()
@@ -532,7 +532,7 @@ public class XuQingYunTest {
 
 
         requireJson="{\n    \"activityPrice\": \"100\",\n    \"beginTime\": \""+beginTime.toString()+"\",\n    \"endTime\": \""+endTime.toString()+"\",\n    \"quantity\": \"-100\"\n}";
-        response =manageClient.post().uri("/shops/0/skus/278/floatPrices")
+        response =manageClient.post().uri("/shops/1/skus/278/floatPrices")
                 .header("authorization",token)
                 .bodyValue(requireJson)
                 .exchange()
@@ -546,11 +546,11 @@ public class XuQingYunTest {
     @Test
     @Order(9)
     void deleteSku() throws Exception{
-        String token = //"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE2MjM1NzU1NTlZIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzc4NzUsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM0Mjc1fQ.pPt1eKnY36zI2sZcBbiN57FTdGaq3Pj_CbbXdJUzt2U"
+        String token = //"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE3MjI0NTQ3M0oyIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjoxLCJleHAiOjE2MDgyMTk5NDcsInVzZXJJZCI6NTksImlhdCI6MTYwODIxNjM0N30.Kbd-Zz-P_PWO7H6dok4LIyLnAXEVMtATIivgjny9eFA"
                 this.adminLogin("13088admin", "123456")
                 ;
 
-        byte[] response =manageClient.delete().uri("/shops/1/skus/20682").header("authorization",token)
+        byte[] response =manageClient.delete().uri("/shops/2/skus/20682").header("authorization",token)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -560,7 +560,7 @@ public class XuQingYunTest {
         String expectedResponse = "{\"errno\":505,\"errmsg\":\"操作的资源id不是自己的对象\"}";
 
 
-        response =manageClient.delete().uri("/shops/0/skus/20682").header("authorization",token)
+        response =manageClient.delete().uri("/shops/1/skus/20682").header("authorization",token)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -569,7 +569,7 @@ public class XuQingYunTest {
                 .getResponseBodyContent();
         expectedResponse="{\"errno\":0,\"errmsg\":\"成功\"}";
 
-        response =manageClient.delete().uri("/shops/0/skus/20682").header("authorization",token)
+        response =manageClient.delete().uri("/shops/1/skus/20682").header("authorization",token)
                 .exchange()
                 .expectStatus().isOk().expectBody()
                 .jsonPath("$.errno").isEqualTo(504)
@@ -578,7 +578,7 @@ public class XuQingYunTest {
         expectedResponse="{\"errno\":504,\"errmsg\":\"操作的资源id不存在\"}";
 
 
-        response =manageClient.delete().uri("/shops/0/skus/1").header("authorization",token)
+        response =manageClient.delete().uri("/shops/1/skus/1").header("authorization",token)
                 .exchange()
                 .expectStatus().isOk().expectBody()
                 .jsonPath("$.errno").isEqualTo(504)

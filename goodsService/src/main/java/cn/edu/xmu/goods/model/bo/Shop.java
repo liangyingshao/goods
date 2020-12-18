@@ -50,6 +50,9 @@ public class Shop implements VoObject {
             this.code = code;
             this.description = description;
         }
+        public static Shop.ShopStatus getTypeByCode(Integer code) {
+            return typeMap.get(code);
+        }
         public Integer getCode() {
             return code;
         }
