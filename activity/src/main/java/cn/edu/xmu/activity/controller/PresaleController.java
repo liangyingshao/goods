@@ -11,14 +11,15 @@ import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ResponseUtil;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import com.github.pagehelper.PageInfo;
+import com.sun.mail.iap.Response;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -114,7 +115,10 @@ public class PresaleController {
             object = Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
         } else {
             ReturnObject<PageInfo<VoObject>> returnObject = presaleService.QueryPresales(shopId, skuId, state, null, page, pagesize,true);
-            object = Common.getPageRetObject(returnObject);
+            if(returnObject.getCode() == ResponseCode.OK)
+                object = Common.getPageRetObject(returnObject);
+            else
+                object = Common.decorateReturnObject(returnObject);
         }
 
         return object;
@@ -135,38 +139,15 @@ public class PresaleController {
     @Audit
     @PostMapping("/shops/{shopId}/skus/{id}/presales")
     @ResponseBody
-    public Object createPresaleOfSKU(@PathVariable(name = "id") Long id, @PathVariable(name="shopId") Long shopId, @RequestBody PresaleVo presaleVo ){
+    public Object createPresaleOfSKU(@PathVariable(name = "id") Long id, @PathVariable(name="shopId") Long shopId, @NotNull @RequestBody PresaleVo presaleVo ){
 
-        //beginTime，endTime的验证
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime beginTime = null;
-        try {
-            beginTime = LocalDateTime.parse(presaleVo.getBeginTime(),dtf);
-        } catch (Exception e) {
-            httpServletResponse.setStatus(HttpStatus.BAD_REQUEST.value());
-            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
+        if(presaleVo.getEndTime()==null || presaleVo.getBeginTime()==null ||presaleVo.getPayTime() == null){
+            return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
         }
-        LocalDateTime endTime = null;
-        try {
-            endTime = LocalDateTime.parse(presaleVo.getEndTime(),dtf);
-        } catch (Exception e) {
-            httpServletResponse.setStatus(HttpStatus.BAD_REQUEST.value());
-            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
-        }
-        LocalDateTime payTime = null;
-        try {
-            payTime = LocalDateTime.parse(presaleVo.getPayTime(),dtf);
-        } catch (Exception e) {
-            httpServletResponse.setStatus(HttpStatus.BAD_REQUEST.value());
-            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
-        }
-
-        if(beginTime.isBefore(LocalDateTime.now())||
-                endTime.isBefore(LocalDateTime.now())||
-                endTime.isBefore(payTime)||
-                payTime.isBefore(beginTime)){
-            httpServletResponse.setStatus(HttpStatus.BAD_REQUEST.value());
-            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
+        if(presaleVo.getEndTime().isBefore(LocalDateTime.now())||
+                presaleVo.getEndTime().isBefore(presaleVo.getPayTime())||
+                presaleVo.getPayTime().isBefore(presaleVo.getBeginTime())){
+            return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
         }
 
 
@@ -195,58 +176,23 @@ public class PresaleController {
     })
     @Audit
     @PutMapping("/shops/{shopId}/presales/{id}")
-    public Object modifyPresaleofSKU(@PathVariable Long shopId, @PathVariable Long id,@RequestBody(required = true) PresaleVo presaleVo){
+    public Object modifyPresaleofSKU(@PathVariable Long shopId, @PathVariable Long id,@NotNull @RequestBody(required = true) PresaleVo presaleVo){
 
-        //beginTime，endTime的验证
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime beginTime = null;
-        if(presaleVo.getBeginTime()!=null) {
-            try {
-                beginTime = LocalDateTime.parse(presaleVo.getBeginTime(),dtf);
-            } catch (Exception e) {
-                httpServletResponse.setStatus(HttpStatus.BAD_REQUEST.value());
-                return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
-            }
+
+        if(presaleVo.getBeginTime()!=null && presaleVo.getPayTime() != null && presaleVo.getPayTime().isBefore(presaleVo.getBeginTime())){
+            return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
         }
 
-        LocalDateTime endTime = null;
-        if(presaleVo.getEndTime()!=null){
-            try {
-                endTime = LocalDateTime.parse(presaleVo.getEndTime(),dtf);
-            } catch (Exception e) {
-                httpServletResponse.setStatus(HttpStatus.BAD_REQUEST.value());
-                return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
-            }
+        if(presaleVo.getEndTime()!=null && presaleVo.getPayTime() != null && presaleVo.getPayTime().isAfter(presaleVo.getEndTime())){
+            return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
         }
 
-        LocalDateTime payTime = null;
-        if(presaleVo.getPayTime() != null){
-            try {
-                payTime = LocalDateTime.parse(presaleVo.getPayTime(),dtf);
-            } catch (Exception e) {
-                httpServletResponse.setStatus(HttpStatus.BAD_REQUEST.value());
-                return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
-            }
+        if(presaleVo.getBeginTime()!=null && presaleVo.getEndTime() != null && presaleVo.getBeginTime().isAfter(presaleVo.getEndTime())){
+            return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
         }
 
-        if(beginTime!=null && payTime != null && payTime.isBefore(beginTime)){
-            httpServletResponse.setStatus(HttpStatus.BAD_REQUEST.value());
-            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
-        }
-
-        if(endTime!=null && payTime != null && payTime.isAfter(endTime)){
-            httpServletResponse.setStatus(HttpStatus.BAD_REQUEST.value());
-            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
-        }
-
-        if(beginTime!=null && endTime != null && beginTime.isAfter(endTime)){
-            httpServletResponse.setStatus(HttpStatus.BAD_REQUEST.value());
-            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
-        }
-
-        if(endTime.isBefore(LocalDateTime.now())){
-            httpServletResponse.setStatus(HttpStatus.BAD_REQUEST.value());
-            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
+        if(presaleVo.getEndTime()!=null && presaleVo.getEndTime().isBefore(LocalDateTime.now())){
+            return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
         }
 
         ReturnObject returnObject = presaleService.modifyPresaleOfSKU(shopId,id,presaleVo);

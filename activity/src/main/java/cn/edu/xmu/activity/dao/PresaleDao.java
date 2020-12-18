@@ -127,7 +127,7 @@ public class PresaleDao {
 
 
     }
-    public ReturnObject<Boolean> checkInPresale(Long id,String beginTime,String endTime){
+    public ReturnObject<Boolean> checkInPresale(Long id,LocalDateTime beginTime,LocalDateTime endTime){
         PresaleActivityPoExample example = new PresaleActivityPoExample();
         PresaleActivityPoExample.Criteria criteria = example.createCriteria();
         criteria.andGoodsSkuIdEqualTo(id);
@@ -142,9 +142,8 @@ public class PresaleDao {
         //数据库中的活动开始时间晚于endTime，或结束时间早于beginTime，才返回false
         if(!list.isEmpty())
         {
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             for(PresaleActivityPo p : list){
-                if(!(p.getBeginTime().isAfter(LocalDateTime.parse(endTime,dtf))||p.getEndTime().isBefore(LocalDateTime.parse(beginTime,dtf))))
+                if(!(p.getBeginTime().isAfter(endTime)||p.getEndTime().isBefore(beginTime)))
                     return new ReturnObject<>(true);
             }
         }
@@ -161,10 +160,9 @@ public class PresaleDao {
         presaleActivityPo.setRestPayPrice(presaleVo.getRestPayPrice());
         presaleActivityPo.setQuantity(presaleVo.getQuantity());
         presaleActivityPo.setState(ActivityStatus.OFF_SHELVES.getCode().byteValue());
-        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        presaleActivityPo.setBeginTime(LocalDateTime.parse(presaleVo.getBeginTime(),df));
-        presaleActivityPo.setEndTime(LocalDateTime.parse(presaleVo.getEndTime(),df));
-        presaleActivityPo.setPayTime(LocalDateTime.parse(presaleVo.getPayTime(),df));
+        presaleActivityPo.setBeginTime(presaleVo.getBeginTime());
+        presaleActivityPo.setEndTime(presaleVo.getEndTime());
+        presaleActivityPo.setPayTime(presaleVo.getPayTime());
 
         try {
             presaleActivityPoMapper.insertSelective(presaleActivityPo);
@@ -207,10 +205,12 @@ public class PresaleDao {
         presaleActivityPo.setRestPayPrice(presaleVo.getRestPayPrice());
         presaleActivityPo.setQuantity(presaleVo.getQuantity());
         presaleActivityPo.setState(ActivityStatus.OFF_SHELVES.getCode().byteValue());
-        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        presaleActivityPo.setBeginTime(LocalDateTime.parse(presaleVo.getBeginTime(),df));
-        presaleActivityPo.setEndTime(LocalDateTime.parse(presaleVo.getEndTime(),df));
-        presaleActivityPo.setPayTime(LocalDateTime.parse(presaleVo.getPayTime(),df));
+
+
+
+        presaleActivityPo.setBeginTime(presaleVo.getBeginTime());
+        presaleActivityPo.setEndTime(presaleVo.getEndTime());
+        presaleActivityPo.setPayTime(presaleVo.getPayTime());
 
         try {
             presaleActivityPoMapper.updateByPrimaryKeySelective(presaleActivityPo);

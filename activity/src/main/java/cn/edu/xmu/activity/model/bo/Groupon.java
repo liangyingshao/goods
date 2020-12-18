@@ -5,6 +5,8 @@ import cn.edu.xmu.activity.model.vo.GrouponRetVo;
 import cn.edu.xmu.ooad.model.VoObject;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 /**
  * description: Groupon
  * date: 2020/12/11 10:56
@@ -15,8 +17,8 @@ import lombok.Data;
 public class Groupon implements VoObject {
     Long id;
     String name;
-    String beginTime;
-    String endTime;
+    LocalDateTime beginTime;
+    LocalDateTime endTime;
 
     @Override
     public GrouponRetVo createVo() {
@@ -30,8 +32,8 @@ public class Groupon implements VoObject {
 
     public Groupon(GrouponActivityPo po) {
         this.setId(po.getId());
-        this.setBeginTime(po.getBeginTime().toString());
-        this.setEndTime(po.getEndTime().toString());
+        this.setBeginTime(po.getBeginTime());
+        this.setEndTime(po.getEndTime());
         this.setName(po.getName());
     }
 }

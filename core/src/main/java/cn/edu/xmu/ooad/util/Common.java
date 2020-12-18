@@ -192,7 +192,11 @@ public class Common {
             case RESOURCE_ID_OUTSCOPE:
                 return new ResponseEntity(
                         ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg()),
-                        HttpStatus.UNAUTHORIZED);
+                        HttpStatus.FORBIDDEN);
+            case FIELD_NOTVALID:
+                return new ResponseEntity(
+                        ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg()),
+                        HttpStatus.BAD_REQUEST);
             case OK:
                 // 200: 无错误
                 Object data = returnObject.getData();

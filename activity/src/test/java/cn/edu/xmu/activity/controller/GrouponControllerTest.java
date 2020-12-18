@@ -72,9 +72,9 @@ class GrouponControllerTest {
     public void createGrouponofSPU()throws Exception {
         String token = creatTestToken(1L, 0L, 100);
         GrouponVo grouponVo = new GrouponVo();
-        grouponVo.setBeginTime("2022-01-09 15:55:18");
-        grouponVo.setEndTime("2022-01-20 15:55:18");
-        grouponVo.setStrategy("teststrategy");
+//        grouponVo.setBeginTime("2022-01-09 15:55:18");
+//        grouponVo.setEndTime("2022-01-20 15:55:18");
+//        grouponVo.setStrategy("teststrategy");
         String Json = JacksonUtil.toJson(grouponVo);
 
         String responseString=this.mvc.perform(MockMvcRequestBuilders.post("/shops/1/spus/10/groupons")
@@ -103,8 +103,8 @@ class GrouponControllerTest {
         String endTime = "2022-01-05 15:55:18";
 
         GrouponVo grouponVo = new GrouponVo();
-        grouponVo.setBeginTime(beginTime);
-        grouponVo.setEndTime(endTime);
+//        grouponVo.setBeginTime(beginTime);
+//        grouponVo.setEndTime(endTime);
         grouponVo.setStrategy(strategy);
         String Json = JacksonUtil.toJson(grouponVo);
 
@@ -260,8 +260,8 @@ class GrouponControllerTest {
     public void createGrouponofSPU1() throws Exception {
 
         GrouponVo grouponVo = new GrouponVo();
-        grouponVo.setBeginTime("2022-01-20 15:55:18");
-        grouponVo.setEndTime("2022-01-09 15:55:18");
+//        grouponVo.setBeginTime("2022-01-20 15:55:18");
+//        grouponVo.setEndTime("2022-01-09 15:55:18");
         grouponVo.setStrategy("teststrategy");
         String Json = JacksonUtil.toJson(grouponVo);//{"beginTime":"2022-01-20 15:55:18","endTime":"2022-01-09 15:55:18","strategy":"teststrategy"}
 
@@ -284,8 +284,8 @@ class GrouponControllerTest {
     @Test
     public void createGrouponofSPU2() throws Exception {
         GrouponVo grouponVo = new GrouponVo();
-        grouponVo.setBeginTime("2018-01-20 15:55:18");
-        grouponVo.setEndTime("2019-01-09 15:55:18");
+//        grouponVo.setBeginTime("2018-01-20 15:55:18");
+//        grouponVo.setEndTime("2019-01-09 15:55:18");
         grouponVo.setStrategy("teststrategy");
         String Json = JacksonUtil.toJson(grouponVo);//{"beginTime":"2018-01-20 15:55:18","endTime":"2019-01-09 15:55:18","strategy":"teststrategy"}
 
@@ -308,8 +308,8 @@ class GrouponControllerTest {
     @Test
     public void createGrouponofSPU3() throws Exception {
         GrouponVo grouponVo = new GrouponVo();
-        grouponVo.setBeginTime("2021-01-20 15:55:18");
-        grouponVo.setEndTime("2021-01-09 15:55:18");
+//        grouponVo.setBeginTime("2021-01-20 15:55:18");
+//        grouponVo.setEndTime("2021-01-09 15:55:18");
         grouponVo.setStrategy("teststrategy");
         String Json = JacksonUtil.toJson(grouponVo);//{"beginTime":"2021-01-20 15:55:18","endTime":"2021-01-09 15:55:18","strategy":"teststrategy"}
 
@@ -332,8 +332,8 @@ class GrouponControllerTest {
     @Test
     public void createGrouponofSPU4() throws Exception {
         GrouponVo grouponVo = new GrouponVo();
-        grouponVo.setBeginTime("2021-01-20 15:55:18");
-        grouponVo.setEndTime("2021-01-31 15:55:18");
+//        grouponVo.setBeginTime("2021-01-20 15:55:18");
+//        grouponVo.setEndTime("2021-01-31 15:55:18");
         grouponVo.setStrategy("teststrategy");
         String Json = JacksonUtil.toJson(grouponVo);//{"beginTime":"2021-01-20 15:55:18","endTime":"2021-01-09 15:55:18","strategy":"teststrategy"}
 
@@ -356,8 +356,8 @@ class GrouponControllerTest {
     @Test
     public void createGrouponofSPU5() throws Exception {
         GrouponVo grouponVo = new GrouponVo();
-        grouponVo.setBeginTime("2021-01-20 15:55:18");
-        grouponVo.setEndTime("2021-01-31 15:55:18");
+//        grouponVo.setBeginTime("2021-01-20 15:55:18");
+//        grouponVo.setEndTime("2021-01-31 15:55:18");
         grouponVo.setStrategy("teststrategy");
         String Json = JacksonUtil.toJson(grouponVo);//{"beginTime":"2021-01-20 15:55:18","endTime":"2021-01-09 15:55:18","strategy":"teststrategy"}
 
@@ -389,8 +389,8 @@ class GrouponControllerTest {
         String endTime = "2022-01-05 15:55:18";
 
         GrouponVo grouponVo = new GrouponVo();
-        grouponVo.setBeginTime(beginTime);
-        grouponVo.setEndTime(endTime);
+//        grouponVo.setBeginTime(beginTime);
+//        grouponVo.setEndTime(endTime);
         grouponVo.setStrategy(strategy);
         String Json = JacksonUtil.toJson(grouponVo);
 
@@ -417,8 +417,8 @@ class GrouponControllerTest {
         String endTime = "2022-01-05 15:55:18";
 
         GrouponVo grouponVo = new GrouponVo();
-        grouponVo.setBeginTime(beginTime);
-        grouponVo.setEndTime(endTime);
+//        grouponVo.setBeginTime(beginTime);
+//        grouponVo.setEndTime(endTime);
         grouponVo.setStrategy(strategy);
         String Json = JacksonUtil.toJson(grouponVo);
 
@@ -444,8 +444,8 @@ class GrouponControllerTest {
         String endTime = "2022-01-05 15:55:18";
 
         GrouponVo grouponVo = new GrouponVo();
-        grouponVo.setBeginTime(beginTime);
-        grouponVo.setEndTime(endTime);
+//        grouponVo.setBeginTime(beginTime);
+//        grouponVo.setEndTime(endTime);
         grouponVo.setStrategy(strategy);
         String Json = JacksonUtil.toJson(grouponVo);
 
@@ -471,8 +471,8 @@ class GrouponControllerTest {
         String endTime = "2022-01-05 15:55:18";
 
         GrouponVo grouponVo = new GrouponVo();
-        grouponVo.setBeginTime(beginTime);
-        grouponVo.setEndTime(endTime);
+//        grouponVo.setBeginTime(beginTime);
+//        grouponVo.setEndTime(endTime);
         grouponVo.setStrategy(strategy);
         String Json = JacksonUtil.toJson(grouponVo);
 
@@ -498,8 +498,8 @@ class GrouponControllerTest {
         String endTime = "2022-01-05 15:55:18";
 
         GrouponVo grouponVo = new GrouponVo();
-        grouponVo.setBeginTime(beginTime);
-        grouponVo.setEndTime(endTime);
+//        grouponVo.setBeginTime(beginTime);
+//        grouponVo.setEndTime(endTime);
         grouponVo.setStrategy(strategy);
         String Json = JacksonUtil.toJson(grouponVo);
 

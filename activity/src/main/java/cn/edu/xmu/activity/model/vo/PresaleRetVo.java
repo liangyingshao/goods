@@ -4,6 +4,8 @@ import cn.edu.xmu.oomall.goods.model.SimpleGoodsSkuDTO;
 import cn.edu.xmu.oomall.goods.model.SimpleShopDTO;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 /**
  * description: PresaleRetVo
  * date: 2020/12/11 12:08
@@ -14,9 +16,9 @@ import lombok.Data;
 public class PresaleRetVo {
     Long id;
     String name;
-    String beginTime;
-    String endTime;
-    String payTime;
+    LocalDateTime beginTime;
+    LocalDateTime endTime;
+    LocalDateTime payTime;
     SimpleGoodsSkuDTO goodsSku;
     SimpleShopDTO shop;
 

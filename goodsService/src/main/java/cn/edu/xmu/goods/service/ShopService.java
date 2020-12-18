@@ -22,6 +22,7 @@ public class ShopService {
 
     @Transactional
     public ReturnObject<VoObject> modifyShop(Long shopid, String name) {
+        //1.是否有权限修改此店铺
         return goodsDao.modifyShop(shopid,name);
 
     }

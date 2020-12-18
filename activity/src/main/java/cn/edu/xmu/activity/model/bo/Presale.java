@@ -8,6 +8,7 @@ import cn.edu.xmu.oomall.goods.model.SimpleGoodsSkuDTO;
 import cn.edu.xmu.oomall.goods.model.SimpleShopDTO;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
@@ -20,9 +21,9 @@ import java.time.format.DateTimeFormatter;
 public class Presale implements VoObject {
     Long id;
     String name;
-    String beginTime;
-    String endTime;
-    String payTime;
+    LocalDateTime beginTime;
+    LocalDateTime endTime;
+    LocalDateTime payTime;
     SimpleGoodsSkuDTO simpleGoodsSkuDTO;
     SimpleShopDTO simpleShopDTO;
 
@@ -30,10 +31,9 @@ public class Presale implements VoObject {
     {
         id = presaleActivityPo.getId();
         name = presaleActivityPo.getName();
-        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        beginTime = df.format(presaleActivityPo.getBeginTime());
-        endTime = df.format(presaleActivityPo.getEndTime());
-        payTime = df.format(presaleActivityPo.getPayTime());
+        beginTime = presaleActivityPo.getBeginTime();
+        endTime = presaleActivityPo.getEndTime();
+        payTime = presaleActivityPo.getPayTime();
         this.simpleGoodsSkuDTO = simpleGoodsSkuDTO;
         this.simpleShopDTO = simpleShopDTO;
 

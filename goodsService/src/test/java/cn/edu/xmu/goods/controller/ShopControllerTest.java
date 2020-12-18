@@ -8,6 +8,8 @@ import cn.edu.xmu.goods.model.po.ShopPo;
 import cn.edu.xmu.goods.model.vo.ShopStateVo;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.JwtHelper;
+import cn.edu.xmu.ooad.util.ResponseCode;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.slf4j.Logger;
@@ -17,6 +19,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.util.Assert;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -148,8 +152,54 @@ public class ShopControllerTest {
 
     }
 
+    @Test
+    public void modifyShop_unaudit() throws Exception{
 
+        String token = creatTestToken(1L, 6L, 100);
+        String Json = "{\"name\": \"没过审\"}";
+        String responseString = this.mvc.perform(put("/shops/6").header("authorization",token).contentType("application/json;charset=UTF-8").content(Json))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.errno").value(ResponseCode.SHOP_STATENOTALLOW.getCode()))
+                .andReturn().getResponse().getContentAsString();
 
+    }
+
+    /**
+     * 修改审核未通过的商铺的名字
+     */
+    @Test
+    public void updateShop_state() throws Exception {
+        String token = creatTestToken(1L, 8L, 100);
+        String Json = "{\"name\": \"状态不会变\",\"state\":4}";
+
+        String responseString = this.mvc.perform(put("/shops/8").header("authorization",token).contentType("application/json;charset=UTF-8").content(Json))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                //.andExpect(MockMvcResultMatchers.jsonPath("$.errno").value(ResponseCode.FIELD_NOTVALID.getCode()))
+                .andReturn().getResponse().getContentAsString();
+        String expected= "";
+    }
+
+    /**
+     * 修改商铺的名字为空
+     * @author  24320182203310 Yang Lei
+     * @date 2020/12/15 16:07
+     */
+    @Test
+    public void updateShop_null() throws Exception {
+
+        String token = creatTestToken(1L, 8L, 100);
+
+        String Json = "{\"name\": \"  \"}";
+
+        String responseString = this.mvc.perform(put("/shops/8").header("authorization",token).contentType("application/json;charset=UTF-8").content(Json))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                //.andExpect(MockMvcResultMatchers.jsonPath("$.errno").value(ResponseCode.FIELD_NOTVALID.getCode()))
+                .andReturn().getResponse().getContentAsString();
+
+    }
 
     @Test
     public void onshelfShop1() throws Exception{

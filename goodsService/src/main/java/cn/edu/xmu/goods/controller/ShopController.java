@@ -2,6 +2,7 @@ package cn.edu.xmu.goods.controller;
 
 import cn.edu.xmu.goods.model.bo.Shop;
 import cn.edu.xmu.goods.model.vo.ShopStateVo;
+import cn.edu.xmu.goods.model.vo.ShopVo;
 import cn.edu.xmu.goods.service.ShopService;
 import cn.edu.xmu.ooad.annotation.Audit;
 import cn.edu.xmu.ooad.annotation.Depart;
@@ -15,8 +16,10 @@ import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +31,7 @@ import java.util.List;
  */
 @Api(value = "店铺服务", tags = "goods")
 @RestController /*Restful的Controller对象*/
-@RequestMapping(value = "/goods", produces = "application/json;charset=UTF-8")
+@RequestMapping(produces = "application/json;charset=UTF-8")
 public class ShopController {
 
 
@@ -47,7 +50,7 @@ public class ShopController {
      * author: 杨铭
      *
      * @param shopid Long
-     * @param name String
+     * @param shopVo ShopVo
      * @return java.lang.Object
      */
     @ApiOperation(value="店家修改店铺信息")
@@ -60,12 +63,17 @@ public class ShopController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功")
     })
+    @Audit
     @PutMapping("shops/{shopid}")
     @ResponseBody
-    public Object modifyShop(@PathVariable @Depart Long shopid, @RequestBody String name) {
+    public Object modifyShop(@PathVariable @Depart Long shopid, @Validated @NotNull @RequestBody ShopVo shopVo) {
 
-        ReturnObject returnObject = shopService.modifyShop(shopid,name);
-        return Common.decorateReturnObject(returnObject);
+        ReturnObject returnObject = shopService.modifyShop(shopid,shopVo.getName());
+        if (returnObject.getCode() == ResponseCode.OK) {
+            return Common.getRetObject(returnObject);
+        } else {
+            return Common.decorateReturnObject(returnObject);
+        }
     }
 
 
@@ -76,7 +84,7 @@ public class ShopController {
      * author: 杨铭
      *
      * @param id 用户id
-     * @param name 店铺名称
+     * @param shopVo 店铺名称
      * @return java.lang.Object
      */
     @ApiOperation(value = "店家申请店铺")
@@ -91,9 +99,9 @@ public class ShopController {
     @Audit
     @PostMapping("/shops")
     @ResponseBody
-    public Object addShop(@LoginUser Long id, @RequestBody String name){
+    public Object addShop(@LoginUser Long id, @RequestBody ShopVo shopVo){
 
-        ReturnObject<VoObject> returnObject =  shopService.addShop(id,name);
+        ReturnObject<VoObject> returnObject =  shopService.addShop(id,shopVo.getName());
         if (returnObject.getCode() == ResponseCode.OK) {
             return Common.getRetObject(returnObject);
         } else {
@@ -125,7 +133,11 @@ public class ShopController {
     @ResponseBody
     public Object deleteShop(@PathVariable Long shopId) {
         ReturnObject<VoObject> returnObject =  shopService.deleteShop(shopId);
-        return Common.getRetObject(returnObject);
+        if (returnObject.getCode() == ResponseCode.OK) {
+            return Common.getRetObject(returnObject);
+        } else {
+            return Common.decorateReturnObject(returnObject);
+        }
     }
 
     /**
@@ -176,7 +188,11 @@ public class ShopController {
     @ResponseBody
     public Object auditShop(@PathVariable Long id,@RequestBody boolean conclusion){
         ReturnObject<VoObject> returnObject =  shopService.auditShop(id,conclusion);
-        return Common.getRetObject(returnObject);
+        if (returnObject.getCode() == ResponseCode.OK) {
+            return Common.getRetObject(returnObject);
+        } else {
+            return Common.decorateReturnObject(returnObject);
+        }
     }
 
     /**
@@ -199,7 +215,11 @@ public class ShopController {
     @ResponseBody
     public Object onshelfShop(@PathVariable Long shopId) {
         ReturnObject<VoObject> returnObject =  shopService.onshelfShop(shopId);
-        return Common.getRetObject(returnObject);
+        if (returnObject.getCode() == ResponseCode.OK) {
+            return Common.getRetObject(returnObject);
+        } else {
+            return Common.decorateReturnObject(returnObject);
+        }
     }
 
     /**
@@ -222,7 +242,11 @@ public class ShopController {
     @ResponseBody
     public Object offshelfShop(@PathVariable Long shopId) {
         ReturnObject<VoObject> returnObject =  shopService.offshelfShop(shopId);
-        return Common.getRetObject(returnObject);
+        if (returnObject.getCode() == ResponseCode.OK) {
+            return Common.getRetObject(returnObject);
+        } else {
+            return Common.decorateReturnObject(returnObject);
+        }
     }
 
     /* shop end */

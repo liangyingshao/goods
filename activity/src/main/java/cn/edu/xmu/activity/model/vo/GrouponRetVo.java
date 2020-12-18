@@ -3,6 +3,8 @@ package cn.edu.xmu.activity.model.vo;
 import cn.edu.xmu.activity.model.bo.Groupon;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 /**
  * description: GrouponRetVo
  * date: 2020/12/11 10:57
@@ -13,8 +15,8 @@ import lombok.Data;
 public class GrouponRetVo {
     Long id;
     String name;
-    String beginTime;
-    String endTime;
+    LocalDateTime beginTime;
+    LocalDateTime endTime;
 
     public GrouponRetVo(Groupon grouponActivity){
         this.id = grouponActivity.getId();

@@ -97,7 +97,7 @@ public class GrouponService {
         return grouponDao.cancelGrouponofSPU(shopId,id);
     }
 
-    public ReturnObject<PageInfo<VoObject>> queryGroupons(Long shopId, Long spu_id, Integer state, Integer timeline, String beginTime, String endTime, Integer page, Integer pagesize, boolean isadmin) {
+    public ReturnObject<PageInfo<VoObject>> queryGroupons(Long shopId, Long spu_id, Integer state, Integer timeline, LocalDateTime beginTime, LocalDateTime endTime, Integer page, Integer pagesize, Boolean isadmin) {
         return grouponDao.queryGroupons(shopId, spu_id, state, timeline, beginTime, endTime, page, pagesize, isadmin);
     }
 }

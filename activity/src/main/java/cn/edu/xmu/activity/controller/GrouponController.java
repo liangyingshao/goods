@@ -12,10 +12,12 @@ import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ResponseUtil;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import com.github.pagehelper.PageInfo;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -106,7 +108,7 @@ public class GrouponController {
         if(page <= 0 || pagesize <= 0) {
             object = Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
         } else {
-            ReturnObject<PageInfo<VoObject>> returnObject = grouponService.queryGroupons(shopId, spu_id, null, timeline, "", "", page, pagesize, false);
+            ReturnObject<PageInfo<VoObject>> returnObject = grouponService.queryGroupons(shopId, spu_id, null, timeline, null, null, page, pagesize, false);
             object = Common.getPageRetObject(returnObject);
         }
 
@@ -155,7 +157,8 @@ public class GrouponController {
         if(page <= 0 || pagesize <= 0) {
             object = Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
         } else {
-            ReturnObject<PageInfo<VoObject>> returnObject = grouponService.queryGroupons(id, spuid, state, null, beginTime, endTime, page, pagesize, true);
+            DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            ReturnObject<PageInfo<VoObject>> returnObject = grouponService.queryGroupons(id, spuid, state, null, LocalDateTime.parse(beginTime,df), LocalDateTime.parse(endTime,df), page, pagesize, true);
             object = Common.getPageRetObject(returnObject);
         }
 
@@ -189,25 +192,14 @@ public class GrouponController {
     @ResponseBody
     public Object createGrouponofSPU(@PathVariable(name="id") Long id, @PathVariable(name="shopId") Long shopId, @RequestBody GrouponVo grouponVo ){
 
-        //beginTime，endTime的验证
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime beginTime = null;
-        try {
-            beginTime = LocalDateTime.parse(grouponVo.getBeginTime(),dtf);
-        } catch (Exception e) {
-            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
+        //beginTime，endTime不能空
+        if(grouponVo.getBeginTime()==null || grouponVo.getEndTime() == null){
+            return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
         }
-        LocalDateTime endTime = null;
-        try {
-            endTime = LocalDateTime.parse(grouponVo.getEndTime(),dtf);
-        } catch (Exception e) {
-            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
+        if(grouponVo.getEndTime().isBefore(LocalDateTime.now())||
+                grouponVo.getBeginTime().isAfter(grouponVo.getEndTime())) {
+            return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
         }
-
-        if(beginTime.isBefore(LocalDateTime.now()) ||
-                endTime.isBefore(LocalDateTime.now())||
-                endTime.isBefore(beginTime))
-            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
 
         ReturnObject returnObject = grouponService.createGrouponofSPU(shopId,id,grouponVo);
         if (returnObject.getCode() == ResponseCode.OK) {
@@ -247,23 +239,12 @@ public class GrouponController {
     public Object modifyGrouponofSPU(@PathVariable Long shopId, @PathVariable Long id,@RequestBody(required = true) GrouponVo grouponVo){
 
         //BeginTime，EndTime的验证
-        LocalDateTime beginTime = null;
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        try {
-            beginTime= LocalDateTime.parse(grouponVo.getBeginTime(),dtf);
-        } catch (Exception e) {
-            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
+        if(grouponVo.getEndTime()!=null && grouponVo.getEndTime().isBefore(LocalDateTime.now())){
+            return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
         }
-        LocalDateTime endTime = null;
-        try {
-            endTime = LocalDateTime.parse(grouponVo.getEndTime(),dtf);
-        } catch (Exception e) {
-            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
+        if(grouponVo.getEndTime()!=null && grouponVo.getBeginTime()!=null && grouponVo.getEndTime().isBefore(grouponVo.getBeginTime())){
+            return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
         }
-        if(endTime.isBefore(LocalDateTime.now())||
-                beginTime.isBefore(LocalDateTime.now())||
-                endTime.isBefore(beginTime))
-            return Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
 
         ReturnObject returnObject = grouponService.modifyGrouponofSPU(shopId,id,grouponVo);
         if (returnObject.getCode() == ResponseCode.OK) {

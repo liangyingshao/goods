@@ -21,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -60,9 +59,8 @@ public class GrouponDao {
         grouponActivityPo.setState(ActivityStatus.OFF_SHELVES.getCode().byteValue());
         grouponActivityPo.setStrategy(grouponVo.getStrategy());
 
-        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        grouponActivityPo.setBeginTime(LocalDateTime.parse(grouponVo.getBeginTime(),df));
-        grouponActivityPo.setEndTime(LocalDateTime.parse(grouponVo.getEndTime(),df));
+        grouponActivityPo.setBeginTime(grouponVo.getBeginTime());
+        grouponActivityPo.setEndTime(grouponVo.getEndTime());
 
         try {
             grouponActivityPoMapper.insertSelective(grouponActivityPo);
@@ -196,9 +194,8 @@ public class GrouponDao {
         GrouponActivityPo grouponActivityPo = new GrouponActivityPo();
         grouponActivityPo.setId(id);
         grouponActivityPo.setStrategy(grouponVo.getStrategy());
-        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        grouponActivityPo.setBeginTime(LocalDateTime.parse(grouponVo.getBeginTime(),df));
-        grouponActivityPo.setEndTime(LocalDateTime.parse(grouponVo.getEndTime(),df));
+        grouponActivityPo.setBeginTime(grouponVo.getBeginTime());
+        grouponActivityPo.setEndTime(grouponVo.getEndTime());
 
         try {
             grouponActivityPoMapper.updateByPrimaryKeySelective(grouponActivityPo);
@@ -248,7 +245,7 @@ public class GrouponDao {
         return new ReturnObject<>(ResponseCode.OK);
     }
 
-    public ReturnObject<Boolean> checkInGroupon(Long id,String beginTime,String endTime) {
+    public ReturnObject<Boolean> checkInGroupon(Long id,LocalDateTime beginTime,LocalDateTime endTime) {
         GrouponActivityPoExample example = new GrouponActivityPoExample();
         GrouponActivityPoExample.Criteria criteria = example.createCriteria();
         criteria.andGoodsSpuIdEqualTo(id);
@@ -263,9 +260,8 @@ public class GrouponDao {
         //数据库中的活动开始时间晚于endTime，或结束时间早于beginTime，才返回false
         if(!list.isEmpty())
         {
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             for(GrouponActivityPo p : list){
-                if(!(p.getBeginTime().isAfter(LocalDateTime.parse(endTime,dtf))||p.getEndTime().isBefore(LocalDateTime.parse(beginTime,dtf))))
+                if(!(p.getBeginTime().isAfter(endTime)||p.getEndTime().isBefore(beginTime)))
                     return new ReturnObject<>(true);
             }
         }
@@ -274,7 +270,7 @@ public class GrouponDao {
     }
 
 
-    public ReturnObject<PageInfo<VoObject>> queryGroupons(Long shopId, Long spu_id, Integer state, Integer timeline, String beginTime, String endTime, Integer page, Integer pagesize, boolean isadmin) {
+    public ReturnObject<PageInfo<VoObject>> queryGroupons(Long shopId, Long spu_id, Integer state, Integer timeline, LocalDateTime beginTime, LocalDateTime endTime, Integer page, Integer pagesize, Boolean isadmin) {
         //1.创建规则
         GrouponActivityPoExample example = new GrouponActivityPoExample();
         GrouponActivityPoExample.Criteria criteria = example.createCriteria();
@@ -326,11 +322,10 @@ public class GrouponDao {
         }
 
         //6.按时间段查询
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         if(beginTime!=null)
-            criteria.andBeginTimeGreaterThanOrEqualTo(LocalDateTime.parse(beginTime,dtf));
+            criteria.andBeginTimeGreaterThanOrEqualTo(beginTime);
         if(endTime!=null)
-            criteria.andEndTimeLessThanOrEqualTo(LocalDateTime.parse(endTime,dtf));
+            criteria.andEndTimeLessThanOrEqualTo(endTime);
 
         //7.如果不是管理员，仅显示有效的活动
         if(!isadmin) {

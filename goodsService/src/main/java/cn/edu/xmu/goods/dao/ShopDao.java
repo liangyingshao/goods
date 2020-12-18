@@ -49,11 +49,28 @@ public class ShopDao {
      */
     public ReturnObject<VoObject> modifyShop(Long id, String name)
     {
-        ShopPo shopPo = new ShopPo();
-        shopPo.setName(name);
-        shopPo.setId(id);
+
+        //1.读出此店铺
+        ShopPo oldPo = null;
         try {
-            shopPoMapper.updateByPrimaryKeySelective(shopPo);
+            oldPo = shopPoMapper.selectByPrimaryKey(id);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        //2.店铺不存在
+        if(oldPo == null)
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+
+        //3.店铺的状态为已下线，才能修改
+        if(oldPo.getState()!=Shop.ShopStatus.OFFLINE.getCode().byteValue())
+            return new ReturnObject<>(ResponseCode.SHOP_STATENOTALLOW);
+
+        //4.修改
+        ShopPo newPo = new ShopPo();
+        newPo.setName(name);
+        newPo.setId(id);
+        try {
+            shopPoMapper.updateByPrimaryKeySelective(newPo);
         } catch (DataAccessException e) {
             StringBuilder message = new StringBuilder().append("modifyShop: ").append(e.getMessage());
             logger.error(message.toString());
