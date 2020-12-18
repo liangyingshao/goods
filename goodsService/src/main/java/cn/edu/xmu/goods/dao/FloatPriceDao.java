@@ -1,9 +1,11 @@
 package cn.edu.xmu.goods.dao;
 
 import cn.edu.xmu.goods.mapper.FloatPricePoMapper;
+import cn.edu.xmu.goods.mapper.GoodsSkuPoMapper;
+import cn.edu.xmu.goods.mapper.GoodsSpuPoMapper;
 import cn.edu.xmu.goods.model.bo.FloatPrice;
-import cn.edu.xmu.goods.model.po.FloatPricePo;
-import cn.edu.xmu.goods.model.po.FloatPricePoExample;
+import cn.edu.xmu.goods.model.bo.GoodsSku;
+import cn.edu.xmu.goods.model.po.*;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import org.slf4j.Logger;
@@ -18,6 +20,12 @@ import java.util.List;
 public class FloatPriceDao {
     @Autowired
     private FloatPricePoMapper floatPricePoMapper;
+
+    @Autowired
+    private GoodsSkuPoMapper goodsSkuPoMapper;
+
+    @Autowired
+    private GoodsSpuPoMapper goodsSpuPoMapper;
 
     private static final Logger logger = LoggerFactory.getLogger(FloatPriceDao.class);
 
@@ -103,7 +111,7 @@ public class FloatPriceDao {
         return retObj;
     }
 
-    public ReturnObject<Object> invalidFloatPrice(Long id){
+    public ReturnObject<Object> invalidFloatPrice(Long shopId, Long id){
         FloatPricePo floatPricePo = floatPricePoMapper.selectByPrimaryKey(id);
         //价格浮动项不存在
         if(floatPricePo==null || FloatPrice.Validation.getTypeByCode(floatPricePo.getValid().intValue())==FloatPrice.Validation.INVALID)
@@ -111,11 +119,31 @@ public class FloatPriceDao {
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
 
+        //价格浮动项和shopId匹配：float_price-sku-spu-shop
+        GoodsSkuPoExample skuPoExample = new GoodsSkuPoExample();
+        GoodsSkuPoExample.Criteria skuCriteria = skuPoExample.createCriteria();
+        skuCriteria.andIdEqualTo(floatPricePo.getGoodsSkuId());
+        List<GoodsSkuPo> goodsSkuPos = goodsSkuPoMapper.selectByExample(skuPoExample);
+        GoodsSkuPo goodsSkuPo;
+        if(goodsSkuPos.size()!=0) {
+            goodsSkuPo = goodsSkuPos.get(0);
+        } else {
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"skuId不存在：" + floatPricePo.getGoodsSkuId());
+        }
+        //shopId能和skuId匹配
+        GoodsSpuPoExample spuPoExample=new GoodsSpuPoExample();
+        GoodsSpuPoExample.Criteria criteria1=spuPoExample.createCriteria();
+        criteria1.andShopIdEqualTo(shopId);
+        criteria1.andIdEqualTo(goodsSkuPo.getGoodsSpuId());
+        List<GoodsSpuPo> spuPos=goodsSpuPoMapper.selectByExample(spuPoExample);
+        if(spuPos.size()==0)
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+
         try
         {
-            byte valid=1;
+            byte valid=6;//4可用 6废弃
             floatPricePo.setValid(valid);
-            int ret = floatPricePoMapper.insertSelective(floatPricePo);
+            int ret = floatPricePoMapper.updateByPrimaryKey(floatPricePo);
             if (ret == 0)
             {
                 //修改失败,一般来说不会这样的

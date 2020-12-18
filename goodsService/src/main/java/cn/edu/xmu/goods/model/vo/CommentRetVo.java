@@ -1,6 +1,7 @@
 package cn.edu.xmu.goods.model.vo;
 
 import cn.edu.xmu.goods.model.bo.Comment;
+import cn.edu.xmu.ooad.model.VoObject;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -17,7 +18,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @ApiModel(description = "评论返回视图")
-public class CommentRetVo {
+public class CommentRetVo implements VoObject {
     @ApiModelProperty(value = "评论id")
     private Long id;
 
@@ -59,5 +60,15 @@ public class CommentRetVo {
         this.state = comment.getState();
         this.gmtCreate = comment.getGmtCreate();
         this.gmtModified = comment.getGmtModified();
+    }
+
+    @Override
+    public Object createVo() {
+        return this;
+    }
+
+    @Override
+    public Object createSimpleVo() {
+        return this;
     }
 }

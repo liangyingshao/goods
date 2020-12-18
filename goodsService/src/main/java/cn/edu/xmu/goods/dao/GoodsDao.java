@@ -354,7 +354,7 @@ public class GoodsDao {
         criteria1.andIdEqualTo(selectSkuPo.getGoodsSpuId());
         List<GoodsSpuPo> spuPos=spuMapper.selectByExample(spuPoExample);
         if(spuPos.size()==0)
-            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, "skuId不存在：" + floatPrice.getGoodsSkuId());
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
 
         //时间不冲突
         FloatPricePoExample nowExample=new FloatPricePoExample();
