@@ -384,10 +384,10 @@ public class ActivityController {
         ReturnObject retObject = activityService.addCouponActivity(activity);
         if (retObject.getData() != null) {
             httpServletResponse.setStatus(HttpStatus.CREATED.value());
-            return Common.decorateReturnObject(retObject);
-        } else {
-            return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
+            return Common.getRetObject(retObject);
         }
+            return Common.decorateReturnObject(retObject);
+
     }
 
     /**
@@ -471,6 +471,37 @@ public class ActivityController {
     }
 
     /**
+     * couponActivity 007 业务: 管理员下线己方某优惠活动
+     * @param shopId 商铺ID
+     * @param userId 当前用户ID
+     * @return  ReturnObject
+     * @author 24320182203254 秦楚彦
+     * Created at 2020/12/05 22：19
+     */
+    @ApiOperation(value="管理员下线己方优惠活动",produces="application/json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="authorization", value="Token", required = true, dataType="String", paramType="header"),
+            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "shopId", value = "商铺id", required = true),
+            @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "id", value = "优惠活动id", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+
+    })
+    @Audit // 需要认证
+    @DeleteMapping("shops/{shopId}/couponactivities/{id}")
+    @ResponseBody
+    public Object deleteCouponActivity(@PathVariable Long shopId,@PathVariable Long id,
+                                        @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
+                                        @Depart @ApiIgnore @RequestParam(required = false) Long departId
+
+    ) {
+
+        ReturnObject retObject = activityService.deleteCouponActivity(shopId,id,userId);
+        return Common.decorateReturnObject(retObject);
+
+    }
+    /**
      * couponActivity 007 业务: 管理员上线己方某优惠活动
      * @param shopId 商铺ID
      * @param userId 当前用户ID
@@ -517,7 +548,7 @@ public class ActivityController {
             @ApiImplicitParam(paramType = "query", dataType = "int", name = "timeline", value = "时间状态", required = false),
             @ApiImplicitParam(paramType = "query", dataType = "int", name = "shopId", value = "店铺Id", required = false)
     })
-    //@Audit
+
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功")
     })
@@ -555,13 +586,15 @@ public class ActivityController {
     })
     @GetMapping("/shops/{id}/couponactivities/invalid")
     @ResponseBody
-    public Object showInvalidCouponActivities(@PathVariable Long id,
-                                              @LoginUser @ApiIgnore @RequestParam(required = false) Long userId, @Depart @ApiIgnore @RequestParam(required = false) Long departId,
+    public Object showInvalidCouponActivities(@PathVariable Long shopId,
+                                              @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
+                                              @Depart @ApiIgnore @RequestParam(required = false) Long departId,
                                               @RequestParam(required = false, defaultValue = "1") Integer page,
-                                              @RequestParam(required = false, defaultValue = "10") Integer pageSize)
+                                              @RequestParam(required = false, defaultValue = "10") Integer pageSize
+                                              )
     {
         logger.debug("showCoupons:page="+page+" pageSize="+pageSize);
-        ReturnObject<PageInfo<CouponActivityByNewCouponRetVo>> returnObject=activityService.showInvalidCouponActivities(id,page,pageSize);
+        ReturnObject<PageInfo<CouponActivityByNewCouponRetVo>> returnObject=activityService.showInvalidCouponActivities(shopId,page,pageSize);
         return Common.decorateReturnObject(returnObject);
     }
 
@@ -597,7 +630,6 @@ public class ActivityController {
         activity.setId(id);
         activity.setGmtModified(LocalDateTime.now());
         ReturnObject retObject = activityService.uploadActivityImg(activity,file);
-        return Common.getNullRetObj(retObject, httpServletResponse);
+        return Common.decorateReturnObject(retObject);
     }
-
 }
