@@ -36,7 +36,7 @@ import java.util.Objects;
 
 @Api(value = "活动服务", tags = "activity")
 @RestController /*Restful的Controller对象*/
-@RequestMapping(value = "", produces = "application/json;charset=UTF-8")
+@RequestMapping(value = "/goods", produces = "application/json;charset=UTF-8")
 public class ActivityController {
     private  static  final Logger logger = LoggerFactory.getLogger(ActivityController.class);
 

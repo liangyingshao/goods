@@ -16,9 +16,11 @@ import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +33,7 @@ import java.util.List;
  */
 @Api(value = "店铺服务", tags = "goods")
 @RestController /*Restful的Controller对象*/
-@RequestMapping(produces = "application/json;charset=UTF-8")
+@RequestMapping(value = "/goods",produces = "application/json;charset=UTF-8")
 public class ShopController {
 
 
@@ -66,7 +68,12 @@ public class ShopController {
     @Audit
     @PutMapping("shops/{shopid}")
     @ResponseBody
-    public Object modifyShop(@PathVariable @Depart Long shopid, @Validated @NotNull @RequestBody ShopVo shopVo) {
+    public Object modifyShop(@PathVariable @Depart Long shopid, @Validated @RequestBody ShopVo shopVo, BindingResult bindingResult, HttpServletResponse httpServletResponse) {
+
+        Object o = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if(o != null){
+            return o;
+        }
 
         ReturnObject returnObject = shopService.modifyShop(shopid,shopVo.getName());
         if (returnObject.getCode() == ResponseCode.OK) {
