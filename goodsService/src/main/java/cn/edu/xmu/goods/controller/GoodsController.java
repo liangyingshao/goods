@@ -111,7 +111,13 @@ public class GoodsController {
         logger.debug("getSku:id="+id);
         ReturnObject returnObject=goodsService.getSku(id);
         if(userId!=null&&returnObject.getCode().equals(ResponseCode.OK)){
-            iFootprintService.postFootprint(userId, id);
+            try{
+                iFootprintService.postFootprint(userId, id);
+            }
+            catch (Exception e)
+            {
+                logger.error("IFootPrint未启动");
+            }
         }
         return Common.decorateReturnObject(returnObject);
     }
@@ -147,7 +153,7 @@ public class GoodsController {
         if (null != returnObject) {
             return returnObject;
         }
-        if(!Objects.equals(departId, shopId))
+        if(departId!=0&&!Objects.equals(departId, shopId))
             return Common.getRetObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         ReturnObject retObject = goodsService.uploadSkuImg(shopId,id,file);
         return Common.getNullRetObj(retObject, httpServletResponse);
@@ -253,7 +259,7 @@ public class GoodsController {
         if (null != returnObject) {
             return returnObject;
         }
-        if(!Objects.equals(departId, shopId))return Common.getRetObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
+        if(departId!=0&&!Objects.equals(departId, shopId))return Common.getRetObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         FloatPrice floatPrice=vo.createFloatPrice();
         floatPrice.setGoodsSkuId(id);
         floatPrice.setValid(FloatPrice.Validation.VALID);
@@ -288,7 +294,7 @@ public class GoodsController {
             @ApiResponse(code = 0, message = "成功")
     })
     @Audit
-    @PostMapping("/shops/{shopId}/spus/{id}")
+    @PostMapping("/shops/{shopId}/spus/{id}/skus")
     public Object createSKU(@PathVariable Long shopId, @PathVariable Long id,
                             @Validated @RequestBody GoodsSkuBySpuVo vo, BindingResult bindingResult,
                             @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
@@ -299,14 +305,15 @@ public class GoodsController {
         if (null != returnObject) {
             return returnObject;
         }
-        if(!Objects.equals(departId, shopId))return Common.getRetObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
+        if(departId!=0&&!Objects.equals(departId, shopId))return Common.getRetObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         GoodsSku sku=vo.createGoodsSku();
         sku.setGoodsSpuId(id);
         sku.setState(GoodsSku.State.OFFSHELF);
+        sku.setDisabled(GoodsSku.Disable.OPEN);
         ReturnObject retObject=goodsService.createSKU(shopId,sku);
         if (retObject.getData() != null) {
             httpServletResponse.setStatus(HttpStatus.CREATED.value());
-            return Common.decorateReturnObject(retObject);
+            return Common.getRetObject(retObject);
         } else {
             return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }
@@ -324,7 +331,7 @@ public class GoodsController {
     @GetMapping("skus/states")
     @ResponseBody
     public Object getgoodskustate() {
-
+        logger.debug("getgoodskustate");
         GoodsSku.State[] states=GoodsSku.State.class.getEnumConstants();
         List<GoodsSkuStateRetVo> stateVos=new ArrayList<GoodsSkuStateRetVo>();
         for (GoodsSku.State state : states) stateVos.add(new GoodsSkuStateRetVo(state));
@@ -478,7 +485,7 @@ public class GoodsController {
         logger.debug("put SKU onsale by shopId:" + shopId+ " skuId:" + id);
 
         //校验是否为该商铺管理员
-        if(shopId!=departId)
+        if(departId!=0&&shopId!=departId)
             return  Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE), httpServletResponse);
         ReturnObject retObject = goodsService.putGoodsOnSale(shopId,id);
         if (retObject.getData() != null) {
@@ -515,7 +522,7 @@ public class GoodsController {
         logger.debug("put SKU offsale by shopId:" + shopId+ " skuId:" + id);
 
         //校验是否为该商铺管理员
-        if(departId!=shopId)
+        if(departId!=0&&departId!=shopId)
             return Common.getRetObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         ReturnObject retObject = goodsService.putOffGoodsOnSale(shopId,id);
         if (retObject.getData() != null) {
@@ -1079,6 +1086,7 @@ public class GoodsController {
     public Object getShareSku(@PathVariable Long sid, @PathVariable Long id,
                               @LoginUser @ApiIgnore @RequestParam(required = false) Long userId)
     {
+        logger.debug("getShareSku:sid="+sid+" skuId="+id+" userId="+userId);
         ReturnObject returnObject = iShareService.shareUserSkuMatch(sid,id,userId);
         if(returnObject.getCode().equals(ResponseCode.OK))
             returnObject=goodsService.getShareSku(id);

@@ -57,6 +57,11 @@ public class IFlashsaleServiceImpl implements IFlashsaleService {
         Byte type = 1;
         ReturnObject<Long> returnObject = iTimeService.getCurrentSegmentId(type);
         Long id = returnObject.getData();
+        if(id==null){
+            log.error("ITimeService出错");
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+
         String key = "FlashSaleItem:" + LocalDateTime.now().toString() + id.toString();
         Set<FlashSaleItemPo> itemSet = redisTemplate.opsForSet().members(key);
         for (FlashSaleItemPo item : itemSet) {

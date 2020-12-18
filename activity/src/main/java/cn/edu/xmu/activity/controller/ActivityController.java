@@ -274,6 +274,7 @@ public class ActivityController {
     @ResponseBody
     public Object getCoupon(@LoginUser @ApiIgnore @RequestParam(required = false) Long userId, @PathVariable Long id)
     {
+        logger.debug("getCoupon:userId="+userId+" activityId="+id);
         ReturnObject<List<String>> returnObject=activityService.getCoupon(userId,id);
         return Common.decorateReturnObject(returnObject);
     }

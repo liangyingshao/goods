@@ -27,10 +27,10 @@ import java.io.IOException;
 public class WangYiFeiTest {
 
     //@Value("${public-test.managementgate}")
-    private String managementGate="192.168.43.168:8090/goods";
+    private String managementGate="192.168.43.194:8881";
 
     //@Value("${public-test.mallgate}")
-    private String mallGate="192.168.43.168:8090/goods";
+    private String mallGate="192.168.43.194:8880";
     private WebTestClient manageClient;
 
     private WebTestClient mallClient;
@@ -328,19 +328,19 @@ public class WangYiFeiTest {
     }
 
     private String login(String userName, String password) throws Exception {
-//        LoginVo vo = new LoginVo();
-//        vo.setUserName(userName);
-//        vo.setPassword(password);
-//        String requireJson = JacksonUtil.toJson(vo);
-//        byte[] ret = manageClient.post().uri("/privileges/login").bodyValue(requireJson).exchange()
-//                .expectStatus().isOk()
-//                .expectBody()
-//                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-//                .jsonPath("$.errmsg").isEqualTo("成功")
-//                .returnResult()
-//                .getResponseBodyContent();
-//        return JacksonUtil.parseString(new String(ret, "UTF-8"), "data");
-   return "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE3MDAzOTAyNDBaIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxNDAzNDIsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM2NzQyfQ.oK5vs6BQw0PdpiJfwSQR3Dwbs0n86s8yE4VvbdX11As";
+        LoginVo vo = new LoginVo();
+        vo.setUserName(userName);
+        vo.setPassword(password);
+        String requireJson = JacksonUtil.toJson(vo);
+        byte[] ret = manageClient.post().uri("/privileges/login").bodyValue(requireJson).exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
+                .jsonPath("$.errmsg").isEqualTo("成功")
+                .returnResult()
+                .getResponseBodyContent();
+        return JacksonUtil.parseString(new String(ret, "UTF-8"), "data");
+//   return "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE3MDAzOTAyNDBaIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxNDAzNDIsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM2NzQyfQ.oK5vs6BQw0PdpiJfwSQR3Dwbs0n86s8yE4VvbdX11As";
     }
 }
 

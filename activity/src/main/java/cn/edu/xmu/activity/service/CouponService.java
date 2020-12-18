@@ -49,6 +49,8 @@ public class CouponService {
         //获取Sku的id列表，根据SKUid列表调用远程服务获取每一个sku的name
 //        PageInfo<GoodsSkuCouponRetVo>couponSkus=activityDao.getCouponSkuList(id,page,pageSize);
         List<CouponSkuPo> list = couponDao.getCouponSkuList(id);
+        if(list==null||list.size()==0)return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+
         List<Long> idList = new ArrayList<>(list.stream().map(CouponSkuPo::getSkuId).collect(Collectors.toList()));
         List<SkuInfoDTO> skuList = iGoodsService.getSelectSkuListBySkuIdList(idList);
         PageHelper.startPage(page,pageSize);
@@ -140,6 +142,7 @@ public class CouponService {
     @Transactional
     public ReturnObject<List<String>> getCoupon(Long userId, Long id)
     {
+        logger.debug("getCoupon:userId="+userId+" activityId="+id);
         ReturnObject<List<String>> returnObject= couponDao.getCoupon(userId,id);
         return returnObject;
     }

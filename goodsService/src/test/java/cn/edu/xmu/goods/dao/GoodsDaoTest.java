@@ -35,7 +35,7 @@ class GoodsDaoTest {
 
     @Test
     void getSkuList() {
-        PageInfo<GoodsSkuRetVo>skus=goodsDao.getSkuList((long)0,null, (long) 273,"drh-d0001",1,5);
+        PageInfo<GoodsSku>skus=goodsDao.getSkuList((long)0,null, (long) 273,"drh-d0001",1,5);
         assertEquals(skus.getList().size(),1);
         skus=goodsDao.getSkuList(null,null, null,null,1,5);
         assertEquals(skus.getList().size(),5);
@@ -153,7 +153,7 @@ class GoodsDaoTest {
         sku.setInventory(9999);
         sku.setDetail("detail");
         sku.setState(GoodsSku.State.OFFSHELF);
-        ReturnObject<GoodsSkuRetVo> returnObject=goodsDao.createSKU((long)0,sku);
+        ReturnObject<GoodsSku> returnObject=goodsDao.createSKU((long)0,sku);
         assertEquals(returnObject.getCode(),ResponseCode.OK);
 
         returnObject=goodsDao.createSKU((long)0,sku);
@@ -179,7 +179,7 @@ class GoodsDaoTest {
     @Test
     void getShareSku()
     {
-        ReturnObject<GoodsSkuRetVo> returnObject= goodsDao.getShareSku((long)273);
+        ReturnObject<GoodsSkuDetailRetVo> returnObject= goodsDao.getShareSku((long)273);
         assertEquals(returnObject.getCode(),ResponseCode.OK);
     }
 
