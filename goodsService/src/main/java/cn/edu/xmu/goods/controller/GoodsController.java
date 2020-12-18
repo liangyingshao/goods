@@ -731,7 +731,7 @@ public class GoodsController {
     @GetMapping("/categories/{id}/subcategories")
     public Object getSubcategories(@PathVariable Long id){
         ReturnObject returnObject =  goodsCategoryService.getSubcategories(id);
-        return  Common.getRetObject(returnObject);
+        return  Common.decorateReturnObject(returnObject);
     }
 
     /**
