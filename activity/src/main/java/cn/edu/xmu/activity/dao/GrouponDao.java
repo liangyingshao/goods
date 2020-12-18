@@ -330,7 +330,7 @@ public class GrouponDao {
         //7.如果不是管理员，仅显示有效的活动
         if(!isadmin) {
             criteria.andStateEqualTo(ActivityStatus.ON_SHELVES.getCode().byteValue());
-            criteria.andEndTimeGreaterThan(LocalDateTime.now());
+            //criteria.andEndTimeGreaterThan(LocalDateTime.now());
         }
 
         //8.查询数据库

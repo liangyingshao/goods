@@ -13,6 +13,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -96,7 +97,8 @@ public class AuditAspect {
                         logger.debug("did ="+pathId);
                         if(!pathId.equals(departId.toString())){
                             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                            return ResponseUtil.fail(ResponseCode.FIELD_NOTVALID, "departId不匹配");
+                            //return ResponseUtil.fail(ResponseCode.FIELD_NOTVALID, "departId不匹配");
+                            return ResponseUtil.fail(ResponseCode.RESOURCE_ID_OUTSCOPE, "departId不匹配");
                         }
                         logger.debug("success match Id!");
                     }

@@ -59,7 +59,7 @@ class PresaleControllerTest {
     @Test
     public void getPresaleState() throws Exception {
         String token = createTestToken(1L, 0L, 100);
-        String responseString=this.mvc.perform(MockMvcRequestBuilders.get("/presales/states")
+        String responseString=this.mvc.perform(MockMvcRequestBuilders.get("/goods/presales/states")
                 .header("authorization",token)
                 .contentType("application/json;charset=UTF-8"))
                 .andExpect(status().isOk())
@@ -77,7 +77,7 @@ class PresaleControllerTest {
     @Test
     public void customerQueryPresales() throws Exception {
 
-        String responseString=this.mvc.perform(MockMvcRequestBuilders.get("/presales"))
+        String responseString=this.mvc.perform(MockMvcRequestBuilders.get("/goods/presales"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();
@@ -313,7 +313,7 @@ class PresaleControllerTest {
                 "  \"endTime\": \"2032-01-20 15:55:18\"\n" +
                 "}";
 
-        String responseString=this.mvc.perform(MockMvcRequestBuilders.post("/shops/1/skus/3311/presales")
+        String responseString=this.mvc.perform(MockMvcRequestBuilders.post("/goods/shops/1/skus/3311/presales")
                 .header("authorization",token)
                 .contentType("application/json;charset=UTF-8")
                 .content(Json))
