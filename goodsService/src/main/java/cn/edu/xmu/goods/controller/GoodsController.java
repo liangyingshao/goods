@@ -252,14 +252,20 @@ public class GoodsController {
                                      @Depart @ApiIgnore @RequestParam(required = false) Long departId)
     {
         if(vo.getBeginTime().isAfter(vo.getEndTime()))return Common.getRetObject(new ReturnObject<>(ResponseCode.Log_Bigger));
+
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != returnObject) {
             return returnObject;
         }
+
+        if(departId!=0&&departId!=shopId)
+            return Common.getRetObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
+
         FloatPrice floatPrice=vo.createFloatPrice();
         floatPrice.setGoodsSkuId(id);
         floatPrice.setValid(FloatPrice.Validation.VALID);
         floatPrice.setCreatedBy(userId);
+        floatPrice.setInvalidBy(userId);
         ReturnObject retObject=goodsService.addFloatPrice(shopId,floatPrice,userId);
         if (retObject.getData() != null) {
             httpServletResponse.setStatus(HttpStatus.CREATED.value());
