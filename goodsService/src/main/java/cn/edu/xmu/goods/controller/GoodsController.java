@@ -34,7 +34,8 @@ import java.util.Objects;
 
 @Api(value = "商品服务", tags = "goods")
 @RestController /*Restful的Controller对象*/
-@RequestMapping(value = "/goods", produces = "application/json;charset=UTF-8")
+//@RequestMapping(value = "/goods", produces = "application/json;charset=UTF-8")
+@RequestMapping( produces = "application/json;charset=UTF-8")
 public class GoodsController {
 
     private  static  final Logger logger = LoggerFactory.getLogger(GoodsController.class);
@@ -248,12 +249,11 @@ public class GoodsController {
                                      @Depart @ApiIgnore @RequestParam(required = false) Long departId)
     {
         if(vo.getBeginTime().isAfter(vo.getEndTime()))return Common.getRetObject(new ReturnObject<>(ResponseCode.Log_Bigger));
-        logger.debug("add_floating_price: id = "+ id+" shopId="+shopId+" vo="+vo);
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != returnObject) {
             return returnObject;
         }
-        if(!Objects.equals(departId, shopId))return Common.getRetObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
+//        if(!Objects.equals(departId, shopId))return Common.getRetObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         FloatPrice floatPrice=vo.createFloatPrice();
         floatPrice.setGoodsSkuId(id);
         floatPrice.setValid(FloatPrice.Validation.VALID);

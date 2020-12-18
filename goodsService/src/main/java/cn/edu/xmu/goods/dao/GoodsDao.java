@@ -337,13 +337,6 @@ public class GoodsDao {
      */
     public ReturnObject<FloatPriceRetVo> addFloatPrice(Long shopId, FloatPrice floatPrice, Long userId)
     {
-        //Shop存在
-        ShopPo shopPo = shopMapper.selectByPrimaryKey(shopId);
-        if(shopId!=0&&
-                (shopPo==null
-                || Shop.ShopStatus.getTypeByCode(shopPo.getState().intValue())== Shop.ShopStatus.CLOSED
-                ||Shop.ShopStatus.getTypeByCode(shopPo.getState().intValue())== Shop.ShopStatus.AUDIT_FAIL))
-            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         //SKU存在
         GoodsSkuPo selectSkuPo=skuMapper.selectByPrimaryKey(floatPrice.getGoodsSkuId());
         if(selectSkuPo==null|| GoodsSku.State.getTypeByCode(selectSkuPo.getState().intValue())== GoodsSku.State.DELETED)
