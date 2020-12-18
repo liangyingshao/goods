@@ -55,13 +55,19 @@ public class IFlashsaleServiceImpl implements IFlashsaleService {
     @Override
     public ReturnObject<GoodsDetailDTO> modifyFlashsaleItem(Long skuId, Integer quantity) {
         Byte type = 1;
-        ReturnObject<Long> returnObject = iTimeService.getCurrentSegmentId(type);
-        Long id = returnObject.getData();
-        if(id==null){
+        ReturnObject<Long> returnObject ;
+        Long id;
+        try {
+            returnObject= iTimeService.getCurrentSegmentId(type);
+            id = returnObject.getData();
+        }
+        catch (Exception e)
+        {
             log.error("ITimeService出错");
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
 
+        if(id==null)return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         String key = "FlashSaleItem:" + LocalDateTime.now().toString() + id.toString();
         Set<FlashSaleItemPo> itemSet = redisTemplate.opsForSet().members(key);
         for (FlashSaleItemPo item : itemSet) {

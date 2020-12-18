@@ -123,16 +123,17 @@ public class PresaleService {
     }
 
     public ReturnObject putPresaleOnShelves(Long shopId, Long id) {
-        try {
-            iOrderService.putPresaleOffshevles(id);
-        } catch (Exception e) {
-            logger.debug("dubbo error!");
-        }
+
         return presaleDao.putPresaleOnShelves(shopId,id);
     }
 
     public ReturnObject putPresaleOffShelves(Long shopId, Long id) {
 
+        try {
+            iOrderService.putPresaleOffshevles(id);
+        } catch (Exception e) {
+            logger.debug("dubbo error!");
+        }
         return presaleDao.putPresaleOffShelves(shopId,id);
     }
 }

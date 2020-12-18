@@ -13,6 +13,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -64,20 +65,22 @@ public class AuditAspect {
         HttpServletResponse response = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse();
         String token = request.getHeader(JwtHelper.LOGIN_TOKEN_KEY);
         if (token == null){
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return ResponseUtil.fail(ResponseCode.AUTH_NEED_LOGIN);
+//            什么也不做
+//            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+//            return ResponseUtil.fail(ResponseCode.AUTH_NEED_LOGIN);
         }
 
         JwtHelper.UserAndDepart userAndDepart = new JwtHelper().verifyTokenAndGetClaims(token);
-        if (null == userAndDepart){
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return ResponseUtil.fail(ResponseCode.AUTH_INVALID_JWT);
+        Long userId = null;
+        Long departId = null;
+        if (null != userAndDepart){
+            userId = userAndDepart.getUserId();
+            departId = userAndDepart.getDepartId();
         }
-        Long userId = userAndDepart.getUserId();
-        Long departId = userAndDepart.getDepartId();
+
 
         //检验/shop的api中传入token是否和departId一致
-        String pathInfo=request.getPathInfo();
+        String pathInfo = userAndDepart == null ? null : request.getPathInfo();
         if(null!=pathInfo)
         {
             logger.debug("getPathInfo = "+ pathInfo);
@@ -94,7 +97,8 @@ public class AuditAspect {
                         logger.debug("did ="+pathId);
                         if(!pathId.equals(departId.toString())){
                             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                            return ResponseUtil.fail(ResponseCode.FIELD_NOTVALID, "departId不匹配");
+                            //return ResponseUtil.fail(ResponseCode.FIELD_NOTVALID, "departId不匹配");
+                            return ResponseUtil.fail(ResponseCode.RESOURCE_ID_OUTSCOPE, "departId不匹配");
                         }
                         logger.debug("success match Id!");
                     }
@@ -108,10 +112,10 @@ public class AuditAspect {
 
 
         logger.debug("around: userId ="+userId+" departId="+departId);
-        if (userId == null) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return ResponseUtil.fail(ResponseCode.AUTH_NEED_LOGIN);
-        }
+//        if (userId == null) {
+//            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+//            return ResponseUtil.fail(ResponseCode.AUTH_NEED_LOGIN);
+//        }
 
         Object[] args = joinPoint.getArgs();
         Annotation[][] annotations = method.getParameterAnnotations();
@@ -137,7 +141,6 @@ public class AuditAspect {
 
         Object obj = null;
         try {
-
             obj = ((ProceedingJoinPoint) joinPoint).proceed(args);
         } catch (Throwable e) {
 

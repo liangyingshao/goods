@@ -794,10 +794,16 @@ public class CouponDao implements InitializingBean
         criteria.andShopIdEqualTo(activity.getShopId());
         criteria.andStateEqualTo((byte)0);//待修改活动必须为【已下线】
         try{
+            CouponActivityPo po=activityMapper.selectByPrimaryKey(activityPo.getId());
+            if(po==null)
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            if(!po.getShopId().equals(activity.getShopId()))
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+
             int ret = activityMapper.updateByExampleSelective(activityPo,activityPoExample);
             if(ret==0){//修改失败
                 logger.debug("updateCouponActivity fail:"+activityPo.toString());
-                returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,String.format("该优惠活动不存在"));
+                returnObject=new ReturnObject<>(ResponseCode.FIELD_NOTVALID,String.format("该优惠活动不存在"));
             }
             else{//修改成功
                 logger.debug("updateCouponActivity success:"+activityPo.toString());
@@ -834,25 +840,26 @@ public class CouponDao implements InitializingBean
         criteria.andIdEqualTo(id);
         criteria.andShopIdEqualTo(shopId);
         try{
+            CouponActivityPo ca=activityMapper.selectByPrimaryKey(id);
+            if(ca==null)
+                return returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            else if(!ca.getShopId().equals(shopId))
+                return returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
             //下线优惠活动
             List<CouponActivityPo> activityPo=activityMapper.selectByExample(activityPoExample);
             if(activityPo==null)//未找到符合条件的优惠活动
             {
-                CouponActivityPo ca=activityMapper.selectByPrimaryKey(id);
-                if(ca==null)
                     return returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-                else if(!ca.getShopId().equals(shopId))
-                    return returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
             }
             if(!activityPo.get(0).getState().equals((byte)1)){//未找到符合条件的优惠活动
-                return returnObject=new ReturnObject<>(ResponseCode.ACTIVITYALTER_INVALID,String.format("不可重复下线"));
+                return returnObject=new ReturnObject<>(ResponseCode.COUPONACT_STATENOTALLOW,String.format("不可重复下线"));
             }
             activityPo.get(0).setState((byte)0);//活动状态修改为0【已下线】
             activityPo.get(0).setModiBy(userId);//修改者更新
             int ret = activityMapper.updateByExampleSelective(activityPo.get(0),activityPoExample);
             if(ret==0){//修改失败
                 logger.debug("updateCouponActivity fail:"+activityPo.toString());
-                returnObject=new ReturnObject<>(ResponseCode.ACTIVITYALTER_INVALID,String.format("下线优惠活动失败"));
+                returnObject=new ReturnObject<>(ResponseCode.COUPONACT_STATENOTALLOW,String.format("下线优惠活动失败"));
             }
             else{//修改活动状态成功
                 logger.debug("updateCouponActivity success:"+activityPo.toString());
@@ -901,6 +908,62 @@ public class CouponDao implements InitializingBean
 
         return returnObject;
     }
+
+    /**
+     * 管理员删除己方优惠活动
+     * @param shopId
+     * @param id
+     * @return ReturnObject
+     */
+    public ReturnObject<ResponseCode> deleteCouponActivity(Long shopId, Long id, Long userId) {
+        ReturnObject returnObject=new ReturnObject();
+        CouponActivityPoExample activityPoExample=new CouponActivityPoExample();
+        CouponActivityPoExample.Criteria criteria=activityPoExample.createCriteria();
+        criteria.andIdEqualTo(id);
+        criteria.andShopIdEqualTo(shopId);
+        try{
+            CouponActivityPo ca=activityMapper.selectByPrimaryKey(id);
+            if(ca==null)
+                return returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            else if(!ca.getShopId().equals(shopId))
+                return returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+            //上线优惠活动
+            List<CouponActivityPo> activityPo=activityMapper.selectByExample(activityPoExample);
+            if(activityPo==null)//未找到符合条件的优惠活动
+            {
+                return returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            }
+            if(activityPo.get(0).getState().equals((byte)2)){//未找到符合条件的优惠活动
+                return returnObject=new ReturnObject<>(ResponseCode.COUPONACT_STATENOTALLOW,String.format("不可重复删除"));
+            }
+            activityPo.get(0).setState((byte)2);//活动状态修改为2【已删除】
+            activityPo.get(0).setModiBy(userId);//修改者更新
+            int ret = activityMapper.updateByExampleSelective(activityPo.get(0),activityPoExample);
+            if(ret==0){//修改失败
+                logger.debug("updateCouponActivity fail:"+activityPo.toString());
+                returnObject=new ReturnObject<>(ResponseCode.COUPONACT_STATENOTALLOW,String.format("下线优惠活动失败"));
+            }
+            else{//修改活动状态成功
+                logger.debug("updateCouponActivity success:"+activityPo.toString());
+                returnObject =new ReturnObject<>();
+
+            }
+        }
+        catch (DataAccessException e) {
+
+            // 其他数据库错误
+            logger.debug("other sql exception : " + e.getMessage());
+            returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            returnObject = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
+
+        return returnObject;
+    }
     /**
      * 管理员上线己方优惠活动
      * @param shopId
@@ -915,25 +978,26 @@ public class CouponDao implements InitializingBean
         criteria.andIdEqualTo(id);
         criteria.andShopIdEqualTo(shopId);
         try{
+            CouponActivityPo ca=activityMapper.selectByPrimaryKey(id);
+            if(ca==null)
+                return returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            else if(!ca.getShopId().equals(shopId))
+                return returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
             //上线优惠活动
             List<CouponActivityPo> activityPo=activityMapper.selectByExample(activityPoExample);
             if(activityPo==null)//未找到符合条件的优惠活动
             {
-                CouponActivityPo ca=activityMapper.selectByPrimaryKey(id);
-                if(ca==null)
                     return returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-                else if(!ca.getShopId().equals(shopId))
-                    return returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
             }
             if(!activityPo.get(0).getState().equals((byte)0)){//未找到符合条件的优惠活动
-                return returnObject=new ReturnObject<>(ResponseCode.ACTIVITYALTER_INVALID,String.format("不可重复下线"));
+                return returnObject=new ReturnObject<>(ResponseCode.COUPONACT_STATENOTALLOW,String.format("不可重复上线"));
             }
             activityPo.get(0).setState((byte)1);//活动状态修改为1【已上线】
             activityPo.get(0).setModiBy(userId);//修改者更新
             int ret = activityMapper.updateByExampleSelective(activityPo.get(0),activityPoExample);
             if(ret==0){//修改失败
                 logger.debug("updateCouponActivity fail:"+activityPo.toString());
-                returnObject=new ReturnObject<>(ResponseCode.ACTIVITYALTER_INVALID,String.format("下线优惠活动失败"));
+                returnObject=new ReturnObject<>(ResponseCode.COUPONACT_STATENOTALLOW,String.format("下线优惠活动失败"));
             }
             else{//修改活动状态成功
                 logger.debug("updateCouponActivity success:"+activityPo.toString());
@@ -1009,6 +1073,8 @@ public class CouponDao implements InitializingBean
             PageHelper.startPage(page, pageSize);
             logger.debug("page = " + page + "pageSize = " + pageSize);
             PageInfo<CouponActivityByNewCouponRetVo>activityPage=PageInfo.of(retList);
+            activityPage.setPageNum(page);
+            activityPage.setPageSize(pageSize);
             return new ReturnObject<>(activityPage) ;
         }
         catch (DataAccessException e){
@@ -1054,6 +1120,8 @@ public class CouponDao implements InitializingBean
             PageHelper.startPage(page, pageSize);
             logger.debug("page = " + page + "pageSize = " + pageSize);
             PageInfo<CouponActivityByNewCouponRetVo>activityPage=PageInfo.of(retList);
+            activityPage.setPageNum(page);
+            activityPage.setPageSize(pageSize);
             return new ReturnObject<>(activityPage) ;
         }
         catch (DataAccessException e){
@@ -1291,6 +1359,7 @@ public class CouponDao implements InitializingBean
         return activityRules;
 
     }
+
 
 
 }

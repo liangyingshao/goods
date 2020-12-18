@@ -11,10 +11,10 @@ import java.util.Map;
 public class Coupon {
 
     public enum State {
-        UNAVAILABLE(0,"不可用"),
-        AVAILABLE(1,"可用"),
+        UNAVAILABLE(0,"未领取"),
+        AVAILABLE(1,"已领取"),
         USED(2,"已使用"),
-        DISABLED(3,"失效");
+        DISABLED(3,"已失效");
 
         private static final Map<Integer, Coupon.State> stateMap;
 

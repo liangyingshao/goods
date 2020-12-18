@@ -34,8 +34,8 @@ import java.util.List;
  */
 @Api(value = "团购服务", tags = "Groupon")
 @RestController /*Restful的Controller对象*/
-//@RequestMapping(value = "/goods", produces = "application/json;charset=UTF-8")
-@RequestMapping(produces = "application/json;charset=UTF-8")
+@RequestMapping(value = "/goods", produces = "application/json;charset=UTF-8")
+//@RequestMapping(produces = "application/json;charset=UTF-8")
 public class GrouponController {
 
     @Autowired
@@ -56,11 +56,7 @@ public class GrouponController {
      * @return java.lang.Object
      */
     @ApiOperation(value="获得团购活动的所有状态")
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
-    })
     @ApiResponse(code = 0,message = "成功")
-    @Audit
     @GetMapping("/groupons/states")
     public Object getgrouponState() {
         ActivityStatus[] states= ActivityStatus.class.getEnumConstants();

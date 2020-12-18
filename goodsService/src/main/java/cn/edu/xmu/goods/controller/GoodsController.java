@@ -34,8 +34,7 @@ import java.util.Objects;
 
 @Api(value = "商品服务", tags = "goods")
 @RestController /*Restful的Controller对象*/
-//@RequestMapping(value = "/goods", produces = "application/json;charset=UTF-8")
-@RequestMapping( produces = "application/json;charset=UTF-8")
+@RequestMapping(value = "/goods", produces = "application/json;charset=UTF-8")
 public class GoodsController {
 
     private  static  final Logger logger = LoggerFactory.getLogger(GoodsController.class);
@@ -183,7 +182,7 @@ public class GoodsController {
     {
         logger.debug("deleteSku: id = "+ id+" shopId="+shopId);
         ReturnObject retObject=goodsService.deleteSku(shopId,id);
-        return Common.getRetObject(retObject);
+        return Common.decorateReturnObject(retObject);
     }
 
     /**
@@ -221,7 +220,7 @@ public class GoodsController {
         sku.setId(id);
         ReturnObject retObject=goodsService.modifySku(shopId,sku);
         if (retObject.getData() != null) {
-            return Common.getRetObject(retObject);
+            return Common.decorateReturnObject(retObject);
         } else {
             return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }
@@ -253,14 +252,20 @@ public class GoodsController {
                                      @Depart @ApiIgnore @RequestParam(required = false) Long departId)
     {
         if(vo.getBeginTime().isAfter(vo.getEndTime()))return Common.getRetObject(new ReturnObject<>(ResponseCode.Log_Bigger));
+
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != returnObject) {
             return returnObject;
         }
+
+        if(departId!=0&&departId!=shopId)
+            return Common.getRetObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
+
         FloatPrice floatPrice=vo.createFloatPrice();
         floatPrice.setGoodsSkuId(id);
         floatPrice.setValid(FloatPrice.Validation.VALID);
         floatPrice.setCreatedBy(userId);
+        floatPrice.setInvalidBy(userId);
         ReturnObject retObject=goodsService.addFloatPrice(shopId,floatPrice,userId);
         if (retObject.getData() != null) {
             httpServletResponse.setStatus(HttpStatus.CREATED.value());
@@ -483,7 +488,7 @@ public class GoodsController {
             return  Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE), httpServletResponse);
         ReturnObject retObject = goodsService.putGoodsOnSale(shopId,id);
         if (retObject.getData() != null) {
-            return Common.getRetObject(retObject);
+            return Common.decorateReturnObject(retObject);
         } else {
             return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }
@@ -520,7 +525,7 @@ public class GoodsController {
             return Common.getRetObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         ReturnObject retObject = goodsService.putOffGoodsOnSale(shopId,id);
         if (retObject.getData() != null) {
-            return Common.getRetObject(retObject);
+            return Common.decorateReturnObject(retObject);
         } else {
             return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }
