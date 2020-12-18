@@ -1073,6 +1073,8 @@ public class CouponDao implements InitializingBean
             PageHelper.startPage(page, pageSize);
             logger.debug("page = " + page + "pageSize = " + pageSize);
             PageInfo<CouponActivityByNewCouponRetVo>activityPage=PageInfo.of(retList);
+            activityPage.setPageNum(page);
+            activityPage.setPageSize(pageSize);
             return new ReturnObject<>(activityPage) ;
         }
         catch (DataAccessException e){
@@ -1118,6 +1120,8 @@ public class CouponDao implements InitializingBean
             PageHelper.startPage(page, pageSize);
             logger.debug("page = " + page + "pageSize = " + pageSize);
             PageInfo<CouponActivityByNewCouponRetVo>activityPage=PageInfo.of(retList);
+            activityPage.setPageNum(page);
+            activityPage.setPageSize(pageSize);
             return new ReturnObject<>(activityPage) ;
         }
         catch (DataAccessException e){

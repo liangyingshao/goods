@@ -565,7 +565,6 @@ public class ActivityController {
 
     /**
      * CouponActivity 004 查看本店下线的优惠活动列表
-     * @param id
      * @param page
      * @param pageSize
      * @return Object

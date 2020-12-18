@@ -160,6 +160,7 @@ public class GoodsDao {
         logger.debug("page="+page+" pageSize="+pageSize);
         PageInfo<GoodsSku> returns=PageInfo.of(skus);
         returns.setPageNum(page);
+        returns.setPageSize(pageSize);
         return returns;
     }
 

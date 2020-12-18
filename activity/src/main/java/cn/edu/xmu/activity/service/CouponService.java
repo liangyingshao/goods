@@ -55,6 +55,8 @@ public class CouponService {
         List<SkuInfoDTO> skuList = iGoodsService.getSelectSkuListBySkuIdList(idList);
         PageHelper.startPage(page,pageSize);
         PageInfo<SkuInfoDTO> skuInfoDTOPageInfo = PageInfo.of(skuList);
+        skuInfoDTOPageInfo.setPageSize(pageSize);
+        skuInfoDTOPageInfo.setPageNum(page);
         return new ReturnObject<>(skuInfoDTOPageInfo);
     }
 
@@ -102,6 +104,8 @@ public class CouponService {
     public ReturnObject<PageInfo<CouponRetVo>> showCoupons(Long userId, Integer state, Integer page, Integer pageSize)
     {
         PageInfo<CouponRetVo> returnObject= couponDao.showCoupons(userId,state,page,pageSize);
+        returnObject.setPageNum(page);
+        returnObject.setPageSize(pageSize);
         return new ReturnObject<PageInfo<CouponRetVo>>(returnObject);
     }
 
@@ -254,6 +258,8 @@ public class CouponService {
      */
     public ReturnObject<PageInfo<CouponActivityByNewCouponRetVo>> showActivities(Long shopId, Integer timeline, Integer page, Integer pageSize) {
         ReturnObject<PageInfo<CouponActivityByNewCouponRetVo>> returnObject= couponDao.showActivities(shopId,timeline,page,pageSize);
+        returnObject.getData().setPageSize(pageSize);
+        returnObject.getData().setPageNum(page);
         return returnObject;
     }
 
@@ -266,6 +272,8 @@ public class CouponService {
      */
     public ReturnObject<PageInfo<CouponActivityByNewCouponRetVo>> showInvalidCouponActivities(Long shopId, Integer page, Integer pageSize) {
         ReturnObject<PageInfo<CouponActivityByNewCouponRetVo>> returnObject= couponDao.showInvalidCouponActivities(shopId,page,pageSize);
+        returnObject.getData().setPageNum(page);
+        returnObject.getData().setPageSize(pageSize);
         return returnObject;
     }
 
