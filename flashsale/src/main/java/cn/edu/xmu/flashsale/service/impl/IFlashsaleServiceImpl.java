@@ -67,6 +67,7 @@ public class IFlashsaleServiceImpl implements IFlashsaleService {
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
 
+        if(id==null)return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         String key = "FlashSaleItem:" + LocalDateTime.now().toString() + id.toString();
         Set<FlashSaleItemPo> itemSet = redisTemplate.opsForSet().members(key);
         for (FlashSaleItemPo item : itemSet) {
