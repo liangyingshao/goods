@@ -1,9 +1,9 @@
 package cn.edu.xmu.activity.controller;
 
-import cn.edu.xmu.ooad.Application;
+import cn.edu.xmu.activity.ActivityServiceApplication;
+import cn.edu.xmu.activity.LoginVo;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.ResponseCode;
-import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -13,8 +13,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 
-import java.nio.charset.StandardCharsets;
-
 
 /**
  *
@@ -23,23 +21,26 @@ import java.nio.charset.StandardCharsets;
  * @author 24320182203161 Bai Haoyue 白皓月
  * @date: 2020/12/13 19:33
  */
-@SpringBootTest(classes = Application.class)
+@SpringBootTest(classes = ActivityServiceApplication.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @Slf4j
 public class BaiHaoyueTest {
 
     //@Value("${public-test.managementgate}")
-    private String managementGate="192.168.43.73:8881";
+    private String managementGate;
 
     //@Value("${public-test.mallgate}")
-    private String mallGate="192.168.43.73:8880";
+    private String mallGate;
+
     private WebTestClient manageClient;
 
     private WebTestClient mallClient;
 
-
     @BeforeEach
     public void setUp(){
+
+        managementGate="192.168.43.194:8881";
+        mallGate="192.168.43.194:8880";
 
         this.manageClient = WebTestClient.bindToServer()
                 .baseUrl("http://"+managementGate)
@@ -50,40 +51,24 @@ public class BaiHaoyueTest {
                 .baseUrl("http://"+mallGate)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/json;charset=UTF-8")
                 .build();
+
     }
 
-    private String userLogin(String userName, String password) throws Exception{
-
-        JSONObject body = new JSONObject();
-        body.put("userName", userName);
-        body.put("password", password);
-        String requireJson = body.toJSONString();
-        byte[] responseString = mallClient.post().uri("/users/login").bodyValue(requireJson).exchange()
+    private String login(String userName, String password) throws Exception {
+        LoginVo vo = new LoginVo();
+        vo.setUserName(userName);
+        vo.setPassword(password);
+        String requireJson = JacksonUtil.toJson(vo);
+        byte[] ret = manageClient.post().uri("/adminusers/login").bodyValue(requireJson).exchange()
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
+                .jsonPath("$.errmsg").isEqualTo("成功")
                 .returnResult()
                 .getResponseBodyContent();
-        return JSONObject.parseObject(new String(responseString, StandardCharsets.UTF_8)).getString("data");
+        return JacksonUtil.parseString(new String(ret, "UTF-8"), "data");
+        //endregion
     }
-
-    private String adminLogin(String userName, String password) throws Exception{
-
-        JSONObject body = new JSONObject();
-        body.put("userName", userName);
-        body.put("password", password);
-        String requireJson = body.toJSONString();
-        byte[] responseString = manageClient.post().uri("/adminusers/login").bodyValue(requireJson).exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
-                .returnResult()
-                .getResponseBodyContent();
-        return JSONObject.parseObject(new String(responseString, StandardCharsets.UTF_8)).getString("data");
-    }
-
     /** 查看某活动商品
      * 异常1
      * 活动不存在
@@ -95,10 +80,11 @@ public class BaiHaoyueTest {
                 .exchange()
                 .expectStatus().isNotFound()
                 .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_NOTEXIST.getCode())
                 .returnResult()
                 .getResponseBodyContent();
         String expectedResponse1 = "{\n" +
-                "  \"errno\": 504,\n" +
+                "  \"errno\": 504\n" +
 //                "  \"errmsg\": \"操作的资源id不存在\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse1,new String(queryResponseString, "UTF-8"), false);
@@ -112,51 +98,14 @@ public class BaiHaoyueTest {
     public void getcouponsku2() throws Exception {
         byte[] queryResponseString = mallClient.get().uri("/couponactivities/1/skus")
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isNotFound()
                 .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_NOTEXIST.getCode())
                 .returnResult()
                 .getResponseBodyContent();
         String expectedResponse1 = "{\n" +
-                "  \"errno\": 0,\n" +
-                "  \"data\": {\n" +
-                "    \"total\": 3,\n" +
-                "    \"pages\": 1,\n" +
-                "    \"pageSize\": 3,\n" +
-                "    \"page\": 1,\n" +
-                "    \"list\": [\n" +
-                "      {\n" +
-                "        \"id\": 333,\n" +
-                "        \"name\": \"+\",\n" +
-                "        \"sknSn\": null,\n" +
-                "        \"imageUrl\": \"http://47.52.88.176/file/images/201612/file_5866629229288.jpg\",\n" +
-                "        \"inventory\": 100,\n" +
-                "        \"originalPrice\": 3600,\n" +
-                "        \"price\": 3600,\n" +
-                "        \"disable\": false\n" +
-                "      },\n" +
-                "      {\n" +
-                "        \"id\": 444,\n" +
-                "        \"name\": \"+\",\n" +
-                "        \"sknSn\": null,\n" +
-                "        \"imageUrl\": \"http://47.52.88.176/file/images/201808/file_5b74f132d4900.jpg\",\n" +
-                "        \"inventory\": 100,\n" +
-                "        \"originalPrice\": 3499,\n" +
-                "        \"price\": 3499,\n" +
-                "        \"disable\": false\n" +
-                "      },\n" +
-                "      {\n" +
-                "        \"id\": 555,\n" +
-                "        \"name\": \"+\",\n" +
-                "        \"sknSn\": null,\n" +
-                "        \"imageUrl\": \"http://47.52.88.176/file/images/201711/file_5a12f4794a992.jpg\",\n" +
-                "        \"inventory\": 1,\n" +
-                "        \"originalPrice\": 60000,\n" +
-                "        \"price\": 60000,\n" +
-                "        \"disable\": false\n" +
-                "      }\n" +
-                "    ]\n" +
-                "  },\n" +
-//                "  \"errmsg\": \"成功\"\n" +
+                "  \"errno\": 504\n" +
+//                "  \"errmsg\": \"操作的资源id不存在\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse1,new String(queryResponseString, "UTF-8"), false);
     }
@@ -167,17 +116,16 @@ public class BaiHaoyueTest {
     @Test
     @Order(2)
     public void getunderline1() throws Exception {
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE2MjM1NzU1NTlZIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzc4NzUsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM0Mjc1fQ.pPt1eKnY36zI2sZcBbiN57FTdGaq3Pj_CbbXdJUzt2U"
-                //this.adminLogin("13088admin","123456")
-                ;
+        String token = this.login("13088admin","123456");
         byte[] queryResponseString = manageClient.get().uri("/shops/2/couponactivities/invalid").header("authorization",token)
                 .exchange()
                 .expectStatus().isForbidden()
                 .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_OUTSCOPE.getCode())
                 .returnResult()
                 .getResponseBodyContent();
         String expectedResponse1 = "{\n" +
-                "  \"errno\": 505,\n" +
+                "  \"errno\": 505\n" +
 //                "  \"errmsg\": \"操作的资源id不是自己的对象\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse1,new String(queryResponseString, "UTF-8"), false);
@@ -189,9 +137,7 @@ public class BaiHaoyueTest {
     @Test
     @Order(3)
     public void getunderline2() throws Exception {
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE2MjM1NzU1NTlZIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgxMzc4NzUsInVzZXJJZCI6MSwiaWF0IjoxNjA4MTM0Mjc1fQ.pPt1eKnY36zI2sZcBbiN57FTdGaq3Pj_CbbXdJUzt2U"
-                //this.adminLogin("13088admin","123456")
-                ;
+        String token = this.login("13088admin","123456");
         byte[] queryResponseString = manageClient.get().uri("/shops/0/couponactivities/invalid").header("authorization",token)
                 .exchange()
                 .expectStatus().isOk()
@@ -201,10 +147,10 @@ public class BaiHaoyueTest {
         String expectedResponse1 = "{\n" +
                 "  \"errno\": 0,\n" +
                 "  \"data\": {\n" +
-                "    \"total\": 3,\n" +
+                "    \"total\": 4,\n" +
                 "    \"pages\": 1,\n" +
-                "    \"pageSize\": 3,\n" +
-                "    \"page\": 1,\n" +
+//                "    \"pageSize\": 10,\n" +
+//                "    \"page\": 1,\n" +
                 "    \"list\": [\n" +
                 "      {\n" +
                 "        \"id\": 1,\n" +
@@ -232,9 +178,18 @@ public class BaiHaoyueTest {
                 "        \"couponTime\": \"2020-12-14 08:28:50\",\n" +
                 "        \"quantity\": 0,\n" +
                 "        \"imageUrl\": null\n" +
+                "      },\n" +
+                "      {\n" +
+                "        \"id\": 2158,\n" +
+                "        \"name\": \"双十一\",\n" +
+                "        \"beginTime\": \"2021-01-20 22:46:38\",\n" +
+                "        \"endTime\": \"2021-01-30 22:46:55\",\n" +
+                "        \"couponTime\": \"2021-01-10 22:47:01\",\n" +
+                "        \"quantity\": 0,\n" +
+                "        \"imageUrl\": null\n" +
                 "      }\n" +
                 "    ]\n" +
-                "  },\n" +
+                "  }\n" +
 //                "  \"errmsg\": \"成功\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse1,new String(queryResponseString, "UTF-8"), false);
@@ -246,7 +201,7 @@ public class BaiHaoyueTest {
     @Test
     @Order(4)
     public void getunderline3() throws Exception {
-        String token = this.adminLogin("13088admin","123456");
+        String token = this.login("13088admin","123456");
         byte[] queryResponseString = manageClient.get().uri((uriBuilder -> uriBuilder.path("/shops/0/couponactivities/invalid")
                 .queryParam("page",2)
                 .queryParam("pageSize",1)
@@ -260,22 +215,22 @@ public class BaiHaoyueTest {
         String expectedResponse1 = "{\n" +
                 "  \"errno\": 0,\n" +
                 "  \"data\": {\n" +
-                "    \"total\": 3,\n" +
-                "    \"pages\": 3,\n" +
-                "    \"pageSize\": 1,\n" +
-                "    \"page\": 2,\n" +
+                "    \"total\": 4,\n" +
+                "    \"pages\": 4,\n" +
+//                "    \"pageSize\": 1,\n" +
+//                "    \"page\": 2,\n" +
                 "    \"list\": [\n" +
                 "      {\n" +
                 "        \"id\": 4,\n" +
                 "        \"name\": \"string\",\n" +
-                //      "        \"beginTime\": \"2022-12-13T08:02:14\",\n" +
-                //      "        \"endTime\": \"2024-12-13T08:02:14\",\n" +
-                //     "        \"couponTime\": \"2022-12-13T08:02:14\",\n" +
+                "        \"beginTime\": \"2022-12-13 08:02:14\",\n" +
+                "        \"endTime\": \"2024-12-13 08:02:14\",\n" +
+                "        \"couponTime\": \"2022-12-13 08:02:14\",\n" +
                 "        \"quantity\": 0,\n" +
                 "        \"imageUrl\": null\n" +
                 "      }\n" +
                 "    ]\n" +
-                "  },\n" +
+                "  }\n" +
 //                "  \"errmsg\": \"成功\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse1,new String(queryResponseString, "UTF-8"), false);
@@ -293,6 +248,7 @@ public class BaiHaoyueTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
                 .returnResult()
                 .getResponseBodyContent();
         String expectedResponse1 = "{\n" +
@@ -300,10 +256,10 @@ public class BaiHaoyueTest {
                 "  \"data\": {\n" +
                 "    \"total\": 0,\n" +
                 "    \"pages\": 0,\n" +
-                "    \"pageSize\": 0,\n" +
-                "    \"page\": 1,\n" +
+//                "    \"pageSize\": 10,\n" +
+//                "    \"page\": 1,\n" +
                 "    \"list\": []\n" +
-                "  },\n" +
+                "  }\n" +
 //                "  \"errmsg\": \"成功\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse1,new String(queryResponseString, "UTF-8"), false);
@@ -323,14 +279,15 @@ public class BaiHaoyueTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
                 .returnResult()
                 .getResponseBodyContent();
         String expectedResponse1 = "{\n" +
                 "  \"errno\": 0,\n" +
                 "  \"data\": {\n" +
-                "    \"total\": 1,\n" +
+                "    \"total\": 3,\n" +
                 "    \"pages\": 1,\n" +
-                "    \"pageSize\": 1,\n" +
+                "    \"pageSize\": 10,\n" +
                 "    \"page\": 1,\n" +
                 "    \"list\": [\n" +
                 "      {\n" +
@@ -341,9 +298,27 @@ public class BaiHaoyueTest {
                 "        \"couponTime\": \"2020-12-14 00:28:50\",\n" +
                 "        \"quantity\": 0,\n" +
                 "        \"imageUrl\": null\n" +
+                "      },\n" +
+                "      {\n" +
+                "        \"id\": 20001,\n" +
+                "        \"name\": \"cpz1\",\n" +
+                "        \"beginTime\": \"2020-11-01 03:22:30\",\n" +
+                "        \"endTime\": \"2021-01-31 03:22:39\",\n" +
+                "        \"couponTime\": \"2020-12-01 03:22:52\",\n" +
+                "        \"quantity\": 100,\n" +
+                "        \"imageUrl\": null\n" +
+                "      },\n" +
+                "      {\n" +
+                "        \"id\": 20002,\n" +
+                "        \"name\": \"cpz2\",\n" +
+                "        \"beginTime\": \"2020-11-01 03:31:24\",\n" +
+                "        \"endTime\": \"2021-01-31 03:31:38\",\n" +
+                "        \"couponTime\": \"2020-12-01 03:31:44\",\n" +
+                "        \"quantity\": 200,\n" +
+                "        \"imageUrl\": null\n" +
                 "      }\n" +
                 "    ]\n" +
-                "  },\n" +
+                "  }\n" +
 //                "  \"errmsg\": \"成功\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse1,new String(queryResponseString, "UTF-8"), false);
@@ -357,7 +332,7 @@ public class BaiHaoyueTest {
     @Test
     @Order(7)
     public void createCouponActivity1() throws Exception {
-        String token1 = this.adminLogin("13088admin", "123456");
+        String token1 = this.login("13088admin", "123456");
         String json="{\n" +
                 "  \"beginTime\": \"2022-12-15T07:05:33.976Z\",\n" +
                 "  \"couponTime\": \"2022-12-15T07:05:33.976Z\",\n" +
@@ -374,10 +349,11 @@ public class BaiHaoyueTest {
                 .exchange()
                 .expectStatus().isForbidden()
                 .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_OUTSCOPE.getCode())
                 .returnResult()
                 .getResponseBodyContent();
         String expectedResponse="{\n" +
-                "  \"errno\": 505,\n" +
+                "  \"errno\": 505\n" +
 //                "  \"errmsg\": \"操作的资源id不是自己的对象\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse, new String(responseString1, "UTF-8"), false);
@@ -389,11 +365,11 @@ public class BaiHaoyueTest {
     @Test
     @Order(8)
     public void createCouponActivity2() throws Exception {
-        String token1 = this.adminLogin("13088admin", "123456");
+        String token1 = this.login("13088admin", "123456");
         String json="{\n" +
-                "  \"beginTime\": \"2022-12-15T07:05:33.976Z\",\n" +
-                "  \"couponTime\": \"2022-12-15T07:05:33.976Z\",\n" +
-                "  \"endTime\": \"2023-12-15T07:05:33.976Z\",\n" +
+                "  \"beginTime\": \"2021-12-17T08:39:13.741Z\",\n" +
+                "  \"couponTime\": \"2021-12-17T08:39:13.741Z\",\n" +
+                "  \"endTime\": \"2022-12-17T08:39:13.741Z\",\n" +
                 "  \"name\": \"string\",\n" +
                 "  \"quantitiyType\": 0,\n" +
                 "  \"quantity\": 0,\n" +
@@ -404,7 +380,7 @@ public class BaiHaoyueTest {
                 .header("authorization",token1)
                 .bodyValue(json)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectBody()
                 .returnResult()
                 .getResponseBodyContent();
@@ -412,11 +388,11 @@ public class BaiHaoyueTest {
         String expectedResponse =   "{\n" +
                 "  \"errno\": 0,\n" +
                 "  \"data\": {\n" +
-                "    \"id\": 10,\n" +
+                "    \"id\": 20007,\n" +
                 "    \"name\": \"string\",\n" +
-                "    \"beginTime\": \"2022-12-15 07:05:33.976\",\n" +
-                "    \"endTime\": \"2023-12-15 07:05:33.976\",\n" +
-                "    \"couponTime\": \"2022-12-15 07:05:33.976\",\n" +
+                "    \"beginTime\": \"2021-12-17 08:39:13\",\n" +
+                "    \"endTime\": \"2022-12-17 08:39:13\",\n" +
+                "    \"couponTime\": \"2021-12-17 08:39:13\",\n" +
                 "    \"state\": 0,\n" +
                 "    \"shopId\": 0,\n" +
                 "    \"quantity\": 0,\n" +
@@ -431,9 +407,10 @@ public class BaiHaoyueTest {
                 "      \"userId\": null,\n" +
                 "      \"userName\": null\n" +
                 "    },\n" +
+//                "    \"gmtCreate\": \"2020-12-17 16:51:24\",\n" +
                 "    \"gmtModified\": null,\n" +
                 "    \"quantitiyType\": 0\n" +
-                "  },\n" +
+                "  }\n" +
 //                "  \"errmsg\": \"成功\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse, new String(responseString, "UTF-8"), false);
@@ -446,7 +423,7 @@ public class BaiHaoyueTest {
     @Test
     @Order(9)
     public void modifyCouponActivity1() throws Exception {
-        String token = this.adminLogin("13088admin", "123456");
+        String token = this.login("13088admin", "123456");
         String json="{\n" +
                 "  \"beginTime\": \"2022-12-15T07:41:46.909Z\",\n" +
                 "  \"endTime\": \"2023-12-15T07:41:46.909Z\",\n" +
@@ -464,7 +441,7 @@ public class BaiHaoyueTest {
                 .getResponseBodyContent();
 
         String expectedResponse =  "{\n" +
-                "  \"errno\": 505,\n" +
+                "  \"errno\": 505\n" +
 //                "  \"errmsg\": \"操作的资源id不是自己的对象\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse, new String(responseString, "UTF-8"), false);
@@ -477,7 +454,7 @@ public class BaiHaoyueTest {
     @Test
     @Order(10)
     public void modifyCouponActivity2() throws Exception {
-        String token = this.adminLogin("13088admin", "123456");
+        String token = this.login("13088admin", "123456");
         String json="{\n" +
                 "  \"beginTime\": \"2022-12-15T07:41:46.909Z\",\n" +
                 "  \"endTime\": \"2023-12-15T07:41:46.909Z\",\n" +
@@ -495,7 +472,7 @@ public class BaiHaoyueTest {
                 .getResponseBodyContent();
 
         String expectedResponse =  "{\n" +
-                "  \"errno\": 505,\n" +
+                "  \"errno\": 505\n" +
 //                "  \"errmsg\": \"操作的资源id不是自己的对象\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse, new String(responseString, "UTF-8"), false);
@@ -508,10 +485,10 @@ public class BaiHaoyueTest {
     @Order(11)
     @Test
     public void modifyCouponActivity3() throws Exception {
-        String token = this.adminLogin("13088admin", "123456");
+        String token = this.login("13088admin", "123456");
         String json="{\n" +
-                "  \"beginTime\": \"2020-12-16T16:33:50\",\n" +
-                "  \"endTime\": \"2021-12-29T08:28:50\",\n" +
+                "  \"beginTime\": \"2020-12-31T16:33:50\",\n" +
+                "  \"endTime\": \"2021-12-31T21:28:50\",\n" +
                 "  \"name\": \"modify\",\n" +
                 "  \"quantity\": 0,\n" +
                 "  \"strategy\": \"string\"\n" +
@@ -526,7 +503,7 @@ public class BaiHaoyueTest {
                 .getResponseBodyContent();
 
         String expectedResponse =  "{\n" +
-                "  \"errno\": 0,\n" +
+                "  \"errno\": 0\n" +
 //                "  \"errmsg\": \"成功\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse, new String(responseString1, "UTF-8"), false);
@@ -544,9 +521,9 @@ public class BaiHaoyueTest {
                 "  \"data\": {\n" +
                 "    \"id\": 9,\n" +
                 "    \"name\": \"modify\",\n" +
-                "    \"beginTime\": \"2020-12-16 08:33:50\",\n" +
-                "    \"endTime\": \"2021-12-29 00:28:50\",\n" +
-//                "    \"couponTime\": \"2020-12-12T08:28:50\",\n" +
+                "    \"beginTime\": \"2020-12-31 08:33:50\",\n" +
+                "    \"endTime\": \"2021-12-31 13:28:50\",\n" +
+//                "    \"couponTime\": \"2020-12-14 00:28:50\",\n" +
                 "    \"state\": 0,\n" +
                 "    \"shopId\": 0,\n" +
                 "    \"quantity\": 0,\n" +
@@ -561,10 +538,10 @@ public class BaiHaoyueTest {
                 "      \"userId\": 1,\n" +
                 "      \"userName\": \"13088admin\"\n" +
                 "    },\n" +
-                //               "    \"gmtCreate\": \"2020-12-12T08:33:31\",\n" +
-                //               "    \"gmtModified\": \"2020-12-15T08:27:24\",\n" +
+//                "    \"gmtCreate\": \"2020-12-13 16:33:31\",\n" +
+//                "    \"gmtModified\": \"2020-12-17 09:33:08\",\n" +
                 "    \"quantitiyType\": 0\n" +
-                "  },\n" +
+                "  }\n" +
 //                "  \"errmsg\": \"成功\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse2, new String(responseString2, "UTF-8"), false);
@@ -577,18 +554,18 @@ public class BaiHaoyueTest {
     @Order(12)
     @Test
     public void offshelves1() throws Exception {
-        String token = this.adminLogin("13088admin","123456");
+        String token = this.login("13088admin","123456");
         byte[] ret = manageClient.put()
                 .uri("/shops/0/couponactivities/1/offshelves")
                 .header("authorization",token)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isBadRequest()
                 .expectBody()
                 .returnResult()
                 .getResponseBodyContent();
         String responseString = new String(ret, "UTF-8");
         String expectedResponse = "{\n" +
-                "  \"errno\": 904,\n" +
+                "  \"errno\": 920\n" +
 //                "  \"errmsg\": \"优惠活动状态禁止\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse, responseString, false);
@@ -600,18 +577,18 @@ public class BaiHaoyueTest {
     @Test
     @Order(13)
     public void offshelves2() throws Exception {
-        String token = this.adminLogin("13088admin","123456");
+        String token = this.login("13088admin","123456");
         byte[] ret = manageClient.put()
                 .uri("/shops/0/couponactivities/3/offshelves")
                 .header("authorization",token)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isBadRequest()
                 .expectBody()
                 .returnResult()
                 .getResponseBodyContent();
         String responseString = new String(ret, "UTF-8");
         String expectedResponse = "{\n" +
-                "  \"errno\": 904,\n" +
+                "  \"errno\": 904\n" +
 //                "  \"errmsg\": \"优惠活动状态禁止\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse, responseString, false);
@@ -623,7 +600,7 @@ public class BaiHaoyueTest {
     @Test
     @Order(14)
     public void offshelves3() throws Exception {
-        String token = this.adminLogin("13088admin","123456");
+        String token = this.login("13088admin","123456");
         byte[] ret = manageClient.put()
                 .uri("/shops/2/couponactivities/1/offshelves")
                 .header("authorization",token)
@@ -634,7 +611,7 @@ public class BaiHaoyueTest {
                 .getResponseBodyContent();
         String responseString = new String(ret, "UTF-8");
         String expectedResponse = "{\n" +
-                "  \"errno\": 505,\n" +
+                "  \"errno\": 505\n" +
 //                "  \"errmsg\": \"操作的资源id不是自己的对象\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse, responseString, false);
@@ -646,7 +623,7 @@ public class BaiHaoyueTest {
     @Test
     @Order(15)
     public void offshelves4() throws Exception {
-        String token = this.adminLogin("13088admin","123456");
+        String token = this.login("13088admin","123456");
         byte[] ret = manageClient.put()
                 .uri("/shops/0/couponactivities/0/offshelves")
                 .header("authorization",token)
@@ -657,7 +634,7 @@ public class BaiHaoyueTest {
                 .getResponseBodyContent();
         String responseString = new String(ret, "UTF-8");
         String expectedResponse = "{\n" +
-                "  \"errno\": 504,\n" +
+                "  \"errno\": 504\n" +
 //                "  \"errmsg\": \"操作的资源id不存在\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse, responseString, false);
@@ -669,7 +646,7 @@ public class BaiHaoyueTest {
     @Test
     @Order(16)
     public void offshelves5() throws Exception {
-        String token = this.adminLogin("13088admin","123456");
+        String token = this.login("13088admin","123456");
         byte[] ret = manageClient.put()
                 .uri("/shops/0/couponactivities/7/offshelves")
                 .header("authorization",token)
@@ -680,7 +657,7 @@ public class BaiHaoyueTest {
                 .getResponseBodyContent();
         String responseString = new String(ret, "UTF-8");
         String expectedResponse = "{\n" +
-                "  \"errno\": 505,\n" +
+                "  \"errno\": 505\n" +
 //                "  \"errmsg\": \"操作的资源id不是自己的对象\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse, responseString, false);
@@ -692,7 +669,7 @@ public class BaiHaoyueTest {
     @Test
     @Order(17)
     public void offshelves6() throws Exception {
-        String token = this.adminLogin("13088admin","123456");
+        String token = this.login("13088admin","123456");
         byte[] ret = manageClient.put()
                 .uri("/shops/0/couponactivities/2/offshelves")
                 .header("authorization",token)
@@ -703,7 +680,7 @@ public class BaiHaoyueTest {
                 .getResponseBodyContent();
         String responseString = new String(ret, "UTF-8");
         String expectedResponse = "{\n" +
-                "  \"errno\": 0,\n" +
+                "  \"errno\": 0\n" +
 //                "  \"errmsg\": \"成功\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse, responseString, false);
@@ -740,7 +717,7 @@ public class BaiHaoyueTest {
                 //              "    \"gmtCreate\": \"2020-12-13T08:09:52\",\n" +
                 //              "    \"gmtModified\": \"2020-12-13T08:14:54\",\n" +
                 "    \"quantitiyType\": 0\n" +
-                "  },\n" +
+                "  }\n" +
 //                "  \"errmsg\": \"成功\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse2, new String(responseString2, "UTF-8"), false);
@@ -752,18 +729,18 @@ public class BaiHaoyueTest {
     @Test
     @Order(18)
     public void onshelves1() throws Exception {
-        String token = this.adminLogin("13088admin","123456");
+        String token = this.login("13088admin","123456");
         byte[] ret = manageClient.put()
                 .uri("/shops/0/couponactivities/5/onshelves")
                 .header("authorization",token)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isBadRequest()
                 .expectBody()
                 .returnResult()
                 .getResponseBodyContent();
         String responseString = new String(ret, "UTF-8");
         String expectedResponse = "{\n" +
-                "  \"errno\": 904,\n" +
+                "  \"errno\": 920\n" +
 //                "  \"errmsg\": \"优惠活动状态禁止\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse, responseString, false);
@@ -775,18 +752,18 @@ public class BaiHaoyueTest {
     @Test
     @Order(19)
     public void onshelves2() throws Exception {
-        String token = this.adminLogin("13088admin","123456");
+        String token = this.login("13088admin","123456");
         byte[] ret = manageClient.put()
                 .uri("/shops/0/couponactivities/6/onshelves")
                 .header("authorization",token)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isBadRequest()
                 .expectBody()
                 .returnResult()
                 .getResponseBodyContent();
         String responseString = new String(ret, "UTF-8");
         String expectedResponse = "{\n" +
-                "  \"errno\": 904,\n" +
+                "  \"errno\": 904\n" +
 //                "  \"errmsg\": \"优惠活动状态禁止\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse, responseString, false);
@@ -798,7 +775,7 @@ public class BaiHaoyueTest {
     @Test
     @Order(20)
     public void onshelves3() throws Exception {
-        String token = this.adminLogin("13088admin","123456");
+        String token = this.login("13088admin","123456");
         byte[] ret = manageClient.put()
                 .uri("/shops/2/couponactivities/1/onshelves")
                 .header("authorization",token)
@@ -809,7 +786,7 @@ public class BaiHaoyueTest {
                 .getResponseBodyContent();
         String responseString = new String(ret, "UTF-8");
         String expectedResponse ="{\n" +
-                "  \"errno\": 505,\n" +
+                "  \"errno\": 505\n" +
 //                "  \"errmsg\": \"操作的资源id不是自己的对象\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse, responseString, false);
@@ -821,7 +798,7 @@ public class BaiHaoyueTest {
     @Test
     @Order(21)
     public void onshelves4() throws Exception {
-        String token = this.adminLogin("13088admin","123456");
+        String token = this.login("13088admin","123456");
         byte[] ret = manageClient.put()
                 .uri("/shops/0/couponactivities/0/onshelves")
                 .header("authorization",token)
@@ -832,7 +809,7 @@ public class BaiHaoyueTest {
                 .getResponseBodyContent();
         String responseString = new String(ret, "UTF-8");
         String expectedResponse = "{\n" +
-                "  \"errno\": 504,\n" +
+                "  \"errno\": 504\n" +
 //                "  \"errmsg\": \"操作的资源id不存在\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse, responseString, false);
@@ -844,7 +821,7 @@ public class BaiHaoyueTest {
     @Test
     @Order(22)
     public void onshelves5() throws Exception {
-        String token = this.adminLogin("13088admin","123456");
+        String token = this.login("13088admin","123456");
         byte[] ret = manageClient.put()
                 .uri("/shops/0/couponactivities/7/onshelves")
                 .header("authorization",token)
@@ -855,7 +832,7 @@ public class BaiHaoyueTest {
                 .getResponseBodyContent();
         String responseString = new String(ret, "UTF-8");
         String expectedResponse = "{\n" +
-                "  \"errno\": 505,\n" +
+                "  \"errno\": 505\n" +
 //                "  \"errmsg\": \"操作的资源id不是自己的对象\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse, responseString, false);
@@ -867,7 +844,7 @@ public class BaiHaoyueTest {
     @Test
     @Order(23)
     public void onshelves6() throws Exception {
-        String token = this.adminLogin("13088admin","123456");
+        String token = this.login("13088admin","123456");
         byte[] ret = manageClient.put()
                 .uri("/shops/0/couponactivities/4/onshelves")
                 .header("authorization",token)
@@ -878,7 +855,7 @@ public class BaiHaoyueTest {
                 .getResponseBodyContent();
         String responseString = new String(ret, "UTF-8");
         String expectedResponse = "{\n" +
-                "  \"errno\": 0,\n" +
+                "  \"errno\": 0\n" +
 //                "  \"errmsg\": \"成功\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse, responseString, false);
@@ -915,7 +892,7 @@ public class BaiHaoyueTest {
                 //              "    \"gmtCreate\": \"2020-12-13T08:09:52\",\n" +
                 //              "    \"gmtModified\": \"2020-12-13T08:14:54\",\n" +
                 "    \"quantitiyType\": 0\n" +
-                "  },\n" +
+                "  }\n" +
 //                "  \"errmsg\": \"成功\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse2, new String(responseString2, "UTF-8"), false);
@@ -927,18 +904,18 @@ public class BaiHaoyueTest {
     @Test
     @Order(24)
     public void delete1() throws Exception {
-        String token = this.adminLogin("13088admin","123456");
+        String token = this.login("13088admin","123456");
         byte[] ret = manageClient.delete()
                 .uri("/shops/0/couponactivities/8")
                 .header("authorization",token)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isBadRequest()
                 .expectBody()
                 .returnResult()
                 .getResponseBodyContent();
         String responseString = new String(ret, "UTF-8");
         String expectedResponse =  "{\n" +
-                "  \"errno\": 904,\n" +
+                "  \"errno\": 904\n" +
 //                "  \"errmsg\": \"优惠活动状态禁止\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse, responseString, false);
@@ -950,18 +927,18 @@ public class BaiHaoyueTest {
     @Test
     @Order(25)
     public void delete2() throws Exception {
-        String token = this.adminLogin("13088admin","123456");
+        String token = this.login("13088admin","123456");
         byte[] ret = manageClient.delete()
                 .uri("/shops/0/couponactivities/3")
                 .header("authorization",token)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isBadRequest()
                 .expectBody()
                 .returnResult()
                 .getResponseBodyContent();
         String responseString = new String(ret, "UTF-8");
         String expectedResponse =  "{\n" +
-                "  \"errno\": 904,\n" +
+                "  \"errno\": 920\n" +
 //                "  \"errmsg\": \"优惠活动状态禁止\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse, responseString, false);
@@ -973,7 +950,7 @@ public class BaiHaoyueTest {
     @Test
     @Order(26)
     public void delete3() throws Exception {
-        String token = this.adminLogin("13088admin","123456");
+        String token = this.login("13088admin","123456");
         byte[] ret = manageClient.delete()
                 .uri("/shops/2/couponactivities/1")
                 .header("authorization",token)
@@ -984,7 +961,7 @@ public class BaiHaoyueTest {
                 .getResponseBodyContent();
         String responseString = new String(ret, "UTF-8");
         String expectedResponse = "{\n" +
-                "  \"errno\": 505,\n" +
+                "  \"errno\": 505\n" +
 //                "  \"errmsg\": \"操作的资源id不是自己的对象\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse, responseString, false);
@@ -996,7 +973,7 @@ public class BaiHaoyueTest {
     @Test
     @Order(27)
     public void delete4() throws Exception {
-        String token = this.adminLogin("13088admin","123456");
+        String token = this.login("13088admin","123456");
         byte[] ret = manageClient.delete()
                 .uri("/shops/0/couponactivities/0")
                 .header("authorization",token)
@@ -1007,7 +984,7 @@ public class BaiHaoyueTest {
                 .getResponseBodyContent();
         String responseString = new String(ret, "UTF-8");
         String expectedResponse= "{\n" +
-                "  \"errno\": 504,\n" +
+                "  \"errno\": 504\n" +
 //                "  \"errmsg\": \"操作的资源id不存在\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse, responseString, false);
@@ -1019,7 +996,7 @@ public class BaiHaoyueTest {
     @Test
     @Order(28)
     public void delete5() throws Exception {
-        String token = this.adminLogin("13088admin","123456");
+        String token = this.login("13088admin","123456");
         byte[] ret = manageClient.delete()
                 .uri("/shops/0/couponactivities/7")
                 .header("authorization",token)
@@ -1030,7 +1007,7 @@ public class BaiHaoyueTest {
                 .getResponseBodyContent();
         String responseString = new String(ret, "UTF-8");
         String expectedResponse = "{\n" +
-                "  \"errno\": 505,\n" +
+                "  \"errno\": 505\n" +
 //                "  \"errmsg\": \"操作的资源id不是自己的对象\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse, responseString, false);
@@ -1042,7 +1019,7 @@ public class BaiHaoyueTest {
     @Test
     @Order(29)
     public void delete6() throws Exception {
-        String token = this.adminLogin("13088admin","123456");
+        String token = this.login("13088admin","123456");
         byte[] ret = manageClient.delete()
                 .uri("/shops/0/couponactivities/1")
                 .header("authorization",token)
@@ -1053,7 +1030,7 @@ public class BaiHaoyueTest {
                 .getResponseBodyContent();
         String responseString = new String(ret, "UTF-8");
         String expectedResponse = "{\n" +
-                "  \"errno\": 0,\n" +
+                "  \"errno\": 0\n" +
 //                "  \"errmsg\": \"成功\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse, responseString, false);
@@ -1090,7 +1067,7 @@ public class BaiHaoyueTest {
                 //              "    \"gmtCreate\": \"2020-12-13T08:09:52\",\n" +
                 //              "    \"gmtModified\": \"2020-12-13T08:14:54\",\n" +
                 "    \"quantitiyType\": 0\n" +
-                "  },\n" +
+                "  }\n" +
 //                "  \"errmsg\": \"成功\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse2, new String(responseString2, "UTF-8"), false);
@@ -1102,7 +1079,7 @@ public class BaiHaoyueTest {
     @Test
     @Order(30)
     public void getdetail1() throws Exception {
-        String token = this.adminLogin("13088admin","123456");
+        String token = this.login("13088admin","123456");
         byte[] queryResponseString = manageClient.get().uri("/shops/0/couponactivities/0")
                 .header("authorization",token)
                 .exchange()
@@ -1111,7 +1088,7 @@ public class BaiHaoyueTest {
                 .returnResult()
                 .getResponseBodyContent();
         String expectedResponse1 = "{\n" +
-                "  \"errno\": 504,\n" +
+                "  \"errno\": 504\n" +
 //                "  \"errmsg\": \"操作的资源id不存在\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse1,new String(queryResponseString, "UTF-8"), false);
@@ -1123,7 +1100,7 @@ public class BaiHaoyueTest {
     @Test
     @Order(31)
     public void getdetail2() throws Exception {
-        String token = this.adminLogin("13088admin","123456");
+        String token = this.login("13088admin","123456");
         byte[] queryResponseString = manageClient.get().uri("/shops/0/couponactivities/7")
                 .header("authorization",token)
                 .exchange()
@@ -1132,7 +1109,7 @@ public class BaiHaoyueTest {
                 .returnResult()
                 .getResponseBodyContent();
         String expectedResponse1 = "{\n" +
-                "  \"errno\": 505,\n" +
+                "  \"errno\": 505\n" +
 //                "  \"errmsg\": \"操作的资源id不是自己的对象\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse1,new String(queryResponseString, "UTF-8"), false);
@@ -1144,7 +1121,7 @@ public class BaiHaoyueTest {
     @Test
     @Order(32)
     public void getdetail3() throws Exception {
-        String token = this.adminLogin("13088admin","123456");
+        String token = this.login("13088admin","123456");
         byte[] queryResponseString = manageClient.get().uri("/shops/0/couponactivities/6")
                 .header("authorization",token)
                 .exchange()
@@ -1177,11 +1154,10 @@ public class BaiHaoyueTest {
                 //          "    \"gmtCreate\": \"2020-12-10T16:09:54\",\n" +
                 //          "    \"gmtModified\": \"2020-12-13T00:50:57\",\n" +
                 "    \"quantitiyType\": 0\n" +
-                "  },\n" +
+                "  }\n" +
 //                "  \"errmsg\": \"成功\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedResponse1,new String(queryResponseString, "UTF-8"), false);
     }
 
 }
-

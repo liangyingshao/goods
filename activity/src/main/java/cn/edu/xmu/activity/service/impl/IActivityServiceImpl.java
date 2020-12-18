@@ -9,11 +9,13 @@ import cn.edu.xmu.oomall.goods.model.CouponInfoDTO;
 import cn.edu.xmu.oomall.goods.model.GoodsDetailDTO;
 import cn.edu.xmu.oomall.goods.model.PresaleDTO;
 import cn.edu.xmu.oomall.goods.service.IActivityService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
+@Slf4j
 @DubboService
 public class IActivityServiceImpl implements IActivityService {
 

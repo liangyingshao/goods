@@ -133,15 +133,13 @@ public class GoodsDao {
      * @param pageSize
      * @return PageInfo<GoodsSkuPo>
      */
-    public PageInfo<GoodsSkuRetVo> getSkuList(Long shopId, String skuSn, Long spuId, String spuSn, Integer page, Integer pageSize)
+    public PageInfo<GoodsSku> getSkuList(Long shopId, String skuSn, Long spuId, String spuSn, Integer page, Integer pageSize)
     {
         GoodsSkuPoExample skuExample=new GoodsSkuPoExample();
         GoodsSkuPoExample.Criteria skuCriteria=skuExample.createCriteria();
         if(skuSn!=null&&!skuSn.isBlank())skuCriteria.andSkuSnEqualTo(skuSn);
         if(spuId!=null)skuCriteria.andGoodsSpuIdEqualTo(spuId);
         List<GoodsSkuPo> skuPos=new ArrayList<>();
-        PageHelper.startPage(page,pageSize);
-        logger.debug("page="+page+" pageSize="+pageSize);
         if((spuSn!=null&&!spuSn.isBlank())||shopId!=null)
         {
             GoodsSpuPoExample spuExample=new GoodsSpuPoExample();
@@ -158,7 +156,9 @@ public class GoodsDao {
         else skuPos=skuMapper.selectByExample(skuExample);
         List<GoodsSku>skus=skuPos.stream().map(GoodsSku::new).collect(Collectors.toList());
         List<GoodsSkuRetVo> ret = skus.stream().map(GoodsSkuRetVo::new).collect(Collectors.toList());
-        PageInfo<GoodsSkuRetVo> returns=new PageInfo<GoodsSkuRetVo>(ret);
+        PageHelper.startPage(page,pageSize);
+        logger.debug("page="+page+" pageSize="+pageSize);
+        PageInfo<GoodsSku> returns=new PageInfo<GoodsSku>(skus);
         returns.setPageNum(page);
         return returns;
     }
@@ -418,7 +418,7 @@ public class GoodsDao {
      * @param sku
      * @return ReturnObject<GoodsSkuRetVo>
      */
-    public ReturnObject<GoodsSkuRetVo> createSKU(Long shopId, GoodsSku sku)
+    public ReturnObject<GoodsSku> createSKU(Long shopId, GoodsSku sku)
     {
         //SPU存在
         GoodsSpuPo spuPo=spuMapper.selectByPrimaryKey(sku.getGoodsSpuId());
@@ -437,11 +437,6 @@ public class GoodsDao {
         for(GoodsSkuPo skuPo:nowSkuPos)
             if(skuPo.getName().equals(sku.getName()))return new ReturnObject<>(ResponseCode.SKUSN_SAME,"SKU规格重复："+sku.getName());
 
-        //更新redis
-        String key="sku_"+sku.getId();
-        redisTemplate.opsForHash().delete(key,"quantity");
-        redisTemplate.opsForHash().put(key,"quantity",sku.getInventory());
-        redisTemplate.opsForHash().put(key,"price",sku.getOriginalPrice());
         GoodsSkuPo skuPo=sku.getNewGoodsSkuPo();
         skuPo.setGmtCreate(LocalDateTime.now());
         skuPo.setGmtModified(LocalDateTime.now());
@@ -456,6 +451,7 @@ public class GoodsDao {
             else {
                 //修改成功
                 logger.debug("createSku: insert floatPrice = " + skuPo.toString());
+
                 //检验
                 GoodsSkuPoExample checkSkuExample=new GoodsSkuPoExample();
                 GoodsSkuPoExample.Criteria criteria=checkSkuExample.createCriteria();
@@ -472,11 +468,16 @@ public class GoodsDao {
                 List<GoodsSkuPo> checkSkuPo=skuMapper.selectByExample(checkSkuExample);
                 if(checkSkuPo.size()==0)
                     return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("floatPrice字段不合法：" + checkSkuExample.toString()));
-                else {//构造FloatPriceRetVo
+                else {
+                    //更新redis
+                    String key="sku_"+sku.getId();
+                    redisTemplate.opsForHash().put(key,"quantity",sku.getInventory());
+                    redisTemplate.opsForHash().put(key,"price",sku.getOriginalPrice());
+                    //构造FloatPriceRetVo
                     GoodsSku returnSku=new GoodsSku(checkSkuPo.get(0));
                     returnSku.setPrice(returnSku.getOriginalPrice());
                     GoodsSkuRetVo retVo=new GoodsSkuRetVo(returnSku);
-                    return new ReturnObject<>(retVo);
+                    return new ReturnObject<>(returnSku);
                 }
             }
         }
@@ -496,7 +497,7 @@ public class GoodsDao {
     public ReturnObject<ResponseCode> checkSkuUsableBySkuShop(Long skuId, Long shopId) {
         //SKU存在
         GoodsSkuPo skuPo = skuMapper.selectByPrimaryKey(skuId);
-        if (skuPo == null || GoodsSku.State.getTypeByCode(skuPo.getDisabled().intValue()).equals(GoodsSku.State.DELETED))
+        if (skuPo == null || GoodsSku.State.getTypeByCode(skuPo.getState().intValue()).equals(GoodsSku.State.DELETED))
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
 
         //SKU对应的SPU和shopId匹配
@@ -512,13 +513,14 @@ public class GoodsDao {
      * @param id
      * @return ReturnObject<GoodsSkuRetVo>
      */
-    public ReturnObject<GoodsSkuRetVo> getShareSku(Long id)
+    public ReturnObject<GoodsSkuDetailRetVo> getShareSku(Long id)
     {
         GoodsSkuPo skuPo=skuMapper.selectByPrimaryKey(id);
         if(skuPo==null)return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
 
         GoodsSku sku=new GoodsSku(skuPo);
-        GoodsSkuRetVo skuRetVo=new GoodsSkuRetVo(sku);
+        GoodsSkuDetailRetVo skuRetVo=new GoodsSkuDetailRetVo();
+        skuRetVo.set(sku);
         return new ReturnObject<>(skuRetVo);
     }
 
@@ -699,7 +701,7 @@ public class GoodsDao {
         //SKU非已上架
         if(state.equals(GoodsSku.State.ONSHELF))return new ReturnObject<>(ResponseCode.STATE_NOCHANGE);
 
-        skuPo.setDisabled(GoodsSku.State.ONSHELF.getCode().byteValue());
+        skuPo.setState(GoodsSku.State.ONSHELF.getCode().byteValue());
         try{
             int ret=skuMapper.updateByPrimaryKeySelective(skuPo);
             if(ret==0)
@@ -742,7 +744,7 @@ public class GoodsDao {
         //SKU非已下架
         if(state.equals(GoodsSku.State.OFFSHELF))return new ReturnObject<>(ResponseCode.STATE_NOCHANGE);
 
-        skuPo.setDisabled(GoodsSku.State.OFFSHELF.getCode().byteValue());
+        skuPo.setState(GoodsSku.State.OFFSHELF.getCode().byteValue());
         try{
             int ret=skuMapper.updateByPrimaryKeySelective(skuPo);
             if(ret==0)

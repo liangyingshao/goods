@@ -54,6 +54,5 @@ public class GoodsSkuDetailRetVo{
         gmtCreated = obj.getGmtCreated();
         gmtModified = obj.getGmtModified();
         disable= !GoodsSku.Disable.getTypeByCode(obj.getDisabled().getCode()).equals(GoodsSku.Disable.OPEN);
-
     }
 }

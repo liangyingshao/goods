@@ -1,344 +1,1151 @@
 package cn.edu.xmu.activity.controller;
-
-
+import cn.edu.xmu.ooad.Application;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.JwtHelper;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeAll;
+import cn.edu.xmu.ooad.util.ResponseCode;
+import com.alibaba.fastjson.JSONObject;
+import lombok.extern.slf4j.Slf4j;
+
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 /**
- * 这是其他组的代码，请勿上传，谢谢！！！
- * description: SPU相关api测试类
- * date: 2020/11/30 0:38
- * author: 秦楚彦 24320182203254
- * version: 1.0
+ * SPU公开测试
+ * @author 24320182203254 秦楚彦
+ * @date 2020-12-14
  */
-@SpringBootTest
-@AutoConfigureMockMvc
-@Transactional
+@SpringBootTest(classes = Application.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Slf4j
 public class CouponActivityTest {
-    @Autowired
-    private ObjectMapper mObjectMapper;
+    //    @Value("${public-test.managementgate}")
+//    private String managementGate;
+//    @Value("${public-test.mallgate}")
+//    private String mallGate;
+    private String managementGate = "127.0.0.1:8092";
+    private String mallGate = "127.0.0.1:8092";
 
-    private WebTestClient webClient;
+    private WebTestClient manageClient;
+    private WebTestClient mallClient;
+    private String token;
 
-    private static String adminToken;
-    private static String shopToken;
+    @BeforeEach
+    public void setUp(){
+        token = creatTestToken(1L,2L,100);
+        this.manageClient = WebTestClient.bindToServer()
+                .baseUrl("http://"+managementGate)
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/json;charset=UTF-8")
+                .build();
 
-    public CouponActivityTest(){
-        this.webClient = WebTestClient.bindToServer()
-                .baseUrl("http://localhost:8092")
+        this.mallClient = WebTestClient.bindToServer()
+                .baseUrl("http://"+mallGate)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/json;charset=UTF-8")
                 .build();
     }
 
-    @BeforeAll
-    private static void login(){
-        JwtHelper jwtHelper = new JwtHelper();
-        adminToken =jwtHelper.createToken(1L,0L, 3600);
-        shopToken =jwtHelper.createToken(59L,1L, 3600);
-    }
+    private String userLogin(String userName, String password) throws Exception{
 
-    /**
-     * description: 查看优惠活动详情 (成功)
-     * date: 2020/12/04 20：27
-     * author: 秦楚彦 24320182203254
-     * version: 1.0
-     */
-
-    @Test
-    public void showCouponActivity1() throws Exception {
-        byte[] responseBuffer = null;
-
-        responseBuffer = webClient.get().uri("/shops/1/couponactivities/1").header("authorization",adminToken).exchange()
+        JSONObject body = new JSONObject();
+        body.put("userName", userName);
+        body.put("password", password);
+        String requireJson = body.toJSONString();
+        byte[] responseString = mallClient.post().uri("/users/login").bodyValue(requireJson).exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
-                .returnResult().getResponseBody();
-
-        String responseString = new String(responseBuffer, "utf-8");
+                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
+                .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
+                .returnResult()
+                .getResponseBodyContent();
+        return JSONObject.parseObject(new String(responseString, StandardCharsets.UTF_8)).getString("data");
     }
 
-    /**
-     * description: 查看优惠活动详情 (活动不存在)
-     * date: 2020/12/04 20：48
-     * author: 秦楚彦 24320182203254
-     * version: 1.0
-     */
-    @Test
-    public void showCouponActivity2() throws Exception {
-        byte[] responseBuffer = null;
+    private String adminLogin(String userName, String password) throws Exception{
 
-        responseBuffer = webClient.get().uri("/shops/1/couponactivities/2").header("authorization",adminToken).exchange()
+        JSONObject body = new JSONObject();
+        body.put("userName", userName);
+        body.put("password", password);
+        String requireJson = body.toJSONString();
+        byte[] responseString = manageClient.post().uri("/adminusers/login").bodyValue(requireJson).exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
-                .returnResult().getResponseBody();
-
-        String responseString = new String(responseBuffer, "utf-8");
+                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
+                .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
+                .returnResult()
+                .getResponseBodyContent();
+        return JSONObject.parseObject(new String(responseString, StandardCharsets.UTF_8)).getString("data");
     }
 
     /**
-     * description: 查看优惠活动详情 (shopId不匹配)
-     * date: 2020/12/04 20：48
-     * author: 秦楚彦 24320182203254
-     * version: 1.0
+     * description: 创建测试用token
      */
+    private final String creatTestToken(Long userId, Long departId, int expireTime) {
+        String token = new JwtHelper().createToken(userId, departId, expireTime);
+        return token;
+    }
+    /** 查看本店已下线优惠活动
+     * 异常1
+     * 店铺不属于用户
+     * */
     @Test
-    public void showCouponActivity3() throws Exception {
-        byte[] responseBuffer = null;
-
-        responseBuffer= webClient.get().uri("/shops/3/couponactivities/1").header("authorization",adminToken).exchange()
+    @Order(2)
+    public void getunderline1() throws Exception {
+        token = creatTestToken(1L,2L,100);
+        byte[] queryResponseString = manageClient.get().uri("/shops/2/couponactivities/invalid").header("authorization",token)
+                .exchange()
+                .expectStatus().isForbidden()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_OUTSCOPE.getCode())
+                .returnResult()
+                .getResponseBodyContent();
+        String expectedResponse1 = "{\n" +
+                "  \"errno\": 505\n" +
+//                "  \"errmsg\": \"操作的资源id不是自己的对象\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse1,new String(queryResponseString, "UTF-8"), false);
+    }
+    /** 查看本店已下线优惠活动
+     * 正常1
+     * 默认分页
+     * */
+    @Test
+    @Order(3)
+    public void getunderline2() throws Exception {
+        token = creatTestToken(1L,0L,100);
+        byte[] queryResponseString = manageClient.get().uri("/shops/0/couponactivities/invalid").header("authorization",token)
+                .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
-                .returnResult().getResponseBody();
-        String responseString = new String(responseBuffer, "utf-8");
+                .returnResult()
+                .getResponseBodyContent();
+        String expectedResponse1 = "{\n" +
+                "  \"errno\": 0,\n" +
+                "  \"data\": {\n" +
+                "    \"total\": 4,\n" +
+                "    \"pages\": 1,\n" +
+//                "    \"pageSize\": 10,\n" +
+//                "    \"page\": 1,\n" +
+                "    \"list\": [\n" +
+                "      {\n" +
+                "        \"id\": 1,\n" +
+                "        \"name\": \"string\",\n" +
+                "        \"beginTime\": \"2022-12-13 08:02:14\",\n" +
+                "        \"endTime\": \"2024-12-13 08:02:14\",\n" +
+                "        \"couponTime\": \"2022-12-13 08:02:14\",\n" +
+                "        \"quantity\": 0,\n" +
+                "        \"imageUrl\": null\n" +
+                "      },\n" +
+                "      {\n" +
+                "        \"id\": 4,\n" +
+                "        \"name\": \"string\",\n" +
+                "        \"beginTime\": \"2022-12-13 08:02:14\",\n" +
+                "        \"endTime\": \"2024-12-13 08:02:14\",\n" +
+                "        \"couponTime\": \"2022-12-13 08:02:14\",\n" +
+                "        \"quantity\": 0,\n" +
+                "        \"imageUrl\": null\n" +
+                "      },\n" +
+                "      {\n" +
+                "        \"id\": 9,\n" +
+                "        \"name\": \"string\",\n" +
+                "        \"beginTime\": \"2020-12-13 16:33:50\",\n" +
+                "        \"endTime\": \"2021-12-29 08:28:50\",\n" +
+                "        \"couponTime\": \"2020-12-14 08:28:50\",\n" +
+                "        \"quantity\": 0,\n" +
+                "        \"imageUrl\": null\n" +
+                "      },\n" +
+                "      {\n" +
+                "        \"id\": 2158,\n" +
+                "        \"name\": \"双十一\",\n" +
+                "        \"beginTime\": \"2021-01-20 22:46:38\",\n" +
+                "        \"endTime\": \"2021-01-30 22:46:55\",\n" +
+                "        \"couponTime\": \"2021-01-10 22:47:01\",\n" +
+                "        \"quantity\": 0,\n" +
+                "        \"imageUrl\": null\n" +
+                "      }\n" +
+                "    ]\n" +
+                "  }\n" +
+//                "  \"errmsg\": \"成功\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse1,new String(queryResponseString, "UTF-8"), false);
+    }
+    /** 查看本店已下线优惠活动
+     * 正常2
+     * pagesize=1 page=2
+     * */
+    @Test
+    @Order(4)
+    public void getunderline3() throws Exception {
+        token = creatTestToken(1L,0L,100);
+        byte[] queryResponseString = manageClient.get().uri((uriBuilder -> uriBuilder.path("/shops/0/couponactivities/invalid")
+                .queryParam("page",2)
+                .queryParam("pageSize",1)
+                .build())
+        ).header("authorization",token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .returnResult()
+                .getResponseBodyContent();
+        String expectedResponse1 = "{\n" +
+                "  \"errno\": 0,\n" +
+                "  \"data\": {\n" +
+                "    \"total\": 4,\n" +
+                "    \"pages\": 4,\n" +
+//                "    \"pageSize\": 1,\n" +
+//                "    \"page\": 2,\n" +
+                "    \"list\": [\n" +
+                "      {\n" +
+                "        \"id\": 4,\n" +
+                "        \"name\": \"string\",\n" +
+                "        \"beginTime\": \"2022-12-13 08:02:14\",\n" +
+                "        \"endTime\": \"2024-12-13 08:02:14\",\n" +
+                "        \"couponTime\": \"2022-12-13 08:02:14\",\n" +
+                "        \"quantity\": 0,\n" +
+                "        \"imageUrl\": null\n" +
+                "      }\n" +
+                "    ]\n" +
+                "  }\n" +
+//                "  \"errmsg\": \"成功\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse1,new String(queryResponseString, "UTF-8"), false);
+    }
+    /** 查看本已上线优惠活动
+     * 正常1
+     *默认分页
+     * */
+    @Test
+    @Order(5)
+    public void getonline1() throws Exception {
+        byte[] queryResponseString = mallClient.get().uri(uriBuilder -> uriBuilder.path("/couponactivities")
+                .queryParam("shopId",2)
+                .build())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
+                .returnResult()
+                .getResponseBodyContent();
+        String expectedResponse1 = "{\n" +
+                "  \"errno\": 0,\n" +
+                "  \"data\": {\n" +
+                "    \"total\": 0,\n" +
+                "    \"pages\": 0,\n" +
+//                "    \"pageSize\": 10,\n" +
+//                "    \"page\": 1,\n" +
+                "    \"list\": []\n" +
+                "  }\n" +
+//                "  \"errmsg\": \"成功\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse1,new String(queryResponseString, "UTF-8"), false);
+
+    }
+    /** 查看本已上线优惠活动
+     * 正常1
+     *默认分页
+     * */
+    @Test
+    @Order(6)
+    public void getonline2() throws Exception {
+        byte[] queryResponseString = mallClient.get().uri(uriBuilder -> uriBuilder.path("/couponactivities")
+                .queryParam("shopId",0)
+                .queryParam("timeline",2)
+                .build())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
+                .returnResult()
+                .getResponseBodyContent();
+        String expectedResponse1 = "{\n" +
+                "  \"errno\": 0,\n" +
+                "  \"data\": {\n" +
+                "    \"total\": 3,\n" +
+                "    \"pages\": 1,\n" +
+                "    \"pageSize\": 10,\n" +
+                "    \"page\": 1,\n" +
+                "    \"list\": [\n" +
+                "      {\n" +
+                "        \"id\": 8,\n" +
+                "        \"name\": \"string\",\n" +
+                "        \"beginTime\": \"2020-12-13 08:33:50\",\n" +
+                "        \"endTime\": \"2021-12-29 00:28:50\",\n" +
+                "        \"couponTime\": \"2020-12-14 00:28:50\",\n" +
+                "        \"quantity\": 0,\n" +
+                "        \"imageUrl\": null\n" +
+                "      },\n" +
+                "      {\n" +
+                "        \"id\": 20001,\n" +
+                "        \"name\": \"cpz1\",\n" +
+                "        \"beginTime\": \"2020-11-01 03:22:30\",\n" +
+                "        \"endTime\": \"2021-01-31 03:22:39\",\n" +
+                "        \"couponTime\": \"2020-12-01 03:22:52\",\n" +
+                "        \"quantity\": 100,\n" +
+                "        \"imageUrl\": null\n" +
+                "      },\n" +
+                "      {\n" +
+                "        \"id\": 20002,\n" +
+                "        \"name\": \"cpz2\",\n" +
+                "        \"beginTime\": \"2020-11-01 03:31:24\",\n" +
+                "        \"endTime\": \"2021-01-31 03:31:38\",\n" +
+                "        \"couponTime\": \"2020-12-01 03:31:44\",\n" +
+                "        \"quantity\": 200,\n" +
+                "        \"imageUrl\": null\n" +
+                "      }\n" +
+                "    ]\n" +
+                "  }\n" +
+//                "  \"errmsg\": \"成功\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse1,new String(queryResponseString, "UTF-8"), false);
+
     }
 
-    /**
-     * description: 新建己方优惠活动 (成功)
-     * date: 2020/12/05 15:32
-     * author: 秦楚彦 24320182203254
-     * version: 1.0
-     */
+    /** 新建优惠活动
+     * 非法情况1
+     * 店铺不属于该用户
+     * */
     @Test
-    public void addCouponActivity1() throws Exception {
-        Map<String,Object> vo = new HashMap<>();
-        vo.put("name", "lipstickSale");
-        vo.put("beginTime", LocalDateTime.now().toString());
-        vo.put("endTime", LocalDateTime.of(2020,12,31,8,0,0).toString());
-        vo.put("quantity", 30000);
-        vo.put("quantityType", 1);
-        vo.put("strategy", "{\"id\":1,\"name\":\"couponstrategy\", \"shresholds\":{\"type\":\"满减\",\"value\":\"200\",\"discount\":\"30\"}");
-        vo.put("validTerm", 0);
-        String activityJson=JacksonUtil.toJson(vo);
+    @Order(7)
+    public void createCouponActivity1() throws Exception {
+        token = creatTestToken(1L,1L,100);
+        String json="{\n" +
+                "  \"beginTime\": \"2022-12-15T07:05:33.976Z\",\n" +
+                "  \"couponTime\": \"2022-12-15T07:05:33.976Z\",\n" +
+                "  \"endTime\": \"2023-12-15T07:05:33.976Z\",\n" +
+                "  \"name\": \"string\",\n" +
+                "  \"quantitiyType\": 0,\n" +
+                "  \"quantity\": 0,\n" +
+                "  \"strategy\": \"string\",\n" +
+                "  \"validTerm\": 0\n" +
+                "}";
+        byte[] responseString1 = manageClient.post().uri("/shops/2/couponactivities")
+                .header("authorization",token)
+                .bodyValue(json)
+                .exchange()
+                .expectStatus().isForbidden()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_OUTSCOPE.getCode())
+                .returnResult()
+                .getResponseBodyContent();
+        String expectedResponse="{\n" +
+                "  \"errno\": 505\n" +
+//                "  \"errmsg\": \"操作的资源id不是自己的对象\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse, new String(responseString1, "UTF-8"), false);
+    }
+    /**
+     * 成功
+     *
+     * */
+    @Test
+    @Order(8)
+    public void createCouponActivity2() throws Exception {
+        token = creatTestToken(1L,0L,100);
+        String json="{\n" +
+                "  \"beginTime\": \"2021-12-17T08:39:13.741Z\",\n" +
+                "  \"couponTime\": \"2021-12-17T08:39:13.741Z\",\n" +
+                "  \"endTime\": \"2022-12-17T08:39:13.741Z\",\n" +
+                "  \"name\": \"string\",\n" +
+                "  \"quantitiyType\": 0,\n" +
+                "  \"quantity\": 0,\n" +
+                "  \"strategy\": \"string\",\n" +
+                "  \"validTerm\": 0\n" +
+                "}";
+        byte[] responseString = manageClient.post().uri("/shops/0/couponactivities")
+                .header("authorization",token)
+                .bodyValue(json)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody()
+                .returnResult()
+                .getResponseBodyContent();
 
-        byte[] responseBuffer = null;
-        responseBuffer=webClient.post().uri("/shops/1/couponactivities").header("authorization",adminToken).bodyValue(activityJson).exchange()
-                    .expectStatus().isOk()
-                    .expectHeader().contentType("application/json;charset=UTF-8")
-                    .expectBody()
-                    .returnResult().getResponseBody();
-
-        String responseString = new String(responseBuffer, "utf-8");
+        String expectedResponse =   "{\n" +
+                "  \"errno\": 0,\n" +
+                "  \"data\": {\n" +
+                "    \"id\": 20007,\n" +
+                "    \"name\": \"string\",\n" +
+                "    \"beginTime\": \"2021-12-17 08:39:13\",\n" +
+                "    \"endTime\": \"2022-12-17 08:39:13\",\n" +
+                "    \"couponTime\": \"2021-12-17 08:39:13\",\n" +
+                "    \"state\": 0,\n" +
+                "    \"shopId\": 0,\n" +
+                "    \"quantity\": 0,\n" +
+                "    \"validTerm\": 0,\n" +
+                "    \"imageUrl\": null,\n" +
+                "    \"strategy\": \"string\",\n" +
+                "    \"createdBy\": {\n" +
+                "      \"userId\": 1,\n" +
+                "      \"userName\": \"13088admin\"\n" +
+                "    },\n" +
+                "    \"modiBy\": {\n" +
+                "      \"userId\": null,\n" +
+                "      \"userName\": null\n" +
+                "    },\n" +
+//                "    \"gmtCreate\": \"2020-12-17 16:51:24\",\n" +
+                "    \"gmtModified\": null,\n" +
+                "    \"quantitiyType\": 0\n" +
+                "  }\n" +
+//                "  \"errmsg\": \"成功\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse, new String(responseString, "UTF-8"), false);
     }
 
-    /**
-     * description: 修改己方优惠活动 (成功)
-     * date: 2020/12/05 20:04
-     * author: 秦楚彦 24320182203254
-     * version: 1.0
-     */
+    /** 修改优惠活动
+     * 非法情况1
+     * 店铺不属于该用户
+     * */
     @Test
+    @Order(9)
     public void modifyCouponActivity1() throws Exception {
-        Map<String,Object> vo = new HashMap<>();
-        vo.put("name", "colaSale");
-        vo.put("beginTime", LocalDateTime.now().toString());
-        vo.put("endTime", LocalDateTime.of(2020,12,31,10,0,0).toString());
-        vo.put("quantity", 100);
-        vo.put("quantityType", 0);
-        vo.put("strategy", "{\"id\":1,\"name\":\"couponstrategy\", \"shresholds\":{\"type\":\"满减\",\"value\":\"200\",\"discount\":\"30\"}");
-        vo.put("validTerm", 0);
-        String activityJson=JacksonUtil.toJson(vo);
-
-        byte[] responseBuffer = null;
-        responseBuffer=webClient.put().uri("/shops/1/couponactivities/5").header("authorization",adminToken).bodyValue(activityJson).exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType("application/json;charset=UTF-8")
+        token = creatTestToken(1L,1L,100);
+        String json="{\n" +
+                "  \"beginTime\": \"2022-12-15T07:41:46.909Z\",\n" +
+                "  \"endTime\": \"2023-12-15T07:41:46.909Z\",\n" +
+                "  \"name\": \"modify\",\n" +
+                "  \"quantity\": 0,\n" +
+                "  \"strategy\": \"string\"\n" +
+                "}";
+        byte[] responseString = manageClient.put().uri("/shops/2/couponactivities/10")
+                .header("authorization",token)
+                .bodyValue(json)
+                .exchange()
+                .expectStatus().isForbidden()
                 .expectBody()
-                .returnResult().getResponseBody();
+                .returnResult()
+                .getResponseBodyContent();
 
-        String responseString = new String(responseBuffer, "utf-8");
+        String expectedResponse =  "{\n" +
+                "  \"errno\": 505\n" +
+//                "  \"errmsg\": \"操作的资源id不是自己的对象\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse, new String(responseString, "UTF-8"), false);
     }
 
-    /**
-     * description: 修改己方优惠活动 (优惠活动id不存在)
-     * date: 2020/12/05 20:16
-     * author: 秦楚彦 24320182203254
-     * version: 1.0
-     */
+    /** 修改优惠活动
+     * 非法情况2
+     * 活动不属于该店铺
+     * */
     @Test
+    @Order(10)
     public void modifyCouponActivity2() throws Exception {
-        Map<String,Object> vo = new HashMap<>();
-        vo.put("name", "appleSale");
-        vo.put("beginTime", LocalDateTime.now().toString());
-        vo.put("endTime", LocalDateTime.of(2020,12,31,10,0,0).toString());
-        vo.put("quantity", 100);
-        vo.put("quantityType", 0);
-        vo.put("strategy", "{\"id\":1,\"name\":\"couponstrategy\", \"shresholds\":{\"type\":\"满减\",\"value\":\"200\",\"discount\":\"30\"}");
-        vo.put("validTerm", 0);
-        String activityJson=JacksonUtil.toJson(vo);
-
-        byte[] responseBuffer = null;
-        responseBuffer=webClient.put().uri("/shops/1/couponactivities/100").header("authorization",adminToken).bodyValue(activityJson).exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType("application/json;charset=UTF-8")
+        token = creatTestToken(1L,0L,100);
+        String json="{\n" +
+                "  \"beginTime\": \"2022-12-15T07:41:46.909Z\",\n" +
+                "  \"endTime\": \"2023-12-15T07:41:46.909Z\",\n" +
+                "  \"name\": \"modify\",\n" +
+                "  \"quantity\": 0,\n" +
+                "  \"strategy\": \"string\"\n" +
+                "}";
+        byte[] responseString = manageClient.put().uri("/shops/0/couponactivities/7")
+                .header("authorization",token)
+                .bodyValue(json)
+                .exchange()
+                .expectStatus().isForbidden()
                 .expectBody()
-                .returnResult().getResponseBody();
-        String responseString = new String(responseBuffer, "utf-8");
+                .returnResult()
+                .getResponseBodyContent();
+
+        String expectedResponse =  "{\n" +
+                "  \"errno\": 505\n" +
+//                "  \"errmsg\": \"操作的资源id不是自己的对象\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse, new String(responseString, "UTF-8"), false);
     }
 
-    /**
-     * description: 下线己方优惠活动 (成功)
-     * date: 2020/12/05 21:30
-     * author: 秦楚彦 24320182203254
-     * version: 1.0
-     */
+    /** 修改优惠活动
+     * 正常
+     *
+     * */
+    @Order(11)
     @Test
-    public void offlineCouponActivity1() throws Exception {
-        byte[] responseBuffer = null;
-        responseBuffer=webClient.delete().uri("/shops/1/couponactivities/5").header("authorization",adminToken).exchange()
+    public void modifyCouponActivity3() throws Exception {
+        token = creatTestToken(1L,0L,100);
+        String json="{\n" +
+                "  \"beginTime\": \"2020-12-31T16:33:50\",\n" +
+                "  \"endTime\": \"2021-12-31T21:28:50\",\n" +
+                "  \"name\": \"modify\",\n" +
+                "  \"quantity\": 0,\n" +
+                "  \"strategy\": \"string\"\n" +
+                "}";
+        byte[] responseString1 = manageClient.put().uri("/shops/0/couponactivities/9")
+                .header("authorization",token)
+                .bodyValue(json)
+                .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
-                .returnResult().getResponseBody();
+                .returnResult()
+                .getResponseBodyContent();
 
-        String responseString = new String(responseBuffer, "utf-8");
+        String expectedResponse =  "{\n" +
+                "  \"errno\": 0\n" +
+//                "  \"errmsg\": \"成功\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse, new String(responseString1, "UTF-8"), false);
+
+        byte[] responseString2 = manageClient.get().uri("/shops/0/couponactivities/9")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .returnResult()
+                .getResponseBodyContent();
+
+        String expectedResponse2 =  "{\n" +
+                "  \"errno\": 0,\n" +
+                "  \"data\": {\n" +
+                "    \"id\": 9,\n" +
+                "    \"name\": \"modify\",\n" +
+                "    \"beginTime\": \"2020-12-31 08:33:50\",\n" +
+                "    \"endTime\": \"2021-12-31 13:28:50\",\n" +
+//                "    \"couponTime\": \"2020-12-14 00:28:50\",\n" +
+                "    \"state\": 0,\n" +
+                "    \"shopId\": 0,\n" +
+                "    \"quantity\": 0,\n" +
+                "    \"validTerm\": 0,\n" +
+                "    \"imageUrl\": null,\n" +
+                "    \"strategy\": \"string\",\n" +
+                "    \"createdBy\": {\n" +
+                "      \"userId\": 1,\n" +
+                "      \"userName\": \"13088admin\"\n" +
+                "    },\n" +
+                "    \"modiBy\": {\n" +
+                "      \"userId\": 1,\n" +
+                "      \"userName\": \"13088admin\"\n" +
+                "    },\n" +
+//                "    \"gmtCreate\": \"2020-12-13 16:33:31\",\n" +
+//                "    \"gmtModified\": \"2020-12-17 09:33:08\",\n" +
+                "    \"quantitiyType\": 0\n" +
+                "  }\n" +
+//                "  \"errmsg\": \"成功\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse2, new String(responseString2, "UTF-8"), false);
     }
 
-    /**
-     * description: 下线己方优惠活动 (优惠活动已下线)
-     * date: 2020/12/05 21:46
-     * author: 秦楚彦 24320182203254
-     * version: 1.0
-     */
+    /** 下线优惠活动
+     * 异常1
+     * 已下线活动不能下线
+     * */
+    @Order(12)
     @Test
-    public void offlineCouponActivity2() throws Exception {
-        byte[] responseBuffer = null;
-        responseBuffer=webClient.delete().uri("/shops/1/couponactivities/5").header("authorization",adminToken).exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType("application/json;charset=UTF-8")
+    public void offshelves1() throws Exception {
+        token = creatTestToken(1L,1L,100);
+        byte[] ret = manageClient.put()
+                .uri("/shops/0/couponactivities/1/offshelves")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isBadRequest()
                 .expectBody()
-                .returnResult().getResponseBody();
-        String responseString = new String(responseBuffer, "utf-8");
+                .returnResult()
+                .getResponseBodyContent();
+        String responseString = new String(ret, "UTF-8");
+        String expectedResponse = "{\n" +
+                "  \"errno\": 920\n" +
+//                "  \"errmsg\": \"优惠活动状态禁止\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse, responseString, false);
     }
-
-    /**
-     * description: 下线己方优惠活动 (不发优惠券类型的优惠活动 成功)
-     * date: 2020/12/05 21:46
-     * author: 秦楚彦 24320182203254
-     * version: 1.0
-     */
+    /** 下线优惠活动
+     * 异常2
+     * 已删除活动不能下线
+     * */
     @Test
-    public void offlineCouponActivity3() throws Exception {
-        byte[] responseBuffer = null;
-        responseBuffer=webClient.delete().uri("/shops/1/couponactivities/10")
-                .header("authorization",adminToken).exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType("application/json;charset=UTF-8")
+    @Order(13)
+    public void offshelves2() throws Exception {
+        token = creatTestToken(1L,0L,100);
+        byte[] ret = manageClient.put()
+                .uri("/shops/0/couponactivities/3/offshelves")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isBadRequest()
                 .expectBody()
-                .returnResult().getResponseBody();
-
-        String responseString = new String(responseBuffer, "utf-8");
+                .returnResult()
+                .getResponseBodyContent();
+        String responseString = new String(ret, "UTF-8");
+        String expectedResponse = "{\n" +
+                "  \"errno\": 904\n" +
+//                "  \"errmsg\": \"优惠活动状态禁止\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse, responseString, false);
     }
-
-    /**
-     * description: 下线己方优惠活动 (优惠活动无状态为【可用】优惠券)
-     * date: 2020/12/05 21:46
-     * author: 秦楚彦 24320182203254
-     * version: 1.0
-     */
+    /** 下线优惠活动
+     * 异常3
+     * 店铺不属于用户
+     * */
     @Test
-    public void offlineCouponActivity4() throws Exception {
-        byte[] responseBuffer = null;
-        responseBuffer = webClient.delete().uri("/shops/1/couponactivities/5").header("authorization",adminToken).exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType("application/json;charset=UTF-8")
+    @Order(14)
+    public void offshelves3() throws Exception {
+        token = creatTestToken(1L,1L,100);
+        byte[] ret = manageClient.put()
+                .uri("/shops/2/couponactivities/1/offshelves")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isForbidden()
                 .expectBody()
-                .returnResult().getResponseBody();
-        
-        String responseString = new String(responseBuffer, "utf-8");
+                .returnResult()
+                .getResponseBodyContent();
+        String responseString = new String(ret, "UTF-8");
+        String expectedResponse = "{\n" +
+                "  \"errno\": 505\n" +
+//                "  \"errmsg\": \"操作的资源id不是自己的对象\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse, responseString, false);
     }
-
-    /**
-     * description: 查看上线的活动列表 (成功)
-     * date: 2020/12/6 18:50
-     * author: 秦楚彦 24320182203254
-     * version: 1.0
-     */
+    /** 下线优惠活动
+     * 异常4
+     * 活动不存在
+     * */
     @Test
-    void getCouponActivityList() throws Exception{
-        byte[] responseBuffer = null;
-        responseBuffer=webClient.get().uri("/couponactivities?page=1&pageSize=3&timeline=1").exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType("application/json;charset=UTF-8")
+    @Order(15)
+    public void offshelves4() throws Exception {
+        token = creatTestToken(1L,0L,100);
+        byte[] ret = manageClient.put()
+                .uri("/shops/0/couponactivities/0/offshelves")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isNotFound()
                 .expectBody()
-                .returnResult().getResponseBody();
-
-        String responseString = new String(responseBuffer, "utf-8");
-
-//        responseString=webClient.get().uri("/couponactivities")
-//                .queryParam("page", "2").queryParam("pageSize", "2").queryParam("shopId","1"))
-//                .andExpect(status().isOk())
-//                .andExpect(content().contentType("application/json;charset=UTF-8"))
-//                .andReturn().getResponse().getContentAsString();
-//        System.out.println(responseString);
-//
-//        responseString=webClient.get().uri("/couponactivities")
-//                .queryParam("page", "2").queryParam("pageSize", "3"))
-//                .andExpect(status().isOk())
-//                .andExpect(content().contentType("application/json;charset=UTF-8"))
-//                .andReturn().getResponse().getContentAsString();
-//        System.out.println(responseString);
-//
-//        responseString=webClient.get().uri("/couponactivities")
-//                .queryParam("page", "2").queryParam("pageSize", "2").queryParam("shopId","3"))
-//                .andExpect(status().isOk())
-//                .andExpect(content().contentType("application/json;charset=UTF-8"))
-//                .andReturn().getResponse().getContentAsString();
-//        System.out.println(responseString);
-
-
+                .returnResult()
+                .getResponseBodyContent();
+        String responseString = new String(ret, "UTF-8");
+        String expectedResponse = "{\n" +
+                "  \"errno\": 504\n" +
+//                "  \"errmsg\": \"操作的资源id不存在\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse, responseString, false);
     }
-
-    /**
-     * description: 查看下线的活动列表 (成功)
-     * date: 2020/12/6 22:46
-     * author: 秦楚彦 24320182203254
-     * version: 1.0
-     */
+    /** 下线优惠活动
+     * 异常5
+     * 活动不属于店铺
+     * */
     @Test
-    void getInvalidCouponActivityList1() throws Exception{
-        byte[] responseBuffer = null;
-        responseBuffer=webClient.get().uri("/shops/1/couponactivities/invalid?page=1&pageSize=3").exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType("application/json;charset=UTF-8")
+    @Order(16)
+    public void offshelves5() throws Exception {
+        token = creatTestToken(1L,7L,100);
+        byte[] ret = manageClient.put()
+                .uri("/shops/0/couponactivities/7/offshelves")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isForbidden()
                 .expectBody()
-                .returnResult().getResponseBody();
-
-        String responseString = new String(responseBuffer, "utf-8");
+                .returnResult()
+                .getResponseBodyContent();
+        String responseString = new String(ret, "UTF-8");
+        String expectedResponse = "{\n" +
+                "  \"errno\": 505\n" +
+//                "  \"errmsg\": \"操作的资源id不是自己的对象\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse, responseString, false);
     }
-
-    /**
-     * description: 查看下线的活动列表 (成功)
-     * date: 2020/12/6 22:46
-     * author: 秦楚彦 24320182203254
-     * version: 1.0
-     */
+    /** 下线优惠活动
+     * 正常
+     * 下线成功
+     * */
     @Test
-    void getInvalidCouponActivityList2() throws Exception{
-        //该店铺不存在invalid活动
-        byte[] responseBuffer = null;
-        responseBuffer=webClient.get().uri("/shops/2/couponactivities/invalid?page=1&pageSize=3")
-                .header("authorization",adminToken).exchange()
+    @Order(17)
+    public void offshelves6() throws Exception {
+        token = creatTestToken(1L,2L,100);
+        byte[] ret = manageClient.put()
+                .uri("/shops/0/couponactivities/2/offshelves")
+                .header("authorization",token)
+                .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
-                .returnResult().getResponseBody();
-
-        String responseString = new String(responseBuffer, "utf-8");
+                .returnResult()
+                .getResponseBodyContent();
+        String responseString = new String(ret, "UTF-8");
+        String expectedResponse = "{\n" +
+                "  \"errno\": 0\n" +
+//                "  \"errmsg\": \"成功\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse, responseString, false);
+        byte[] responseString2 = mallClient.get().uri("/shops/0/couponactivities/2")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .returnResult()
+                .getResponseBodyContent();
+//        String responseString1 = new String(ret, "UTF-8");
+        String expectedResponse2 =  "{\n" +
+                "  \"errno\": 0,\n" +
+                "  \"data\": {\n" +
+                "    \"id\": 2,\n" +
+                "    \"name\": \"string\",\n" +
+                //       "    \"beginTime\": \"2022-12-11T16:02:14\",\n" +
+                //         "    \"endTime\": \"2024-12-11T16:02:14\",\n" +
+                //           "    \"couponTime\": \"2022-12-12T16:02:14\",\n" +
+                "    \"state\": 0,\n" +
+                "    \"shopId\": 0,\n" +
+                "    \"quantity\": 0,\n" +
+                "    \"validTerm\": 0,\n" +
+                "    \"imageUrl\": null,\n" +
+                "    \"strategy\": \"string\",\n" +
+                "    \"createdBy\": {\n" +
+                "      \"userId\": 1,\n" +
+                "      \"userName\": \"13088admin\"\n" +
+                "    },\n" +
+                "    \"modiBy\": {\n" +
+                "      \"userId\": 1,\n" +
+                "      \"userName\": \"13088admin\"\n" +
+                "    },\n" +
+                //              "    \"gmtCreate\": \"2020-12-13T08:09:52\",\n" +
+                //              "    \"gmtModified\": \"2020-12-13T08:14:54\",\n" +
+                "    \"quantitiyType\": 0\n" +
+                "  }\n" +
+//                "  \"errmsg\": \"成功\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse2, new String(responseString2, "UTF-8"), false);
     }
+    /** 上线优惠活动
+     * 异常1
+     * 已上线活动不能上线
+     * */
+    @Test
+    @Order(18)
+    public void onshelves1() throws Exception {
+        token = creatTestToken(1L,1L,100);
+        byte[] ret = manageClient.put()
+                .uri("/shops/0/couponactivities/5/onshelves")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .returnResult()
+                .getResponseBodyContent();
+        String responseString = new String(ret, "UTF-8");
+        String expectedResponse = "{\n" +
+                "  \"errno\": 920\n" +
+//                "  \"errmsg\": \"优惠活动状态禁止\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse, responseString, false);
+    }
+    /** 上线优惠活动
+     * 异常2
+     * 已删除活动不能上线
+     * */
+    @Test
+    @Order(19)
+    public void onshelves2() throws Exception {
+        token = creatTestToken(1L,1L,100);
+        byte[] ret = manageClient.put()
+                .uri("/shops/0/couponactivities/6/onshelves")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .returnResult()
+                .getResponseBodyContent();
+        String responseString = new String(ret, "UTF-8");
+        String expectedResponse = "{\n" +
+                "  \"errno\": 904\n" +
+//                "  \"errmsg\": \"优惠活动状态禁止\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse, responseString, false);
+    }
+    /** 上线优惠活动
+     * 异常3
+     * 店铺不属于用户
+     * */
+    @Test
+    @Order(20)
+    public void onshelves3() throws Exception {
+        token = creatTestToken(1L,1L,100);
+        byte[] ret = manageClient.put()
+                .uri("/shops/2/couponactivities/1/onshelves")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isForbidden()
+                .expectBody()
+                .returnResult()
+                .getResponseBodyContent();
+        String responseString = new String(ret, "UTF-8");
+        String expectedResponse ="{\n" +
+                "  \"errno\": 505\n" +
+//                "  \"errmsg\": \"操作的资源id不是自己的对象\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse, responseString, false);
+    }
+    /** 上线优惠活动
+     * 异常4
+     * 活动不存在
+     * */
+    @Test
+    @Order(21)
+    public void onshelves4() throws Exception {
+        token = creatTestToken(1L,1L,100);
+        byte[] ret = manageClient.put()
+                .uri("/shops/0/couponactivities/0/onshelves")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .returnResult()
+                .getResponseBodyContent();
+        String responseString = new String(ret, "UTF-8");
+        String expectedResponse = "{\n" +
+                "  \"errno\": 504\n" +
+//                "  \"errmsg\": \"操作的资源id不存在\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse, responseString, false);
+    }
+    /** 上线优惠活动
+     * 异常5
+     * 活动不属于店铺
+     * */
+    @Test
+    @Order(22)
+    public void onshelves5() throws Exception {
+        token = creatTestToken(1L,1L,100);
+        byte[] ret = manageClient.put()
+                .uri("/shops/0/couponactivities/7/onshelves")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isForbidden()
+                .expectBody()
+                .returnResult()
+                .getResponseBodyContent();
+        String responseString = new String(ret, "UTF-8");
+        String expectedResponse = "{\n" +
+                "  \"errno\": 505\n" +
+//                "  \"errmsg\": \"操作的资源id不是自己的对象\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse, responseString, false);
+    }
+    /** 上线优惠活动
+     * 正常
+     * 上线成功
+     * */
+    @Test
+    @Order(23)
+    public void onshelves6() throws Exception {
+        token = creatTestToken(1L,0L,100);
+        byte[] ret = manageClient.put()
+                .uri("/shops/0/couponactivities/4/onshelves")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .returnResult()
+                .getResponseBodyContent();
+        String responseString = new String(ret, "UTF-8");
+        String expectedResponse = "{\n" +
+                "  \"errno\": 0\n" +
+//                "  \"errmsg\": \"成功\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse, responseString, false);
+        byte[] responseString2 = manageClient.get().uri("/shops/0/couponactivities/4")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .returnResult()
+                .getResponseBodyContent();
+//        String responseString1 = new String(ret, "UTF-8");
+        String expectedResponse2 =  "{\n" +
+                "  \"errno\": 0,\n" +
+                "  \"data\": {\n" +
+                "    \"id\": 4,\n" +
+                "    \"name\": \"string\",\n" +
+                //       "    \"beginTime\": \"2022-12-11T16:02:14\",\n" +
+                //         "    \"endTime\": \"2024-12-11T16:02:14\",\n" +
+                //           "    \"couponTime\": \"2022-12-12T16:02:14\",\n" +
+                "    \"state\": 1,\n" +
+                "    \"shopId\": 0,\n" +
+                "    \"quantity\": 0,\n" +
+                "    \"validTerm\": 0,\n" +
+                "    \"imageUrl\": null,\n" +
+                "    \"strategy\": \"string\",\n" +
+                "    \"createdBy\": {\n" +
+                "      \"userId\": 1,\n" +
+                "      \"userName\": \"13088admin\"\n" +
+                "    },\n" +
+                "    \"modiBy\": {\n" +
+                "      \"userId\": 1,\n" +
+                "      \"userName\": \"13088admin\"\n" +
+                "    },\n" +
+                //              "    \"gmtCreate\": \"2020-12-13T08:09:52\",\n" +
+                //              "    \"gmtModified\": \"2020-12-13T08:14:54\",\n" +
+                "    \"quantitiyType\": 0\n" +
+                "  }\n" +
+//                "  \"errmsg\": \"成功\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse2, new String(responseString2, "UTF-8"), false);
+    }
+    /** 删除优惠活动
+     * 异常1
+     * 已上线活动不能删除
+     * */
+    @Test
+    @Order(24)
+    public void delete1() throws Exception {
+        token = creatTestToken(1L,0L,100);
+        byte[] ret = manageClient.delete()
+                .uri("/shops/0/couponactivities/8")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .returnResult()
+                .getResponseBodyContent();
+        String responseString = new String(ret, "UTF-8");
+        String expectedResponse =  "{\n" +
+                "  \"errno\": 904\n" +
+//                "  \"errmsg\": \"优惠活动状态禁止\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse, responseString, false);
+    }
+    /** 删除优惠活动
+     * 异常2
+     * 已删除活动不能删除
+     * */
+    @Test
+    @Order(25)
+    public void delete2() throws Exception {
+        token = creatTestToken(1L,0L,100);
+        byte[] ret = manageClient.delete()
+                .uri("/shops/0/couponactivities/3")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .returnResult()
+                .getResponseBodyContent();
+        String responseString = new String(ret, "UTF-8");
+        String expectedResponse =  "{\n" +
+                "  \"errno\": 920\n" +
+//                "  \"errmsg\": \"优惠活动状态禁止\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse, responseString, false);
+    }
+    /** 删除优惠活动
+     * 异常3
+     * 店铺不属于用户
+     * */
+    @Test
+    @Order(26)
+    public void delete3() throws Exception {
+        token = creatTestToken(1L,1L,100);
+        byte[] ret = manageClient.delete()
+                .uri("/shops/2/couponactivities/1")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isForbidden()
+                .expectBody()
+                .returnResult()
+                .getResponseBodyContent();
+        String responseString = new String(ret, "UTF-8");
+        String expectedResponse = "{\n" +
+                "  \"errno\": 505\n" +
+//                "  \"errmsg\": \"操作的资源id不是自己的对象\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse, responseString, false);
+    }
+    /** 删除优惠活动
+     * 异常4
+     * 活动不存在
+     * */
+    @Test
+    @Order(27)
+    public void delete4() throws Exception {
+        token = creatTestToken(1L,0L,100);
+        byte[] ret = manageClient.delete()
+                .uri("/shops/0/couponactivities/0")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .returnResult()
+                .getResponseBodyContent();
+        String responseString = new String(ret, "UTF-8");
+        String expectedResponse= "{\n" +
+                "  \"errno\": 504\n" +
+//                "  \"errmsg\": \"操作的资源id不存在\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse, responseString, false);
+    }
+    /** 删除优惠活动
+     * 异常5
+     * 活动不属于店铺
+     * */
+    @Test
+    @Order(28)
+    public void delete5() throws Exception {
+        token = creatTestToken(1L,1L,100);
+        byte[] ret = manageClient.delete()
+                .uri("/shops/0/couponactivities/7")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isForbidden()
+                .expectBody()
+                .returnResult()
+                .getResponseBodyContent();
+        String responseString = new String(ret, "UTF-8");
+        String expectedResponse = "{\n" +
+                "  \"errno\": 505\n" +
+//                "  \"errmsg\": \"操作的资源id不是自己的对象\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse, responseString, false);
+    }
+    /** 删除优惠活动
+     * 正常
+     * 成功
+     * */
+    @Test
+    @Order(29)
+    public void delete6() throws Exception {
+        token = creatTestToken(1L,0L,100);
+        byte[] ret = manageClient.delete()
+                .uri("/shops/0/couponactivities/1")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .returnResult()
+                .getResponseBodyContent();
+        String responseString = new String(ret, "UTF-8");
+        String expectedResponse = "{\n" +
+                "  \"errno\": 0\n" +
+//                "  \"errmsg\": \"成功\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse, responseString, false);
+        byte[] responseString2 = manageClient.get().uri("/shops/0/couponactivities/1")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .returnResult()
+                .getResponseBodyContent();
+//        String responseString1 = new String(ret, "UTF-8");
+        String expectedResponse2 =  "{\n" +
+                "  \"errno\": 0,\n" +
+                "  \"data\": {\n" +
+                "    \"id\": 1,\n" +
+                "    \"name\": \"string\",\n" +
+                //       "    \"beginTime\": \"2022-12-11T16:02:14\",\n" +
+                //         "    \"endTime\": \"2024-12-11T16:02:14\",\n" +
+                //           "    \"couponTime\": \"2022-12-12T16:02:14\",\n" +
+                "    \"state\": 2,\n" +
+                "    \"shopId\": 0,\n" +
+                "    \"quantity\": 0,\n" +
+                "    \"validTerm\": 0,\n" +
+                "    \"imageUrl\": null,\n" +
+                "    \"strategy\": \"string\",\n" +
+                "    \"createdBy\": {\n" +
+                "      \"userId\": 1,\n" +
+                "      \"userName\": \"13088admin\"\n" +
+                "    },\n" +
+                "    \"modiBy\": {\n" +
+                "      \"userId\": 1,\n" +
+                "      \"userName\": \"13088admin\"\n" +
+                "    },\n" +
+                //              "    \"gmtCreate\": \"2020-12-13T08:09:52\",\n" +
+                //              "    \"gmtModified\": \"2020-12-13T08:14:54\",\n" +
+                "    \"quantitiyType\": 0\n" +
+                "  }\n" +
+//                "  \"errmsg\": \"成功\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse2, new String(responseString2, "UTF-8"), false);
+    }
+    /**
+     * 查看优惠活动详情
+     * 活动不存在
+     * */
+    @Test
+    @Order(30)
+    public void getdetail1() throws Exception {
+
+        byte[] queryResponseString = manageClient.get().uri("/shops/0/couponactivities/0")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .returnResult()
+                .getResponseBodyContent();
+        String expectedResponse1 = "{\n" +
+                "  \"errno\": 504\n" +
+//                "  \"errmsg\": \"操作的资源id不存在\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse1,new String(queryResponseString, "UTF-8"), false);
+    }
+    /**
+     * 查看优惠活动详情
+     * 不属于该店铺
+     * */
+    @Test
+    @Order(31)
+    public void getdetail2() throws Exception {
+        token = creatTestToken(1L,0L,100);
+        byte[] queryResponseString = manageClient.get().uri("/shops/0/couponactivities/7")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isForbidden()
+                .expectBody()
+                .returnResult()
+                .getResponseBodyContent();
+        String expectedResponse1 = "{\n" +
+                "  \"errno\": 505\n" +
+//                "  \"errmsg\": \"操作的资源id不是自己的对象\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse1,new String(queryResponseString, "UTF-8"), false);
+    }
+    /**
+     * 查看优惠活动详情
+     * 正常
+     * */
+    @Test
+    @Order(32)
+    public void getdetail3() throws Exception {
+        token = creatTestToken(1L,0L,100);
+        byte[] queryResponseString = manageClient.get().uri("/shops/0/couponactivities/6")
+                .header("authorization",token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .returnResult()
+                .getResponseBodyContent();
+        String expectedResponse1 = "{\n" +
+                "  \"errno\": 0,\n" +
+                "  \"data\": {\n" +
+                "    \"id\": 6,\n" +
+                "    \"name\": \"string\",\n" +
+                //     "    \"beginTime\": \"2022-12-10T00:02:14\",\n" +
+                //      "    \"endTime\": \"2024-12-10T00:02:14\",\n" +
+                //       "    \"couponTime\": \"2022-12-10T00:02:14\",\n" +
+                "    \"state\": 2,\n" +
+                "    \"shopId\": 0,\n" +
+                "    \"quantity\": 0,\n" +
+                "    \"validTerm\": 0,\n" +
+                "    \"imageUrl\": null,\n" +
+                "    \"strategy\": \"string\",\n" +
+                "    \"createdBy\": {\n" +
+                "      \"userId\": 1,\n" +
+                "      \"userName\": \"13088admin\"\n" +
+                "    },\n" +
+                "    \"modiBy\": {\n" +
+                "      \"userId\": 1,\n" +
+                "      \"userName\": \"13088admin\"\n" +
+                "    },\n" +
+                //          "    \"gmtCreate\": \"2020-12-10T16:09:54\",\n" +
+                //          "    \"gmtModified\": \"2020-12-13T00:50:57\",\n" +
+                "    \"quantitiyType\": 0\n" +
+                "  }\n" +
+//                "  \"errmsg\": \"成功\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedResponse1,new String(queryResponseString, "UTF-8"), false);
+    }
+
 }
+
 
