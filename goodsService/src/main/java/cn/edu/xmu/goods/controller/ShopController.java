@@ -34,8 +34,8 @@ import java.util.List;
  */
 @Api(value = "店铺服务", tags = "goods")
 @RestController /*Restful的Controller对象*/
-//@RequestMapping(value = "/goods",produces = "application/json;charset=UTF-8")
-@RequestMapping(value = "",produces = "application/json;charset=UTF-8")
+@RequestMapping(value = "/goods",produces = "application/json;charset=UTF-8")
+//@RequestMapping(value = "",produces = "application/json;charset=UTF-8")
 public class ShopController {
 
 
