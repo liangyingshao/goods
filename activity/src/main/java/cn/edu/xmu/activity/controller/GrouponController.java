@@ -24,6 +24,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+import java.lang.invoke.LambdaConversionException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -156,8 +157,27 @@ public class GrouponController {
         if(page <= 0 || pagesize <= 0) {
             object = Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
         } else {
-            DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            ReturnObject<PageInfo<VoObject>> returnObject = grouponService.queryGroupons(id, spuid, state, null, LocalDateTime.parse(beginTime,df), LocalDateTime.parse(endTime,df), page, pagesize, true);
+            //时间处理
+
+            LocalDateTime bt = null;
+            if(beginTime!=null){
+                try {
+                    bt = LocalDateTime.parse(beginTime,DateTimeFormatter.ISO_DATE_TIME);
+                } catch (Exception e) {
+                    object = Common.decorateReturnObject(new ReturnObject<>(ResponseCode.FIELD_NOTVALID));
+                }
+            }
+
+            LocalDateTime et = null;
+            if(endTime!=null){
+                try {
+                    et = LocalDateTime.parse(endTime,DateTimeFormatter.ISO_DATE_TIME);
+                } catch (Exception e) {
+                    object = Common.decorateReturnObject(new ReturnObject<>(ResponseCode.FIELD_NOTVALID));
+                }
+            }
+
+            ReturnObject<PageInfo<VoObject>> returnObject = grouponService.queryGroupons(id, spuid, state, null, bt, et, page, pagesize, true);
             object = Common.getPageRetObject(returnObject);
         }
 

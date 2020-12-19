@@ -53,6 +53,11 @@ public class GrouponDao {
     public ReturnObject<NewGroupon> createGrouponofSPU(Long shopId, Long id, GrouponVo grouponVo, GoodsSpuPoDTO goodsSpuPoDTO, SimpleShopDTO simpleShopDTO) {
 
 
+        //1. 此spu是否正在参加其他团购
+        if(checkInGroupon(id,grouponVo.getBeginTime(),grouponVo.getEndTime()).getData())
+            return new ReturnObject(ResponseCode.FIELD_NOTVALID);
+
+        //3. 创建
         GrouponActivityPo grouponActivityPo = new GrouponActivityPo();
         grouponActivityPo.setShopId(shopId);
         grouponActivityPo.setGoodsSpuId(id);
@@ -181,6 +186,7 @@ public class GrouponDao {
         }
         if(oldPo == null)
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+
 
         //2.若shopId不一致，则无权限访问
         if(oldPo.getShopId()!= shopId)
@@ -360,6 +366,7 @@ public class GrouponDao {
 
     public ReturnObject<Boolean> judgeGrouponIdValid(Long grouponId) {
 
+        //根据id查找
         GrouponActivityPo po = null;
         try {
             po = grouponActivityPoMapper.selectByPrimaryKey(grouponId);
@@ -368,9 +375,13 @@ public class GrouponDao {
             logger.error(message.toString());
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
         }
-        if(po==null)
-            return new ReturnObject<>(false);
+        //时间和状态都合法
+        if(po!=null && po.getBeginTime().isBefore(LocalDateTime.now())&&
+                po.getEndTime().isAfter(LocalDateTime.now()) &&
+                po.getState() == ActivityStatus.ON_SHELVES.getCode().byteValue()){
+            return new ReturnObject<>(true);
+        }
 
-        return new ReturnObject<>(true);
+        return new ReturnObject<>(false);
     }
 }

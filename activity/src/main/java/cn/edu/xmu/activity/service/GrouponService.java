@@ -47,6 +47,11 @@ public class GrouponService {
     private static final Logger logger = LoggerFactory.getLogger(GrouponService.class);
     
     public ReturnObject modifyGrouponofSPU(Long shopId, Long id, GrouponVo grouponVo) {
+        //1. shopId是否存在
+        SimpleShopDTO simpleShopDTO = iGoodsService.getSimpleShopByShopId(shopId).getData();
+        if(simpleShopDTO == null)
+            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+
         return grouponDao.modifyGrouponofSPU(shopId, id, grouponVo);
     }
 
@@ -62,39 +67,65 @@ public class GrouponService {
         if(goodsSpuPoDTO == null)
             return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
 
-        //3. 此spu是否在此shop中,否则无权限操作
-        if(goodsSpuPoDTO.getShopId()!=shopId)
-            return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);//TODO 考虑错误码是否合适
-
-        //4. 此spu是否正在参加其他团购
-        if(grouponDao.checkInGroupon(id,grouponVo.getBeginTime(),grouponVo.getEndTime()).getData())
-            return new ReturnObject(ResponseCode.FIELD_NOTVALID);//TODO 考虑错误码是否合适
+        //3.若shopId不一致，则无权限访问
+        if(goodsSpuPoDTO.getShopId()!= shopId)
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
 
         return grouponDao.createGrouponofSPU(shopId, id, grouponVo, goodsSpuPoDTO, simpleShopDTO);
 
     }
 
     public ReturnObject putGrouponOnShelves(Long shopId, Long id) {
+
+        //1. shopId是否存在
+        SimpleShopDTO simpleShopDTO = iGoodsService.getSimpleShopByShopId(shopId).getData();
+        if(simpleShopDTO == null)
+            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+
         return grouponDao.putGrouponOnShelves(shopId,id);
 
     }
 
     public ReturnObject putGrouponOffShelves(Long shopId, Long id) {
+        //1. shopId是否存在
+        SimpleShopDTO simpleShopDTO = iGoodsService.getSimpleShopByShopId(shopId).getData();
+        if(simpleShopDTO == null)
+            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+
+        //2. 调用dao
+        ReturnObject retobj = grouponDao.putGrouponOffShelves(shopId,id);
+        if(retobj.getCode()!=ResponseCode.OK)
+            return retobj;
+
+        //3. 如无其他错误，则通知订单模块修改订单类型
         try {
             iOrderService.putGrouponOffshelves(id);
         } catch (Exception e) {
             logger.debug("dubbo error!");
         }
-        return grouponDao.putGrouponOffShelves(shopId,id);
+        return new ReturnObject<>(ResponseCode.OK);
+
     }
 
     public ReturnObject cancelGrouponofSPU(Long shopId, Long id) {
+        //1. shopId是否存在
+        SimpleShopDTO simpleShopDTO = iGoodsService.getSimpleShopByShopId(shopId).getData();
+        if(simpleShopDTO == null)
+            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+
+        //2. 调用dao
+        ReturnObject retobj = grouponDao.cancelGrouponofSPU(shopId,id);
+        if(retobj.getCode()!=ResponseCode.OK)
+            return retobj;
+
+        //3. 如无其他错误，则通知订单模块修改订单类型
         try {
             iOrderService.putGrouponOffshelves(id);
         } catch (Exception e) {
             logger.debug("dubbo error!");
         }
-        return grouponDao.cancelGrouponofSPU(shopId,id);
+        return new ReturnObject<>(ResponseCode.OK);
+
     }
 
     public ReturnObject<PageInfo<VoObject>> queryGroupons(Long shopId, Long spu_id, Integer state, Integer timeline, LocalDateTime beginTime, LocalDateTime endTime, Integer page, Integer pagesize, Boolean isadmin) {

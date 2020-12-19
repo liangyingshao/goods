@@ -100,42 +100,76 @@ public class PresaleService {
             return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
         }
 
-
-        //4. 此sku是否正在参加其他预售
-        if(presaleDao.checkInPresale(id,presaleVo.getBeginTime(),presaleVo.getEndTime()).getData()){
-            logger.debug("此sku正在参加其他预售");
-            return new ReturnObject(ResponseCode.PRESALE_STATENOTALLOW);
-        }
         
         return presaleDao.createPresaleOfSKU(shopId, id, presaleVo,simpleGoodsSkuDTO,simpleShopDTO);
         
     }
 
     public ReturnObject modifyPresaleOfSKU(Long shopId, Long id, PresaleVo presaleVo) {
+        //1. shopId是否存在
+        ReturnObject<SimpleShopDTO> returnObject = iGoodsService.getSimpleShopByShopId(shopId);
+        SimpleShopDTO simpleShopDTO = returnObject.getData();
+
+        if(simpleShopDTO == null)
+            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+
         return presaleDao.modifyPresaleOfSKU(shopId,id,presaleVo);
     }
 
     public ReturnObject cancelPresaleOfSKU(Long shopId, Long id) {
+        //1. shopId是否存在
+        ReturnObject<SimpleShopDTO> returnObject = iGoodsService.getSimpleShopByShopId(shopId);
+        SimpleShopDTO simpleShopDTO = returnObject.getData();
+
+        if(simpleShopDTO == null)
+            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+
+        //2. 调用dao
+        ReturnObject retObj = presaleDao.cancelPresaleOfSKU(shopId,id);
+        if(retObj.getCode()!=ResponseCode.OK)
+            return retObj;
+
+        //3. 如无其他错误，则通知订单模块修改订单类型
         try {
             iOrderService.putPresaleOffshevles(id);
         } catch (Exception e) {
             logger.debug("dubbo error!");
         }
-        return presaleDao.cancelPresaleOfSKU(shopId,id);
+        return new ReturnObject<>(ResponseCode.OK);
     }
 
     public ReturnObject putPresaleOnShelves(Long shopId, Long id) {
+
+        //1. shopId是否存在
+        ReturnObject<SimpleShopDTO> returnObject = iGoodsService.getSimpleShopByShopId(shopId);
+        SimpleShopDTO simpleShopDTO = returnObject.getData();
+
+        if(simpleShopDTO == null)
+            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
 
         return presaleDao.putPresaleOnShelves(shopId,id);
     }
 
     public ReturnObject putPresaleOffShelves(Long shopId, Long id) {
+        //1. shopId是否存在
+        ReturnObject<SimpleShopDTO> returnObject = iGoodsService.getSimpleShopByShopId(shopId);
+        SimpleShopDTO simpleShopDTO = returnObject.getData();
 
+        if(simpleShopDTO == null)
+            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+
+
+        //2. 调用dao
+        ReturnObject retobj = presaleDao.putPresaleOffShelves(shopId,id);
+        if(retobj.getCode()!=ResponseCode.OK)
+            return retobj;
+
+        //3. 如无其他错误，则通知订单模块修改订单类型
         try {
             iOrderService.putPresaleOffshevles(id);
         } catch (Exception e) {
             logger.debug("dubbo error!");
         }
-        return presaleDao.putPresaleOffShelves(shopId,id);
+        return new ReturnObject<>(ResponseCode.OK);
     }
 }
