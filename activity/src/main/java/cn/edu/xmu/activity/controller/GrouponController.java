@@ -15,6 +15,7 @@ import cn.edu.xmu.ooad.util.ReturnObject;
 import com.github.pagehelper.PageInfo;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.swagger.annotations.*;
+import org.apache.tomcat.jni.Local;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -218,8 +219,10 @@ public class GrouponController {
         if(grouponVo.getBeginTime()==null || grouponVo.getEndTime() == null){
             return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
         }
+        //endtime<now,begintime>endtime, begintime<now
         if(grouponVo.getEndTime().isBefore(LocalDateTime.now())||
-                grouponVo.getBeginTime().isAfter(grouponVo.getEndTime())) {
+                grouponVo.getBeginTime().isAfter(grouponVo.getEndTime())||
+                grouponVo.getBeginTime().isBefore(LocalDateTime.now())) {
             return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
         }
 
@@ -260,6 +263,25 @@ public class GrouponController {
     @ResponseBody
     @PutMapping("/shops/{shopId}/groupons/{id}")
     public Object modifyGrouponofSPU(@PathVariable Long shopId, @Depart Long departId, @PathVariable Long id,@Validated @RequestBody(required = true) GrouponVo grouponVo,BindingResult bindingResult){
+
+        Object ret = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (null != ret) {
+            logger.debug("validate fail");
+            return ret;
+        }
+
+        //begintime<now
+        if((grouponVo.getBeginTime()!=null) && (grouponVo.getBeginTime().isBefore(LocalDateTime.now())))
+            return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
+        //endtime<now
+        if((grouponVo.getEndTime()!=null) && (grouponVo.getEndTime().isBefore(LocalDateTime.now())))
+            return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
+        //begintime>endtime
+        if(grouponVo.getBeginTime()!=null
+                && grouponVo.getEndTime()!=null
+                && grouponVo.getEndTime().isBefore(grouponVo.getBeginTime()))
+            return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
+
         if(shopId!=departId)
             return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         Object retObject = Common.processFieldErrors(bindingResult, httpServletResponse);

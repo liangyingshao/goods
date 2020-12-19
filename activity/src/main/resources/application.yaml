@@ -145,13 +145,14 @@ dubbo:
     qos-accept-foreign-ip: false
   # 配置注册中心
   registry:
-    address: nacos://192.168.43.194:8848
-    #192.168.137.1:8848
+    address: nacos://192.168.1.4:8848
+    #address: nacos://127.0.0.1:8848
   # 设置协议-协议由提供方指定消费方被动接受
   protocol:
     name: dubbo
     port: -1 # -1 表示端口自增 from 20880
-    host: 192.168.43.180
+    host: 192.168.1.15
+    # host: 127.0.0.1
     # 设置超时时间
   consumer:
     timeout: 4000
@@ -164,11 +165,15 @@ spring:
   application:
     name: activity-service
   cloud:
+    inetutils:
+      preferred-networks: 192.168.1
+      # preferred-networks: 127.0.0
     nacos:
       discovery:
-        ip: 192.168.43.180
-        server-addr: 192.168.43.194:8848
-        #192.168.137.1:8848
+        # ip: 127.0.0.1
+        ip: 192.168.1.15
+        server-addr: 192.168.1.4:8848
+        # server-addr: 127.0.0.1:8848
   profiles:
     active: dev
   datasource:

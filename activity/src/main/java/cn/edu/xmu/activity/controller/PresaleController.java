@@ -149,9 +149,15 @@ public class PresaleController {
             return retObject;
         }
 
+        //不能为空
         if(presaleVo.getEndTime()==null || presaleVo.getBeginTime()==null ||presaleVo.getPayTime() == null){
             return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
         }
+        //endtime<now,begin<now
+        if(presaleVo.getEndTime().isBefore(LocalDateTime.now())||presaleVo.getBeginTime().isBefore(LocalDateTime.now())){
+            return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
+        }
+        //begintime>endtime
         if(presaleVo.getEndTime().isBefore(LocalDateTime.now())||
                 presaleVo.getEndTime().isBefore(presaleVo.getPayTime())||
                 presaleVo.getPayTime().isBefore(presaleVo.getBeginTime())){
@@ -187,31 +193,44 @@ public class PresaleController {
     @PutMapping("/shops/{shopId}/presales/{id}")
     public Object modifyPresaleofSKU(@PathVariable Long shopId, @Depart Long departId, @PathVariable Long id, @Validated @NotNull @RequestBody(required = true) PresaleVo presaleVo, BindingResult bindingResult){
 
-        if(shopId!=departId)
-            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
-
         Object retObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != retObject) {
             logger.debug("validate fail");
             return retObject;
         }
 
-
-        if(presaleVo.getBeginTime()!=null && presaleVo.getPayTime() != null && presaleVo.getPayTime().isBefore(presaleVo.getBeginTime())){
+        //paytime<begintime
+        if(presaleVo.getBeginTime()!=null &&
+                presaleVo.getPayTime() != null &&
+                presaleVo.getPayTime().isBefore(presaleVo.getBeginTime())){
             return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
         }
 
+        //paytime>endtime
         if(presaleVo.getEndTime()!=null && presaleVo.getPayTime() != null && presaleVo.getPayTime().isAfter(presaleVo.getEndTime())){
             return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
         }
 
+        //begintime>endtime
         if(presaleVo.getBeginTime()!=null && presaleVo.getEndTime() != null && presaleVo.getBeginTime().isAfter(presaleVo.getEndTime())){
             return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
         }
 
+        //endtime<now
         if(presaleVo.getEndTime()!=null && presaleVo.getEndTime().isBefore(LocalDateTime.now())){
             return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
         }
+        //begintime<now
+        if(presaleVo.getBeginTime()!=null && presaleVo.getBeginTime().isBefore(LocalDateTime.now())){
+            return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
+        }
+        //paytime<now
+        if(presaleVo.getPayTime()!=null && presaleVo.getPayTime().isBefore(LocalDateTime.now())){
+            return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
+        }
+
+        if(shopId!=departId)
+            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
 
         ReturnObject returnObject = presaleService.modifyPresaleOfSKU(shopId,id,presaleVo);
         if (returnObject.getCode() == ResponseCode.OK) {
