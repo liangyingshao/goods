@@ -138,9 +138,12 @@ public class ShopDao {
             shopPoMapper.updateByPrimaryKeySelective(shopPo);
             //级联删除
             List<Long> idlist = goodsSpuDao.getAllSpuIdByShopId(shopId).getData();
-            for(Long i : idlist) {
-                goodsSpuDao.deleteGoodsSpu(shopId,i);
+            if(idlist!=null){
+                for(Long i : idlist) {
+                    goodsSpuDao.deleteGoodsSpu(shopId,i);
+                }
             }
+
         } catch (Exception e) {
             StringBuilder message = new StringBuilder().append("deleteShop: ").append(e.getMessage());
             logger.error(message.toString());
