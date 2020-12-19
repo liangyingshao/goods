@@ -42,8 +42,8 @@ public class LiuFeiYanTest {
     @BeforeEach
     public void setUp(){
 
-        managementGate="192.168.43.73:8881";
-        mallGate="192.168.43.73:8880";
+        managementGate="192.168.1.4:8881";
+        mallGate="192.168.1.14:8880";
         this.manageClient = WebTestClient.bindToServer()
                 .baseUrl("http://"+managementGate)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/json;charset=UTF-8")
@@ -87,8 +87,7 @@ public class LiuFeiYanTest {
      */
     @Test
     public void getCouponActivity1() throws Exception{
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDI1OTI4NTBTIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMjE1NjgsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzE3OTY4fQ.n0Bjg03jImHGucV90XtK8UU1UjGWDPrVmykKnLd4xtA";
-                //this.login("13088admin", "123456");
+        String token = this.login("13088admin", "123456");
         manageClient
                 .get()
                 .uri("/shops/0/couponactivities/100415648632")
@@ -127,8 +126,7 @@ public class LiuFeiYanTest {
     public void putCouponActivityOnShelves1() throws Exception{
         //user的departId为0
         //id为5821的活动 departId=0 状态为已删除
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDI1OTI4NTBTIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMjE1NjgsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzE3OTY4fQ.n0Bjg03jImHGucV90XtK8UU1UjGWDPrVmykKnLd4xtA";
-                //this.login("13088admin", "123456");
+        String token = this.login("13088admin", "123456");
         byte[] responseString = manageClient.put().uri("/shops/0/couponactivities/5821/onshelves")
                 .header("authorization", token)
                 .exchange()
@@ -166,8 +164,7 @@ public class LiuFeiYanTest {
     @Test
     public void putCouponActivityOffShelves1() throws Exception{
         //id为5821的活动 departId=0 状态为已删除
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDI1OTI4NTBTIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMjE1NjgsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzE3OTY4fQ.n0Bjg03jImHGucV90XtK8UU1UjGWDPrVmykKnLd4xtA";
-                //this.login("13088admin", "123456");
+        String token = this.login("13088admin", "123456");
         byte[] responseString = manageClient.put().uri("/shops/0/couponactivities/5821/offshelves")
                 .header("authorization", token)
                 .exchange()
@@ -204,8 +201,7 @@ public class LiuFeiYanTest {
     @Test
     public void deleteCouponActivity1() throws Exception{
         //id为1582的活动 departId=0 状态为已上线
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDI1OTI4NTBTIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMjE1NjgsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzE3OTY4fQ.n0Bjg03jImHGucV90XtK8UU1UjGWDPrVmykKnLd4xtA";
-                //this.login("13088admin", "123456");
+        String token = this.login("13088admin", "123456");
         byte[] responseString = manageClient.delete().uri("/shops/0/couponactivities/1582")
                 .header("authorization", token)
                 .exchange()
@@ -249,8 +245,7 @@ public class LiuFeiYanTest {
     public void  updateCouponActivity2() throws Exception{
         //user的departId为0
         //id为1582的活动 departId=0 但处于上线状态 state=1
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDI1OTI4NTBTIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMjE1NjgsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzE3OTY4fQ.n0Bjg03jImHGucV90XtK8UU1UjGWDPrVmykKnLd4xtA";
-                //this.login("13088admin", "123456");
+        String token = this.login("13088admin", "123456");
         LocalDateTime beginTime=LocalDateTime.now().plusDays(1);
         LocalDateTime endTime=LocalDateTime.now().plusDays(100);
         String json = "{\"name\":\"618大促\",\"quantity\":0,\"quantityType\":0,\"beginTime\":\""+beginTime.toString()+"\",\"endTime\":\""+endTime.toString()+"\",\"strategy\":\"优惠策略\"}";
@@ -273,8 +268,7 @@ public class LiuFeiYanTest {
     public void  updateCouponActivity3() throws Exception{
         //user的departId为0
         //id为5821的活动 departId=0 但处于删除状态 state=2
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDI1OTI4NTBTIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMjE1NjgsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzE3OTY4fQ.n0Bjg03jImHGucV90XtK8UU1UjGWDPrVmykKnLd4xtA";
-                //this.login("13088admin", "123456");
+        String token = this.login("13088admin", "123456");
         LocalDateTime beginTime=LocalDateTime.now().plusDays(1);
         LocalDateTime endTime=LocalDateTime.now().plusDays(100);
         String json = "{\"name\":\"618大促\",\"quantity\":0,\"quantityType\":0,\"beginTime\":\""+beginTime.toString()+"\",\"endTime\":\""+endTime.toString()+"\",\"strategy\":\"优惠策略\"}";
@@ -295,8 +289,7 @@ public class LiuFeiYanTest {
      */
     @Test
     public void getCouponSku1() throws Exception{
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDI1OTI4NTBTIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMjE1NjgsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzE3OTY4fQ.n0Bjg03jImHGucV90XtK8UU1UjGWDPrVmykKnLd4xtA";
-                //this.login("13088admin", "123456");
+        String token = this.login("13088admin", "123456");
         byte[] responseString = manageClient.get().uri("/couponactivities/100415648632/skus")
                 .header("authorization", token)
                 .exchange()
@@ -314,8 +307,7 @@ public class LiuFeiYanTest {
      */
     @Test
     public void getCoupon1() throws Exception{
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDI1OTI4NTBTIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMjE1NjgsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzE3OTY4fQ.n0Bjg03jImHGucV90XtK8UU1UjGWDPrVmykKnLd4xtA";
-                //this.login("13088admin", "123456");
+        String token = this.login("13088admin", "123456");
         byte[] responseString = manageClient.post().uri("/couponactivities/122659232/usercoupons")
                 .header("authorization", token)
                 .exchange()
@@ -331,8 +323,7 @@ public class LiuFeiYanTest {
      */
     @Test
     public void  addCouponSku1() throws Exception{
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDI1OTI4NTBTIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMjE1NjgsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzE3OTY4fQ.n0Bjg03jImHGucV90XtK8UU1UjGWDPrVmykKnLd4xtA";
-                //this.login("13088admin", "123456");
+        String token = this.login("13088admin", "123456");
         Long[] skuId= new Long[1];
         skuId[0]=273L;
         String json = JacksonUtil.toJson(skuId);
@@ -352,8 +343,7 @@ public class LiuFeiYanTest {
      */
     @Test
     public void  addCouponSku2() throws Exception{
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDI1OTI4NTBTIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMjE1NjgsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzE3OTY4fQ.n0Bjg03jImHGucV90XtK8UU1UjGWDPrVmykKnLd4xtA";
-                //this.login("13088admin", "123456");
+        String token = this.login("13088admin", "123456");
         Long[] skuId= new Long[1];
         skuId[0]=277773L;
         String json = JacksonUtil.toJson(skuId);
@@ -373,8 +363,7 @@ public class LiuFeiYanTest {
      */
     @Test
     public void  addCouponSku3() throws Exception{
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDI1OTI4NTBTIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMjE1NjgsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzE3OTY4fQ.n0Bjg03jImHGucV90XtK8UU1UjGWDPrVmykKnLd4xtA";
-                //this.login("13088admin", "123456");
+        String token = this.login("13088admin", "123456");
         Long[] skuId= new Long[1];
         skuId[0]=273L;
         String json = JacksonUtil.toJson(skuId);
@@ -382,9 +371,9 @@ public class LiuFeiYanTest {
                 .header("authorization", token)
                 .bodyValue(json)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isNotFound()
                 .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.COUPONACT_STATENOTALLOW.getCode())
+                .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_NOTEXIST.getCode())
                 .returnResult()
                 .getResponseBodyContent();
     }
@@ -394,8 +383,7 @@ public class LiuFeiYanTest {
      */
     @Test
     public void  addCouponSku4() throws Exception{
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDI1OTI4NTBTIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMjE1NjgsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzE3OTY4fQ.n0Bjg03jImHGucV90XtK8UU1UjGWDPrVmykKnLd4xtA";
-                //this.login("13088admin", "123456");
+        String token = this.login("13088admin", "123456");
         Long[] skuId= new Long[1];
         skuId[0]=1275L;//此商品的shopId不为0
         String json = JacksonUtil.toJson(skuId);
@@ -415,8 +403,7 @@ public class LiuFeiYanTest {
      */
     @Test
     public void  deleteCouponSku1() throws Exception{
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDI1OTI4NTBTIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMjE1NjgsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzE3OTY4fQ.n0Bjg03jImHGucV90XtK8UU1UjGWDPrVmykKnLd4xtA";
-                //this.login("13088admin", "123456");
+        String token = this.login("13088admin", "123456");
         byte[] responseString = manageClient.delete().uri("/shops/0/couponskus/111111")
                 .header("authorization", token)
                 .exchange()
