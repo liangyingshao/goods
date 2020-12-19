@@ -7,6 +7,7 @@ import lombok.Data;
 
 import javax.validation.constraints.Min;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * 新增优惠活动传入VO
@@ -49,9 +50,12 @@ public class CouponActivityCreateVo {
         couponActivity.setQuantity(this.quantity);
         couponActivity.setStrategy(this.strategy);
         couponActivity.setQuantitiyType(CouponActivity.Type.getTypeByCode(this.quantityType));
+        if(this.validTerm!=null)
         couponActivity.setValidTerm(this.validTerm.byteValue());
-        couponActivity.setBeginTime(LocalDateTime.parse(this.beginTime));//或者直接设置为LocalDateTime类型?
-        couponActivity.setEndTime(LocalDateTime.parse(this.endTime));
+        if(this.beginTime!=null)
+        couponActivity.setBeginTime(LocalDateTime.parse(this.beginTime,DateTimeFormatter.ISO_DATE_TIME));
+        if(this.endTime!=null)
+        couponActivity.setEndTime(LocalDateTime.parse(this.endTime,DateTimeFormatter.ISO_DATE_TIME));
         return  couponActivity;
     }
 }

@@ -37,8 +37,8 @@ public class ChenPinzhenTest {
     @BeforeEach
     public void setUp(){
 
-        managementGate="192.168.43.73:8881";
-        mallGate="192.168.43.73:8880";
+        managementGate="192.168.43.194:8881";
+        mallGate="192.168.43.194:8880";
 
         this.manageClient = WebTestClient.bindToServer()
                 .baseUrl("http://"+managementGate)
@@ -150,7 +150,8 @@ public class ChenPinzhenTest {
     //200: 成功
     @Test
     public void insertSpu1() throws Exception {
-        String token = this.adminLogin("13088admin", "123456");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAzOTQ2OFEzIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTMxODYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA5NTg2fQ.F2cS4Qn16pDCxo5pL3GwqywN9neSdd-rLjXjM7306r4";
+                //this.adminLogin("13088admin", "123456");
         String json = "{\n" +
                 "  \"decription\": \"string\",\n" +
                 "  \"name\": \"string\",\n" +
@@ -236,7 +237,8 @@ public class ChenPinzhenTest {
     //200: 成功
     @Test
     public void updateSpu1() throws Exception {
-        String token = this.adminLogin("13088admin", "123456");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAzOTQ2OFEzIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTMxODYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA5NTg2fQ.F2cS4Qn16pDCxo5pL3GwqywN9neSdd-rLjXjM7306r4";
+                //this.adminLogin("13088admin", "123456");
         String json = "{\n" +
                 "  \"decription\": \"string\",\n" +
                 "  \"name\": \"string\",\n" +
@@ -296,7 +298,8 @@ public class ChenPinzhenTest {
     //404: spuId不存在
     @Test
     public void updateSpu2() throws Exception {
-        String token = this.adminLogin("13088admin", "123456");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAzOTQ2OFEzIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTMxODYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA5NTg2fQ.F2cS4Qn16pDCxo5pL3GwqywN9neSdd-rLjXjM7306r4";
+                //this.adminLogin("13088admin", "123456");
         byte[] ret = manageClient.get()
                 .uri("/spus/2")
                 .header("authorization", token)
@@ -322,7 +325,8 @@ public class ChenPinzhenTest {
     //200: 成功
     @Test
     public void deleteSpu1() throws Exception {
-        String token = this.adminLogin("13088admin", "123456");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAzOTQ2OFEzIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTMxODYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA5NTg2fQ.F2cS4Qn16pDCxo5pL3GwqywN9neSdd-rLjXjM7306r4";
+                //this.adminLogin("13088admin", "123456");
         byte[] ret = manageClient.delete()
                 .uri("/shops/0/spus/20680")
                 .header("authorization", token)
@@ -353,7 +357,8 @@ public class ChenPinzhenTest {
     //504: 重复删除spu
     @Test
     public void deleteSpu2() throws Exception {
-        String token = this.adminLogin("13088admin", "123456");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAzOTQ2OFEzIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTMxODYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA5NTg2fQ.F2cS4Qn16pDCxo5pL3GwqywN9neSdd-rLjXjM7306r4";
+                //this.adminLogin("13088admin", "123456");
         byte[] ret = manageClient.delete()
                 .uri("/shops/0/spus/20681")
                 .header("authorization", token)
@@ -378,7 +383,8 @@ public class ChenPinzhenTest {
     //200: 成功
     @Test
     public void onshelfSku1() throws Exception {
-        String token = this.adminLogin("13088admin", "123456");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAzOTQ2OFEzIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTMxODYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA5NTg2fQ.F2cS4Qn16pDCxo5pL3GwqywN9neSdd-rLjXjM7306r4";
+                //this.adminLogin("13088admin", "123456");
         byte[] ret = manageClient.put()
                 .uri("/shops/0/skus/20680/onshelves")
                 .header("authorization", token)
@@ -444,7 +450,8 @@ public class ChenPinzhenTest {
     //504: sku状态不合格
     @Test
     public void onshelfSku2() throws Exception {
-        String token = this.adminLogin("13088admin", "123456");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAzOTQ2OFEzIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTMxODYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA5NTg2fQ.F2cS4Qn16pDCxo5pL3GwqywN9neSdd-rLjXjM7306r4";
+                //this.adminLogin("13088admin", "123456");
         byte[] ret = manageClient.put()
                 .uri("/shops/0/skus/273")
                 .header("authorization", token)
@@ -516,7 +523,8 @@ public class ChenPinzhenTest {
     //200: 成功
     @Test
     public void offshelfSku1() throws Exception {
-        String token = this.adminLogin("13088admin", "123456");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAzOTQ2OFEzIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTMxODYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA5NTg2fQ.F2cS4Qn16pDCxo5pL3GwqywN9neSdd-rLjXjM7306r4";
+                //this.adminLogin("13088admin", "123456");
         byte[] ret = manageClient.put()
                 .uri("/shops/0/skus/20680")
                 .header("authorization", token)
@@ -585,7 +593,8 @@ public class ChenPinzhenTest {
     //504: sku状态不合格
     @Test
     public void offshelfSku2() throws Exception {
-        String token = this.adminLogin("13088admin", "123456");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAzOTQ2OFEzIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTMxODYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA5NTg2fQ.F2cS4Qn16pDCxo5pL3GwqywN9neSdd-rLjXjM7306r4";
+                //this.adminLogin("13088admin", "123456");
         byte[] ret = manageClient.put()
                 .uri("/shops/0/skus/20680")
                 .header("authorization", token)
@@ -659,7 +668,8 @@ public class ChenPinzhenTest {
     //200: 成功
     @Test
     public void insertFloatPrice1() throws Exception {
-        String token = this.adminLogin("13088admin", "123456");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAzOTQ2OFEzIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTMxODYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA5NTg2fQ.F2cS4Qn16pDCxo5pL3GwqywN9neSdd-rLjXjM7306r4";
+                //this.adminLogin("13088admin", "123456");
         String json = "{\n" +
                 "  \"activityPrice\": 10,\n" +
                 "  \"beginTime\": \"2021-12-14 03:00:52\",\n" +
@@ -687,7 +697,8 @@ public class ChenPinzhenTest {
     //902: 浮动价格时间冲突
     @Test
     public void insertFloatPrice2() throws Exception {
-        String token = this.adminLogin("13088admin", "123456");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAzOTQ2OFEzIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTMxODYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA5NTg2fQ.F2cS4Qn16pDCxo5pL3GwqywN9neSdd-rLjXjM7306r4";
+                //this.adminLogin("13088admin", "123456");
         String json = "{\n" +
                 "  \"activityPrice\": 10,\n" +
                 "  \"beginTime\": \"2020-11-14 02:23:01\",\n" +
@@ -739,7 +750,8 @@ public class ChenPinzhenTest {
     //200: 成功
     @Test
     public void deleteFloatPrice1() throws Exception {
-        String token = this.adminLogin("13088admin", "123456");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAzOTQ2OFEzIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTMxODYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA5NTg2fQ.F2cS4Qn16pDCxo5pL3GwqywN9neSdd-rLjXjM7306r4";
+                //this.adminLogin("13088admin", "123456");
         byte[] ret = manageClient.delete()
                 .uri("/shops/0/floatPrices/20001")
                 .header("authorization", token)
@@ -760,7 +772,8 @@ public class ChenPinzhenTest {
 //    //504: 浮动价格已经失效
 //    @Test
 //    public void deleteFloatPrice2() throws Exception {
-//        String token = this.adminLogin("13088admin", "123456");
+//        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAzOTQ2OFEzIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTMxODYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA5NTg2fQ.F2cS4Qn16pDCxo5pL3GwqywN9neSdd-rLjXjM7306r4";
+                //this.adminLogin("13088admin", "123456");
 //        byte[] ret = manageClient.delete()
 //                .uri("/shops/0/floatPrices/20004")
 //                .header("authorization", token)
@@ -782,7 +795,8 @@ public class ChenPinzhenTest {
     //404: skuId不存在或浮动价格不存在
     @Test
     public void deleteFloatPrice3() throws Exception {
-        String token = this.adminLogin("13088admin", "123456");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAzOTQ2OFEzIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTMxODYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA5NTg2fQ.F2cS4Qn16pDCxo5pL3GwqywN9neSdd-rLjXjM7306r4";
+                //this.adminLogin("13088admin", "123456");
         byte[] ret = manageClient.delete()
                 .uri("/shops/0/floatPrices/20010")
                 .exchange()
@@ -949,7 +963,8 @@ public class ChenPinzhenTest {
     //200: 成功
     @Test
     public void deleteSpuFromBrand1() throws Exception {
-        String token = this.adminLogin("13088admin", "123456");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAzOTQ2OFEzIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTMxODYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA5NTg2fQ.F2cS4Qn16pDCxo5pL3GwqywN9neSdd-rLjXjM7306r4";
+                //this.adminLogin("13088admin", "123456");
         byte[] ret = manageClient.delete()
                 .uri("/shops/0/spus/20680/brands/20120")
                 .header("authorization", token)
@@ -979,7 +994,8 @@ public class ChenPinzhenTest {
     //404: 品牌不存在
     @Test
     public void deleteSpuFromBrand2() throws Exception {
-        String token = this.adminLogin("13088admin", "123456");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAzOTQ2OFEzIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTMxODYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA5NTg2fQ.F2cS4Qn16pDCxo5pL3GwqywN9neSdd-rLjXjM7306r4";
+                //this.adminLogin("13088admin", "123456");
         byte[] ret = manageClient.delete()
                 .uri("/shops/0/spus/20680/brands/20130")
                 .header("authorization", token)
@@ -1123,7 +1139,8 @@ public class ChenPinzhenTest {
     //200: 成功
     @Test
     public void deleteSpuFromCategory1() throws Exception {
-        String token = this.adminLogin("13088admin", "123456");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAzOTQ2OFEzIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTMxODYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA5NTg2fQ.F2cS4Qn16pDCxo5pL3GwqywN9neSdd-rLjXjM7306r4";
+                //this.adminLogin("13088admin", "123456");
         byte[] ret = manageClient.delete()
                 .uri("/shops/0/spus/20680/categories/20140")
                 .header("authorization", token)
@@ -1154,7 +1171,8 @@ public class ChenPinzhenTest {
     //404: 分类不存在
     @Test
     public void deleteSpuFromCategory2() throws Exception {
-        String token = this.adminLogin("13088admin", "123456");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAzOTQ2OFEzIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTMxODYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA5NTg2fQ.F2cS4Qn16pDCxo5pL3GwqywN9neSdd-rLjXjM7306r4";
+                //this.adminLogin("13088admin", "123456");
         byte[] ret = manageClient.delete()
                 .uri("/shops/0/spus/20680/categories/1001")
                 .header("authorization", token)
@@ -1213,7 +1231,8 @@ public class ChenPinzhenTest {
     //200: 第一页
     @Test
     public void getCouponList1() throws Exception {
-        String token = this.adminLogin("13088admin", "123456");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAzOTQ2OFEzIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTMxODYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA5NTg2fQ.F2cS4Qn16pDCxo5pL3GwqywN9neSdd-rLjXjM7306r4";
+                //this.adminLogin("13088admin", "123456");
         byte[] ret = manageClient.get()
                 .uri("/coupons?page=1&pageSize=3&state=4")
                 .header("authorization", token)
@@ -1298,7 +1317,8 @@ public class ChenPinzhenTest {
     //200: 第二页
     @Test
     public void getCouponList2() throws Exception {
-        String token = this.adminLogin("13088admin", "123456");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAzOTQ2OFEzIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTMxODYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA5NTg2fQ.F2cS4Qn16pDCxo5pL3GwqywN9neSdd-rLjXjM7306r4";
+                //this.adminLogin("13088admin", "123456");
         byte[] ret = manageClient.get()
                 .uri("/coupons?page=5&pageSize=3&state=4")
                 .header("authorization", token)
@@ -1377,7 +1397,8 @@ public class ChenPinzhenTest {
 //    //200: 成功
 //    @Test
 //    public void useCoupon1() throws Exception {
-//        String token = this.adminLogin("13088admin", "123456");
+//        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAzOTQ2OFEzIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTMxODYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA5NTg2fQ.F2cS4Qn16pDCxo5pL3GwqywN9neSdd-rLjXjM7306r4";
+                //this.adminLogin("13088admin", "123456");
 //        byte[] ret = manageClient.put()
 //                .uri("/coupons/20001")
 //                .header("authorization", token)
@@ -1398,7 +1419,8 @@ public class ChenPinzhenTest {
 //    //905: 优惠券状态禁止
 //    @Test
 //    public void useCoupon2() throws Exception {
-//        String token = this.adminLogin("13088admin", "123456");
+//        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAzOTQ2OFEzIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTMxODYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA5NTg2fQ.F2cS4Qn16pDCxo5pL3GwqywN9neSdd-rLjXjM7306r4";
+                //this.adminLogin("13088admin", "123456");
 //        byte[] ret = manageClient.put()
 //                .uri("/coupons/20012")
 //                .header("authorization", token)
@@ -1425,7 +1447,8 @@ public class ChenPinzhenTest {
 //    //200: 成功
 //    @Test
 //    public void returnCoupon1() throws Exception {
-//        String token = this.adminLogin("13088admin", "123456");
+//        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAzOTQ2OFEzIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTMxODYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA5NTg2fQ.F2cS4Qn16pDCxo5pL3GwqywN9neSdd-rLjXjM7306r4";
+                //this.adminLogin("13088admin", "123456");
 //        byte[] ret = manageClient.put()
 //                .uri("goods/shops/0/coupons/20012")
 //                .header("authorization", token)
@@ -1446,7 +1469,8 @@ public class ChenPinzhenTest {
 //    //905: 优惠券状态禁止
 //    @Test
 //    public void returnCoupon2() throws Exception {
-//        String token = this.adminLogin("13088admin", "123456");
+//        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAzOTQ2OFEzIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTMxODYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA5NTg2fQ.F2cS4Qn16pDCxo5pL3GwqywN9neSdd-rLjXjM7306r4";
+                //this.adminLogin("13088admin", "123456");
 //        byte[] ret = manageClient.put()
 //                .uri("goods/shops/0/coupons/20001")
 //                .header("authorization", token)
@@ -1475,7 +1499,8 @@ public class ChenPinzhenTest {
     //200: 成功
     @Test
     public void receiveCoupon1() throws Exception {
-        String token = this.adminLogin("13088admin", "123456");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAzOTQ2OFEzIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTMxODYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA5NTg2fQ.F2cS4Qn16pDCxo5pL3GwqywN9neSdd-rLjXjM7306r4";
+                //this.adminLogin("13088admin", "123456");
         byte[] ret = manageClient.post()
                 .uri("/couponactivities/20003/usercoupons")
                 .header("authorization", token)
@@ -1495,7 +1520,8 @@ public class ChenPinzhenTest {
     //905: 优惠券状态禁止--不允许领自己店内的优惠券
     @Test
     public void receiveCoupon2() throws Exception {
-        String token = this.adminLogin("13088admin", "123456");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAzOTQ2OFEzIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTMxODYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA5NTg2fQ.F2cS4Qn16pDCxo5pL3GwqywN9neSdd-rLjXjM7306r4";
+                //this.adminLogin("13088admin", "123456");
         byte[] ret = manageClient.post()
                 .uri("/couponactivities/20001/usercoupons")
                 .header("authorization", token)
@@ -1515,7 +1541,8 @@ public class ChenPinzhenTest {
     //909: 未到领取优惠券时间
     @Test
     public void receiveCoupon3() throws Exception {
-        String token = this.adminLogin("13088admin", "123456");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAzOTQ2OFEzIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTMxODYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA5NTg2fQ.F2cS4Qn16pDCxo5pL3GwqywN9neSdd-rLjXjM7306r4";
+                //this.adminLogin("13088admin", "123456");
         byte[] ret = manageClient.post()
                 .uri("/couponactivities/4/usercoupons")
                 .header("authorization", token)
@@ -1535,7 +1562,8 @@ public class ChenPinzhenTest {
     //910: 优惠券领罄
     @Test
     public void receiveCoupon4() throws Exception {
-        String token = this.adminLogin("13088admin", "123456");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAzOTQ2OFEzIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTMxODYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA5NTg2fQ.F2cS4Qn16pDCxo5pL3GwqywN9neSdd-rLjXjM7306r4";
+                //this.adminLogin("13088admin", "123456");
         byte[] ret = manageClient.post()
                 .uri("/couponactivities/20005/usercoupons")
                 .header("authorization", token)
@@ -1555,7 +1583,8 @@ public class ChenPinzhenTest {
     //911: 优惠卷活动终止
     @Test
     public void receiveCoupon5() throws Exception {
-        String token = this.adminLogin("13088admin", "123456");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE5MDAzOTQ2OFEzIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTMxODYsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA5NTg2fQ.F2cS4Qn16pDCxo5pL3GwqywN9neSdd-rLjXjM7306r4";
+                //this.adminLogin("13088admin", "123456");
         byte[] ret = manageClient.post()
                 .uri("/couponactivities/20006/usercoupons")
                 .header("authorization", token)

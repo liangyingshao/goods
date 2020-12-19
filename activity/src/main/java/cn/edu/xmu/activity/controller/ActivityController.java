@@ -70,7 +70,7 @@ public class ActivityController {
             @RequestParam(required = false, defaultValue = "1") Integer page,
             @RequestParam(required = false, defaultValue = "10") Integer pageSize)
     {
-        
+        logger.debug("getCouponSkuList:id="+id+" page="+page+" pageSize="+pageSize);
         ReturnObject<PageInfo<SkuInfoDTO>> returnObject=activityService.getCouponSkuList(id,page,pageSize);
         return Common.decorateReturnObject(returnObject);
     }
@@ -169,6 +169,7 @@ public class ActivityController {
     @ResponseBody
     public Object getcouponState()
     {
+        logger.debug("getcouponState");
         Coupon.State[] states=Coupon.State.class.getEnumConstants();
         List<CouponStateRetVo> stateRetVos=new ArrayList<CouponStateRetVo>();
         for(int i=0;i<states.length;++i)
@@ -268,10 +269,11 @@ public class ActivityController {
     })
     @PostMapping("/couponactivities/{id}/usercoupons")
     @ResponseBody
-    public Object getCoupon(@LoginUser @ApiIgnore @RequestParam(required = false) Long userId, @PathVariable Long id)
+    public Object getCoupon(@LoginUser @ApiIgnore @RequestParam(required = false) Long userId, @PathVariable Long id,
+                            @Depart @ApiIgnore @RequestParam(required = false) Long departId)
     {
         logger.debug("getCoupon:userId="+userId+" activityId="+id);
-        ReturnObject<List<String>> returnObject=activityService.getCoupon(userId,id);
+        ReturnObject<List<String>> returnObject=activityService.getCoupon(userId,id,departId);
         return Common.decorateReturnObject(returnObject);
     }
 

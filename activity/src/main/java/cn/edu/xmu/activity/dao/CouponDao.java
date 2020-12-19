@@ -344,7 +344,8 @@ public class CouponDao implements InitializingBean
         else if(Coupon.State.getTypeByCode(state).equals(Coupon.State.DISABLED))
             //失效了会及时更改状态
             couponCriteria.andStateEqualTo(Coupon.State.DISABLED.getCode().byteValue());
-
+        PageHelper.startPage(page,pageSize);
+        logger.debug("page="+page+" pageSize="+pageSize);
         List<CouponPo> couponPos= couponMapper.selectByExample(couponExample);
 
         //构造RetVo
@@ -474,11 +475,20 @@ public class CouponDao implements InitializingBean
      * 买家领取活动优惠券
      * @param userId
      * @param id
+     * @param departId
      * @return ReturnObject<CouponNewRetVo>
      */
-    public ReturnObject<List<String>> getCoupon(Long userId, Long id)
+    public ReturnObject<List<String>> getCoupon(Long userId, Long id, Long departId)
     {
         logger.debug("getCoupon:userId="+userId+" activityId="+id);
+        if(departId!=null)//管理员不能领自家的优惠券
+        {
+            CouponActivityPo activityPo= activityMapper.selectByPrimaryKey(id);
+            if(activityPo==null|| CouponActivity.DatabaseState.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.DatabaseState.DELETED))
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            if(activityPo.getShopId().equals(departId))return new ReturnObject<>(ResponseCode.COUPON_STATENOTALLOW);
+        }
+
         int quantity;
         String key="ca_"+id;//redis里存的活动对应的key
         CouponActivityPo activityPo=activityMapper.selectByPrimaryKey(id);
@@ -926,7 +936,7 @@ public class CouponDao implements InitializingBean
                 return returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             else if(!ca.getShopId().equals(shopId))
                 return returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
-            if(!ca.getState().equals((byte)1)){//未找到符合条件的优惠活动
+            if(!ca.getState().equals((byte)0)){//未找到符合条件的优惠活动
                 return returnObject=new ReturnObject<>(ResponseCode.COUPONACT_STATENOTALLOW,String.format("不可重复删除"));
             }
             ca.setState((byte)2);//活动状态修改为2【已删除】
@@ -1066,6 +1076,7 @@ public class CouponDao implements InitializingBean
                     retList.add(vo);
                 }
             PageInfo<CouponActivityByNewCouponRetVo>activityPage=PageInfo.of(retList);
+            activityPage.setPageNum(page);
             activityPage.setPageSize(pageSize);
             return new ReturnObject<>(activityPage) ;
         }
@@ -1111,6 +1122,7 @@ public class CouponDao implements InitializingBean
                     retList.add(vo);
                 }
             PageInfo<CouponActivityByNewCouponRetVo>activityPage=PageInfo.of(retList);
+            activityPage.setPageNum(page);
             activityPage.setPageSize(pageSize);
             return new ReturnObject<>(activityPage) ;
         }

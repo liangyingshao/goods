@@ -283,8 +283,7 @@ public class XuQingYunTest {
                 "  \"inventory\": 100,\n" +
                 "  \"detail\": \"detail\"\n" +
                 "}";
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE4MjM1MTI3NlhLIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTAyODcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA2Njg3fQ.vOzAbfp4ytcP2-JwG6Z-S6Z5sv6M9OPw86KROzpOESs";
-                //this.adminLogin("13088admin", "123456");
+        String token = this.adminLogin("13088admin", "123456");
 
         byte[] response =manageClient.post().uri("/shops/1/spus/273/skus")
                 .header("authorization",token)
@@ -315,8 +314,7 @@ public class XuQingYunTest {
                 "  \"inventory\": 100,\n" +
                 "  \"detail\": \"detail\"\n" +
                 "}";
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE4MjM1MTI3NlhLIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTAyODcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA2Njg3fQ.vOzAbfp4ytcP2-JwG6Z-S6Z5sv6M9OPw86KROzpOESs";
-                //this.adminLogin("13088admin", "123456");
+        String token = this.adminLogin("13088admin", "123456");
 
         byte[] response =manageClient.post().uri("/shops/1/spus/273/skus")
                 .header("authorization",token)
@@ -345,8 +343,7 @@ public class XuQingYunTest {
                 "  \"inventory\": 100,\n" +
                 "  \"detail\": \"detail\"\n" +
                 "}";
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE4MjM1MTI3NlhLIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTAyODcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA2Njg3fQ.vOzAbfp4ytcP2-JwG6Z-S6Z5sv6M9OPw86KROzpOESs";
-                //this.adminLogin("13088admin", "123456");
+        String token = this.adminLogin("13088admin", "123456");
 
         byte[] response =manageClient.post().uri("/shops/2/spus/273/skus")
                 .header("authorization",token)
@@ -365,8 +362,7 @@ public class XuQingYunTest {
     @Order(13)
     void modifySKU1() throws Exception{
         String requireJson="{\n    \"name\": \"name\",\n    \"originalPrice\": \"100\",\n    \"configuration\": \"configuration\",\n    \"weight\": \"100\",\n    \"inventory\": \"9999\",\n    \"detail\": \"detail\"\n}";
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE4MjM1MTI3NlhLIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTAyODcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA2Njg3fQ.vOzAbfp4ytcP2-JwG6Z-S6Z5sv6M9OPw86KROzpOESs";
-                //this.adminLogin("13088admin", "123456");
+        String token = this.adminLogin("13088admin", "123456");
 
         byte[] response =manageClient.put().uri("/shops/1/skus/20682")
                 .header("authorization",token)
@@ -384,8 +380,7 @@ public class XuQingYunTest {
     @Order(14)
     void modifySKU2() throws Exception{
         String requireJson="{\n    \"name\": \"name\",\n    \"originalPrice\": \"100\",\n    \"configuration\": \"configuration\",\n    \"weight\": \"100\",\n    \"inventory\": \"9999\",\n    \"detail\": \"detail\"\n}";
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE4MjM1MTI3NlhLIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTAyODcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA2Njg3fQ.vOzAbfp4ytcP2-JwG6Z-S6Z5sv6M9OPw86KROzpOESs";
-                //this.adminLogin("13088admin", "123456");
+        String token = this.adminLogin("13088admin", "123456");
 
         byte[] response =manageClient.put().uri("/shops/1/skus/273")
                 .header("authorization",token)
@@ -402,8 +397,7 @@ public class XuQingYunTest {
     @Order(15)
     void modifySKU3() throws Exception{
         String requireJson="{\n    \"name\": \"name\",\n    \"originalPrice\": \"100\",\n    \"configuration\": \"configuration\",\n    \"weight\": \"100\",\n    \"inventory\": \"9999\",\n    \"detail\": \"detail\"\n}";
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE4MjM1MTI3NlhLIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTAyODcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA2Njg3fQ.vOzAbfp4ytcP2-JwG6Z-S6Z5sv6M9OPw86KROzpOESs";
-                //this.adminLogin("13088admin", "123456");
+        String token = this.adminLogin("13088admin", "123456");
 
         byte[] response =manageClient.put().uri("/shops/2/skus/273")
                 .header("authorization",token)
@@ -421,8 +415,7 @@ public class XuQingYunTest {
     @Order(16)
     void modifySKU4() throws Exception{
         String requireJson="{\n    \"name\": \"name\",\n    \"originalPrice\": \"100\",\n    \"configuration\": \"configuration\",\n    \"weight\": \"100\",\n    \"inventory\": \"9999\",\n    \"detail\": \"detail\"\n}";
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE4MjM1MTI3NlhLIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTAyODcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA2Njg3fQ.vOzAbfp4ytcP2-JwG6Z-S6Z5sv6M9OPw86KROzpOESs";
-                //this.adminLogin("13088admin", "123456");
+        String token = this.adminLogin("13088admin", "123456");
 
         byte[] response =manageClient.put().uri("/shops/1/skus/1")
                 .header("authorization",token)
@@ -439,8 +432,7 @@ public class XuQingYunTest {
     @Test
     @Order(17)
     void putOffGoodsOnSale1() throws Exception {
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE4MjM1MTI3NlhLIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTAyODcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA2Njg3fQ.vOzAbfp4ytcP2-JwG6Z-S6Z5sv6M9OPw86KROzpOESs";
-                //this.adminLogin("13088admin", "123456");
+        String token = this.adminLogin("13088admin", "123456");
         byte[] response  = manageClient.put().uri("/shops/1/skus/400/offshelves")
                 .header("authorization",token)
                 .exchange()
@@ -454,8 +446,7 @@ public class XuQingYunTest {
     @Test
     @Order(18)
     void putOffGoodsOnSale2() throws Exception {
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE4MjM1MTI3NlhLIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTAyODcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA2Njg3fQ.vOzAbfp4ytcP2-JwG6Z-S6Z5sv6M9OPw86KROzpOESs";
-                //this.adminLogin("13088admin", "123456");
+        String token = this.adminLogin("13088admin", "123456");
         byte[] response  = manageClient.put().uri("/shops/1/skus/400/offshelves")
                 .header("authorization",token)
                 .exchange()
@@ -469,8 +460,7 @@ public class XuQingYunTest {
     @Test
     @Order(19)
     void putOffGoodsOnSale3() throws Exception {
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE4MjM1MTI3NlhLIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTAyODcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA2Njg3fQ.vOzAbfp4ytcP2-JwG6Z-S6Z5sv6M9OPw86KROzpOESs";
-                //this.adminLogin("13088admin", "123456");
+        String token = this.adminLogin("13088admin", "123456");
         byte[] response  = manageClient.put().uri("/shops/2/skus/400/offshelves")
                 .header("authorization",token)
                 .exchange()
@@ -484,8 +474,7 @@ public class XuQingYunTest {
     @Test
     @Order(20)
     void putOffGoodsOnSale4() throws Exception {
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE4MjM1MTI3NlhLIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTAyODcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA2Njg3fQ.vOzAbfp4ytcP2-JwG6Z-S6Z5sv6M9OPw86KROzpOESs";
-                //this.adminLogin("13088admin", "123456");
+        String token = this.adminLogin("13088admin", "123456");
         byte[] response  = manageClient.put().uri("/shops/1/skus/1/offshelves")
                 .header("authorization",token)
                 .exchange()
@@ -499,8 +488,7 @@ public class XuQingYunTest {
     @Test
     @Order(21)
     void putOffGoodsOnSale5() throws Exception {
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE4MjM1MTI3NlhLIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTAyODcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA2Njg3fQ.vOzAbfp4ytcP2-JwG6Z-S6Z5sv6M9OPw86KROzpOESs";
-                //this.adminLogin("13088admin", "123456");
+        String token = this.adminLogin("13088admin", "123456");
         byte[] response  = manageClient.put().uri("/shops/2/skus/400/offshelves")
                 .header("authorization",token)
                 .exchange()
@@ -514,8 +502,7 @@ public class XuQingYunTest {
     @Test
     @Order(22)
     void putGoodsOnSale1() throws Exception {
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE4MjM1MTI3NlhLIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTAyODcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA2Njg3fQ.vOzAbfp4ytcP2-JwG6Z-S6Z5sv6M9OPw86KROzpOESs";
-                //this.adminLogin("13088admin", "123456");
+        String token = this.adminLogin("13088admin", "123456");
         byte[] response  = manageClient.put().uri("/shops/1/skus/400/onshelves")
                 .header("authorization",token)
                 .exchange()
@@ -528,8 +515,7 @@ public class XuQingYunTest {
     @Test
     @Order(23)
     void putGoodsOnSale2() throws Exception {
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE4MjM1MTI3NlhLIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTAyODcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA2Njg3fQ.vOzAbfp4ytcP2-JwG6Z-S6Z5sv6M9OPw86KROzpOESs";
-                //this.adminLogin("13088admin", "123456");
+        String token = this.adminLogin("13088admin", "123456");
         byte[] response  = manageClient.put().uri("/shops/1/skus/400/onshelves")
                 .header("authorization",token)
                 .exchange()
@@ -543,8 +529,7 @@ public class XuQingYunTest {
     @Test
     @Order(24)
     void putGoodsOnSale3() throws Exception {
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE4MjM1MTI3NlhLIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTAyODcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA2Njg3fQ.vOzAbfp4ytcP2-JwG6Z-S6Z5sv6M9OPw86KROzpOESs";
-                //this.adminLogin("13088admin", "123456");
+        String token = this.adminLogin("13088admin", "123456");
         byte[] response  = manageClient.put().uri("/shops/2/skus/400/onshelves")
                 .header("authorization",token)
                 .exchange()
@@ -558,8 +543,7 @@ public class XuQingYunTest {
     @Test
     @Order(25)
     void putGoodsOnSale4() throws Exception {
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE4MjM1MTI3NlhLIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTAyODcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA2Njg3fQ.vOzAbfp4ytcP2-JwG6Z-S6Z5sv6M9OPw86KROzpOESs";
-                //this.adminLogin("13088admin", "123456");
+        String token = this.adminLogin("13088admin", "123456");
         byte[] response  = manageClient.put().uri("/shops/1/skus/1/onshelves")
                 .header("authorization",token)
                 .exchange()
@@ -574,8 +558,7 @@ public class XuQingYunTest {
     @Test
     @Order(26)
     void putGoodsOnSale5() throws Exception {
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE4MjM1MTI3NlhLIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTAyODcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA2Njg3fQ.vOzAbfp4ytcP2-JwG6Z-S6Z5sv6M9OPw86KROzpOESs";
-                //this.adminLogin("13088admin", "123456");
+        String token = this.adminLogin("13088admin", "123456");
         byte[] response  = manageClient.put().uri("/shops/2/skus/400/onshelves")
                 .header("authorization",token)
                 .exchange()
@@ -593,8 +576,7 @@ public class XuQingYunTest {
         LocalDateTime beginTime= LocalDateTime.of(2020,12,29,20,0,0);
         LocalDateTime endTime=LocalDateTime.of(2020,12,30,10,0,0);
         String requireJson="{\n    \"activityPrice\": \"100\",\n    \"beginTime\": \""+beginTime.toString()+"\",\n    \"endTime\": \""+endTime.toString()+"\",\n    \"quantity\": \"100\"\n}";
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE4MjM1MTI3NlhLIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTAyODcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA2Njg3fQ.vOzAbfp4ytcP2-JwG6Z-S6Z5sv6M9OPw86KROzpOESs";
-                //this.adminLogin("13088admin", "123456");
+        String token = this.adminLogin("13088admin", "123456");
 
         byte[] response =manageClient.post().uri("/shops/1/skus/278/floatPrices")
                 .header("authorization",token)
@@ -620,8 +602,7 @@ public class XuQingYunTest {
         LocalDateTime beginTime= LocalDateTime.of(2020,12,29,20,0,0);
         LocalDateTime endTime=LocalDateTime.of(2020,12,30,10,0,0);
         String requireJson="{\n    \"activityPrice\": \"100\",\n    \"beginTime\": \""+beginTime.toString()+"\",\n    \"endTime\": \""+endTime.toString()+"\",\n    \"quantity\": \"100\"\n}";
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE4MjM1MTI3NlhLIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTAyODcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA2Njg3fQ.vOzAbfp4ytcP2-JwG6Z-S6Z5sv6M9OPw86KROzpOESs";
-                //this.adminLogin("13088admin", "123456");
+        String token = this.adminLogin("13088admin", "123456");
 
         byte[] response =manageClient.post().uri("/shops/1/skus/273/floatPrices")
                 .header("authorization",token)
@@ -642,8 +623,7 @@ public class XuQingYunTest {
         LocalDateTime beginTime= LocalDateTime.of(2020,12,29,20,0,0);
         LocalDateTime endTime=LocalDateTime.of(2020,12,30,10,0,0);
         String requireJson="{\n    \"activityPrice\": \"100\",\n    \"beginTime\": \""+beginTime.toString()+"\",\n    \"endTime\": \""+endTime.toString()+"\",\n    \"quantity\": \"100\"\n}";
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE4MjM1MTI3NlhLIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTAyODcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA2Njg3fQ.vOzAbfp4ytcP2-JwG6Z-S6Z5sv6M9OPw86KROzpOESs";
-                //this.adminLogin("13088admin", "123456");
+        String token = this.adminLogin("13088admin", "123456");
 
         byte[] response =manageClient.post().uri("/shops/2/skus/278/floatPrices")
                 .header("authorization",token)
@@ -665,8 +645,7 @@ public class XuQingYunTest {
         LocalDateTime beginTime= LocalDateTime.of(2020,12,29,20,0,0);
         LocalDateTime endTime=LocalDateTime.of(2020,12,30,10,0,0);
         String requireJson="{\n    \"activityPrice\": \"100\",\n    \"beginTime\": \""+beginTime.toString()+"\",\n    \"endTime\": \""+endTime.toString()+"\",\n    \"quantity\": \"100\"\n}";
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE4MjM1MTI3NlhLIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTAyODcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA2Njg3fQ.vOzAbfp4ytcP2-JwG6Z-S6Z5sv6M9OPw86KROzpOESs";
-                //this.adminLogin("13088admin", "123456");
+        String token = this.adminLogin("13088admin", "123456");
         LocalDateTime beginTime1=LocalDateTime.of(2019,12,12,10,0,0);
         requireJson="{\n    \"activityPrice\": \"100\",\n    \"beginTime\": \""+beginTime1.toString()+"\",\n    \"endTime\": \""+endTime.toString()+"\",\n    \"quantity\": \"100\"\n}";
         byte[] response =manageClient.post().uri("/shops/1/skus/278/floatPrices")
@@ -686,8 +665,7 @@ public class XuQingYunTest {
         LocalDateTime beginTime= LocalDateTime.of(2020,12,29,20,0,0);
         LocalDateTime endTime=LocalDateTime.of(2020,12,30,10,0,0);
         String requireJson="{\n    \"activityPrice\": \"100\",\n    \"beginTime\": \""+beginTime.toString()+"\",\n    \"endTime\": \""+endTime.toString()+"\",\n    \"quantity\": \"100\"\n}";
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE4MjM1MTI3NlhLIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTAyODcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA2Njg3fQ.vOzAbfp4ytcP2-JwG6Z-S6Z5sv6M9OPw86KROzpOESs";
-                //this.adminLogin("13088admin", "123456");
+        String token = this.adminLogin("13088admin", "123456");
         LocalDateTime endTime1=LocalDateTime.of(2020,12,11,20,0,0);
         requireJson="{\n    \"activityPrice\": \"100\",\n    \"beginTime\": \""+beginTime.toString()+"\",\n    \"endTime\": \""+endTime1.toString()+"\",\n    \"quantity\": \"100\"\n}";
         byte[] response =manageClient.post().uri("/shops/1/skus/278/floatPrices")
@@ -709,8 +687,7 @@ public class XuQingYunTest {
         LocalDateTime beginTime= LocalDateTime.of(2020,12,29,20,0,0);
         LocalDateTime endTime=LocalDateTime.of(2020,12,30,10,0,0);
         String requireJson="{\n    \"activityPrice\": \"100\",\n    \"beginTime\": \""+beginTime.toString()+"\",\n    \"endTime\": \""+endTime.toString()+"\",\n    \"quantity\": \"100\"\n}";
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE4MjM1MTI3NlhLIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTAyODcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA2Njg3fQ.vOzAbfp4ytcP2-JwG6Z-S6Z5sv6M9OPw86KROzpOESs";
-                //this.adminLogin("13088admin", "123456");
+        String token = this.adminLogin("13088admin", "123456");
 
         requireJson="{\n    \"activityPrice\": \"100\",\n    \"beginTime\": \""+beginTime.toString()+"\",\n    \"endTime\": \""+endTime.toString()+"\",\n    \"quantity\": \"-100\"\n}";
         byte[] response =manageClient.post().uri("/shops/1/skus/278/floatPrices")
@@ -727,8 +704,7 @@ public class XuQingYunTest {
     @Test
     @Order(33)
     void deleteSku1() throws Exception{
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE4MjM1MTI3NlhLIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTAyODcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA2Njg3fQ.vOzAbfp4ytcP2-JwG6Z-S6Z5sv6M9OPw86KROzpOESs";
-                //this.adminLogin("13088admin", "123456");
+        String token = this.adminLogin("13088admin", "123456");
 
         byte[] response =manageClient.delete().uri("/shops/2/skus/20682").header("authorization",token)
                 .exchange()
@@ -743,8 +719,7 @@ public class XuQingYunTest {
     @Test
     @Order(34)
     void deleteSku2() throws Exception{
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE4MjM1MTI3NlhLIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTAyODcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA2Njg3fQ.vOzAbfp4ytcP2-JwG6Z-S6Z5sv6M9OPw86KROzpOESs";
-                //this.adminLogin("13088admin", "123456");
+        String token = this.adminLogin("13088admin", "123456");
 
         byte[] response =manageClient.delete().uri("/shops/1/skus/20682").header("authorization",token)
                 .exchange()
@@ -759,8 +734,7 @@ public class XuQingYunTest {
     @Test
     @Order(35)
     void deleteSku3() throws Exception{
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE4MjM1MTI3NlhLIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTAyODcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA2Njg3fQ.vOzAbfp4ytcP2-JwG6Z-S6Z5sv6M9OPw86KROzpOESs";
-                //this.adminLogin("13088admin", "123456");
+        String token = this.adminLogin("13088admin", "123456");
 
         byte[] response =manageClient.delete().uri("/shops/1/skus/20682").header("authorization",token)
                 .exchange()
@@ -774,8 +748,7 @@ public class XuQingYunTest {
     @Test
     @Order(36)
     void deleteSku4() throws Exception{
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE4MjM1MTI3NlhLIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjowLCJleHAiOjE2MDgzMTAyODcsInVzZXJJZCI6MSwiaWF0IjoxNjA4MzA2Njg3fQ.vOzAbfp4ytcP2-JwG6Z-S6Z5sv6M9OPw86KROzpOESs";
-                //this.adminLogin("13088admin", "123456");
+        String token = this.adminLogin("13088admin", "123456");
 
         byte[] response =manageClient.delete().uri("/shops/1/skus/1").header("authorization",token)
                 .exchange()
