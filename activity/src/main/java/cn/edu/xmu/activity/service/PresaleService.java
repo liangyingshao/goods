@@ -71,6 +71,8 @@ public class PresaleService {
             BoList.add(bo);
         }
         PageInfo<VoObject> PresalePage = PageInfo.of(BoList);
+        //改为传入的pageSize
+        PresalePage.setPageSize(pagesize);
         return new ReturnObject<>(PresalePage);
 
     }

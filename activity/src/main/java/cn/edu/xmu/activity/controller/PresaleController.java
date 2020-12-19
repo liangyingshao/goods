@@ -13,8 +13,12 @@ import cn.edu.xmu.ooad.util.ReturnObject;
 import com.github.pagehelper.PageInfo;
 import com.sun.mail.iap.Response;
 import io.swagger.annotations.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -31,8 +35,8 @@ import java.util.List;
  */
 @Api(value = "预售服务", tags = "Presale")
 @RestController /*Restful的Controller对象*/
-@RequestMapping(value = "/goods", produces = "application/json;charset=UTF-8")
-//@RequestMapping(produces = "application/json;charset=UTF-8")
+//@RequestMapping(value = "/goods", produces = "application/json;charset=UTF-8")
+@RequestMapping(produces = "application/json;charset=UTF-8")
 public class PresaleController {
 
     @Autowired
@@ -41,7 +45,7 @@ public class PresaleController {
     @Autowired
     private HttpServletResponse httpServletResponse;
 
-
+    private static final Logger logger = LoggerFactory.getLogger(PresaleController.class);
     /**
      * description: Presale001 getPresaleState
      * version: 1.0
@@ -139,7 +143,13 @@ public class PresaleController {
     @Audit
     @PostMapping("/shops/{shopId}/skus/{id}/presales")
     @ResponseBody
-    public Object createPresaleOfSKU(@PathVariable(name = "id") Long id, @PathVariable(name="shopId") Long shopId, @NotNull @RequestBody PresaleVo presaleVo ){
+    public Object createPresaleOfSKU(@PathVariable(name = "id") Long id, @PathVariable(name="shopId") Long shopId, @Validated @NotNull @RequestBody PresaleVo presaleVo, BindingResult bindingResult){
+
+        Object retObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (null != retObject) {
+            logger.debug("validate fail");
+            return retObject;
+        }
 
         if(presaleVo.getEndTime()==null || presaleVo.getBeginTime()==null ||presaleVo.getPayTime() == null){
             return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
@@ -156,6 +166,7 @@ public class PresaleController {
         returnObject = presaleService.createPresaleOfSKU(shopId,id,presaleVo);
 
         if (returnObject.getCode() == ResponseCode.OK) {
+            httpServletResponse.setStatus(HttpStatus.CREATED.value());
             return Common.getRetObject(returnObject);
         } else {
             return Common.decorateReturnObject(returnObject);
@@ -176,7 +187,13 @@ public class PresaleController {
     })
     @Audit
     @PutMapping("/shops/{shopId}/presales/{id}")
-    public Object modifyPresaleofSKU(@PathVariable Long shopId, @PathVariable Long id,@NotNull @RequestBody(required = true) PresaleVo presaleVo){
+    public Object modifyPresaleofSKU(@PathVariable Long shopId, @PathVariable Long id,@Validated @NotNull @RequestBody(required = true) PresaleVo presaleVo,BindingResult bindingResult){
+
+        Object retObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (null != retObject) {
+            logger.debug("validate fail");
+            return retObject;
+        }
 
 
         if(presaleVo.getBeginTime()!=null && presaleVo.getPayTime() != null && presaleVo.getPayTime().isBefore(presaleVo.getBeginTime())){

@@ -26,6 +26,12 @@ public class Presale implements VoObject {
     LocalDateTime payTime;
     SimpleGoodsSkuDTO simpleGoodsSkuDTO;
     SimpleShopDTO simpleShopDTO;
+    Byte state;
+    Integer quantity;
+    Long advancePayPrice;
+    Long restPayPrice;
+    LocalDateTime gmtCreate;
+    LocalDateTime gmtModified;
 
     public Presale(PresaleActivityPo presaleActivityPo,SimpleGoodsSkuDTO simpleGoodsSkuDTO,SimpleShopDTO simpleShopDTO)
     {
@@ -36,6 +42,12 @@ public class Presale implements VoObject {
         payTime = presaleActivityPo.getPayTime();
         this.simpleGoodsSkuDTO = simpleGoodsSkuDTO;
         this.simpleShopDTO = simpleShopDTO;
+        state = presaleActivityPo.getState();
+        quantity = presaleActivityPo.getQuantity();
+        advancePayPrice = presaleActivityPo.getAdvancePayPrice();
+        restPayPrice = presaleActivityPo.getRestPayPrice();
+        gmtCreate = presaleActivityPo.getGmtCreate();
+        gmtModified = presaleActivityPo.getGmtModified();
 
     }
 
@@ -55,6 +67,13 @@ public class Presale implements VoObject {
         vo.setEndTime(endTime);
         vo.setGoodsSku(simpleGoodsSkuDTO);
         vo.setShop(simpleShopDTO);
+        vo.setState(state);
+        vo.setQuantity(quantity);
+        vo.setAdvancePayPrice(advancePayPrice);
+        vo.setRestPayPrice(restPayPrice);
+        vo.setGmtCreate(gmtCreate);
+        vo.setGmtModified(gmtModified);
+
         return vo;
     }
 

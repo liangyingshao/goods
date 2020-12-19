@@ -367,6 +367,8 @@ public class CouponDao implements InitializingBean
             //添加
             couponRetVos.add(retVo);
         }
+        PageHelper.startPage(page,pageSize);
+        logger.debug("page="+page+" pageSize="+pageSize);
         return new PageInfo<>(couponRetVos);
     }
 
@@ -800,14 +802,13 @@ public class CouponDao implements InitializingBean
         CouponActivityPoExample.Criteria criteria=activityPoExample.createCriteria();
         criteria.andIdEqualTo(activity.getId());
         criteria.andShopIdEqualTo(activity.getShopId());
-        criteria.andStateEqualTo((byte)0);//待修改活动必须为【已下线】
         try{
             CouponActivityPo po=activityMapper.selectByPrimaryKey(activityPo.getId());
             if(po==null)
                 return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             if(!po.getShopId().equals(activity.getShopId()))
                 return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
-
+            if(!po.getState().equals(0))return  new ReturnObject<>(ResponseCode.COUPONACT_STATENOTALLOW);
             int ret = activityMapper.updateByExampleSelective(activityPo,activityPoExample);
             if(ret==0){//修改失败
                 logger.debug("updateCouponActivity fail:"+activityPo.toString());
@@ -935,24 +936,18 @@ public class CouponDao implements InitializingBean
                 return returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             else if(!ca.getShopId().equals(shopId))
                 return returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
-            //上线优惠活动
-            List<CouponActivityPo> activityPo=activityMapper.selectByExample(activityPoExample);
-            if(activityPo==null)//未找到符合条件的优惠活动
-            {
-                return returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-            }
-            if(activityPo.get(0).getState().equals((byte)2)){//未找到符合条件的优惠活动
+            if(!ca.getState().equals((byte)0)){//未找到符合条件的优惠活动
                 return returnObject=new ReturnObject<>(ResponseCode.COUPONACT_STATENOTALLOW,String.format("不可重复删除"));
             }
-            activityPo.get(0).setState((byte)2);//活动状态修改为2【已删除】
-            activityPo.get(0).setModiBy(userId);//修改者更新
-            int ret = activityMapper.updateByExampleSelective(activityPo.get(0),activityPoExample);
+            ca.setState((byte)2);//活动状态修改为2【已删除】
+            ca.setModiBy(userId);//修改者更新
+            int ret = activityMapper.updateByExampleSelective(ca,activityPoExample);
             if(ret==0){//修改失败
-                logger.debug("updateCouponActivity fail:"+activityPo.toString());
+                logger.debug("updateCouponActivity fail:"+ca.toString());
                 returnObject=new ReturnObject<>(ResponseCode.COUPONACT_STATENOTALLOW,String.format("下线优惠活动失败"));
             }
             else{//修改活动状态成功
-                logger.debug("updateCouponActivity success:"+activityPo.toString());
+                logger.debug("updateCouponActivity success:"+ca.toString());
                 returnObject =new ReturnObject<>();
 
             }
@@ -1064,22 +1059,22 @@ public class CouponDao implements InitializingBean
             criteria.andBeginTimeGreaterThanOrEqualTo(searchTimeMin);//beginTime>=明日零点
             criteria.andBeginTimeLessThan(searchTimeMax);//beginTime<后日零点
         }
-        //分页查询
-        PageHelper.startPage(page, pageSize);
-        logger.debug("page = " + page + "pageSize = " + pageSize);
         List<CouponActivityPo> activityPos=null;
         try{
+            //分页查询
+            PageHelper.startPage(page, pageSize);
+            logger.debug("page = " + page + "pageSize = " + pageSize);
             activityPos=activityMapper.selectByExample(activityExample);
 //            if(activityPos.size()==0)//未找到相应活动
 //                return new ReturnObject<>(ResponseCode.OK);
             List<CouponActivityByNewCouponRetVo> retList=new ArrayList<>(activityPos.size());
             if(activityPos.size()!=0)
-            for(CouponActivityPo po:activityPos){
-                CouponActivity bo=new CouponActivity(po);
-                CouponActivityByNewCouponRetVo vo=new CouponActivityByNewCouponRetVo();
-                vo.set(bo);
-                retList.add(vo);
-            }
+                for(CouponActivityPo po:activityPos){
+                    CouponActivity bo=new CouponActivity(po);
+                    CouponActivityByNewCouponRetVo vo=new CouponActivityByNewCouponRetVo();
+                    vo.set(bo);
+                    retList.add(vo);
+                }
             PageInfo<CouponActivityByNewCouponRetVo>activityPage=PageInfo.of(retList);
             activityPage.setPageNum(page);
             activityPage.setPageSize(pageSize);
@@ -1094,7 +1089,6 @@ public class CouponDao implements InitializingBean
             logger.error("other exception : " + e.getMessage());
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
         }
-
     }
 
     /**
@@ -1113,21 +1107,20 @@ public class CouponDao implements InitializingBean
 
         List<CouponActivityPo> activityPos=null;
         try{
-            activityPos=activityMapper.selectByExample(activityExample);
-//            if(activityPos.size()==0)//未找到符合条件的活动
-//                return new ReturnObject<>(ResponseCode.ACTIVITY_NOTFOUND);
             //分页查询
             PageHelper.startPage(page, pageSize);
             logger.debug("page = " + page + "pageSize = " + pageSize);
+            activityPos=activityMapper.selectByExample(activityExample);
+//            if(activityPos.size()==0)//未找到符合条件的活动
+//                return new ReturnObject<>(ResponseCode.ACTIVITY_NOTFOUND);
             List<CouponActivityByNewCouponRetVo> retList=new ArrayList<>(activityPos.size());
             if(activityPos.size()!=0)
-            for(CouponActivityPo po:activityPos){
-                CouponActivity bo=new CouponActivity(po);
-                CouponActivityByNewCouponRetVo vo=new CouponActivityByNewCouponRetVo();
-                vo.set(bo);
-                retList.add(vo);
-            }
-
+                for(CouponActivityPo po:activityPos){
+                    CouponActivity bo=new CouponActivity(po);
+                    CouponActivityByNewCouponRetVo vo=new CouponActivityByNewCouponRetVo();
+                    vo.set(bo);
+                    retList.add(vo);
+                }
             PageInfo<CouponActivityByNewCouponRetVo>activityPage=PageInfo.of(retList);
             activityPage.setPageNum(page);
             activityPage.setPageSize(pageSize);
@@ -1310,12 +1303,12 @@ public class CouponDao implements InitializingBean
         return false;
     }
 
-    public ReturnObject<Object> getCouponActivity(Long activityId,Long shopId){
+    public ReturnObject<CouponActivity> getCouponActivity(Long activityId,Long shopId){
         CouponActivityPo activityPo=activityMapper.selectByPrimaryKey(activityId);
         if(activityPo==null)return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         if(!activityPo.getShopId().equals(shopId))return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
         CouponActivity couponActivity= new CouponActivity(activityPo);
-        return new ReturnObject<>(couponActivity);
+        return new ReturnObject<CouponActivity>(couponActivity);
     }
 
     public Boolean judgeCouponActivityIdValid(Long couponActivityId) {

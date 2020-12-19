@@ -6,6 +6,7 @@ import cn.edu.xmu.activity.model.vo.ActivityStatusRetVo;
 import cn.edu.xmu.activity.model.vo.GrouponVo;
 import cn.edu.xmu.activity.service.GrouponService;
 import cn.edu.xmu.ooad.annotation.Audit;
+import cn.edu.xmu.ooad.annotation.Depart;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
@@ -18,6 +19,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -34,8 +37,8 @@ import java.util.List;
  */
 @Api(value = "团购服务", tags = "Groupon")
 @RestController /*Restful的Controller对象*/
-@RequestMapping(value = "/goods", produces = "application/json;charset=UTF-8")
-//@RequestMapping(produces = "application/json;charset=UTF-8")
+//@RequestMapping(value = "/goods", produces = "application/json;charset=UTF-8")
+@RequestMapping(produces = "application/json;charset=UTF-8")
 public class GrouponController {
 
     @Autowired
@@ -186,7 +189,13 @@ public class GrouponController {
     @Audit
     @PostMapping("/shops/{shopId}/spus/{id}/groupons")
     @ResponseBody
-    public Object createGrouponofSPU(@PathVariable(name="id") Long id, @PathVariable(name="shopId") Long shopId, @RequestBody GrouponVo grouponVo ){
+    public Object createGrouponofSPU(@PathVariable(name="id") Long id, @Depart @PathVariable(name="shopId") Long shopId, @Validated @RequestBody(required = true) GrouponVo grouponVo, BindingResult bindingResult){
+
+        Object retObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (null != retObject) {
+            logger.debug("validate fail");
+            return retObject;
+        }
 
         //beginTime，endTime不能空
         if(grouponVo.getBeginTime()==null || grouponVo.getEndTime() == null){
@@ -199,6 +208,7 @@ public class GrouponController {
 
         ReturnObject returnObject = grouponService.createGrouponofSPU(shopId,id,grouponVo);
         if (returnObject.getCode() == ResponseCode.OK) {
+            httpServletResponse.setStatus(HttpStatus.CREATED.value());
             return Common.getRetObject(returnObject);
         } else {
             return Common.decorateReturnObject(returnObject);
@@ -232,7 +242,13 @@ public class GrouponController {
     @Audit
     @ResponseBody
     @PutMapping("/shops/{shopId}/groupons/{id}")
-    public Object modifyGrouponofSPU(@PathVariable Long shopId, @PathVariable Long id,@RequestBody(required = true) GrouponVo grouponVo){
+    public Object modifyGrouponofSPU(@PathVariable Long shopId, @PathVariable Long id,@Validated @RequestBody(required = true) GrouponVo grouponVo,BindingResult bindingResult){
+
+        Object retObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (null != retObject) {
+            logger.debug("validate fail");
+            return retObject;
+        }
 
         //BeginTime，EndTime的验证
         if(grouponVo.getEndTime()!=null && grouponVo.getEndTime().isBefore(LocalDateTime.now())){

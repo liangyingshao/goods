@@ -61,7 +61,7 @@ public class ShopControllerTest {
     @Test
     public void getshopState1() throws Exception {
 
-        String responseString=this.mvc.perform(get("/goods/shops/state"))
+        String responseString=this.mvc.perform(get("/shops/state"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
                 .andReturn().getResponse().getContentAsString();

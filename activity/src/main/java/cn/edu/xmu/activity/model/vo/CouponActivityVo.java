@@ -68,7 +68,9 @@ public class CouponActivityVo {
         this.couponTime=bo.getCouponTime().toString();
         this.strategy=bo.getStrategy();
         this.state=bo.getState().getCode().byteValue();
+        if(this.gmtCreate!=null)
         this.gmtCreate=bo.getGmtCreate().toString();
+        if(this.gmtModified!=null)
         this.gmtModified=bo.getGmtModified().toString();
     }
 }
