@@ -11,15 +11,22 @@ import cn.edu.xmu.oomall.other.service.ITimeService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.dubbo.config.annotation.DubboService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Set;
+
+import static java.time.LocalTime.MIN;
 
 @Slf4j
 @DubboService
 public class IFlashsaleServiceImpl implements IFlashsaleService {
+
+    private static final Logger logger = LoggerFactory.getLogger(FlashSaleDao.class);
 
     @Autowired
     private RedisTemplate redisTemplate;
@@ -37,9 +44,13 @@ public class IFlashsaleServiceImpl implements IFlashsaleService {
     public ReturnObject deleteSegmentFlashsale(Long id) {
         //删除redis
         //构造Key
-        String key = "FlashSaleItem:" + LocalDateTime.now().toString() + id.toString();
+        LocalDate dateTime1 = LocalDateTime.now().toLocalDate();
+        String key = "FlashSaleItem:" + dateTime1.toString() + id.toString();
+        logger.error("delete segment: "+key);
         redisTemplate.delete(key);
-        key = "FlashSaleItem:" + LocalDateTime.now().plusDays(1).toString() + id.toString();
+        LocalDate dateTime2 = LocalDateTime.now().plusDays(1).toLocalDate();
+        key = "FlashSaleItem:" + dateTime2.toString() + id.toString();
+        logger.error("delete segment: "+key);
         redisTemplate.delete(key);
 
         //删除Flashsale

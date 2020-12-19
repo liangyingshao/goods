@@ -37,8 +37,8 @@ import java.time.format.DateTimeFormatter;
  */
 @Api(value = "秒杀服务", tags = "flashsale")
 @RestController /*Restful的Controller对象*/
-//@RequestMapping(value = "/flashsale", produces = "application/json;charset=UTF-8")
-@RequestMapping(produces = "application/json;charset=UTF-8")
+@RequestMapping(value = "/goods", produces = "application/json;charset=UTF-8")
+//@RequestMapping(produces = "application/json;charset=UTF-8")
 public class FlashsaleController {
     private  static  final Logger logger = LoggerFactory.getLogger(FlashsaleController.class);
 

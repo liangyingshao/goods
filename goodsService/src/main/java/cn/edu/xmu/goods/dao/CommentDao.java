@@ -45,6 +45,7 @@ public class CommentDao {
     private static final Logger logger = LoggerFactory.getLogger(CommentDao.class);
 
     public ReturnObject<CommentRetVo> addSkuComment(Comment comment) {
+        logger.error("进入增加SKU评论dao层，调用iOrderService.getUserSelectSOrderInfo");
         ReturnObject returnObject = null;
         CommentPo commentPo = new CommentPo();
         commentPo.setCustomerId(comment.getCustomerId());
@@ -54,25 +55,24 @@ public class CommentDao {
         commentPo.setContent(comment.getContent());
         commentPo.setState((byte) Comment.State.TOAUDIT.getCode());
         commentPo.setGmtCreate(LocalDateTime.now());
-        logger.debug("success insert Comment: " + commentPo.getId());
         try{
             //是不是该查一下orderItemId是否已经有评论了
             CommentPoExample orderIdExample = new CommentPoExample();
             CommentPoExample.Criteria orderItemCriteria = orderIdExample.createCriteria();
             orderItemCriteria.andOrderitemIdEqualTo(commentPo.getOrderitemId());
-            logger.error("1");
             List<CommentPo> orderIdList = commentPoMapper.selectByExample(orderIdExample);
             if(orderIdList.size()!=0)
             {
+                logger.debug("orderItemId已经有评论了");
                 return new ReturnObject<>(ResponseCode.COMMENT_EXISTED);
             }
-            logger.error("2");
+            logger.debug("orderItemId没有评论");
             int ret = commentPoMapper.insert(commentPo);
-            logger.error("3");
+            logger.error("成功插入comment");
             if (ret == 0)
             {
                 //修改失败
-//                logger.debug("addFloatPrice: insert floatPrice fail : " + floatPricePo.toString());
+                logger.debug("插入失败");
                 return new ReturnObject<>(ResponseCode.FIELD_NOTVALID,"插入失败");
             }
             else {
@@ -86,15 +86,14 @@ public class CommentDao {
                 criteria.andTypeEqualTo(comment.getType());
                 criteria.andContentEqualTo(comment.getContent());
                 criteria.andStateEqualTo(commentPo.getState());
-                logger.error("does it in?");
                 List<CommentPo> pos=commentPoMapper.selectByExample(example);
-                logger.error("4");
                 if(pos.size()==0)
                 {
                     return new ReturnObject<>(ResponseCode.FIELD_NOTVALID,"插入失败");
                 }
                 else
                 {
+                    logger.debug("插入成功");
                     //构造CommentRetVo
                     Customer customer=new Customer();
                     //根据comment.getCustomerId()查询name和realName
@@ -111,12 +110,12 @@ public class CommentDao {
             }
         }
         catch (DataAccessException e){
-            logger.error("selectAllPassComment: DataAccessException:" + e.getMessage());
+            logger.error("数据库错误:" + e.getMessage());
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
         }
         catch (Exception e) {
             // 其他Exception错误
-            logger.error("other exception : " + e.getMessage());
+            logger.error("发生了严重的数据库错误: " + e.getMessage());
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
         }
     }

@@ -37,37 +37,30 @@ public class CommentService {
 
     @Transactional
     public ReturnObject<CommentRetVo> addSkuComment(Comment comment) {
-//        ReturnObject<OrderDTO> orderDTOReturnObject = iOrderService.getUserSelectSOrderInfo(comment.getCustomerId(), comment.getOrderitemId());
-        ReturnObject<OrderDTO> orderDTOReturnObject = new ReturnObject<>(new OrderDTO());
+        logger.error("进入增加SKU评论service层，调用iOrderService.getUserSelectSOrderInfo");
+        ReturnObject<OrderDTO> orderDTOReturnObject = iOrderService.getUserSelectSOrderInfo(comment.getCustomerId(), comment.getOrderitemId());
+        logger.error("iOrderService.getUserSelectSOrderInfo没有直接抛异常");
+//        ReturnObject<OrderDTO> orderDTOReturnObject = new ReturnObject<>(new OrderDTO());
         //根据comment.getOrderitemId()得到对应的订单条目记录orderItem
         if(orderDTOReturnObject.getData() == null)// 记录不存在
         {
             // orderItem为null，返回903
-            logger.error("orderDTOReturnObject:"+orderDTOReturnObject.toString());
+            logger.error("iOrderService.getUserSelectSOrderInfo返回为空");
 
             return new ReturnObject<>(ResponseCode.USER_NOTBUY);
         }
         else// 查到记录，从中拿出SKU_Id
         {
-            List<Long> list = new ArrayList<>();
-            list.add(comment.getOrderitemId());
-//            ReturnObject<Map<Long, OrderDTO>> map = iOrderService.getUserSelectOrderInfoByList(comment.getCustomerId(), list);
-            Map<Long, OrderDTO> map = new HashMap<Long, OrderDTO>();
-            map.put(comment.getOrderitemId(), new OrderDTO());
-            ReturnObject<Map<Long, OrderDTO>> mapReturnObject = new ReturnObject<Map<Long, OrderDTO>>(map);
-
-            //判断orderItem和用户是否对应
-            if(mapReturnObject.getData()==null || mapReturnObject.getData().get(comment.getOrderitemId())==null)
-            {
-                //如果不一致，返回903
-                return new ReturnObject<>(ResponseCode.USER_NOTBUY);
-            }
-            else
-            {
-                logger.error("??????"+mapReturnObject.getData().get(comment.getOrderitemId()).toString());
-                //一致，给SKU_Id赋值
-                comment.setGoodsSkuId(1L);//(mapReturnObject.getData().get(comment.getOrderitemId()).getSkuId());
-            }
+            logger.error("iOrderService.getUserSelectSOrderInfo正常返回");
+//            List<Long> list = new ArrayList<>();
+//            list.add(comment.getOrderitemId());
+//            logger.error("iOrderService.getUserSelectOrderInfoByList: ");
+//            ReturnObject<Map<Long, OrderDTO>> mapReturnObject = iOrderService.getUserSelectOrderInfoByList(comment.getCustomerId(), list);
+//            Map<Long, OrderDTO> map = new HashMap<Long, OrderDTO>();
+//            map.put(comment.getOrderitemId(), new OrderDTO());
+//            ReturnObject<Map<Long, OrderDTO>> mapReturnObject = new ReturnObject<Map<Long, OrderDTO>>(map);
+            //一致，给SKU_Id赋值
+            comment.setGoodsSkuId(orderDTOReturnObject.getData().getSkuId());//(mapReturnObject.getData().get(comment.getOrderitemId()).getSkuId());
         }
 //        //根据用户id找到用户信息，应该是其他模块的内部接口，但是在user模块里没找到对应的API，/users/{id}是外部接口
 ////        "customer": {

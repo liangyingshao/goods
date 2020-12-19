@@ -101,9 +101,10 @@ public class CommentController {
     @PostMapping("/orderitems/{id}/comments")
     @ResponseBody
     public Object addSkuComment(@PathVariable Long id,  @LoginUser @ApiIgnore @RequestParam(required = false) Long userId, @Validated @RequestBody CommentVo vo,BindingResult bindingResult){
-        logger.error("11111111111111");
+        logger.error("进入增加SKU评论controller层");
         Object object = Common.processFieldErrors(bindingResult,httpServletResponse);
         if(null!=object){
+            logger.error("有参数错误");
             return object;
         }
 //        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
