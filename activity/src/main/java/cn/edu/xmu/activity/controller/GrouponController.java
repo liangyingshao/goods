@@ -259,8 +259,9 @@ public class GrouponController {
     @Audit
     @ResponseBody
     @PutMapping("/shops/{shopId}/groupons/{id}")
-    public Object modifyGrouponofSPU(@PathVariable Long shopId, @PathVariable Long id,@Validated @RequestBody(required = true) GrouponVo grouponVo,BindingResult bindingResult){
-
+    public Object modifyGrouponofSPU(@PathVariable Long shopId, @Depart Long departId, @PathVariable Long id,@Validated @RequestBody(required = true) GrouponVo grouponVo,BindingResult bindingResult){
+        if(shopId!=departId)
+            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         Object retObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != retObject) {
             logger.debug("validate fail");
@@ -306,7 +307,11 @@ public class GrouponController {
     })
     @Audit
     @DeleteMapping("/shops/{shopId}/groupons/{id}")
-    public Object cancelGrouponofSPU(@PathVariable Long shopId, @PathVariable Long id) {
+    public Object cancelGrouponofSPU(@PathVariable Long shopId, @Depart Long departId, @PathVariable Long id) {
+
+        if(shopId!=departId)
+            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
+
         ReturnObject returnObject =  grouponService.cancelGrouponofSPU(shopId,id);
         if (returnObject.getCode() == ResponseCode.OK) {
             return Common.getRetObject(returnObject);
@@ -340,7 +345,9 @@ public class GrouponController {
     @Audit
     @ResponseBody
     @PutMapping("/shops/{shopId}/groupons/{id}/onshelves")
-    public Object putGrouponOnShelves(@PathVariable Long id,@PathVariable Long shopId){
+    public Object putGrouponOnShelves(@PathVariable Long id,@Depart Long departId, @PathVariable Long shopId){
+        if(shopId!=departId)
+            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
 
         ReturnObject returnObject = grouponService.putGrouponOnShelves(shopId,id);
         if (returnObject.getCode() == ResponseCode.OK) {
@@ -375,7 +382,10 @@ public class GrouponController {
     @Audit
     @ResponseBody
     @PutMapping("/shops/{shopId}/groupons/{id}/offshelves")
-    public Object putGrouponOffShelves(@PathVariable Long id,@PathVariable Long shopId){
+    public Object putGrouponOffShelves(@PathVariable Long id, @Depart Long departId, @PathVariable Long shopId){
+
+        if(shopId!=departId)
+            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
 
         ReturnObject returnObject = grouponService.putGrouponOffShelves(shopId,id);
         if (returnObject.getCode() == ResponseCode.OK) {
