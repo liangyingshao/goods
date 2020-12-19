@@ -16,6 +16,7 @@ import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -33,7 +34,8 @@ import java.util.List;
  */
 @Api(value = "店铺服务", tags = "goods")
 @RestController /*Restful的Controller对象*/
-@RequestMapping(value = "/goods",produces = "application/json;charset=UTF-8")
+//@RequestMapping(value = "/goods",produces = "application/json;charset=UTF-8")
+@RequestMapping(value = "",produces = "application/json;charset=UTF-8")
 public class ShopController {
 
 
@@ -43,6 +45,8 @@ public class ShopController {
 
     private  static  final Logger logger = LoggerFactory.getLogger(ShopController.class);
 
+    @Autowired
+    private HttpServletResponse httpServletResponse;
 
 
     /**
@@ -68,11 +72,12 @@ public class ShopController {
     @Audit
     @PutMapping("shops/{shopid}")
     @ResponseBody
-    public Object modifyShop(@PathVariable @Depart Long shopid, @Validated @RequestBody ShopVo shopVo, BindingResult bindingResult, HttpServletResponse httpServletResponse) {
+    public Object modifyShop(@PathVariable @Depart Long shopid, @Validated @RequestBody ShopVo shopVo, BindingResult bindingResult) {
 
-        Object o = Common.processFieldErrors(bindingResult, httpServletResponse);
-        if(o != null){
-            return o;
+        Object retObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (null != retObject) {
+            logger.debug("validate fail");
+            return retObject;
         }
 
         ReturnObject returnObject = shopService.modifyShop(shopid,shopVo.getName());
@@ -106,10 +111,17 @@ public class ShopController {
     @Audit
     @PostMapping("/shops")
     @ResponseBody
-    public Object addShop(@LoginUser Long id, @RequestBody ShopVo shopVo){
+    public Object addShop(@LoginUser Long id, @Validated @RequestBody ShopVo shopVo, BindingResult bindingResult){
+
+        Object retObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (null != retObject) {
+            logger.debug("validate fail");
+            return retObject;
+        }
 
         ReturnObject<VoObject> returnObject =  shopService.addShop(id,shopVo.getName());
         if (returnObject.getCode() == ResponseCode.OK) {
+            httpServletResponse.setStatus(HttpStatus.CREATED.value());
             return Common.getRetObject(returnObject);
         } else {
             return Common.decorateReturnObject(returnObject);
@@ -160,8 +172,8 @@ public class ShopController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功")
     })
+    @GetMapping("/shops/states")
     @ResponseBody
-    @GetMapping("/shops/state")
     public Object getshopState() {
         Shop.ShopStatus[] states= Shop.ShopStatus.class.getEnumConstants();
         List<ShopStateVo> stateVos=new ArrayList<ShopStateVo>();

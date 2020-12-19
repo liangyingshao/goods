@@ -21,5 +21,11 @@ public class PresaleRetVo {
     LocalDateTime payTime;
     SimpleGoodsSkuDTO goodsSku;
     SimpleShopDTO shop;
+    Byte state;
+    Integer quantity;
+    Long advancePayPrice;
+    Long restPayPrice;
+    LocalDateTime gmtCreate;
+    LocalDateTime gmtModified;
 
 }

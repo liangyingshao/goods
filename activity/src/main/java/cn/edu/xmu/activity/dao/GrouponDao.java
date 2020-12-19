@@ -352,6 +352,8 @@ public class GrouponDao {
             BoList.add(bo);
         }
         PageInfo<VoObject> GrouponPage = PageInfo.of(BoList);
+        //改为传入的pageSize
+        GrouponPage.setPageSize(pagesize);
         return new ReturnObject<>(GrouponPage);
     }
 
