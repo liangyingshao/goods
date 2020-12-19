@@ -44,7 +44,7 @@ public class PresaleService {
 
     private static final Logger logger = LoggerFactory.getLogger(PresaleService.class);
 
-    public ReturnObject<PageInfo<VoObject>> QueryPresales(Long shopId, Long skuId, Integer state, Integer timeline, Integer page, Integer pagesize, boolean isadmin) {
+    public ReturnObject<PageInfo<VoObject>> CustomerQueryPresales(Long shopId, Long skuId, Integer state, Integer timeline, Integer page, Integer pagesize, boolean isadmin) {
 
         //1.调用dao查询
         List<PresaleActivityPo> results = null;
@@ -56,7 +56,7 @@ public class PresaleService {
         }
 
         //3.取出dao层的数据
-        results = presaleDao.queryPresales(shopId,skuId,state,timeline,isadmin).getData();
+        results = returnObject.getData();
 
         //4.分页返回
         PageHelper.startPage(page, pagesize);
@@ -74,6 +74,35 @@ public class PresaleService {
         //改为传入的pageSize
         PresalePage.setPageSize(pagesize);
         return new ReturnObject<>(PresalePage);
+
+    }
+
+
+    public ReturnObject<List<Presale>> AdminQueryPresales(Long shopId, Long skuId, Integer state, Integer timeline) {
+
+        //1.调用dao查询
+        List<PresaleActivityPo> results = null;
+        ReturnObject<List<PresaleActivityPo>> returnObject = presaleDao.queryPresales(shopId,skuId,state,timeline,true);
+
+        //2.返回dao层的错误
+        if(returnObject.getCode() != ResponseCode.OK) {
+            return new ReturnObject<>(returnObject.getCode());
+        }
+
+        //3.取出dao层的数据
+        results = returnObject.getData();
+
+        List<Presale> BoList = new ArrayList<>(results.size());
+        for(PresaleActivityPo po: results)
+        {
+            //5. 查询此presale对应的sku
+            SimpleGoodsSkuDTO simpleGoodsSkuDTO = iGoodsService.getSimpleSkuBySkuId(po.getGoodsSkuId()).getData();
+            //6. 查询此presale对应的shop
+            SimpleShopDTO simpleShopDTO = iGoodsService.getSimpleShopByShopId(po.getShopId()).getData();
+            Presale bo = new Presale(po,simpleGoodsSkuDTO,simpleShopDTO);
+            BoList.add(bo);
+        }
+        return new ReturnObject<>(BoList);
 
     }
 
