@@ -29,10 +29,10 @@ import java.io.IOException;
 public class WangYiFeiTest {
 
     //@Value("${public-test.managementgate}")
-    private String managementGate="192.168.137.1:8881";
+    private String managementGate="192.168.1.4:8881";
 
     //@Value("${public-test.mallgate}")
-    private String mallGate="192.168.137.1:8880";
+    private String mallGate="192.168.1.14:8880";
     private WebTestClient manageClient;
 
     private WebTestClient mallClient;

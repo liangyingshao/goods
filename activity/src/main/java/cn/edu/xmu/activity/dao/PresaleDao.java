@@ -153,6 +153,12 @@ public class PresaleDao {
 
     public ReturnObject createPresaleOfSKU(Long shopId, Long id, PresaleVo presaleVo,SimpleGoodsSkuDTO simpleGoodsSkuDTO,SimpleShopDTO simpleShopDTO) {
 
+
+        //1. 此sku是否正在参加其他预售
+        if(checkInPresale(id,presaleVo.getBeginTime(),presaleVo.getEndTime()).getData()){
+            logger.debug("此sku正在参加其他预售");
+            return new ReturnObject(ResponseCode.PRESALE_STATENOTALLOW);
+        }
         PresaleActivityPo presaleActivityPo = new PresaleActivityPo();
         presaleActivityPo.setShopId(shopId);
         presaleActivityPo.setId(id);
@@ -382,7 +388,8 @@ public class PresaleDao {
 
         //3.无此id则返回false，有则校验时间
         if(po!=null && po.getBeginTime().isBefore(LocalDateTime.now())&&
-                po.getPayTime().isAfter(LocalDateTime.now())){
+                po.getPayTime().isAfter(LocalDateTime.now()) &&
+                po.getState() == ActivityStatus.ON_SHELVES.getCode().byteValue()){
             presaleDTO.setIsValid(true);
             presaleDTO.setAdvancePayPrice(po.getAdvancePayPrice());
             presaleDTO.setRestPayPrice(po.getRestPayPrice());
@@ -408,7 +415,8 @@ public class PresaleDao {
         }
         //2.无此id则返回false，有则校验时间
         if(po!=null && po.getPayTime().isBefore(LocalDateTime.now())&&
-                po.getEndTime().isAfter(LocalDateTime.now())){
+                po.getEndTime().isAfter(LocalDateTime.now())&&
+                po.getState() == ActivityStatus.ON_SHELVES.getCode().byteValue()){
             return new ReturnObject<>(true);
         }
         else

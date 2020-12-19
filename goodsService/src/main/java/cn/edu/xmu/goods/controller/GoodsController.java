@@ -1048,8 +1048,9 @@ public class GoodsController {
     {
         logger.debug("getShareSku:sid="+sid+" skuId="+id+" userId="+userId);
         ReturnObject returnObject = iShareService.shareUserSkuMatch(sid,id,userId);
-        if(returnObject.getCode().equals(ResponseCode.OK))
+        if(returnObject.getData().equals(true))
             returnObject=goodsService.getShareSku(id);
+        else return Common.decorateReturnObject(new ReturnObject(returnObject.getCode()));
         return Common.decorateReturnObject(returnObject);
     }
 

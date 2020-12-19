@@ -125,7 +125,7 @@ public class IGoodsServiceImpl implements IGoodsService {
     @Override
     public ReturnObject<SimpleShopDTO> getSimpleShopByShopId(Long id) {
         logger.debug("in getSimpleShopByShopId");
-        SimpleShopDTO simpleShopDTO = new SimpleShopDTO();
+        SimpleShopDTO simpleShopDTO = null;
         ShopPo shopPo = shopDao.getShopById(id).getData();
         if(shopPo!=null)
         {
@@ -139,7 +139,7 @@ public class IGoodsServiceImpl implements IGoodsService {
     @Override
     public ReturnObject<SimpleGoodsSkuDTO> getSimpleSkuBySkuId(Long skuId) {
         logger.debug("in getSimpleSkuBySkuId");
-        SimpleGoodsSkuDTO simpleGoodsSkuDTO = new SimpleGoodsSkuDTO();
+        SimpleGoodsSkuDTO simpleGoodsSkuDTO =null;
         if(skuId!=null) {
             simpleGoodsSkuDTO=goodsDao.getSimpleSkuBySkuId(skuId);
             if(simpleGoodsSkuDTO!=null)
@@ -151,7 +151,7 @@ public class IGoodsServiceImpl implements IGoodsService {
     @Override
     public ReturnObject<GoodsSpuPoDTO> getSpuBySpuId(Long spuId) {
         GoodsSpuPo goodsSpuPo = goodsSpuDao.getSpuBySpuId(spuId).getData();
-        GoodsSpuPoDTO goodsSpuPoDTO = new GoodsSpuPoDTO();
+        GoodsSpuPoDTO goodsSpuPoDTO = null;
         if(goodsSpuPo!=null)
         {
             goodsSpuPoDTO = new GoodsSpuPoDTO();
