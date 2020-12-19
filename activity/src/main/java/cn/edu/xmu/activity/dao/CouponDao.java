@@ -926,7 +926,7 @@ public class CouponDao implements InitializingBean
                 return returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
             else if(!ca.getShopId().equals(shopId))
                 return returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
-            if(!ca.getState().equals((byte)1)){//未找到符合条件的优惠活动
+            if(!ca.getState().equals((byte)0)){//未找到符合条件的优惠活动
                 return returnObject=new ReturnObject<>(ResponseCode.COUPONACT_STATENOTALLOW,String.format("不可重复删除"));
             }
             ca.setState((byte)2);//活动状态修改为2【已删除】
