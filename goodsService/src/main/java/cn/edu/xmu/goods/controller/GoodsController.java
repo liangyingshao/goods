@@ -182,7 +182,7 @@ public class GoodsController {
     {
         logger.debug("deleteSku: id = "+ id+" shopId="+shopId);
         ReturnObject retObject=goodsService.deleteSku(shopId,id);
-        return Common.getRetObject(retObject);
+        return Common.decorateReturnObject(retObject);
     }
 
     /**
@@ -220,7 +220,7 @@ public class GoodsController {
         sku.setId(id);
         ReturnObject retObject=goodsService.modifySku(shopId,sku);
         if (retObject.getData() != null) {
-            return Common.getRetObject(retObject);
+            return Common.decorateReturnObject(retObject);
         } else {
             return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }
@@ -488,7 +488,7 @@ public class GoodsController {
             return  Common.getNullRetObj(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE), httpServletResponse);
         ReturnObject retObject = goodsService.putGoodsOnSale(shopId,id);
         if (retObject.getData() != null) {
-            return Common.getRetObject(retObject);
+            return Common.decorateReturnObject(retObject);
         } else {
             return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }
@@ -525,7 +525,7 @@ public class GoodsController {
             return Common.getRetObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         ReturnObject retObject = goodsService.putOffGoodsOnSale(shopId,id);
         if (retObject.getData() != null) {
-            return Common.getRetObject(retObject);
+            return Common.decorateReturnObject(retObject);
         } else {
             return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }

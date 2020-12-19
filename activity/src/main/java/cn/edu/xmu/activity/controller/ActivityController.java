@@ -46,7 +46,6 @@ public class ActivityController {
     @Autowired
     private HttpServletResponse httpServletResponse;
 
-
     @Autowired
     private GrouponService grouponService;
 
@@ -423,6 +422,10 @@ public class ActivityController {
             logger.debug("validate fail");
             return returnObject;
         }
+        if(!departId.equals(shopId)){
+            ReturnObject<ResponseCode> ret=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+            return Common.decorateReturnObject(ret);
+        }
         CouponActivity activity=vo.createActivity();
         //设置activity状态
         activity.setState(CouponActivity.DatabaseState.OFFLINE);
@@ -559,6 +562,7 @@ public class ActivityController {
     {
         logger.debug("showCoupons:page="+page+" pageSize="+pageSize);
         if(timeline!=null&&CouponActivity.State.getTypeByCode(timeline)==null)return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+        if(page<=0||pageSize<=0)return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
         ReturnObject<PageInfo<CouponActivityByNewCouponRetVo>> returnObject=activityService.showActivities(shopId,timeline,page,pageSize);
         return Common.decorateReturnObject(returnObject);
     }
@@ -576,11 +580,11 @@ public class ActivityController {
             @ApiImplicitParam(paramType = "query", dataType = "int", name = "page", value = "页码", required = false),
             @ApiImplicitParam(paramType = "query", dataType = "int", name = "pageSize", value = "每页数目", required = false)
     })
-    @Audit
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功")
     })
-    @GetMapping("/shops/{id}/couponactivities/invalid")
+    @Audit
+    @GetMapping("/shops/{shopId}/couponactivities/invalid")
     @ResponseBody
     public Object showInvalidCouponActivities(@PathVariable Long shopId,
                                               @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
@@ -590,6 +594,10 @@ public class ActivityController {
                                               )
     {
         logger.debug("showCoupons:page="+page+" pageSize="+pageSize);
+        if(!departId.equals(shopId)){
+            ReturnObject<ResponseCode> ret=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+            return Common.decorateReturnObject(ret);
+        }
         ReturnObject<PageInfo<CouponActivityByNewCouponRetVo>> returnObject=activityService.showInvalidCouponActivities(shopId,page,pageSize);
         return Common.decorateReturnObject(returnObject);
     }

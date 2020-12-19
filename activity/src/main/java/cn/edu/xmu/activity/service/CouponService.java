@@ -2,6 +2,7 @@ package cn.edu.xmu.activity.service;
 
 import cn.edu.xmu.activity.dao.CouponDao;
 import cn.edu.xmu.activity.model.bo.CouponActivity;
+import cn.edu.xmu.activity.model.po.CouponActivityPo;
 import cn.edu.xmu.activity.model.po.CouponSkuPo;
 import cn.edu.xmu.activity.model.vo.*;
 import cn.edu.xmu.activity.model.bo.CouponSku;
@@ -10,6 +11,7 @@ import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.goods.service.*;
 import cn.edu.xmu.oomall.goods.model.*;
+import cn.edu.xmu.privilegeservice.client.IUserService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.dubbo.config.annotation.DubboReference;
@@ -34,8 +36,8 @@ public class CouponService {
     @DubboReference(check = false)
     private IGoodsService iGoodsService;
 
-//    @DubboReference
-//    private IPrivilegeService iPrivilegeService;
+    @DubboReference(check = false)
+    private IUserService iUserService;
 
     /**
      * 查看优惠活动中的商品
@@ -175,17 +177,22 @@ public class CouponService {
     @Transactional
     public ReturnObject<Object> showCouponActivity(Long shopId, Long id) {
         ReturnObject<SimpleShopDTO> simpleShopDTOReturnObject=iGoodsService.getSimpleShopByShopId(shopId);
+        //商店不存在，很抽象
+        if(simpleShopDTOReturnObject.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST))return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         //获取创建者修改者ID
-        ReturnObject<Object> retCouponActivity=couponDao.getCouponActivity(id,shopId);
+        ReturnObject<CouponActivity> retCouponActivity=couponDao.getCouponActivity(id,shopId);
         //不存在该活动或无权限先返回
-        if(retCouponActivity.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST)||retCouponActivity.getCode().equals(ResponseCode.RESOURCE_ID_OUTSCOPE))
-            return retCouponActivity;
+        if(retCouponActivity.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST))
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        if(retCouponActivity.getCode().equals(ResponseCode.RESOURCE_ID_OUTSCOPE))
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
         String createByName="";
         String modiByName="";
+//        CouponActivity bo=retCouponActivity.getData();
 //        if(bo!=null)
 //        {
-//            createByName=iPrivilegeService.getUserName(bo.getCreatedBy());
-//            modiByName=iPrivilegeService.getUserName(bo.getModiBy());
+//            createByName=iUserService.getUserName(bo.getCreatedBy());
+//            modiByName=iUserService.getUserName(bo.getModiBy());
 //        }
         ReturnObject<Object> returnObject= couponDao.showCouponActivity(simpleShopDTOReturnObject.getData(),id,createByName,modiByName);
         return returnObject;

@@ -130,8 +130,8 @@ public class CommentDao {
 
         CommentPoExample example = new CommentPoExample();
         CommentPoExample.Criteria criteria = example.createCriteria();
-        //增加state=2的查询
-        Byte state = 2;
+        //增加state=1的查询
+        Byte state = 1;
         criteria.andStateEqualTo(state);
         criteria.andGoodsSkuIdEqualTo(SKU_Id);
         //criteria.andDepartIdEqualTo(departId);
@@ -144,9 +144,26 @@ public class CommentDao {
             List<VoObject> ret = new ArrayList<>(commentPos.size());
             for (CommentPo po : commentPos) {
                 Comment comment = new Comment(po);
-                ret.add(comment);
+                CommentRetVo commentRetVo = new CommentRetVo(comment);
+                //查customer
+                logger.error("haoxiaozizhaobuzhaodedaoa");
+                CustomerDTO customerDTO = iCustomerService.findCustomerByUserId(comment.getCustomerId()).getData();
+                logger.error(customerDTO.toString());
+                Customer customer = new Customer();
+                customer.setId(comment.getCustomerId());
+                customer.setUserName(customerDTO.getUserName());
+                customer.setName(customerDTO.getName());
+                commentRetVo.setCustomer(customer);
+                ret.add(commentRetVo);
+                logger.error(comment.toString());
             }
+            PageInfo<CommentPo> commentRetVoPageInfo = PageInfo.of(commentPos);
             PageInfo<VoObject> commentPage = PageInfo.of(ret);
+            commentPage.setPages(commentRetVoPageInfo.getPages());
+            commentPage.setPageNum(commentRetVoPageInfo.getPageNum());
+            commentPage.setPageSize(commentRetVoPageInfo.getPageSize());
+            commentPage.setTotal(commentRetVoPageInfo.getTotal());
+            logger.error("DAO:"+commentPage.toString());
             return new ReturnObject<>(commentPage);
         }
         catch (DataAccessException e){

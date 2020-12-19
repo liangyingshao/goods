@@ -140,6 +140,8 @@ public class GoodsDao {
         if(skuSn!=null&&!skuSn.isBlank())skuCriteria.andSkuSnEqualTo(skuSn);
         if(spuId!=null)skuCriteria.andGoodsSpuIdEqualTo(spuId);
         List<GoodsSkuPo> skuPos=new ArrayList<>();
+        PageHelper.startPage(page,pageSize);
+        logger.debug("page="+page+" pageSize="+pageSize);
         if((spuSn!=null&&!spuSn.isBlank())||shopId!=null)
         {
             GoodsSpuPoExample spuExample=new GoodsSpuPoExample();
@@ -155,9 +157,6 @@ public class GoodsDao {
         }
         else skuPos=skuMapper.selectByExample(skuExample);
         List<GoodsSku>skus=skuPos.stream().map(GoodsSku::new).collect(Collectors.toList());
-        List<GoodsSkuRetVo> ret = skus.stream().map(GoodsSkuRetVo::new).collect(Collectors.toList());
-        PageHelper.startPage(page,pageSize);
-        logger.debug("page="+page+" pageSize="+pageSize);
         PageInfo<GoodsSku> returns=PageInfo.of(skus);
         returns.setPageNum(page);
         returns.setPageSize(pageSize);
@@ -355,7 +354,7 @@ public class GoodsDao {
         criteria1.andIdEqualTo(selectSkuPo.getGoodsSpuId());
         List<GoodsSpuPo> spuPos=spuMapper.selectByExample(spuPoExample);
         if(spuPos.size()==0)
-            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, "skuId不存在：" + floatPrice.getGoodsSkuId());
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
 
         //时间不冲突
         FloatPricePoExample nowExample=new FloatPricePoExample();

@@ -18,6 +18,7 @@ import org.apache.dubbo.config.annotation.DubboReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -112,6 +113,7 @@ public class FlashsaleController {
         ReturnObject object = flashsaleService.createflash(id, vo.getFlashDate());
         if(object.getData()!=null)
         {
+            httpServletResponse.setStatus(HttpStatus.CREATED.value());
             return Common.decorateReturnObject(object);
         }
         else
@@ -182,6 +184,7 @@ public class FlashsaleController {
         logger.error("2");
         ReturnObject returnObject = flashsaleItemService.addSKUofTopic(id, vo.getSkuId(), vo.getPrice(), vo.getQuantity());
         if(returnObject.getData()!=null) {
+            httpServletResponse.setStatus(HttpStatus.CREATED.value());
             return Common.decorateReturnObject(returnObject);
         } else {
             return Common.getNullRetObj(new ReturnObject<>(returnObject.getCode(), returnObject.getErrmsg()), httpServletResponse);

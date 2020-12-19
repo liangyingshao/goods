@@ -25,6 +25,20 @@
         </dependency>
 
         <dependency>
+            <groupId>cn.edu.xmu</groupId>
+            <artifactId>order-client</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>cn.edu.xmu</groupId>
+            <artifactId>privilegeservice-client</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.apache.rocketmq</groupId>
             <artifactId>rocketmq-spring-boot-starter</artifactId>
         </dependency>
@@ -166,12 +180,6 @@
         <dependency>
             <groupId>com.alibaba.nacos</groupId>
             <artifactId>nacos-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>cn.edu.xmu</groupId>
-            <artifactId>goodsservice</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <scope>compile</scope>
         </dependency>
 
 
