@@ -300,7 +300,7 @@ public class GoodsDao {
             {
                 //修改失败
                 logger.debug("modifySku: update sku fail : " + skuPo.toString());
-                return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("skuId不存在：" + skuPo.getId()));
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, "skuId不存在：" + skuPo.getId());
             }
             else {
                 //修改成功
@@ -422,7 +422,7 @@ public class GoodsDao {
     {
         //SPU存在
         GoodsSpuPo spuPo=spuMapper.selectByPrimaryKey(sku.getGoodsSpuId());
-        if(spuPo==null||spuPo.getDisabled().equals(true))
+        if(spuPo==null||spuPo.getDisabled().equals((byte)1))
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
 
         //shopId和SPU匹配
@@ -467,7 +467,7 @@ public class GoodsDao {
                 criteria.andStateEqualTo(GoodsSku.State.OFFSHELF.getCode().byteValue());
                 List<GoodsSkuPo> checkSkuPo=skuMapper.selectByExample(checkSkuExample);
                 if(checkSkuPo.size()==0)
-                    return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("floatPrice字段不合法：" + checkSkuExample.toString()));
+                    return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, "floatPrice字段不合法：" + checkSkuExample.toString());
                 else {
                     //更新redis
                     String key="sku_"+sku.getId();
@@ -537,7 +537,7 @@ public class GoodsDao {
         List<Long>skuIds=new ArrayList<>();
         for(GoodsSpuPo spuPo:spuPos)
         {
-            if(spuPo.getDisabled().equals(false)) {
+            if(spuPo.getDisabled().equals((byte)0)) {
                 GoodsSkuPoExample skuExample = new GoodsSkuPoExample();
                 GoodsSkuPoExample.Criteria skuCriteria = skuExample.createCriteria();
                 skuCriteria.andGoodsSpuIdEqualTo(spuPo.getId());
@@ -750,7 +750,7 @@ public class GoodsDao {
             if(ret==0)
             {
                 logger.debug("putGoodsOnSale fail:skuPo="+skuPo);
-                return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("sku字段不合法：" + skuPo.toString()));
+                return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, "sku字段不合法：" + skuPo.toString());
             }
             else  return new ReturnObject<>();
         }
@@ -858,7 +858,7 @@ public class GoodsDao {
                 if(ret==0)
                 {
                     logger.debug("modifyInventory fail:floatPricePo="+floatPricePo);
-                    return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, String.format("sku不合法：" + skuId));
+                    return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, "sku不合法：" + skuId);
                 }
                 else  return new ReturnObject<>();
             }

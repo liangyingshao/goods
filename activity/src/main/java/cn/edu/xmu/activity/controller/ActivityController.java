@@ -71,7 +71,7 @@ public class ActivityController {
             @RequestParam(required = false, defaultValue = "10") Integer pageSize)
     {
         logger.debug("getCouponSkuList:id="+id+" page="+page+" pageSize="+pageSize);
-        ReturnObject<PageInfo<SkuInfoDTO>> returnObject=activityService.getCouponSkuList(id,page,pageSize);
+        ReturnObject returnObject=activityService.getCouponSkuList(id,page,pageSize);
         return Common.decorateReturnObject(returnObject);
     }
 
@@ -111,6 +111,7 @@ public class ActivityController {
         if(!Objects.equals(departId, shopId))
             return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         List<CouponSku> couponSkus=new ArrayList<>();
+
         for(Long vo:body)
         {
             CouponSku couponSku=new CouponSku();
@@ -120,6 +121,7 @@ public class ActivityController {
 
         ReturnObject<List<CouponSkuRetVo>> retObject=activityService.createCouponSkus(shopId,id, couponSkus);
         if (retObject.getData() != null) {
+            httpServletResponse.setStatus(HttpStatus.CREATED.value());
             return Common.decorateReturnObject(retObject);
         } else {
             return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
@@ -153,7 +155,7 @@ public class ActivityController {
         logger.debug("deleteCouponSpu: id = "+ id+" shopId="+shopId);
         if(!Objects.equals(departId, shopId))
             return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
-        ReturnObject returnObject=activityService.deleteCouponSku(shopId,id);
+        ReturnObject<ResponseCode> returnObject=activityService.deleteCouponSku(shopId,id);
         return Common.decorateReturnObject(returnObject);
     }
 
@@ -385,7 +387,6 @@ public class ActivityController {
             return Common.getRetObject(retObject);
         }
             return Common.decorateReturnObject(retObject);
-
     }
 
     /**
@@ -424,10 +425,10 @@ public class ActivityController {
             logger.debug("validate fail");
             return returnObject;
         }
-        if(!departId.equals(shopId)){
-            ReturnObject<ResponseCode> ret=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
-            return Common.decorateReturnObject(ret);
-        }
+//        if(!departId.equals(shopId)){
+//            ReturnObject<ResponseCode> ret=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+//            return Common.decorateReturnObject(ret);
+//        }
         CouponActivity activity=vo.createActivity();
         //设置activity状态
         activity.setState(CouponActivity.DatabaseState.OFFLINE);
@@ -638,4 +639,5 @@ public class ActivityController {
         ReturnObject retObject = activityService.uploadActivityImg(activity,file);
         return Common.decorateReturnObject(retObject);
     }
+
 }
