@@ -72,9 +72,9 @@ public class ShopController {
     @Audit
     @PutMapping("shops/{shopid}")
     @ResponseBody
-    public Object modifyShop(@PathVariable Long pathId, @Depart Long departId, @Validated @RequestBody ShopVo shopVo, BindingResult bindingResult) {
+    public Object modifyShop(@PathVariable Long shopId, @Depart Long departId, @Validated @RequestBody ShopVo shopVo, BindingResult bindingResult) {
 
-        if(departId!=pathId)
+        if(shopId!=departId && departId!=0)
             return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         Object retObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != retObject) {
@@ -153,7 +153,7 @@ public class ShopController {
     @DeleteMapping("/shops/{shopId}")
     @ResponseBody
     public Object deleteShop(@PathVariable Long shopId, @Depart Long departId) {
-        if(shopId!=departId)
+        if(shopId!=departId && departId!=0)
             return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         ReturnObject<VoObject> returnObject =  shopService.deleteShop(shopId);
         if (returnObject.getCode() == ResponseCode.OK) {
@@ -235,7 +235,7 @@ public class ShopController {
     @PutMapping("/shops/{shopId}/onshelves")
     @ResponseBody
     public Object onshelfShop(@PathVariable Long shopId, @Depart Long departId) {
-        if(shopId!=departId)
+        if(shopId!=departId && departId!=0)
             return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
 
         ReturnObject<VoObject> returnObject =  shopService.onshelfShop(shopId);
@@ -265,7 +265,7 @@ public class ShopController {
     @PutMapping("/shops/{shopId}/offshelves")
     @ResponseBody
     public Object offshelfShop(@PathVariable Long shopId,@Depart Long departId) {
-        if(shopId!=departId)
+        if(shopId!=departId && departId!=0)
             return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
 
         ReturnObject<VoObject> returnObject =  shopService.offshelfShop(shopId);

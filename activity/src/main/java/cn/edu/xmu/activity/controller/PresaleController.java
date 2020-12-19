@@ -229,7 +229,7 @@ public class PresaleController {
             return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
         }
 
-        if(shopId!=departId)
+        if(shopId!=departId && departId!=0L)
             return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
 
         ReturnObject returnObject = presaleService.modifyPresaleOfSKU(shopId,id,presaleVo);
@@ -254,7 +254,7 @@ public class PresaleController {
     @Audit
     @DeleteMapping("/shops/{shopId}/presales/{id}")
     public Object cancelPresaleOfSKU(@PathVariable Long shopId, @Depart Long departId, @PathVariable Long id) {
-        if(shopId!=departId)
+        if(shopId!=departId && departId!=0L)
             return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         ReturnObject returnObject =  presaleService.cancelPresaleOfSKU(shopId, id);
         if (returnObject.getCode() == ResponseCode.OK) {
@@ -279,7 +279,7 @@ public class PresaleController {
     @ResponseBody
     @PutMapping("/shops/{shopId}/presales/{id}/onshelves")
     public Object putPresaleOnShelves(@PathVariable Long id, @Depart Long departId, @PathVariable Long shopId){
-        if(shopId!=departId)
+        if(shopId!=departId && departId!=0L)
             return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         ReturnObject returnObject = presaleService.putPresaleOnShelves(shopId,id);
         if (returnObject.getCode() == ResponseCode.OK) {
@@ -304,7 +304,7 @@ public class PresaleController {
     @PutMapping("/shops/{shopId}/presales/{id}/offshelves")
     public Object putPresaleOffShelves(@PathVariable Long id, @Depart Long departId, @PathVariable Long shopId){
 
-        if(shopId!=departId)
+        if(shopId!=departId && departId!=0L)
             return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
 
         ReturnObject returnObject = presaleService.putPresaleOffShelves(shopId,id);

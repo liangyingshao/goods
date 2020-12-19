@@ -74,7 +74,8 @@ public class PresaleDao {
             else if(state == 2)
                 criteria.andStateEqualTo(ActivityStatus.DELETED.getCode().byteValue());
             else
-                return new ReturnObject<>(results);
+                criteria.andStateEqualTo(Integer.valueOf(4).byteValue());
+
         }
         //5.按timeline查询
         if(timeline!=null)

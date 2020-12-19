@@ -207,7 +207,7 @@ public class GrouponController {
     @Audit
     @PostMapping("/shops/{shopId}/spus/{id}/groupons")
     @ResponseBody
-    public Object createGrouponofSPU(@PathVariable(name="id") Long id, @Depart @PathVariable(name="shopId") Long shopId, @Validated @RequestBody(required = true) GrouponVo grouponVo, BindingResult bindingResult){
+    public Object createGrouponofSPU(@PathVariable(name="id") Long id, @PathVariable(name="shopId") Long shopId, @Validated @RequestBody(required = true) GrouponVo grouponVo, BindingResult bindingResult){
 
         Object retObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != retObject) {
@@ -282,7 +282,7 @@ public class GrouponController {
                 && grouponVo.getEndTime().isBefore(grouponVo.getBeginTime()))
             return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
 
-        if(shopId!=departId)
+        if(shopId!=departId && departId!=0L)
             return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         Object retObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != retObject) {
@@ -331,7 +331,7 @@ public class GrouponController {
     @DeleteMapping("/shops/{shopId}/groupons/{id}")
     public Object cancelGrouponofSPU(@PathVariable Long shopId, @Depart Long departId, @PathVariable Long id) {
 
-        if(shopId!=departId)
+        if(shopId!=departId && departId!=0L)
             return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
 
         ReturnObject returnObject =  grouponService.cancelGrouponofSPU(shopId,id);
@@ -368,7 +368,7 @@ public class GrouponController {
     @ResponseBody
     @PutMapping("/shops/{shopId}/groupons/{id}/onshelves")
     public Object putGrouponOnShelves(@PathVariable Long id,@Depart Long departId, @PathVariable Long shopId){
-        if(shopId!=departId)
+        if(shopId!=departId && departId!=0L)
             return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
 
         ReturnObject returnObject = grouponService.putGrouponOnShelves(shopId,id);
@@ -406,7 +406,7 @@ public class GrouponController {
     @PutMapping("/shops/{shopId}/groupons/{id}/offshelves")
     public Object putGrouponOffShelves(@PathVariable Long id, @Depart Long departId, @PathVariable Long shopId){
 
-        if(shopId!=departId)
+        if(shopId!=departId && departId!=0L)
             return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
 
         ReturnObject returnObject = grouponService.putGrouponOffShelves(shopId,id);
