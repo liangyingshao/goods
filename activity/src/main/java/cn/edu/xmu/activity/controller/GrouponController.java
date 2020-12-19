@@ -38,8 +38,8 @@ import java.util.List;
  */
 @Api(value = "团购服务", tags = "Groupon")
 @RestController /*Restful的Controller对象*/
-//@RequestMapping(value = "/goods", produces = "application/json;charset=UTF-8")
-@RequestMapping(produces = "application/json;charset=UTF-8")
+@RequestMapping(value = "/goods", produces = "application/json;charset=UTF-8")
+//@RequestMapping(produces = "application/json;charset=UTF-8")
 public class GrouponController {
 
     @Autowired
@@ -87,9 +87,6 @@ public class GrouponController {
      * @return java.lang.Object
      */
     @ApiOperation("顾客查询所有团购活动")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "authorization", value ="用户token", paramType = "header", dataType = "String",  required = true),
-    })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })

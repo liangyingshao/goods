@@ -35,8 +35,8 @@ import java.util.List;
  */
 @Api(value = "预售服务", tags = "Presale")
 @RestController /*Restful的Controller对象*/
-//@RequestMapping(value = "/goods", produces = "application/json;charset=UTF-8")
-@RequestMapping(produces = "application/json;charset=UTF-8")
+@RequestMapping(value = "/goods", produces = "application/json;charset=UTF-8")
+//@RequestMapping(produces = "application/json;charset=UTF-8")
 public class PresaleController {
 
     @Autowired
