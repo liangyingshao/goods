@@ -108,7 +108,7 @@ public class ActivityController {
         if (null != returnObject) {
             return returnObject;
         }
-        if(!Objects.equals(departId, shopId))
+        if(departId!=0&&!Objects.equals(departId, shopId))
             return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         List<CouponSku> couponSkus=new ArrayList<>();
 
@@ -124,6 +124,10 @@ public class ActivityController {
             httpServletResponse.setStatus(HttpStatus.CREATED.value());
             return Common.decorateReturnObject(retObject);
         } else {
+            if(retObject.getCode().equals(ResponseCode.RESOURCE_ID_OUTSCOPE))
+                httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
+            else if(retObject.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST))
+                httpServletResponse.setStatus(HttpStatus.NOT_FOUND.value());
             return Common.getNullRetObj(new ReturnObject<>(retObject.getCode(), retObject.getErrmsg()), httpServletResponse);
         }
     }
@@ -153,7 +157,7 @@ public class ActivityController {
                                   @Depart @ApiIgnore @RequestParam(required = false) Long departId)
     {
         logger.debug("deleteCouponSpu: id = "+ id+" shopId="+shopId);
-        if(!Objects.equals(departId, shopId))
+        if(departId!=0&&!Objects.equals(departId, shopId)&&!departId.equals((long)0))
             return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         ReturnObject<ResponseCode> returnObject=activityService.deleteCouponSku(shopId,id);
         return Common.decorateReturnObject(returnObject);
@@ -597,7 +601,7 @@ public class ActivityController {
                                               )
     {
         logger.debug("showCoupons:page="+page+" pageSize="+pageSize);
-        if(!departId.equals(shopId)){
+        if(departId!=0&&!departId.equals(shopId)){
             ReturnObject<ResponseCode> ret=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
             return Common.decorateReturnObject(ret);
         }

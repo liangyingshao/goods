@@ -44,13 +44,13 @@ public class CouponDao implements InitializingBean
     private static final Logger logger = LoggerFactory.getLogger(CouponDao.class);
 
     @Autowired
-    private MyCouponSkuPoMapper couponSkuMapper;
+    private CouponSkuPoMapper couponSkuMapper;
 
     @Autowired
     private CouponActivityPoMapper activityMapper;
 
     @Autowired
-    private MyCouponPoMapper couponMapper;
+    private CouponPoMapper couponMapper;
 
     @Resource
     private RocketMQTemplate rocketMQTemplate;
@@ -201,6 +201,14 @@ public class CouponDao implements InitializingBean
         CouponActivityPo activityPo = activityMapper.selectByPrimaryKey(id);
         if (activityPo == null) return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
 
+        //【已删除】
+        if(CouponActivity.DatabaseState.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.DatabaseState.DELETED))
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+
+        //【已上线】
+        if(CouponActivity.DatabaseState.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.DatabaseState.ONLINE))
+            return new ReturnObject<>(ResponseCode.COUPONACT_STATENOTALLOW);
+
         //活动和shopId匹配
         if(!Objects.equals(activityPo.getShopId(), shopId))return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
 
@@ -208,14 +216,6 @@ public class CouponDao implements InitializingBean
         //对每个SKU进行判断、添加
         for(CouponSku couponSku:couponSkus)
         {
-            //【已删除】
-            if(CouponActivity.DatabaseState.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.DatabaseState.DELETED))
-                return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-
-            //【已上线】
-            if(CouponActivity.DatabaseState.getTypeByCode(activityPo.getState().intValue()).equals(CouponActivity.DatabaseState.ONLINE))
-                return new ReturnObject<>(ResponseCode.COUPONACT_STATENOTALLOW);
-
             //【已下线】
             //之前没有添加过该SKU
             CouponSkuPoExample alreadyExample=new CouponSkuPoExample();
@@ -235,14 +235,15 @@ public class CouponDao implements InitializingBean
 
         //尝试插入
         try {
-            int ret = couponSkuMapper.insertSelectiveBatch(couponSkuPos);
-            if (ret == 0) {
-                //插入失败
-                logger.debug("createCouponSpu: insert couponSkus fail : " + couponSkuPos.toString());
-                return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, "couponSpu字段不合法：" + couponSkuPos.toString());
-            } else {
-                return new ReturnObject<>();
+            for(CouponSkuPo po:couponSkuPos) {
+                int ret = couponSkuMapper.insert(po);
+                if (ret == 0) {
+                    //插入失败
+                    logger.debug("createCouponSpu: insert couponSkus fail : " + couponSkuPos.toString());
+                    return new ReturnObject<>(ResponseCode.FIELD_NOTVALID, "couponSpu字段不合法：" + couponSkuPos.toString());
+                }
             }
+            return new ReturnObject<>();
         } catch (DataAccessException e) {
             // 其他数据库错误
             logger.debug("other sql exception : " + e.getMessage());
@@ -1293,7 +1294,8 @@ public class CouponDao implements InitializingBean
     public void insertCouponsBatch(List<CouponPo> coupons)
     {
         try{
-            couponMapper.insertSelectiveBatch(coupons);
+            for(CouponPo po:coupons)
+                couponMapper.insert(po);
         }
         catch (Exception e)
         {
