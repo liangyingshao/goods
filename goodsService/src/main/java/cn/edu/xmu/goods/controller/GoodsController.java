@@ -253,7 +253,7 @@ public class GoodsController {
                                      @Depart @ApiIgnore @RequestParam(required = false) Long departId)
     {
         logger.error("进入新增价格浮动项controller层，检查是否有参数错误");
-        if(vo.getBeginTime().isAfter(vo.getEndTime()))return Common.getRetObject(new ReturnObject<>(ResponseCode.FIELD_NOTVALID));
+        if(vo.getBeginTime().isAfter(vo.getEndTime()))return Common.getRetObject(new ReturnObject<>(ResponseCode.Log_Bigger));
 
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != returnObject) {

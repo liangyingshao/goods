@@ -12,8 +12,8 @@ import java.util.Map;
 public class FloatPrice implements VoObject {
 
     public enum Validation {
-        VALID(4, "可用"),
-        INVALID(6, "废弃");
+        VALID(1, "可用"),
+        INVALID(0, "废弃");
 
         private static final Map<Integer, FloatPrice.Validation> stateMap;
 

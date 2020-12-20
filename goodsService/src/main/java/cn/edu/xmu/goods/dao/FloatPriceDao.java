@@ -141,7 +141,7 @@ public class FloatPriceDao {
 
         try
         {
-            byte valid=6;//4可用 6废弃
+            byte valid=0;//1可用 0废弃 FloatPrice.Validation.INVALID.getCode()
             floatPricePo.setValid(valid);
             int ret = floatPricePoMapper.updateByPrimaryKey(floatPricePo);
             if (ret == 0)
