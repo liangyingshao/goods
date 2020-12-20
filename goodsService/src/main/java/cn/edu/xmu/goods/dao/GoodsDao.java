@@ -337,16 +337,16 @@ public class GoodsDao {
      */
     public ReturnObject<FloatPriceRetVo> addFloatPrice(Long shopId, FloatPrice floatPrice, Long userId)
     {
+        logger.error("进入新增价格浮动项Dao层，检查sku是否存在");
         //SKU存在
         GoodsSkuPo selectSkuPo=skuMapper.selectByPrimaryKey(floatPrice.getGoodsSkuId());
         if(selectSkuPo==null|| GoodsSku.State.getTypeByCode(selectSkuPo.getState().intValue())== GoodsSku.State.DELETED)
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-
+        logger.error("SKU存在，检查库存是否充足");
         //库存充足
-        logger.error("selectSkuPo.getInventory()"+selectSkuPo.getInventory()+"   "+floatPrice.getQuantity());
         if(selectSkuPo.getInventory()<floatPrice.getQuantity())
             return new ReturnObject<>(ResponseCode.SKU_NOTENOUGH, "库存不足：" + floatPrice.getGoodsSkuId());
-
+        logger.error("库存充足，检查shopid和sku是否匹配");
         //shopId能和skuId匹配
         GoodsSpuPoExample spuPoExample=new GoodsSpuPoExample();
         GoodsSpuPoExample.Criteria criteria1=spuPoExample.createCriteria();

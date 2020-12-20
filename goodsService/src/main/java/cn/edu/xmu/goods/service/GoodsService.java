@@ -169,6 +169,7 @@ public class GoodsService {
     @Transactional
     public ReturnObject<FloatPriceRetVo> addFloatPrice(Long shopId, FloatPrice floatPrice, Long userId)
     {
+        logger.error("进入新增价格浮动项的service层");
         ReturnObject<FloatPriceRetVo> returnObject= goodsDao.addFloatPrice(shopId,floatPrice,userId);
         if(returnObject.getData()!=null)
         {

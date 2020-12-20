@@ -252,15 +252,17 @@ public class GoodsController {
                                      @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
                                      @Depart @ApiIgnore @RequestParam(required = false) Long departId)
     {
+        logger.error("进入新增价格浮动项controller层，检查是否有参数错误");
         if(vo.getBeginTime().isAfter(vo.getEndTime()))return Common.getRetObject(new ReturnObject<>(ResponseCode.FIELD_NOTVALID));
 
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != returnObject) {
+            logger.error("参数错误");
             return returnObject;
         }
-
-        if(departId!=0&&departId!=shopId)
-            return Common.getRetObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
+        logger.error("没有参数错误");
+//        if(departId!=0&&departId!=shopId)
+//            return Common.getRetObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
 
         FloatPrice floatPrice=vo.createFloatPrice();
         floatPrice.setGoodsSkuId(id);
