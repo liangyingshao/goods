@@ -1,5 +1,6 @@
 package cn.edu.xmu.oomall;
 
+//import cn.edu.xmu.ooad.PublicTestApp;
 import cn.edu.xmu.ooad.util.JwtHelper;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.test.TestApplication;
@@ -395,7 +396,7 @@ public class XuQingYunTest {
     @Test
     @Order(15)
     void modifySKU3() throws Exception{
-        String requireJson="{\n    \"name\": \"name\",\n    \"originalPrice\": \"100\",\n    \"configuration\": \"configuration\",\n    \"weight\": \"100\",\n    \"inventory\": \"9999\",\n    \"detail\": \"detail\"\n}";
+        String requireJson="{\n    \"name\": \"name\",\n    \"originalPrice\": 100,\n    \"configuration\": \"configuration\",\n    \"weight\": 100,\n    \"inventory\": 9999,\n    \"detail\": \"detail\"\n}";
         String token = this.adminLogin("13088admin", "123456");
 
         byte[] response =manageClient.put().uri("/shops/2/skus/273")

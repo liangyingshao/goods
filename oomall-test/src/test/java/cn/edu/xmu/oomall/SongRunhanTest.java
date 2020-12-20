@@ -1,67 +1,70 @@
 package cn.edu.xmu.oomall;
 
 import cn.edu.xmu.ooad.util.JacksonUtil;
-import cn.edu.xmu.ooad.util.JwtHelper;
 import cn.edu.xmu.ooad.util.ResponseCode;
+import cn.edu.xmu.oomall.LoginVo;
 import cn.edu.xmu.test.TestApplication;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
-import org.skyscreamer.jsonassert.JSONAssert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
+/**
+ * 24320182203266
+ * 宋润涵
+ * 请注意！！！
+ * 由于时间段的更改本测试可能会发生错误，当时间段确定后会更新测试
+ * 如遇到冲突，请自行调整端口设置
+ * 本测试运行前务必清除Redis缓存，重置数据库
+ */
 @Slf4j
-@SpringBootTest(classes = TestApplication.class)
+@SpringBootTest(classes = TestApplication.class)   //标识本类是一个SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class SRHTest {
-
+public class SongRunhanTest {
     private static final Logger logger = LoggerFactory.getLogger(SlyTest.class);
-
-    private WebTestClient manageClient;//发给权限的网关
-
-    private WebTestClient mallClient;
-
-    private static  String token;
-    private static String userToken;
-
     @Autowired
     private ObjectMapper mObjectMapper;
 
-    public SRHTest(){
+    @Value("${public-test.managementgate}")
+    private String managementGate;
+
+    @Value("${public-test.mallgate}")
+    private String mallGate;
+
+    private WebTestClient manageClient;
+
+    private WebTestClient mallClient;
+
+    @BeforeEach
+    public void setUp(){
         this.manageClient = WebTestClient.bindToServer()
-                .baseUrl("http://127.0.0.1:8091")
+                .baseUrl("http://"+managementGate)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/json;charset=UTF-8")
                 .build();
+
         this.mallClient = WebTestClient.bindToServer()
-                .baseUrl("http://127.0.0.1:8091")
+                .baseUrl("http://"+mallGate)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/json;charset=UTF-8")
                 .build();
     }
 
-    @BeforeAll
-    private static void login(){
-        JwtHelper jwtHelper = new JwtHelper();
-        token = jwtHelper.createToken(1L,0L, 3600);
-        userToken =jwtHelper.createToken(59L,1L, 3600);
-    }
+
 
     /**
      * 在时段"0"下新建秒杀活动，然后删除活动
      */
     @Test
     public void addFlashSaleActivity1() throws Exception{
-        logger.error("1");
-        //String token = this.login("13088admin", "123456");
+        String token = this.login("13088admin", "123456");
         LocalDateTime dateTime = LocalDateTime.now().plusDays(3);
 
         String requestJson = "{\"flashDate\":\"" + dateTime + "\"}";
@@ -88,7 +91,7 @@ public class SRHTest {
                 .jsonPath("$.data").doesNotExist()
                 .returnResult()
                 .getResponseBodyContent();
-
+        logger.error("insertid: "+insertId);
         responseBuffer= manageClient.delete().uri("/shops/0/flashsales/"+insertId).header("authorization",token)
                 .exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectStatus().isNotFound()
@@ -104,8 +107,7 @@ public class SRHTest {
      */
     @Test
     public void addFlashSaleActivity2() throws Exception{
-        logger.error("2");
-        //String token = this.login("13088admin", "123456");
+        String token = this.login("13088admin", "123456");
         LocalDateTime dateTime = LocalDateTime.now();
 
         String requestJson = "{\"flashDate\":\"" + dateTime + "\"}";
@@ -126,8 +128,7 @@ public class SRHTest {
     @Test
     @Order(1)
     public void getFlashSaleActivity1()throws Exception {
-        logger.error("3");
-        //String token = this.login("13088admin", "123456");
+        String token = this.login("13088admin", "123456");
         byte[] responseBuffer = null;
         WebTestClient.RequestHeadersSpec res = mallClient.get().uri("/flashsales/current?page=1&pageSize=10");
         responseBuffer = res.exchange().expectHeader().contentType("application/json;charset=UTF-8").expectStatus().isOk()
@@ -147,8 +148,7 @@ public class SRHTest {
      */
     @Test
     public void addSKUToActivity()throws Exception {
-        logger.error("4");
-        //String token = this.login("13088admin", "123456");
+        String token = this.login("13088admin", "123456");
         LocalDateTime dateTime = LocalDateTime.now().plusDays(3);
 
         String requestJson = "{\"flashDate\":\"" + dateTime + "\"}";
@@ -180,6 +180,16 @@ public class SRHTest {
         jsonNode = mObjectMapper.readTree(response).findPath("data").get("id");
         int insertItemId = jsonNode.asInt();
 
+        /* 重复加入 */
+//        requestJson = "{\"skuId\": 280,\"price\": 2365,\"quantity\": 36}";
+//        responseBuffer =webClient.post().uri("flashsales/" + insertId + "/flashitems").bodyValue(requestJson).exchange().expectHeader().contentType("application/json;charset=UTF-8")
+//                .expectBody()
+//                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
+//                .jsonPath("$.errmsg").isEqualTo("成功")
+//                .jsonPath("$.data").isMap()
+//                .returnResult()
+//                .getResponseBodyContent();
+
         manageClient.delete().uri("/shops/0/flashsales/"+ insertActivityId +"/flashitems/"+ insertItemId).header("authorization",token).exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
@@ -188,6 +198,7 @@ public class SRHTest {
                 .returnResult()
                 .getResponseBodyContent();
 
+        //删除活动
         responseBuffer= manageClient.delete().uri("/shops/0/flashsales/"+insertActivityId).header("authorization",token)
                 .exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
@@ -201,8 +212,7 @@ public class SRHTest {
     @Test
     @Order(Integer.MAX_VALUE - 2)
     public void delFlashItem() throws Exception {
-        logger.error("5");
-        //String token = this.login("13088admin", "123456");
+        String token = this.login("13088admin", "123456");
         // region 删除今天的秒杀商品
         manageClient.delete().uri("/shops/0/flashsales/3/flashitems/5").header("authorization",token).exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
@@ -211,7 +221,6 @@ public class SRHTest {
                 .jsonPath("$.data").doesNotExist()
                 .returnResult()
                 .getResponseBodyContent();
-
         manageClient.delete().uri("/shops/0/flashsales/3/flashitems/6").header("authorization",token).exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
@@ -219,7 +228,6 @@ public class SRHTest {
                 .jsonPath("$.data").doesNotExist()
                 .returnResult()
                 .getResponseBodyContent();
-
         manageClient.delete().uri("/shops/0/flashsales/4/flashitems/7").header("authorization",token).exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
@@ -227,7 +235,6 @@ public class SRHTest {
                 .jsonPath("$.data").doesNotExist()
                 .returnResult()
                 .getResponseBodyContent();
-
         manageClient.delete().uri("/shops/0/flashsales/4/flashitems/8").header("authorization",token).exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
@@ -257,8 +264,7 @@ public class SRHTest {
     @Test
     @Order(Integer.MAX_VALUE - 1)
     public void offLine() throws Exception {
-        logger.error("6");
-        //String token = this.login("13088admin", "123456");
+        String token = this.login("13088admin", "123456");
         manageClient.put().uri("/shops/0/flashsales/1/offshelves").header("authorization",token).exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
@@ -275,8 +281,7 @@ public class SRHTest {
     @Test
     @Order(Integer.MAX_VALUE)
     public void delFlashSale() throws Exception {
-        logger.error("7");
-        //String token = this.login("13088admin", "123456");
+        String token = this.login("13088admin", "123456");
         for(int i=1;i<=4;++i){
             manageClient.put().uri("/shops/0/flashsales/"+ i +"/offshelves").header("authorization",token).exchange().expectHeader().contentType("application/json;charset=UTF-8")
                     .expectBody()
@@ -307,5 +312,30 @@ public class SRHTest {
                 .jsonPath("$.data").doesNotExist()
                 .returnResult()
                 .getResponseBodyContent();
+    }
+
+    /**
+     * 这个不是测试用例，不要算数！！！
+     * 这个不是测试用例，不要算数！！！
+     * 这个不是测试用例，不要算数！！！
+     * @param userName 登录的用户名
+     * @param password 登录的密码
+     * @return token
+     * @throws Exception
+     */
+    private String login(String userName, String password) throws Exception{
+        LoginVo vo = new LoginVo();
+        vo.setUserName(userName);
+        vo.setPassword(password);
+        String requireJson = JacksonUtil.toJson(vo);
+
+        byte[] ret = manageClient.post().uri("/adminusers/login").bodyValue(requireJson).exchange()
+                .expectStatus().isCreated()
+                .expectBody()
+                .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
+                .jsonPath("$.errmsg").isEqualTo("成功")
+                .returnResult()
+                .getResponseBodyContent();
+        return  JacksonUtil.parseString(new String(ret, "UTF-8"), "data");
     }
 }
