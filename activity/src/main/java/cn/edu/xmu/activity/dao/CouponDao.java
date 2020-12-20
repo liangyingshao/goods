@@ -10,6 +10,7 @@ import cn.edu.xmu.ooad.util.bloom.BloomFilterHelper;
 import cn.edu.xmu.ooad.util.bloom.RedisBloomFilter;
 import cn.edu.xmu.oomall.goods.model.CouponInfoDTO;
 import cn.edu.xmu.oomall.goods.model.SimpleShopDTO;
+import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.base.Charsets;
@@ -52,8 +53,8 @@ public class CouponDao implements InitializingBean
     @Autowired
     private CouponPoMapper couponMapper;
 
-    @Resource
-    private RocketMQTemplate rocketMQTemplate;
+//    @Resource
+//    private RocketMQTemplate rocketMQTemplate;
 
 
     @Autowired
@@ -583,6 +584,12 @@ public class CouponDao implements InitializingBean
             }
 
             quantity=type.equals(CouponActivity.Type.LIMIT_PER_PERSON)?couponQuantity:1;
+            if(type.equals(CouponActivity.Type.LIMIT_TOTAL_NUM))
+            {
+                activityPo.setQuantity(activityPo.getQuantity()-quantity);
+                activityMapper.updateByPrimaryKeySelective(activityPo);
+            }
+
         }
 
         //可领券，设置券属性
@@ -609,21 +616,36 @@ public class CouponDao implements InitializingBean
             newPos.add(newPo);
         }
 
+        try {
+            for (CouponPo newPo : newPos)
+                couponMapper.insert(newPo);
+        }
+        catch (DataAccessException e)
+        {
+            // 其他数据库错误
+            logger.debug("other sql exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        }
+        catch (Exception e) {
+            // 其他Exception错误
+            logger.error("other exception : " + e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
 
-        String json = JacksonUtil.toJson(newPos);
-        Message message = MessageBuilder.withPayload(json).build();
-        logger.info("sendLogMessage: message = " + message);
-        rocketMQTemplate.asyncSend("coupon-topic", message, new SendCallback() {
-            @Override
-            public void onSuccess(SendResult sendResult) {
-                System.out.println(sendResult.getSendStatus());
-            }
-
-            @Override
-            public void onException(Throwable e) {
-                System.out.println(e.getMessage());
-            }
-        });
+//        String json = JSON.toJSONString(newPos);
+//        Message message = MessageBuilder.withPayload(json).build();
+//        logger.info("sendLogMessage: message = " + message);
+//        rocketMQTemplate.asyncSend("coupon-topic", message, new SendCallback() {
+//            @Override
+//            public void onSuccess(SendResult sendResult) {
+//                System.out.println(sendResult.getSendStatus());
+//            }
+//
+//            @Override
+//            public void onException(Throwable e) {
+//                System.out.println(e.getMessage());
+//            }
+//        });
 
         //构造RetVos
         List<String> couponSns=newPos.stream().map(CouponPo::getCouponSn).collect(Collectors.toList());

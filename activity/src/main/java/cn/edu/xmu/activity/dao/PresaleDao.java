@@ -11,6 +11,7 @@ import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.goods.model.*;
 import cn.edu.xmu.oomall.goods.service.IGoodsService;
+import com.alibaba.fastjson.JSON;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
@@ -45,8 +46,8 @@ public class PresaleDao {
     @DubboReference
     IGoodsService iGoodsService;
 
-    @Resource
-    private RocketMQTemplate rocketMQTemplate;
+//    @Resource
+//    private RocketMQTemplate rocketMQTemplate;
 
     @Autowired
     RedisTemplate redisTemplate;
@@ -482,20 +483,23 @@ public class PresaleDao {
         presaleActivityPo.setQuantity(inventory-quantity);
 
         //修改库存
-        String json = JacksonUtil.toJson(presaleActivityPo);
-        Message message = MessageBuilder.withPayload(json).build();
-        logger.info("sendLogMessage: message = " + message);
-        rocketMQTemplate.asyncSend("presale-topic", message, new SendCallback() {
-            @Override
-            public void onSuccess(SendResult sendResult) {
-                System.out.println(sendResult.getSendStatus());
-            }
-
-            @Override
-            public void onException(Throwable e) {
-                System.out.println(e.getMessage());
-            }
-        });
+        presaleActivityPoMapper.updateByPrimaryKeySelective(presaleActivityPo);
+//        String json = JSON.toJSONString(presaleActivityPo);
+//        //String json = JacksonUtil.toJson(presaleActivityPo);
+//        Message message = MessageBuilder.withPayload(json).build();
+//        logger.info("sendLogMessage: message = " + message);
+////        presaleActivityPoMapper.updateByPrimaryKeySelective(presaleActivityPo);
+//        rocketMQTemplate.asyncSend("presale-topic", message, new SendCallback() {
+//            @Override
+//            public void onSuccess(SendResult sendResult) {
+//                System.out.println(sendResult.getSendStatus());
+//            }
+//
+//            @Override
+//            public void onException(Throwable e) {
+//                System.out.println(e.getMessage());
+//            }
+//        });
 
         return new ReturnObject<>(dto);
     }

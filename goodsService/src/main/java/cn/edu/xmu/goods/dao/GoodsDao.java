@@ -11,6 +11,7 @@ import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.oomall.goods.model.*;
+import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -51,8 +52,8 @@ public class GoodsDao {
     @Autowired
     private FloatPricePoMapper floatPricePoMapper;
 
-    @Resource
-    private RocketMQTemplate rocketMQTemplate;
+//    @Resource
+//    private RocketMQTemplate rocketMQTemplate;
 
     @Autowired
     RedisTemplate redisTemplate;
@@ -918,20 +919,22 @@ public class GoodsDao {
 
         //修改SKU库存
         skuPo.setInventory(inventory-quantity);
-        String json = JacksonUtil.toJson(skuPo);
-        Message message = MessageBuilder.withPayload(json).build();
-        logger.info("sendLogMessage: message = " + message);
-        rocketMQTemplate.asyncSend("sku-topic", message, new SendCallback() {
-            @Override
-            public void onSuccess(SendResult sendResult) {
-                System.out.println(sendResult.getSendStatus());
-            }
-
-            @Override
-            public void onException(Throwable e) {
-                System.out.println(e.getMessage());
-            }
-        });
+        skuMapper.updateByPrimaryKeySelective(skuPo);
+        //String json = JacksonUtil.toJson(skuPo);
+//        String json = JSON.toJSONString(skuPo);
+//        Message message = MessageBuilder.withPayload(json).build();
+//        logger.info("sendLogMessage: message = " + message);
+//        rocketMQTemplate.asyncSend("sku-topic", message, new SendCallback() {
+//            @Override
+//            public void onSuccess(SendResult sendResult) {
+//                System.out.println(sendResult.getSendStatus());
+//            }
+//
+//            @Override
+//            public void onException(Throwable e) {
+//                System.out.println(e.getMessage());
+//            }
+//        });
 
 
         return new ReturnObject<>(dto);
