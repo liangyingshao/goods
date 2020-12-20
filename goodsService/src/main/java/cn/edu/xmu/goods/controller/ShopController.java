@@ -62,7 +62,6 @@ public class ShopController {
     @ApiOperation(value="店家修改店铺信息")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
-            @ApiImplicitParam(paramType = "body", dataType = "String", name = "name", required = true),
             @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "shopid", required = true)
 
     })
@@ -70,7 +69,7 @@ public class ShopController {
             @ApiResponse(code = 0, message = "成功")
     })
     @Audit
-    @PutMapping("shops/{shopid}")
+    @PutMapping("shops/{shopId}")
     @ResponseBody
     public Object modifyShop(@PathVariable Long shopId, @Depart Long departId, @Validated @RequestBody ShopVo shopVo, BindingResult bindingResult) {
 
@@ -82,7 +81,7 @@ public class ShopController {
             return retObject;
         }
 
-        ReturnObject returnObject = shopService.modifyShop(departId,shopVo.getName());
+        ReturnObject returnObject = shopService.modifyShop(shopId,shopVo.getName());
         if (returnObject.getCode() == ResponseCode.OK) {
             return Common.getRetObject(returnObject);
         } else {
