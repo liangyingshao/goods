@@ -1050,9 +1050,10 @@ public class GoodsController {
     public Object getShareSku(@PathVariable Long sid, @PathVariable Long id,
                               @LoginUser @ApiIgnore @RequestParam(required = false) Long userId)
     {
-        logger.debug("getShareSku:sid="+sid+" skuId="+id+" userId="+userId);
+        logger.debug("share,进入controller层");
         ReturnObject returnObject = iShareService.shareUserSkuMatch(sid,id,userId);
-        if(returnObject.getData().equals(true))
+        logger.debug("share,返回+"+returnObject.getData());
+        if(returnObject.getData().equals(Boolean.TRUE))
             returnObject=goodsService.getShareSku(id);
         else return Common.decorateReturnObject(new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE));
         return Common.decorateReturnObject(returnObject);

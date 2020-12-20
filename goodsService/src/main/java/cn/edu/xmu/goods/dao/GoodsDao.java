@@ -788,8 +788,7 @@ public class GoodsDao {
         criteria.andGoodsSkuIdEqualTo(skuId);
         criteria.andBeginTimeLessThanOrEqualTo(LocalDateTime.now());
         criteria.andEndTimeGreaterThan(LocalDateTime.now());
-        criteria.andGoodsSkuIdEqualTo(skuId);
-        criteria.andInvalidByEqualTo(FloatPrice.Validation.VALID.getCode().longValue());
+        criteria.andValidEqualTo(FloatPrice.Validation.VALID.getCode().byteValue());
 
         List<FloatPricePo> floatPricePo = null;
         try {
