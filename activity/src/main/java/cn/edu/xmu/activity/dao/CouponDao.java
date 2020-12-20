@@ -483,6 +483,7 @@ public class CouponDao implements InitializingBean
     public ReturnObject<List<String>> getCoupon(Long userId, Long id, Long departId)
     {
         logger.debug("getCoupon:userId="+userId+" activityId="+id);
+
         if(departId!=null)//管理员不能领自家的优惠券
         {
             CouponActivityPo activityPo= activityMapper.selectByPrimaryKey(id);
@@ -516,12 +517,14 @@ public class CouponDao implements InitializingBean
 
         //活动尚不能领券（含TO_BE_ONLINE和ONLINE的couponTime之前）
         if(activityPo.getCouponTime().isAfter(nowTime))
+        {
             return new ReturnObject<>(ResponseCode.COUPON_NOTBEGIN);
-
+        }
         //活动进行中
         //先到bloom过滤器里查询
         ReturnObject returnObject=checkCouponBloomFilter(id,userId);
-        if(returnObject.getCode().equals(ResponseCode.COUPON_FINISH))return returnObject;
+        if(returnObject.getCode().equals(ResponseCode.COUPON_FINISH))
+            return returnObject;
 
 
         //查询优惠券发放情况
@@ -541,9 +544,9 @@ public class CouponDao implements InitializingBean
             CouponPoExample alreadyExample = new CouponPoExample();
             CouponPoExample.Criteria alreadyCriteria = alreadyExample.createCriteria();
             alreadyCriteria.andActivityIdEqualTo(id);
-            //每人限量模式
-            if (CouponActivity.Type.getTypeByCode(activityPo.getQuantitiyType().intValue()).equals(CouponActivity.Type.LIMIT_PER_PERSON))
-                alreadyCriteria.andCustomerIdEqualTo(userId);
+//            //每人限量模式
+//            if (CouponActivity.Type.getTypeByCode(activityPo.getQuantitiyType().intValue()).equals(CouponActivity.Type.LIMIT_PER_PERSON))
+            alreadyCriteria.andCustomerIdEqualTo(userId);
             List<CouponPo> alreadyPos = couponMapper.selectByExample(alreadyExample);
 
 
@@ -554,34 +557,33 @@ public class CouponDao implements InitializingBean
             redisTemplate.opsForHash().put(key,"quantityType",type.getCode().byteValue());
 
             //券已领罄
-            //总量控制模式下券已发完或每人限量模式下该用户领的券已达上限
-            if (couponQuantity==size)
+            if (size>0)
             {
-                //每人限发模式下领取数量达到上限
-                if(type.equals(CouponActivity.Type.LIMIT_PER_PERSON))
-                {
-                    redisTemplate.opsForHash().put(key,"quantity",couponQuantity);
-                    setBloomFilterOfCoupon(id, userId);
-                }
-                //总量控制模式下券已发完
-                else redisTemplate.opsForHash().put(key,"quantity",0);
-
-                //设置过期时间为活动结束时间
-                redisTemplate.expire(key,Duration.between(nowTime,activityPo.getEndTime()).toHours(), TimeUnit.HOURS);
+//                //每人限发模式下领取数量达到上限
+//                if(type.equals(CouponActivity.Type.LIMIT_PER_PERSON))
+//                {
+//                    redisTemplate.opsForHash().put(key,"quantity",couponQuantity);
+//                    setBloomFilterOfCoupon(id, userId);
+//                }
+//                //总量控制模式下券已发完
+//                else redisTemplate.opsForHash().put(key,"quantity",0);
+//
+//                //设置过期时间为活动结束时间
+//                redisTemplate.expire(key,Duration.between(nowTime,activityPo.getEndTime()).toHours(), TimeUnit.HOURS);
 
                 return new ReturnObject<>(ResponseCode.COUPON_FINISH);
             }
 
-            //总量控制模式下该用户已领过券
-            if(type.equals(CouponActivity.Type.LIMIT_TOTAL_NUM) && size > 0)
-            {
-                setBloomFilterOfCoupon(id, userId);
-                redisTemplate.opsForHash().put(key,"quantity",couponQuantity-size);
-                //设置过期时间为活动结束时间
-                redisTemplate.expire(key,Duration.between(nowTime,activityPo.getEndTime()).toHours(), TimeUnit.HOURS);
-
-                return new ReturnObject<>(ResponseCode.COUPON_FINISH);
-            }
+//            //总量控制模式下该用户已领过券
+//            if(type.equals(CouponActivity.Type.LIMIT_TOTAL_NUM) && size > 0)
+//            {
+//                setBloomFilterOfCoupon(id, userId);
+//                redisTemplate.opsForHash().put(key,"quantity",couponQuantity-size);
+//                //设置过期时间为活动结束时间
+//                redisTemplate.expire(key,Duration.between(nowTime,activityPo.getEndTime()).toHours(), TimeUnit.HOURS);
+//
+//                return new ReturnObject<>(ResponseCode.COUPON_FINISH);
+//            }
 
             quantity=type.equals(CouponActivity.Type.LIMIT_PER_PERSON)?couponQuantity:1;
             if(type.equals(CouponActivity.Type.LIMIT_TOTAL_NUM))
