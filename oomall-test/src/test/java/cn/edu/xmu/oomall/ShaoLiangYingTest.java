@@ -1,16 +1,13 @@
 package cn.edu.xmu.oomall;
 
 import cn.edu.xmu.ooad.util.JacksonUtil;
-import cn.edu.xmu.ooad.util.JwtHelper;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.test.TestApplication;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,10 +17,14 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-@Slf4j
+// 需要其他模块进行集成测试 By 宋润涵
+
+/**
+ * @author: 24320182203259 邵良颖
+ * Created at: 2020-12-15 17:36
+ */
 @SpringBootTest(classes = TestApplication.class)
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class SlyTest {
+public class ShaoLiangYingTest {
 
     @Value("${public-test.managementgate}")
     private String managementGate;
@@ -85,25 +86,6 @@ public class SlyTest {
         return  JacksonUtil.parseString(new String(ret, "UTF-8"), "data");
 
     }
-
-
-//    public SlyTest(){
-//        this.manageClient = WebTestClient.bindToServer()
-//                .baseUrl("http://127.0.0.1:8091")
-//                .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/json;charset=UTF-8")
-//                .build();
-//        this.mallClient = WebTestClient.bindToServer()
-//                .baseUrl("http://127.0.0.1:8091")
-//                .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/json;charset=UTF-8")
-//                .build();
-//    }
-//
-//    @BeforeAll
-//    private static void login(){
-//        JwtHelper jwtHelper = new JwtHelper();
-//        adminToken = jwtHelper.createToken(1L,0L, 3600);
-//        userToken =jwtHelper.createToken(59L,1L, 3600);
-//    }
 
     /**
      * Flashsale002
@@ -282,6 +264,7 @@ public class SlyTest {
     }
 
     /**
+     * 修改了状态
      * Flashsale005
      * 不允许修改过去的秒杀活动
      */
@@ -437,7 +420,7 @@ public class SlyTest {
         res = manageClient.delete().uri("/shops/0/flashsales/"+insertId).header("authorization",adminToken);
         res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.DELETE_ONLINE_NOTALLOW.getCode())
+                .jsonPath("$.errno").isEqualTo(ResponseCode.ACTIVITYALTER_INVALID.getCode())
                 .returnResult()
                 .getResponseBodyContent();
 
@@ -465,9 +448,9 @@ public class SlyTest {
     @Test
     public void addSkuComment1() throws Exception{
         userToken = userLogin("8606245097", "123456");
-        String requestJson = "{\"type\":\"0\",\"content\":\"新增Sku评论\"}";
+        String requestJson = "{\"type\":0,\"content\":\"新增Sku评论\"}";
         byte[] responseBuffer = null;
-        WebTestClient.RequestHeadersSpec res = mallClient.post().uri("/orderitems/828/comments").header("authorization",userToken).bodyValue(requestJson);
+        WebTestClient.RequestHeadersSpec res = mallClient.post().uri("/orderitems/143/comments").header("authorization",userToken).bodyValue(requestJson);
         //增加
         responseBuffer = res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
@@ -486,7 +469,7 @@ public class SlyTest {
         userToken = userLogin("8606245097", "123456");
         String requestJson = "{\"type\":\"0\",\"content\":\"新增Sku评论\"}";
         byte[] responseBuffer = null;
-        WebTestClient.RequestHeadersSpec res = mallClient.post().uri("/orderitems/829/comments").header("authorization",userToken).bodyValue(requestJson);
+        WebTestClient.RequestHeadersSpec res = mallClient.post().uri("/orderitems/4/comments").header("authorization",userToken).bodyValue(requestJson);
         //增加
         responseBuffer = res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
@@ -516,7 +499,7 @@ public class SlyTest {
         //增加
         responseBuffer = res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_NOTEXIST.getCode())
+                .jsonPath("$.errno").isEqualTo(ResponseCode.USER_NOTBUY.getCode())
                 .jsonPath("$.data").doesNotExist()
                 .returnResult()
                 .getResponseBodyContent();
@@ -531,7 +514,7 @@ public class SlyTest {
         userToken = userLogin("8606245097", "123456");
         String requestJson = "{\"type\":\"6\",\"content\":\"新增Sku评论\"}";
         byte[] responseBuffer = null;
-        WebTestClient.RequestHeadersSpec res = mallClient.post().uri("/orderitems/830/comments").header("authorization",userToken).bodyValue(requestJson);
+        WebTestClient.RequestHeadersSpec res = mallClient.post().uri("/orderitems/4/comments").header("authorization",userToken).bodyValue(requestJson);
         //增加
         responseBuffer = res
                 .exchange().expectHeader().contentType("application/json;charset=UTF-8").expectStatus().isBadRequest()
@@ -550,7 +533,7 @@ public class SlyTest {
         userToken = userLogin("8606245097", "123456");
         String requestJson = "{\"type\":\"0\",\"content\":\"新增Sku评论\"}";
         byte[] responseBuffer = null;
-        WebTestClient.RequestHeadersSpec res = mallClient.post().uri("/orderitems/830/comments").header("authorization",userToken).bodyValue(requestJson);
+        WebTestClient.RequestHeadersSpec res = mallClient.post().uri("/orderitems/11/comments").header("authorization",userToken).bodyValue(requestJson);
         //增加
         responseBuffer = res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
@@ -583,7 +566,7 @@ public class SlyTest {
         userToken = userLogin("8606245097", "123456");
         String requestJson = "{\"type\":\"0\",\"content\":\"新增Sku评论\"}";
         byte[] responseBuffer = null;
-        WebTestClient.RequestHeadersSpec res = mallClient.post().uri("/orderitems/831/comments").header("authorization",userToken).bodyValue(requestJson);
+        WebTestClient.RequestHeadersSpec res = mallClient.post().uri("/orderitems/32/comments").header("authorization",userToken).bodyValue(requestJson);
         //增加
         responseBuffer = res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
@@ -619,7 +602,7 @@ public class SlyTest {
         LocalDateTime endTime = LocalDateTime.parse("9042-01-28 17:42:20",df);
         String requestJson = "{\"activityPrice\":\"120\", \"beginTime\":\""+beginTime.toString()+"\",\"endTime\":\""+endTime.toString()+"\",\"quantity\": \"10000\"}";
         byte[] responseBuffer = null;
-        WebTestClient.RequestHeadersSpec res = manageClient.post().uri("/shops/0/skus/626/floatPrices").header("authorization",adminToken).bodyValue(requestJson);
+        WebTestClient.RequestHeadersSpec res = manageClient.post().uri("/shops/1/skus/626/floatPrices").header("authorization",adminToken).bodyValue(requestJson);
         //sku库存应大于价格浮动项库存
         responseBuffer = res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
@@ -642,7 +625,7 @@ public class SlyTest {
         LocalDateTime endTime = LocalDateTime.parse("2021-01-28 17:42:20",df);
         String requestJson = "{\"activityPrice\":\"120\", \"beginTime\":\""+beginTime.toString()+"\",\"endTime\":\""+endTime.toString()+"\",\"quantity\": \"1000\"}";
         byte[] responseBuffer = null;
-        WebTestClient.RequestHeadersSpec res = manageClient.post().uri("/shops/0/skus/23333/floatPrices").header("authorization",adminToken).bodyValue(requestJson);
+        WebTestClient.RequestHeadersSpec res = manageClient.post().uri("/shops/1/skus/23333/floatPrices").header("authorization",adminToken).bodyValue(requestJson);
         //增加
         responseBuffer = res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
@@ -654,6 +637,7 @@ public class SlyTest {
 
     /**
      * 新增价格浮动项,时间段冲突
+     * 价格不是String写错了，考虑删除 By 宋润涵
      * @throws Exception
      */
     @Test
@@ -667,7 +651,7 @@ public class SlyTest {
         LocalDateTime beginTime = LocalDateTime.parse("2020-12-28 17:42:20",df);
         LocalDateTime endTime = LocalDateTime.parse("2020-01-28 17:42:20",df);
         String requestJson = "{\"activityPrice\":\"120\", \"beginTime\":\""+beginTime.toString()+"\",\"endTime\":\""+endTime.toString()+"\",\"quantity\": \"100\"}";
-        WebTestClient.RequestHeadersSpec res = manageClient.post().uri("/shops/0/skus/626/floatPrices").header("authorization",adminToken).bodyValue(requestJson);
+        WebTestClient.RequestHeadersSpec res = manageClient.post().uri("/shops/1/skus/626/floatPrices").header("authorization",adminToken).bodyValue(requestJson);
         responseBuffer = res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.Log_Bigger.getCode())
@@ -692,7 +676,7 @@ public class SlyTest {
         beginTime = LocalDateTime.parse("2020-12-28 17:42:20",df);
         endTime = LocalDateTime.parse("2021-01-28 17:42:20",df);
         requestJson = "{\"activityPrice\":\"120\", \"beginTime\":\""+beginTime.toString()+"\",\"endTime\":\""+endTime.toString()+"\",\"quantity\": \"100\"}";
-        res = manageClient.post().uri("/shops/0/skus/626/floatPrices").header("authorization",adminToken).bodyValue(requestJson);
+        res = manageClient.post().uri("/shops/1/skus/626/floatPrices").header("authorization",adminToken).bodyValue(requestJson);
         responseBuffer = res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.SKUPRICE_CONFLICT.getCode())
@@ -729,7 +713,7 @@ public class SlyTest {
         adminToken = adminLogin("13088admin", "123456");
 //        userToken = userLogin("8606245097", "123456");
         byte[] responseBuffer = null;
-        WebTestClient.RequestHeadersSpec res = manageClient.delete().uri("/shops/0/floatPrices/828").header("authorization",adminToken);
+        WebTestClient.RequestHeadersSpec res = manageClient.delete().uri("/shops/1/floatPrices/828").header("authorization",adminToken);
         //增加
         responseBuffer = res.exchange().expectHeader().contentType("application/json;charset=UTF-8")
                 .expectBody()
