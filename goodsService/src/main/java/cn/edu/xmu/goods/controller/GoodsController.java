@@ -1052,7 +1052,7 @@ public class GoodsController {
         ReturnObject returnObject = iShareService.shareUserSkuMatch(sid,id,userId);
         if(returnObject.getData().equals(true))
             returnObject=goodsService.getShareSku(id);
-        else return Common.decorateReturnObject(new ReturnObject(returnObject.getCode()));
+        else return Common.decorateReturnObject(new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE));
         return Common.decorateReturnObject(returnObject);
     }
 
