@@ -280,7 +280,13 @@ public class ActivityController {
     {
         logger.debug("getCoupon:userId="+userId+" activityId="+id);
         ReturnObject<List<String>> returnObject=activityService.getCoupon(userId,id,departId);
-        return Common.decorateReturnObject(returnObject);
+        if (returnObject.getData() != null) {
+            httpServletResponse.setStatus(HttpStatus.CREATED.value());
+            logger.error("created");
+            return Common.decorateReturnObject(returnObject);
+        } else {
+            return Common.getNullRetObj(new ReturnObject<>(returnObject.getCode(), returnObject.getErrmsg()), httpServletResponse);
+        }
     }
 
     //变内部接口了

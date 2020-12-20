@@ -648,18 +648,25 @@ public class CouponDao implements InitializingBean
 //        });
 
         //构造RetVos
-        List<String> couponSns=newPos.stream().map(CouponPo::getCouponSn).collect(Collectors.toList());
-
-        //更新redis
-        if(type.equals(CouponActivity.Type.LIMIT_TOTAL_NUM))
-        {
-            int rest= (int) redisTemplate.opsForHash().get(key,"quantity");
-            redisTemplate.opsForHash().delete(key,"quantity");
-            redisTemplate.opsForHash().put(key,"quantity",rest-1);
+        List<String> couponSns = new ArrayList<>();
+        for (CouponPo t : newPos) {
+            couponSns.add(t.getCouponSn());
         }
+//        List<String> couponSns=newPos
+//                .stream()
+//                .map(CouponPo::getCouponSn)
+//                .collect(Collectors.toList());s
 
-        //更新bloom过滤器
-        setBloomFilterOfCoupon(id,userId);
+//        //更新redis
+//        if(type.equals(CouponActivity.Type.LIMIT_TOTAL_NUM))
+//        {
+//            int rest= (int) redisTemplate.opsForHash().get(key,"quantity");
+//            redisTemplate.opsForHash().delete(key,"quantity");
+//            redisTemplate.opsForHash().put(key,"quantity",rest-1);
+//        }
+
+//        //更新bloom过滤器
+//        setBloomFilterOfCoupon(id,userId);
 
         //返回
         return new ReturnObject<List<String>>(couponSns);
