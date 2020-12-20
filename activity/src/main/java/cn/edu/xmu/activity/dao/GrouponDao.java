@@ -226,6 +226,8 @@ public class GrouponDao {
             logger.error(message.toString());
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
         }
+        if(oldPo == null)
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
 
         //2.若shopId不一致，则无权限访问
         if(oldPo.getShopId()!= shopId)
