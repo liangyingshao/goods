@@ -15,6 +15,7 @@ import cn.edu.xmu.ooad.util.ReturnObject;
 import com.github.pagehelper.PageInfo;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.swagger.annotations.*;
+import org.apache.tomcat.jni.Local;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -206,7 +207,7 @@ public class GrouponController {
     @Audit
     @PostMapping("/shops/{shopId}/spus/{id}/groupons")
     @ResponseBody
-    public Object createGrouponofSPU(@PathVariable(name="id") Long id, @Depart @PathVariable(name="shopId") Long shopId, @Validated @RequestBody(required = true) GrouponVo grouponVo, BindingResult bindingResult){
+    public Object createGrouponofSPU(@PathVariable(name="id") Long id, @PathVariable(name="shopId") Long shopId, @Validated @RequestBody(required = true) GrouponVo grouponVo, BindingResult bindingResult){
 
         Object retObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != retObject) {
@@ -218,8 +219,10 @@ public class GrouponController {
         if(grouponVo.getBeginTime()==null || grouponVo.getEndTime() == null){
             return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
         }
+        //endtime<now,begintime>endtime, begintime<now
         if(grouponVo.getEndTime().isBefore(LocalDateTime.now())||
-                grouponVo.getBeginTime().isAfter(grouponVo.getEndTime())) {
+                grouponVo.getBeginTime().isAfter(grouponVo.getEndTime())||
+                grouponVo.getBeginTime().isBefore(LocalDateTime.now())) {
             return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
         }
 
@@ -259,8 +262,28 @@ public class GrouponController {
     @Audit
     @ResponseBody
     @PutMapping("/shops/{shopId}/groupons/{id}")
-    public Object modifyGrouponofSPU(@PathVariable Long shopId, @PathVariable Long id,@Validated @RequestBody(required = true) GrouponVo grouponVo,BindingResult bindingResult){
+    public Object modifyGrouponofSPU(@PathVariable Long shopId, @Depart Long departId, @PathVariable Long id,@Validated @RequestBody(required = true) GrouponVo grouponVo,BindingResult bindingResult){
 
+        Object ret = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (null != ret) {
+            logger.debug("validate fail");
+            return ret;
+        }
+
+        //begintime<now
+        if((grouponVo.getBeginTime()!=null) && (grouponVo.getBeginTime().isBefore(LocalDateTime.now())))
+            return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
+        //endtime<now
+        if((grouponVo.getEndTime()!=null) && (grouponVo.getEndTime().isBefore(LocalDateTime.now())))
+            return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
+        //begintime>endtime
+        if(grouponVo.getBeginTime()!=null
+                && grouponVo.getEndTime()!=null
+                && grouponVo.getEndTime().isBefore(grouponVo.getBeginTime()))
+            return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
+
+        if(shopId!=departId && departId!=0L)
+            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         Object retObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != retObject) {
             logger.debug("validate fail");
@@ -306,7 +329,11 @@ public class GrouponController {
     })
     @Audit
     @DeleteMapping("/shops/{shopId}/groupons/{id}")
-    public Object cancelGrouponofSPU(@PathVariable Long shopId, @PathVariable Long id) {
+    public Object cancelGrouponofSPU(@PathVariable Long shopId, @Depart Long departId, @PathVariable Long id) {
+
+        if(shopId!=departId && departId!=0L)
+            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
+
         ReturnObject returnObject =  grouponService.cancelGrouponofSPU(shopId,id);
         if (returnObject.getCode() == ResponseCode.OK) {
             return Common.getRetObject(returnObject);
@@ -340,7 +367,9 @@ public class GrouponController {
     @Audit
     @ResponseBody
     @PutMapping("/shops/{shopId}/groupons/{id}/onshelves")
-    public Object putGrouponOnShelves(@PathVariable Long id,@PathVariable Long shopId){
+    public Object putGrouponOnShelves(@PathVariable Long id,@Depart Long departId, @PathVariable Long shopId){
+        if(shopId!=departId && departId!=0L)
+            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
 
         ReturnObject returnObject = grouponService.putGrouponOnShelves(shopId,id);
         if (returnObject.getCode() == ResponseCode.OK) {
@@ -375,7 +404,10 @@ public class GrouponController {
     @Audit
     @ResponseBody
     @PutMapping("/shops/{shopId}/groupons/{id}/offshelves")
-    public Object putGrouponOffShelves(@PathVariable Long id,@PathVariable Long shopId){
+    public Object putGrouponOffShelves(@PathVariable Long id, @Depart Long departId, @PathVariable Long shopId){
+
+        if(shopId!=departId && departId!=0L)
+            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
 
         ReturnObject returnObject = grouponService.putGrouponOffShelves(shopId,id);
         if (returnObject.getCode() == ResponseCode.OK) {

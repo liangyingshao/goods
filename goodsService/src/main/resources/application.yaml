@@ -129,7 +129,7 @@ management:
         include: "*"
 
 server:
-  port: 8093
+  port: 8090
   tomcat:
     threads:
       max: 1000
@@ -143,13 +143,14 @@ dubbo:
     qos-accept-foreign-ip: false
   # 配置注册中心
   registry:
-    address: nacos://127.0.0.1:8848
-    #192.168.137.1:8848
+    # address: nacos://127.0.0.1:8848
+    address: nacos://192.168.1.4:8848
   # 设置协议-协议由提供方指定消费方被动接受
   protocol:
     name: dubbo
     port: -1 # -1 表示端口自增 from 20880
-    host: 127.0.0.1
+    # host: 127.0.0.1
+    host: 192.168.1.15
     # 设置超时时间
   consumer:
     timeout: 4000
@@ -162,19 +163,23 @@ spring:
   application:
     name: goods-service
   cloud:
+    inetutils:
+      # preferred-networks: 127.0.0
+      preferred-networks: 192.168.1
     nacos:
       discovery:
-        ip: 127.0.0.1
-        server-addr: 127.0.0.1:8848
-        #192.168.137.1:8848
+        # ip: 127.0.0.1
+        ip: 192.168.1.15
+        # server-addr: 127.0.0.1:8848
+        server-addr: 192.168.1.4:8848
   profiles:
     active: dev
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
     initialization-mode: always
-    schema: classpath:schema.sql
-    data: classpath:data.sql
+#    schema: classpath:schema.sql
+#    data: classpath:data.sql
     druid:
       #初始化时建立物理连接的个数
       initial-size: 3
@@ -227,12 +232,12 @@ mybatis:
   dav:
     username: night
     password: tiesuolianhuan123
-    baseUrl: http://172.16.4.146:8888/webdav/
+    baseUrl: http://localhost:8888/webdav/
 
 # 配置rocketmq
 rocketmq:
   # 指定namesrv地址
-  name-server: 47.115.162.144:9876
+  name-server: 127.0.0.1:9876
   producer:
     #生产者group名称
     group: producer_group

@@ -65,6 +65,7 @@ public class PresaleDao {
         if(skuId!=null)
             criteria.andGoodsSkuIdEqualTo(skuId);
         //4.按状态查询
+        List<PresaleActivityPo> results = null;
         if(state!=null) {
             if(state == 0)
                 criteria.andStateEqualTo(ActivityStatus.OFF_SHELVES.getCode().byteValue());
@@ -73,7 +74,8 @@ public class PresaleDao {
             else if(state == 2)
                 criteria.andStateEqualTo(ActivityStatus.DELETED.getCode().byteValue());
             else
-                return new ReturnObject<>(ResponseCode.FIELD_NOTVALID);
+                criteria.andStateEqualTo(Integer.valueOf(4).byteValue());
+
         }
         //5.按timeline查询
         if(timeline!=null)
@@ -112,7 +114,7 @@ public class PresaleDao {
         }
 
         //8.查询数据库
-        List<PresaleActivityPo> results = null;
+
         try {
             results = presaleActivityPoMapper.selectByExample(example);
         } catch (Exception e) {

@@ -1,6 +1,7 @@
 package cn.edu.xmu.goods.controller;
 
 import cn.edu.xmu.goods.model.bo.Shop;
+import cn.edu.xmu.goods.model.vo.AuditShopVo;
 import cn.edu.xmu.goods.model.vo.ShopStateVo;
 import cn.edu.xmu.goods.model.vo.ShopVo;
 import cn.edu.xmu.goods.service.ShopService;
@@ -55,7 +56,6 @@ public class ShopController {
      * date: 2020/11/29 23:15
      * author: 杨铭
      *
-     * @param shopid Long
      * @param shopVo ShopVo
      * @return java.lang.Object
      */
@@ -72,15 +72,17 @@ public class ShopController {
     @Audit
     @PutMapping("shops/{shopid}")
     @ResponseBody
-    public Object modifyShop(@PathVariable @Depart Long shopid, @Validated @RequestBody ShopVo shopVo, BindingResult bindingResult) {
+    public Object modifyShop(@PathVariable Long shopId, @Depart Long departId, @Validated @RequestBody ShopVo shopVo, BindingResult bindingResult) {
 
+        if(shopId!=departId && departId!=0)
+            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         Object retObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != retObject) {
             logger.debug("validate fail");
             return retObject;
         }
 
-        ReturnObject returnObject = shopService.modifyShop(shopid,shopVo.getName());
+        ReturnObject returnObject = shopService.modifyShop(departId,shopVo.getName());
         if (returnObject.getCode() == ResponseCode.OK) {
             return Common.getRetObject(returnObject);
         } else {
@@ -111,7 +113,7 @@ public class ShopController {
     @Audit
     @PostMapping("/shops")
     @ResponseBody
-    public Object addShop(@LoginUser Long id, @Validated @RequestBody ShopVo shopVo, BindingResult bindingResult){
+    public Object addShop(@LoginUser Long id, @Depart Long departId, @Validated @RequestBody ShopVo shopVo, BindingResult bindingResult){
 
         Object retObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != retObject) {
@@ -119,7 +121,7 @@ public class ShopController {
             return retObject;
         }
 
-        ReturnObject<VoObject> returnObject =  shopService.addShop(id,shopVo.getName());
+        ReturnObject<VoObject> returnObject =  shopService.addShop(id,departId,shopVo.getName());
         if (returnObject.getCode() == ResponseCode.OK) {
             httpServletResponse.setStatus(HttpStatus.CREATED.value());
             return Common.getRetObject(returnObject);
@@ -150,7 +152,9 @@ public class ShopController {
     @Audit
     @DeleteMapping("/shops/{shopId}")
     @ResponseBody
-    public Object deleteShop(@PathVariable Long shopId) {
+    public Object deleteShop(@PathVariable Long shopId, @Depart Long departId) {
+        if(shopId!=departId && departId!=0)
+            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         ReturnObject<VoObject> returnObject =  shopService.deleteShop(shopId);
         if (returnObject.getCode() == ResponseCode.OK) {
             return Common.getRetObject(returnObject);
@@ -191,7 +195,6 @@ public class ShopController {
      * author: 杨铭
      *
      * @param id 操作的店铺id
-     * @param conclusion 审核是否通过
      * @return java.lang.Object
      */
     @ApiOperation(value="平台管理员审核店铺信息")
@@ -199,14 +202,13 @@ public class ShopController {
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
             @ApiImplicitParam(paramType = "path",dataType = "Integer",name="shopId",required = true),
             @ApiImplicitParam(paramType = "path",dataType = "Integer",name="id",required = true),
-            @ApiImplicitParam(paramType = "body",dataType = "String",name="conclusion",required = true)
     })
     @ApiResponse(code=0,message = "成功")
     @PutMapping("/shops/{shopId}/newshops/{id}/audit")
     @Audit
     @ResponseBody
-    public Object auditShop(@PathVariable Long id,@RequestBody boolean conclusion){
-        ReturnObject<VoObject> returnObject =  shopService.auditShop(id,conclusion);
+    public Object auditShop(@PathVariable Long id, @RequestBody AuditShopVo auditShopVo){
+        ReturnObject<VoObject> returnObject =  shopService.auditShop(id,auditShopVo.getConclusion());
         if (returnObject.getCode() == ResponseCode.OK) {
             return Common.getRetObject(returnObject);
         } else {
@@ -232,7 +234,10 @@ public class ShopController {
     @Audit
     @PutMapping("/shops/{shopId}/onshelves")
     @ResponseBody
-    public Object onshelfShop(@PathVariable Long shopId) {
+    public Object onshelfShop(@PathVariable Long shopId, @Depart Long departId) {
+        if(shopId!=departId && departId!=0)
+            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
+
         ReturnObject<VoObject> returnObject =  shopService.onshelfShop(shopId);
         if (returnObject.getCode() == ResponseCode.OK) {
             return Common.getRetObject(returnObject);
@@ -259,7 +264,10 @@ public class ShopController {
     @Audit
     @PutMapping("/shops/{shopId}/offshelves")
     @ResponseBody
-    public Object offshelfShop(@PathVariable Long shopId) {
+    public Object offshelfShop(@PathVariable Long shopId,@Depart Long departId) {
+        if(shopId!=departId && departId!=0)
+            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
+
         ReturnObject<VoObject> returnObject =  shopService.offshelfShop(shopId);
         if (returnObject.getCode() == ResponseCode.OK) {
             return Common.getRetObject(returnObject);

@@ -90,9 +90,11 @@ public class ShopDao {
      * @param name 店铺名称
      * @return cn.edu.xmu.ooad.util.ReturnObject<cn.edu.xmu.ooad.model.VoObject>
      */
-    public ReturnObject<VoObject> addShop(Long id, String name) {
+    public ReturnObject<VoObject> addShop(Long id, Long departId, String name) {
 
-        //TODO:调用权限模块dubbo 根据id查询此用户的departId是否是-1
+        //用户已有店铺
+        if(departId!=-1)
+            return new ReturnObject<>(ResponseCode.USER_HASSHOP);
 
         //新增店铺
         ShopPo shopPo = new ShopPo();
@@ -131,24 +133,42 @@ public class ShopDao {
      */
     public ReturnObject<VoObject> deleteShop(Long shopId) {
 
-        ShopPo shopPo = new ShopPo();
-        shopPo.setState(Shop.ShopStatus.CLOSED.getCode().byteValue());
-        shopPo.setId(shopId);
+        //查询是否有shopId
+        ShopPo oldpo = null;
         try {
-            shopPoMapper.updateByPrimaryKeySelective(shopPo);
-            //级联删除
-            List<Long> idlist = goodsSpuDao.getAllSpuIdByShopId(shopId).getData();
-            if(idlist!=null){
-                for(Long i : idlist) {
-                    goodsSpuDao.deleteGoodsSpu(shopId,i);
-                }
-            }
-
+            oldpo = shopPoMapper.selectByPrimaryKey(shopId);
         } catch (Exception e) {
             StringBuilder message = new StringBuilder().append("deleteShop: ").append(e.getMessage());
             logger.error(message.toString());
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
         }
+        if(oldpo==null)
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+
+        //状态不允许
+        if(oldpo.getState()!=Shop.ShopStatus.OFFLINE.getCode().byteValue()&&
+                oldpo.getState()!=Shop.ShopStatus.ONLINE.getCode().byteValue())
+            return new ReturnObject<>(ResponseCode.SHOP_STATENOTALLOW);
+
+        ShopPo shopPo = new ShopPo();
+        shopPo.setState(Shop.ShopStatus.CLOSED.getCode().byteValue());
+        shopPo.setId(shopId);
+        try {
+            shopPoMapper.updateByPrimaryKeySelective(shopPo);
+        } catch (Exception e) {
+            StringBuilder message = new StringBuilder().append("deleteShop: ").append(e.getMessage());
+            logger.error(message.toString());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+        }
+        //级联删除
+        List<Long> idlist = goodsSpuDao.getAllSpuIdByShopId(shopId).getData();
+        if(idlist!=null){
+            for(Long i : idlist) {
+                goodsSpuDao.deleteGoodsSpu(shopId,i);
+            }
+        }
+
+
         return new ReturnObject<>(ResponseCode.OK);
     }
 
@@ -163,6 +183,22 @@ public class ShopDao {
      * @return cn.edu.xmu.ooad.util.ReturnObject<cn.edu.xmu.ooad.model.VoObject>
      */
     public ReturnObject<VoObject> onshelfShop(Long shopId) {
+        //查询是否有shopId
+        ShopPo oldpo = null;
+        try {
+            oldpo = shopPoMapper.selectByPrimaryKey(shopId);
+        } catch (Exception e) {
+            StringBuilder message = new StringBuilder().append("deleteShop: ").append(e.getMessage());
+            logger.error(message.toString());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+        }
+        if(oldpo==null)
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+
+        //只有未上线才可以
+        if(oldpo.getState()!=Shop.ShopStatus.OFFLINE.getCode().byteValue())
+            return new ReturnObject<>(ResponseCode.SHOP_STATENOTALLOW);
+
         //修改状态
         ShopPo shopPo = new ShopPo();
         shopPo.setId(shopId);
@@ -187,6 +223,23 @@ public class ShopDao {
      * @return cn.edu.xmu.ooad.util.ReturnObject<cn.edu.xmu.ooad.model.VoObject>
      */
     public ReturnObject<VoObject> offshelfShop(Long shopId) {
+
+        //查询是否有shopId
+        ShopPo oldpo = null;
+        try {
+            oldpo = shopPoMapper.selectByPrimaryKey(shopId);
+        } catch (Exception e) {
+            StringBuilder message = new StringBuilder().append("deleteShop: ").append(e.getMessage());
+            logger.error(message.toString());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+        }
+        if(oldpo==null)
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+
+        //onShelf才可以
+        if(oldpo.getState()!=Shop.ShopStatus.ONLINE.getCode().byteValue())
+            return new ReturnObject<>(ResponseCode.SHOP_STATENOTALLOW);
+
         //修改状态
         ShopPo shopPo = new ShopPo();
         shopPo.setId(shopId);
@@ -216,7 +269,25 @@ public class ShopDao {
      * @param conclusion 审核是否通过
      * @return cn.edu.xmu.ooad.util.ReturnObject<cn.edu.xmu.ooad.model.VoObject>
      */
-    public ReturnObject<VoObject> auditShop(Long shopId,boolean conclusion) {
+    public ReturnObject<VoObject> auditShop(Long shopId, Boolean conclusion) {
+
+        //查询是否有shopId
+        ShopPo oldpo = null;
+        try {
+            oldpo = shopPoMapper.selectByPrimaryKey(shopId);
+        } catch (Exception e) {
+            StringBuilder message = new StringBuilder().append("deleteShop: ").append(e.getMessage());
+            logger.error(message.toString());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+        }
+        if(oldpo==null)
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+
+        //状态禁止
+        if(oldpo.getState()!=Shop.ShopStatus.NOT_AUDIT.getCode().byteValue())
+            return new ReturnObject<>(ResponseCode.SHOP_STATENOTALLOW);
+
+        //更新数据库
         ShopPo shopPo = new ShopPo();
         shopPo.setId(shopId);
         if(conclusion)
@@ -231,6 +302,7 @@ public class ShopDao {
             logger.error(message.toString());
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
         }
+
         return new ReturnObject<>(ResponseCode.OK);
     }
 

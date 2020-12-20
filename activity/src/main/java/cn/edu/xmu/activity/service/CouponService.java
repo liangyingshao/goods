@@ -178,10 +178,13 @@ public class CouponService {
      */
     @Transactional
     public ReturnObject<Object> showCouponActivity(Long shopId, Long id) {
-        ReturnObject<SimpleShopDTO> simpleShopDTOReturnObject=iGoodsService.getSimpleShopByShopId(shopId);
-        //商店不存在，很抽象
-        if(simpleShopDTOReturnObject.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST))return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-        //获取创建者修改者ID
+        ReturnObject<SimpleShopDTO> simpleShopDTOReturnObject=new ReturnObject<>();
+        if(shopId!=0) {
+            simpleShopDTOReturnObject = iGoodsService.getSimpleShopByShopId(shopId);
+            //商店不存在，很抽象
+            if (simpleShopDTOReturnObject.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST))
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }//获取创建者修改者ID
         ReturnObject<CouponActivity> retCouponActivity=couponDao.getCouponActivity(id,shopId);
         //不存在该活动或无权限先返回
         if(retCouponActivity.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST))
@@ -190,12 +193,12 @@ public class CouponService {
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
         String createByName="";
         String modiByName="";
-//        CouponActivity bo=retCouponActivity.getData();
-//        if(bo!=null)
-//        {
-//            createByName=iUserService.getUserName(bo.getCreatedBy());
-//            modiByName=iUserService.getUserName(bo.getModiBy());
-//        }
+        CouponActivity bo=retCouponActivity.getData();
+        if(bo!=null)
+        {
+            createByName=iUserService.getUserName(bo.getCreatedBy());
+            modiByName=iUserService.getUserName(bo.getModiBy());
+        }
         ReturnObject<Object> returnObject= couponDao.showCouponActivity(simpleShopDTOReturnObject.getData(),id,createByName,modiByName);
         return returnObject;
     }

@@ -116,7 +116,9 @@ public class IGoodsServiceImpl implements IGoodsService {
 
     @Override
     public ReturnObject<ResponseCode> checkSkuUsableBySkuShop(Long skuId, Long shopId) {
+        log.debug("checkSkuUsableBySkuShop:skuId="+skuId+" shopId="+shopId);
         ReturnObject<ResponseCode> returnObject=goodsDao.checkSkuUsableBySkuShop(skuId,shopId);
+        log.debug("responseCode:"+returnObject.getCode());
         return returnObject;
     }
 

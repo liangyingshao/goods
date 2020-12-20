@@ -1,17 +1,18 @@
 package cn.edu.xmu.activity.controller;
 
 import cn.edu.xmu.activity.model.bo.ActivityStatus;
+import cn.edu.xmu.activity.model.bo.Presale;
 import cn.edu.xmu.activity.model.vo.ActivityStatusRetVo;
 import cn.edu.xmu.activity.model.vo.PresaleVo;
 import cn.edu.xmu.activity.service.PresaleService;
 import cn.edu.xmu.ooad.annotation.Audit;
+import cn.edu.xmu.ooad.annotation.Depart;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ResponseUtil;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import com.github.pagehelper.PageInfo;
-import com.sun.mail.iap.Response;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,7 +87,7 @@ public class PresaleController {
         if(page <= 0 || pagesize <= 0) {
             object = Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
         } else {
-            ReturnObject<PageInfo<VoObject>> returnObject = presaleService.QueryPresales(shopId, skuId, null, timeline, page, pagesize, false);
+            ReturnObject<PageInfo<VoObject>> returnObject = presaleService.CustomerQueryPresales(shopId, skuId, null, timeline, page, pagesize, false);
             object = Common.getPageRetObject(returnObject);
         }
 
@@ -118,11 +119,8 @@ public class PresaleController {
         if(page <= 0 || pagesize <= 0) {
             object = Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
         } else {
-            ReturnObject<PageInfo<VoObject>> returnObject = presaleService.QueryPresales(shopId, skuId, state, null, page, pagesize,true);
-            if(returnObject.getCode() == ResponseCode.OK)
-                object = Common.getPageRetObject(returnObject);
-            else
-                object = Common.decorateReturnObject(returnObject);
+            ReturnObject<List<Presale>> returnObject = presaleService.AdminQueryPresales(shopId, skuId, state, null);
+            object = Common.decorateReturnObject(returnObject);
         }
 
         return object;
@@ -151,9 +149,15 @@ public class PresaleController {
             return retObject;
         }
 
+        //不能为空
         if(presaleVo.getEndTime()==null || presaleVo.getBeginTime()==null ||presaleVo.getPayTime() == null){
             return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
         }
+        //endtime<now,begin<now
+        if(presaleVo.getEndTime().isBefore(LocalDateTime.now())||presaleVo.getBeginTime().isBefore(LocalDateTime.now())){
+            return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
+        }
+        //begintime>endtime
         if(presaleVo.getEndTime().isBefore(LocalDateTime.now())||
                 presaleVo.getEndTime().isBefore(presaleVo.getPayTime())||
                 presaleVo.getPayTime().isBefore(presaleVo.getBeginTime())){
@@ -187,7 +191,7 @@ public class PresaleController {
     })
     @Audit
     @PutMapping("/shops/{shopId}/presales/{id}")
-    public Object modifyPresaleofSKU(@PathVariable Long shopId, @PathVariable Long id,@Validated @NotNull @RequestBody(required = true) PresaleVo presaleVo,BindingResult bindingResult){
+    public Object modifyPresaleofSKU(@PathVariable Long shopId, @Depart Long departId, @PathVariable Long id, @Validated @NotNull @RequestBody(required = true) PresaleVo presaleVo, BindingResult bindingResult){
 
         Object retObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != retObject) {
@@ -195,22 +199,38 @@ public class PresaleController {
             return retObject;
         }
 
-
-        if(presaleVo.getBeginTime()!=null && presaleVo.getPayTime() != null && presaleVo.getPayTime().isBefore(presaleVo.getBeginTime())){
+        //paytime<begintime
+        if(presaleVo.getBeginTime()!=null &&
+                presaleVo.getPayTime() != null &&
+                presaleVo.getPayTime().isBefore(presaleVo.getBeginTime())){
             return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
         }
 
+        //paytime>endtime
         if(presaleVo.getEndTime()!=null && presaleVo.getPayTime() != null && presaleVo.getPayTime().isAfter(presaleVo.getEndTime())){
             return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
         }
 
+        //begintime>endtime
         if(presaleVo.getBeginTime()!=null && presaleVo.getEndTime() != null && presaleVo.getBeginTime().isAfter(presaleVo.getEndTime())){
             return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
         }
 
+        //endtime<now
         if(presaleVo.getEndTime()!=null && presaleVo.getEndTime().isBefore(LocalDateTime.now())){
             return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
         }
+        //begintime<now
+        if(presaleVo.getBeginTime()!=null && presaleVo.getBeginTime().isBefore(LocalDateTime.now())){
+            return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
+        }
+        //paytime<now
+        if(presaleVo.getPayTime()!=null && presaleVo.getPayTime().isBefore(LocalDateTime.now())){
+            return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
+        }
+
+        if(shopId!=departId && departId!=0L)
+            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
 
         ReturnObject returnObject = presaleService.modifyPresaleOfSKU(shopId,id,presaleVo);
         if (returnObject.getCode() == ResponseCode.OK) {
@@ -233,7 +253,9 @@ public class PresaleController {
     })
     @Audit
     @DeleteMapping("/shops/{shopId}/presales/{id}")
-    public Object cancelPresaleOfSKU(@PathVariable Long shopId, @PathVariable Long id) {
+    public Object cancelPresaleOfSKU(@PathVariable Long shopId, @Depart Long departId, @PathVariable Long id) {
+        if(shopId!=departId && departId!=0L)
+            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         ReturnObject returnObject =  presaleService.cancelPresaleOfSKU(shopId, id);
         if (returnObject.getCode() == ResponseCode.OK) {
             return Common.getRetObject(returnObject);
@@ -256,8 +278,9 @@ public class PresaleController {
     @Audit
     @ResponseBody
     @PutMapping("/shops/{shopId}/presales/{id}/onshelves")
-    public Object putPresaleOnShelves(@PathVariable Long id,@PathVariable Long shopId){
-
+    public Object putPresaleOnShelves(@PathVariable Long id, @Depart Long departId, @PathVariable Long shopId){
+        if(shopId!=departId && departId!=0L)
+            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
         ReturnObject returnObject = presaleService.putPresaleOnShelves(shopId,id);
         if (returnObject.getCode() == ResponseCode.OK) {
             return Common.getRetObject(returnObject);
@@ -279,7 +302,10 @@ public class PresaleController {
     @Audit
     @ResponseBody
     @PutMapping("/shops/{shopId}/presales/{id}/offshelves")
-    public Object putPresaleOffShelves(@PathVariable Long id,@PathVariable Long shopId){
+    public Object putPresaleOffShelves(@PathVariable Long id, @Depart Long departId, @PathVariable Long shopId){
+
+        if(shopId!=departId && departId!=0L)
+            return Common.decorateReturnObject(new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE));
 
         ReturnObject returnObject = presaleService.putPresaleOffShelves(shopId,id);
         if (returnObject.getCode() == ResponseCode.OK) {
