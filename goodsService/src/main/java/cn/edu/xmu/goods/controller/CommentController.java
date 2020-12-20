@@ -152,7 +152,11 @@ public class CommentController {
             @RequestParam(required = false, defaultValue = "10") Integer pageSize) {
         ReturnObject<PageInfo<VoObject>> returnObject =  commentService.selectAllPassComment(id, page, pageSize);
         logger.error("CONTROLLER:"+returnObject.toString());
-        return Common.getPageRetObject(returnObject);
+        if (returnObject.getData() != null) {
+            return Common.getPageRetObject(returnObject);
+        } else {
+            return Common.getNullRetObj(new ReturnObject<>(returnObject.getCode(), returnObject.getErrmsg()), httpServletResponse);
+        }
     }
 
     /**
