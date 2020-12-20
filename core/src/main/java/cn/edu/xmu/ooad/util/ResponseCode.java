@@ -101,7 +101,6 @@ public enum ResponseCode {
     SPU_NOTOPERABLE(926,"失效的SPU"),
     TOMORROW_FLASHSALE_INVALID(930,"不允许增加明天的秒杀"),
     DELETE_ONLINE_NOTALLOW(931, "不允许删除已上线状态的活动"),
-    DELETE_CHANGAE_NOTALLOW(932, "不允许修改已删除活动的状态"),
     COMMENT_AUDITED(940,"评论已审核"),
     COMMENT_EXISTED(941,"该订单条目已评论"),
     SHOP_STATENOTALLOW(980, "当前店铺状态不允许进行此类操作");

@@ -252,7 +252,7 @@ public class GoodsController {
                                      @LoginUser @ApiIgnore @RequestParam(required = false) Long userId,
                                      @Depart @ApiIgnore @RequestParam(required = false) Long departId)
     {
-        if(vo.getBeginTime().isAfter(vo.getEndTime()))return Common.getRetObject(new ReturnObject<>(ResponseCode.Log_Bigger));
+        if(vo.getBeginTime().isAfter(vo.getEndTime()))return Common.getRetObject(new ReturnObject<>(ResponseCode.FIELD_NOTVALID));
 
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != returnObject) {
@@ -362,7 +362,8 @@ public class GoodsController {
     public Object showSpu(@PathVariable Long id) {
         Object returnObject=null;
         ReturnObject spu = spuService.showSpu(id);
-        return Common.getRetObject(spu);
+        //return Common.getRetObject(spu);
+        return Common.decorateReturnObject(spu);
     }
 
     /**

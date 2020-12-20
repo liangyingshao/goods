@@ -1,5 +1,6 @@
 package cn.edu.xmu.goods.model.vo;
 
+import cn.edu.xmu.goods.model.po.BrandPo;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -23,5 +24,11 @@ public class SimpleBrandVo {
     private String imgUrl;
 
     public SimpleBrandVo() {
+
+    }
+    public SimpleBrandVo(BrandPo po) {
+        this.id=po.getId();
+        this.name=po.getName();
+        this.imgUrl=po.getImageUrl();
     }
 }

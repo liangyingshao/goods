@@ -6,6 +6,8 @@ import cn.edu.xmu.goods.model.bo.GoodsSpu;
 import cn.edu.xmu.goods.model.po.*;
 import cn.edu.xmu.goods.model.vo.GoodsSkuRetVo;
 import cn.edu.xmu.goods.model.vo.GoodsSpuVo;
+import cn.edu.xmu.goods.model.vo.SimpleBrandVo;
+import cn.edu.xmu.goods.model.vo.SimpleCategoryVo;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ImgHelper;
 import cn.edu.xmu.ooad.util.ResponseCode;
@@ -137,6 +139,31 @@ public class GoodsSpuDao {
         List<GoodsSkuRetVo> ret = skus.stream().map(GoodsSkuRetVo::new).collect(Collectors.toList());
         GoodsSpu spu=new GoodsSpu(spuPo);
         GoodsSpuVo spuVo= new GoodsSpuVo(spu);
+        GoodsCategoryPo categoryPo=goodsCategoryMapper.selectByPrimaryKey(spu.getCategoryId());
+        SimpleCategoryVo categoryVo=new SimpleCategoryVo();
+        if(categoryPo==null) {
+            categoryVo.setId((long)0);
+            categoryVo.setName(null);
+        }
+        else{
+            categoryVo.setId(categoryPo.getId());
+            categoryVo.setName(categoryPo.getName());
+        }
+        BrandPo brandPo=brandMapper.selectByPrimaryKey(spu.getBrandId());
+        SimpleBrandVo brandVo=new SimpleBrandVo();
+        if(brandPo==null){
+            brandVo.setId((long)0);
+            brandVo.setImgUrl(null);
+            brandVo.setName(null);
+        }
+        else{
+            brandVo.setId(brandPo.getId());
+            brandVo.setImgUrl(brandPo.getImageUrl());
+            brandVo.setName(brandPo.getName());
+        }
+
+        spuVo.setBrand(brandVo);
+        spuVo.setCategory(categoryVo);
         spuVo.setSkuList(ret);
         if(freightModelDTO!=null)
         spuVo.setFreight(freightModelDTO);

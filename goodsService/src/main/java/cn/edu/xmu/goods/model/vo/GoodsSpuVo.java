@@ -78,6 +78,7 @@ public class GoodsSpuVo {
         this.gmtCreate=bo.getGmtCreated();
         this.gmtModified=bo.getGmtModified();
         this.disable=bo.isDisable();
+
     }
 
 }

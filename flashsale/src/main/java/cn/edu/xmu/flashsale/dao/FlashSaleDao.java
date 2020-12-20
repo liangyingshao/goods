@@ -223,7 +223,7 @@ public class FlashSaleDao {
             //判断状态，0可以到1、2，1可以到0，2状态的秒杀活动状态不可变更
             if(flashSalePo.getState().intValue() == 1) {
                 if(state.intValue()==2)
-                    return new ReturnObject(ResponseCode.DELETE_ONLINE_NOTALLOW);
+                    return new ReturnObject(ResponseCode.ACTIVITYALTER_INVALID);//不许修改已经下线的秒杀
             } else if(flashSalePo.getState().intValue() == 2) {
                 logger.error("932:"+id.toString());
                 return  new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
