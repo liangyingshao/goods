@@ -72,6 +72,8 @@ public class ActivityController {
     {
         logger.debug("getCouponSkuList:id="+id+" page="+page+" pageSize="+pageSize);
         ReturnObject returnObject=activityService.getCouponSkuList(id,page,pageSize);
+        if(returnObject.getData()!=null)
+            httpServletResponse.setStatus(HttpStatus.CREATED.value());
         return Common.decorateReturnObject(returnObject);
     }
 

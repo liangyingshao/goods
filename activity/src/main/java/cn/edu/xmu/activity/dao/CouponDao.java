@@ -483,7 +483,6 @@ public class CouponDao implements InitializingBean
     public ReturnObject<List<String>> getCoupon(Long userId, Long id, Long departId)
     {
         logger.debug("getCoupon:userId="+userId+" activityId="+id);
-
         if(departId!=null)//管理员不能领自家的优惠券
         {
             CouponActivityPo activityPo= activityMapper.selectByPrimaryKey(id);
@@ -517,36 +516,40 @@ public class CouponDao implements InitializingBean
 
         //活动尚不能领券（含TO_BE_ONLINE和ONLINE的couponTime之前）
         if(activityPo.getCouponTime().isAfter(nowTime))
-        {
             return new ReturnObject<>(ResponseCode.COUPON_NOTBEGIN);
-        }
+
         //活动进行中
         //先到bloom过滤器里查询
-        ReturnObject returnObject=checkCouponBloomFilter(id,userId);
-        if(returnObject.getCode().equals(ResponseCode.COUPON_FINISH))
-            return returnObject;
+//        ReturnObject returnObject=checkCouponBloomFilter(id,userId);
+//        if(returnObject.getCode().equals(ResponseCode.COUPON_FINISH))return returnObject;
 
+        CouponPoExample personCouponExample=new CouponPoExample();
+        CouponPoExample.Criteria personCriteria=personCouponExample.createCriteria();
+        personCriteria.andActivityIdEqualTo(id);
+        personCriteria.andIdEqualTo(userId);
+        List<CouponPo> personCouponPos=couponMapper.selectByExample(personCouponExample);
+        if(personCouponPos!=null&&personCouponPos.size()>0)return new ReturnObject<>(ResponseCode.COUPON_FINISH);
 
         //查询优惠券发放情况
         //先找redis
-        if(redisTemplate.opsForHash().hasKey(key,"quantity"))
-        {
-            type= CouponActivity.Type.getTypeByCode((Integer) redisTemplate.opsForHash().get(key,"quantityType"));
-            if(type.equals(CouponActivity.Type.LIMIT_PER_PERSON))
-                quantity= (int) redisTemplate.opsForHash().get(key,"quantity");
-            else if(redisTemplate.opsForHash().get(key,"quantity").equals(0))
-                    return new ReturnObject<>(ResponseCode.COUPON_FINISH);
-            else quantity=1;
-        }
-        //没在redis找到，需查数据库
-        else {
+//        if(redisTemplate.opsForHash().hasKey(key,"quantity"))
+//        {
+//            type= CouponActivity.Type.getTypeByCode((Integer) redisTemplate.opsForHash().get(key,"quantityType"));
+//            if(type.equals(CouponActivity.Type.LIMIT_PER_PERSON))
+//                quantity= (int) redisTemplate.opsForHash().get(key,"quantity");
+//            else if(redisTemplate.opsForHash().get(key,"quantity").equals(0))
+//                    return new ReturnObject<>(ResponseCode.COUPON_FINISH);
+//            else quantity=1;
+//        }
+//        //没在redis找到，需查数据库
+//        else {
             //查询数据库
             CouponPoExample alreadyExample = new CouponPoExample();
             CouponPoExample.Criteria alreadyCriteria = alreadyExample.createCriteria();
             alreadyCriteria.andActivityIdEqualTo(id);
-//            //每人限量模式
-//            if (CouponActivity.Type.getTypeByCode(activityPo.getQuantitiyType().intValue()).equals(CouponActivity.Type.LIMIT_PER_PERSON))
-            alreadyCriteria.andCustomerIdEqualTo(userId);
+            //每人限量模式
+            if (CouponActivity.Type.getTypeByCode(activityPo.getQuantitiyType().intValue()).equals(CouponActivity.Type.LIMIT_PER_PERSON))
+                alreadyCriteria.andCustomerIdEqualTo(userId);
             List<CouponPo> alreadyPos = couponMapper.selectByExample(alreadyExample);
 
 
@@ -554,12 +557,13 @@ public class CouponDao implements InitializingBean
             int couponQuantity=activityPo.getQuantity();
             //添加到redis
             type=CouponActivity.Type.getTypeByCode(activityPo.getQuantitiyType().intValue());
-            redisTemplate.opsForHash().put(key,"quantityType",type.getCode().byteValue());
+//            redisTemplate.opsForHash().put(key,"quantityType",type.getCode().byteValue());
 
             //券已领罄
-            if (size>0)
+            //总量控制模式下券已发完或每人限量模式下该用户领的券已达上限
+            if (couponQuantity==size)
             {
-//                //每人限发模式下领取数量达到上限
+                //每人限发模式下领取数量达到上限
 //                if(type.equals(CouponActivity.Type.LIMIT_PER_PERSON))
 //                {
 //                    redisTemplate.opsForHash().put(key,"quantity",couponQuantity);
@@ -574,16 +578,16 @@ public class CouponDao implements InitializingBean
                 return new ReturnObject<>(ResponseCode.COUPON_FINISH);
             }
 
-//            //总量控制模式下该用户已领过券
-//            if(type.equals(CouponActivity.Type.LIMIT_TOTAL_NUM) && size > 0)
-//            {
+            //总量控制模式下该用户已领过券
+            if(type.equals(CouponActivity.Type.LIMIT_TOTAL_NUM) && size > 0)
+            {
 //                setBloomFilterOfCoupon(id, userId);
 //                redisTemplate.opsForHash().put(key,"quantity",couponQuantity-size);
 //                //设置过期时间为活动结束时间
 //                redisTemplate.expire(key,Duration.between(nowTime,activityPo.getEndTime()).toHours(), TimeUnit.HOURS);
-//
-//                return new ReturnObject<>(ResponseCode.COUPON_FINISH);
-//            }
+
+                return new ReturnObject<>(ResponseCode.COUPON_FINISH);
+            }
 
             quantity=type.equals(CouponActivity.Type.LIMIT_PER_PERSON)?couponQuantity:1;
             if(type.equals(CouponActivity.Type.LIMIT_TOTAL_NUM))
@@ -592,7 +596,7 @@ public class CouponDao implements InitializingBean
                 activityMapper.updateByPrimaryKeySelective(activityPo);
             }
 
-        }
+//        }
 
         //可领券，设置券属性
         List<CouponPo>newPos=new ArrayList<>();
@@ -657,7 +661,7 @@ public class CouponDao implements InitializingBean
 //        List<String> couponSns=newPos
 //                .stream()
 //                .map(CouponPo::getCouponSn)
-//                .collect(Collectors.toList());s
+//                .collect(Collectors.toList());
 
 //        //更新redis
 //        if(type.equals(CouponActivity.Type.LIMIT_TOTAL_NUM))
